@@ -131,13 +131,24 @@ body{font-weight:500}b,button,h1,h2,label{font-weight:700}
 #rc .sheet{background:transparent;box-shadow:none}
 #rc{backdrop-filter:blur(3px)}
 @media (min-width:1000px){
- nav{top:0;bottom:0;right:auto;width:86px;flex-direction:column;justify-content:flex-start;padding-top:84px;border-top:0;border-right:1px solid var(--line)}
- nav button{flex:none;padding:14px 4px}
- nav button.on{box-shadow:inset 3px 0 0 var(--ac)!important}
- body{padding-left:86px;padding-bottom:24px}
+ nav{position:sticky;top:64px;left:auto;right:auto;bottom:auto;width:auto;flex-direction:row;justify-content:flex-start;gap:6px;padding:8px 16px;border:0;border-bottom:1px solid var(--line);background:var(--card);z-index:6}
+ nav button{flex:none;flex-direction:row;gap:8px;padding:9px 18px;border-radius:12px;font-size:14px;color:var(--ink)}
+ nav button .i{width:20px;height:20px}
+ nav button.on{background:var(--soft);color:var(--ac);box-shadow:none!important}
+ body{padding-left:0;padding-bottom:24px}
  #bar{display:none!important}
  .grid{grid-template-columns:repeat(auto-fill,minmax(168px,1fr))}
+ .side{top:140px!important;max-height:calc(100vh - 160px)}
 }
+header{min-height:64px;box-sizing:border-box}
+.pv{max-width:480px;margin:0 auto;padding:18px 14px 40px;color:var(--ink)}
+.pvh{text-align:center}.pvh h1{font-size:24px;margin:8px 0 2px;color:var(--ink)}.pvh p{color:var(--mute);margin:0 0 12px}
+.pvc{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 14px 14px;box-shadow:0 6px 22px rgba(0,0,0,.1)}
+.pvi{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line)}
+.pvi img,.pvi .dot{width:64px;height:64px;border-radius:14px;object-fit:cover;flex:none;font-size:26px}
+.pvn{flex:1;min-width:0;display:flex;flex-direction:column}.pvn span{color:var(--mute);font-size:13px}
+.pvt{display:flex;justify-content:space-between;padding:4px 0}.pvt.g{font-size:22px;font-weight:800;margin-top:8px}
+.pvm{text-align:center;color:var(--mute);margin:14px 0 0}.pvl{text-align:center;padding:60px 10px;color:var(--mute)}
 @page{margin:0}
 @media print{
  html,body{background:#fff!important;padding:0!important;margin:0!important}
@@ -218,8 +229,8 @@ function startAuth(){FB.watch(function(u){FB.stop();
  if(lu&&lu!==CU){H=[];P=[];IMG={};S={shop:'Musafir Cafe',cur:'৳',tax:0,lang:S.lang}}
  $('#lgn').classList.remove('show');upl=false;ready=false;sy('off');render();
  FB.listen('pos',onPos,onErr);FB.listen('sales',onSales,onErr)})}
-function boot(){if(!cfgOK){sy('cfg');$('#lgn').classList.add('show');$('#lb').innerHTML='<h2>Firebase setup</h2><p>index.html এর শুরুর দিকে <b>FIREBASE_CONFIG</b> এ আপনার Firebase কনফিগ বসান।<br>Paste your Firebase config into <b>FIREBASE_CONFIG</b> near the top of index.html.</p>';return}
- if(window.FB)startAuth();else{window.onFB=startAuth;setTimeout(function(){if(!window.FB){$('#lgn').classList.add('show');$('#lb').innerHTML='<h2>Firebase</h2><p style="color:var(--warn);font-weight:700">'+L('Firebase লোড হয়নি। ইন্টারনেট বা অ্যাড-ব্লকার দেখুন, তারপর পেজ রিফ্রেশ করুন।','Firebase did not load. Check internet or ad-blocker, then refresh.')+'</p><p class="mute" style="font-size:11px">v6</p>'}},6000)}}
+function boot(){if(PUBR){startPub();return}if(!cfgOK){sy('cfg');$('#lgn').classList.add('show');$('#lb').innerHTML='<h2>Firebase setup</h2><p>index.html এর শুরুর দিকে <b>FIREBASE_CONFIG</b> এ আপনার Firebase কনফিগ বসান।<br>Paste your Firebase config into <b>FIREBASE_CONFIG</b> near the top of index.html.</p>';return}
+ if(window.FB)startAuth();else{window.onFB=startAuth;setTimeout(function(){if(!window.FB&&hasLocal()){enterLocal();return}if(!window.FB){$('#lgn').classList.add('show');$('#lb').innerHTML='<h2>Firebase</h2><p style="color:var(--warn);font-weight:700">'+L('Firebase লোড হয়নি। ইন্টারনেট বা অ্যাড-ব্লকার দেখুন, তারপর পেজ রিফ্রেশ করুন।','Firebase did not load. Check internet or ad-blocker, then refresh.')+'</p><p class="mute" style="font-size:11px">v6</p>'}},6000)}}
 function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function $$(n){return S.cur+' '+(+n).toFixed(2)}
 function toast(m){var e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(function(){e.style.display='none'},2200)}
@@ -1457,7 +1468,7 @@ var sy1=sy;sy=function(k){sy1(k);var e=$('#sync');if(e&&!navigator.onLine){e.tex
 window.addEventListener('online',function(){sy('on');render()});window.addEventListener('offline',function(){sy();render()});
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 
-var RD={foot:true,mode:'shop',custom:'',wifi:false,wn:'',wp:'',offer:false,offerTxt:'',info:false,hours:'',phone:'',qr:true,qm:'inv',l_maps:'',l_wa:'',l_fb:'',qs:44,welcome:true};
+var RD={foot:true,mode:'shop',custom:'',wifi:false,wn:'',wp:'',offer:false,offerTxt:'',info:false,hours:'',phone:'',qr:true,qm:'view',l_maps:'',l_wa:'',l_fb:'',qs:60,dayReset:true,dayStart:0,welcome:true};
 function R(){return Object.assign({},RD,S.rc||{})}
 function rset(k,v){S.rc=R();S.rc[k]=v;save();render()}
 function greet(h){return h>=5&&h<11?L('সুপ্রভাত','Good morning'):h>=11&&h<16?L('শুভ দুপুর','Good afternoon'):h>=16&&h<19?L('শুভ সন্ধ্যা','Good evening'):L('শুভ রাত্রি','Good night')}
@@ -1471,7 +1482,7 @@ function footMsg(s){var r=R();if(!r.foot)return '';var bn=S.lang=='bn',h=new Dat
  return '<div class="th">'+m+'</div><div class="th2">— '+esc(S.shop)+'</div>'}
 rcHtml=function(s){
  var r=R(),id=invCode(s),qrT='INV:'+id+';D:'+day(s.t)+';T:'+s.total.toFixed(2)+';P:'+s.pay,tm=new Date(s.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
- var lk=r.qm!='inv'?r['l_'+r.qm]:'';if(lk)qrT=lk;var qz=lk?Math.max(+r.qs,56):+r.qs;
+ var base=location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'');var lk=(r.qm=='view')?(s.pc?base+'?r='+s.pc:''):(r.qm!='inv'?r['l_'+r.qm]:'');if(lk)qrT=lk;var qz=lk?Math.max(+r.qs,60):+r.qs;
  var rows=s.items.map(function(i){var n=(S.lang=='bn'&&i.bn)?i.bn:i.name;return '<tr><td>'+esc(n)+'</td><td class="q">'+i.qty+' × '+i.price.toFixed(2)+'</td><td class="a">'+(i.qty*i.price).toFixed(2)+'</td></tr>'}).join('');
  var pl=(s.pays&&s.pays.length?s.pays:[{m:s.pay,a:s.total}]);
  var h='<div class="rcpt"><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+L('ইনভয়েস','Invoice')+' #'+s.sn+'</span><span>'+day(s.t)+' · '+tm+'</span></div><table>'+rows+'</table>';
@@ -1497,7 +1508,7 @@ function rcBox(){var r=R();
  +sw('wifi',L('Wi-Fi এর নাম ও পাসওয়ার্ড','Wi-Fi name & password'),inp('wn',L('Wi-Fi নাম','Wi-Fi name'))+inp('wp',L('পাসওয়ার্ড','Password')))
  +sw('offer',L('পরের বারের ছাড়ের লাইন','Next-visit offer line'),inp('offerTxt',L('যেমন: এই রসিদ দেখালে পরের বার চা ফ্রি','e.g. Show this receipt for a free tea next time')))
  +sw('info',L('খোলার সময় ও ফোন','Opening hours & phone'),inp('hours',L('যেমন: সকাল ৬টা – রাত ১২টা','e.g. 6 AM – 12 AM'))+inp('phone',L('ফোন নম্বর','Phone number')))
- +sw('qr',L('রসিদে QR','QR on receipt'),sel('qm',[['inv',L('ইনভয়েস নম্বর','Invoice number')],['maps',L('Google Maps রিভিউ লিংক','Google Maps review link')],['wa',L('WhatsApp লিংক','WhatsApp link')],['fb',L('ফেসবুক পেজ লিংক','Facebook page link')]])+(r.qm!='inv'?inp('l_'+r.qm,L('লিংক বসান (https://…)','Paste link (https://…)')):'')+sel('qs',[[44,L('ছোট (৪৪px)','Small (44px)')],[56,L('মাঝারি (৫৬px)','Medium (56px)')],[70,L('বড় (৭০px)','Large (70px)')]])+'<div class="mute" style="font-size:12px">'+L('লিংক দিলে QR বড় লাগে, তাই ৫৬px এর নিচে নামবে না','Links need a bigger QR, so it will not go below 56px')+'</div>')
+ +sw('qr',L('রসিদে QR','QR on receipt'),sel('qm',[['view',L('রসিদ পাতা (পণ্যের ছবিসহ)','Receipt page with product pictures')],['inv',L('ইনভয়েস নম্বর','Invoice number')],['maps',L('Google Maps রিভিউ লিংক','Google Maps review link')],['wa',L('WhatsApp লিংক','WhatsApp link')],['fb',L('ফেসবুক পেজ লিংক','Facebook page link')]])+(r.qm!='inv'&&r.qm!='view'?inp('l_'+r.qm,L('লিংক বসান (https://…)','Paste link (https://…)')):'')+sel('qs',[[48,L('ছোট (৪৮px)','Small (48px)')],[60,L('মাঝারি (৬০px)','Medium (60px)')],[76,L('বড় (৭৬px)','Large (76px)')]])+'<div class="mute" style="font-size:12px">'+L('লিংকের QR বড় লাগে, তাই ৬০px এর নিচে নামবে না','Link QR codes need more room, so they will not go below 60px')+'</div>')
  +sw('welcome',L('অ্যাপ খোলার স্বাগতম পর্দা','Welcome screen on open'))
  +'<button style="width:100%;margin-top:12px" onclick="previewRc()">'+I('print')+' '+L('রসিদের নমুনা দেখুন','Preview receipt')+'</button></div>'}
 var vSet2=vSet;vSet=function(){return themeBox()+rcBox()+vSet2().replace(themeBox(),'')};
@@ -1506,12 +1517,68 @@ function welcome(){var r=R();if(!r.welcome)return;try{if(sessionStorage.getItem(
  document.body.appendChild(e);setTimeout(function(){e.classList.add('out');setTimeout(function(){e.remove()},500)},2200)}
 var onPos1=onPos;onPos=function(snap){onPos1(snap);if(ready)welcome()};
 
+var PUBR=new URLSearchParams(location.search).get('r');
+(function(){var h=document.querySelector('header'),n=document.getElementById('nav');if(h&&n)h.insertAdjacentElement('afterend',n)})();
+day=function(t){var d=new Date(t-(+R().dayStart||0)*3600000);return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)};
+fixSn=function(){var rs=R().dayReset,c={};H.slice().sort(function(a,b){return a.t-b.t}).forEach(function(s){var k=rs?day(s.t):'all';c[k]=c[k]||0;if(!s.sn)s.sn=++c[k];else c[k]=Math.max(c[k],s.sn)})};
+function snFor(t){fixSn();var rs=R().dayReset,k=day(t),m=0;H.forEach(function(s){if(!rs||day(s.t)==k)m=Math.max(m,s.sn||0)});return m+1}
+nextSn=function(){return snFor(Date.now())};
+function randCode(){var a=new Uint8Array(12),s='';(window.crypto||{getRandomValues:function(x){for(var i=0;i<x.length;i++)x[i]=Math.random()*256}}).getRandomValues(a);for(var i=0;i<a.length;i++)s+=(a[i]%36).toString(36);return s+Date.now().toString(36)}
+function thumb(u,cb){var im=new Image();im.onload=function(){var c=document.createElement('canvas');c.width=c.height=96;var m=Math.min(im.width,im.height);c.getContext('2d').drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,96,96);cb(c.toDataURL('image/jpeg',0.74))};im.onerror=function(){cb(null)};im.src=u}
+function plainFoot(s){return footMsg(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
+function pubReceipt(s){if(!CU||!window.FB||!FB.setPub||!s.pc)return;var ids=[],m={};s.items.forEach(function(i){if(i.id&&IMG[i.id]&&ids.indexOf(i.id)<0)ids.push(i.id)});var left=ids.length;
+ function fin(){w(FB.setPub(s.pc,{uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,t:s.t,sn:s.sn,day:day(s.t),total:s.total,sub:s.sub,disc:s.disc||0,tax:s.tax||0,pays:s.pays||[],msg:plainFoot(s),items:s.items.map(function(i){return{name:i.name,bn:i.bn||'',price:i.price,qty:i.qty,img:m[i.id]||''}})}))}
+ if(!left)return fin();ids.forEach(function(id){thumb(IMG[id],function(x){if(x)m[id]=x;if(--left==0)fin()})})}
+charge=function(){
+ if(!Object.keys(cart).length)return;var ps=pst();if(!ps.ok){toast(L('পেমেন্ট পুরো হয়নি','Payment is not complete'));return}
+ var c=calc(),items=[];
+ for(var id in cart){var p=gp(id);items.push({id:p.id,name:p.name,bn:p.bn,price:p.price,qty:cart[id]});if(p.stock!=='')p.stock-=cart[id]}
+ var left=ps.chg,mg={},cashGiven=0;
+ ps.rows.forEach(function(x){var a=+x.a||0;if(x.m=='Cash'){cashGiven+=a;var d=Math.min(a,left);a-=d;left-=d}if(a>0.004)mg[x.m]=(mg[x.m]||0)+a});
+ var pl=Object.keys(mg).map(function(m){return{m:m,a:+mg[m].toFixed(2)}});
+ var no=H.reduce(function(a,x){return Math.max(a,x.no)},1000)+1,now=Date.now();
+ var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode()};
+ if(!CU)s.lc=true;
+ H.push(s);save();cSale(s);pubReceipt(s);cart={};disc='';recv='';pays=null;$('#cs').classList.remove('show');render();showRc(s.no);
+};
+var voidSale1=voidSale;voidSale=function(no){var s=H.find(function(x){return x.no==no});if(vArm&&s&&s.pc&&CU&&window.FB&&FB.delPub)FB.delPub(s.pc).catch(function(){});voidSale1(no)};
+var onSales2=onSales;onSales=function(snap){var loc=H.filter(function(x){return x.lc});if(loc.length)H=H.filter(function(x){return !x.lc});
+ onSales2(snap);if(!loc.length)return;
+ if(snap.metadata.fromCache){H=H.concat(loc);lsave();render();return}
+ var mx=H.reduce(function(a,x){return Math.max(a,x.no)},1000);loc.forEach(function(x){var c=Object.assign({},x);delete c.lc;c.no=++mx;c.sn=snFor(c.t);H.push(c);cSale(c);pubReceipt(c)});lsave();render()};
+function hasLocal(){try{return !!localStorage.getItem('pos_uid')}catch(e){return false}}
+function enterLocal(){$('#lgn').classList.remove('show');CU=null;sy('off');render();toast(L('অফলাইন মোড: বিক্রি ফোনে জমা হবে','Offline mode: sales are kept on this device'))}
+var sy2=sy;sy=function(k){sy2(k);var n=H.filter(function(x){return x.lc}).length,e=$('#sync');if(e&&n)e.textContent+=L(' · '+n+' টি বিক্রি সিঙ্কের অপেক্ষায়',' · '+n+' sale(s) waiting to sync')};
+function startPub(){document.querySelectorAll('body>*').forEach(function(e){if(e.tagName!='SCRIPT')e.style.display='none'});
+ var d=document.createElement('div');d.id='pv';d.className='pv';d.innerHTML='<div class="pvl">…</div>';document.body.appendChild(d);
+ var go2=function(){FB.pub(PUBR).then(function(x){d.innerHTML=x?pvHtml(x):'<div class="pvl">Receipt not found</div>'}).catch(function(){d.innerHTML='<div class="pvl">⚠ Could not load. Check internet and try again.</div>'})};
+ if(window.FB)go2();else window.onFB=go2}
+function pvHtml(d){var bn=d.lang=='bn',T2=function(k){return(D[d.lang]||D.en)[k]||k},cu=d.cur||'',m=function(n){return cu+' '+(+n).toFixed(2)};
+ var it=d.items.map(function(i){var n=bn&&i.bn?i.bn:i.name;return '<div class="pvi">'+(i.img?'<img src="'+i.img+'" alt="">':'<div class="dot" style="background:hsl('+hue(i.name)+',45%,40%)">'+esc((n||'?').charAt(0).toUpperCase())+'</div>')+'<div class="pvn"><b>'+esc(n)+'</b><span>'+i.qty+' × '+m(i.price)+'</span></div><b>'+m(i.qty*i.price)+'</b></div>'}).join('');
+ var tt='';if(d.disc||d.tax)tt+='<div class="pvt"><span>'+T2('sub')+'</span><span>'+m(d.sub)+'</span></div>';if(d.disc)tt+='<div class="pvt"><span>'+T2('disc')+'</span><span>−'+m(d.disc)+'</span></div>';if(d.tax)tt+='<div class="pvt"><span>'+T2('tax')+'</span><span>'+m(d.tax)+'</span></div>';
+ tt+='<div class="pvt g"><span>'+T2('total')+'</span><span>'+m(d.total)+'</span></div>'+(d.pays||[]).map(function(x){return '<div class="pvt"><span>'+T2(x.m)+'</span><span>'+m(x.a)+'</span></div>'}).join('');
+ return '<div class="pvh">'+LOGO.replace('width="40" height="40"','width="60" height="60"')+'<h1>'+esc(d.shop)+'</h1><p>'+(bn?'ইনভয়েস':'Invoice')+' #'+d.sn+' · '+d.day+' · '+new Date(d.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</p></div><div class="pvc">'+it+tt+'<p class="pvm">'+esc(d.msg||'')+'</p></div>'}
+pickImg=function(id,inp){var f=inp.files&&inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas'),s=360;c.width=c.height=s;var m=Math.min(im.width,im.height),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,s,s);setImg(id,c.toDataURL('image/jpeg',0.88))};im.src=r.result};r.readAsDataURL(f)};
+function backup(){var d={v:1,t:Date.now(),S:S,P:P,H:H.map(function(x){var c=Object.assign({},x);delete c.lc;return c}),IMG:IMG};
+ try{localStorage.setItem('pos_bk',String(Date.now()))}catch(e){}
+ var b=new Blob([JSON.stringify(d)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='musafir-pos-backup-'+tdy()+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},800);render()}
+function restoreFile(inp){var f=inp.files&&inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var d;try{d=JSON.parse(r.result);if(!d.P||!d.H)throw 0}catch(e){toast(L('ফাইলটি ঠিক নয়','Invalid file'));return}
+ ask(L('ব্যাকআপের সব পণ্য ও বিক্রি আবার সেভ হবে। চালিয়ে যাবেন?','All products and sales in the backup will be saved again. Continue?'),function(){S=d.S||S;P=d.P;H=d.H;IMG=d.IMG||{};lsave();if(CU){ready=true;push();H.forEach(cSale);Object.keys(IMG).forEach(function(k){w(FB.set('pos','img_'+k,{d:IMG[k]}))})}render();toast(L('ফেরানো হয়েছে','Restored'))},L('হ্যাঁ, ফেরান','Yes, restore'))};r.readAsText(f);inp.value=''}
+function accBox(){var r=R(),o=[];for(var i=0;i<=6;i++)o.push([i,('0'+i).slice(-2)+':00']);
+ return '<div class="box rb"><div class="hd">'+I('cal')+'<b>'+L('দিনের হিসাব','Daily accounts')+'</b></div>'
+ +sw('dayReset',L('প্রতিদিন নতুন করে শুরু','Start fresh every day'),'<div class="mute" style="font-size:12px;margin-bottom:6px">'+L('চালু থাকলে তারিখ বদলালেই ইনভয়েস নম্বর ১ থেকে শুরু হয় আর নতুন দিনের হিসাব আলাদা হয়। বন্ধ করলে নম্বর একটানা চলবে।','When on, invoice numbers restart at 1 on a new date and each day is counted separately. When off, numbers keep counting.')+'</div>')
+ +'<div class="mute" style="font-size:13px;margin-top:8px">'+L('দিন শুরুর সময় (রাত জেগে চললে দিন দেরিতে বদলাবে)','Day starts at (for shops open past midnight)')+'</div>'+sel('dayStart',o)+'</div>'}
+function bkBox(){var t0=0;try{t0=+localStorage.getItem('pos_bk')||0}catch(e){}var old=!t0||(Date.now()-t0)>7*864e5;
+ return '<div class="box"><div class="hd">'+I('copy')+'<b>'+L('ব্যাকআপ','Backup')+'</b></div><p class="mute" style="margin:0 0 8px">'+(t0?L('শেষ ব্যাকআপ: ','Last backup: ')+day(t0):L('এখনো ব্যাকআপ নেওয়া হয়নি','No backup yet'))+(old?' · <b style="color:var(--warn)">'+L('সপ্তাহে একবার নিন','Take one weekly')+'</b>':'')+'</p>'
+ +'<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="pri" style="flex:1" onclick="backup()">'+I('copy')+' '+L('ডেটা ডাউনলোড','Download data')+'</button><label class="btn" style="flex:1;text-align:center">'+L('ব্যাকআপ থেকে ফেরান','Restore')+'<input type="file" accept=".json,application/json" hidden onchange="restoreFile(this)"></label></div></div>'}
+var vSet3=vSet;vSet=function(){return vSet3()+accBox()+bkBox()};
+
 render();boot();
 </script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,doc,setDoc,deleteDoc,collection,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,doc,setDoc,deleteDoc,collection,onSnapshot,getDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 if(!/PASTE/.test(window.FIREBASE_CONFIG.apiKey)){
  const app=initializeApp(window.FIREBASE_CONFIG),auth=getAuth(app),db=(function(){try{return initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){return getFirestore(app)}})();let un=[];
  const ref=(c,i)=>doc(db,'users',auth.currentUser.uid,c,i);
@@ -1524,6 +1591,9 @@ if(!/PASTE/.test(window.FIREBASE_CONFIG.apiKey)){
   out:()=>{window.FB.stop();return signOut(auth)},
   set:(c,i,d)=>setDoc(ref(c,i),JSON.parse(JSON.stringify(d))),
   del:(c,i)=>deleteDoc(ref(c,i)),
+  pub:c=>getDoc(doc(db,'receipts',c)).then(s=>s.exists()?s.data():null),
+  setPub:(c,d)=>setDoc(doc(db,'receipts',c),JSON.parse(JSON.stringify(d))),
+  delPub:c=>deleteDoc(doc(db,'receipts',c)),
   listen:(c,cb,er)=>un.push(onSnapshot(collection(db,'users',auth.currentUser.uid,c),cb,er))
  };
 }
