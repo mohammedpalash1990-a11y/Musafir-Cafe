@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Counter POS</title>
+<title>Musafir Cafe</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14454b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2064%2064%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20aria-hidden%3D%22true%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%2314454b%22/%3E%3Cpath%20d%3D%22M19%2029h26v6a13%2013%200%200%201-13%2013%2013%2013%200%200%201-13-13z%22%20fill%3D%22%23fff%22/%3E%3Cpath%20d%3D%22M45%2032h2.5a5%205%200%200%201%200%2010H43%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M15%2052h34%22%20stroke%3D%22%23f5b52e%22%20stroke-width%3D%223.4%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M22%2024l4.5-8%205.5%208%205.5-8%204.5%208%22%20fill%3D%22none%22%20stroke%3D%22%23f5b52e%22%20stroke-width%3D%223.4%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
 <style>
 :root{--bg:#f3f1ec;--card:#fff;--ink:#1b2321;--mute:#6d7773;--line:#e2ded5;--ac:#0b6b5c;--acink:#fff;--warn:#c4311f;--soft:#e4f1ee;
@@ -105,8 +109,45 @@ button.pay{width:100%;margin-top:12px;background:var(--ac);color:#fff;font-size:
 .tot.rem b{color:var(--warn)}.tot.ok b{color:var(--ac)}
 button.pay:disabled{opacity:.5}
 @media (min-width:860px){.side{max-height:calc(100vh - 150px);overflow:auto}}
+
+:root[data-theme="dark"]{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mute:#8fa5a8;--line:#244047;--ac:#5cb82e;--acink:#05200a;--soft:#17331f;--warn:#ff8a7a;--blue:#93a6ff;--head:#0b2a2e;--hink:#fff}
+:root[data-theme="light"]{--bg:#e9edf3;--card:#fff;--ink:#1b2733;--mute:#657386;--line:#d3dae5;--ac:#3f9a22;--acink:#fff;--soft:#e3f1dc;--warn:#c4311f;--blue:#3446b8;--head:#14454b;--hink:#fff}
+body{font-weight:500}b,button,h1,h2,label{font-weight:700}
+.thm{padding:7px 9px;border-radius:50%;line-height:0}
+.rcpt{background:#fff;color:#000;font:700 13px/1.25 "Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;width:100%;max-width:310px;margin:0 auto;padding:12px 13px 11px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.28)}
+.rcpt b{font-weight:800}
+.rs{display:block;text-align:center;font-size:19px;font-weight:800;letter-spacing:.2px}
+.rm{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;border-top:1.5px dashed #000;border-bottom:1.5px dashed #000;padding:3px 0;margin:5px 0}
+.rcpt table{width:100%;border-collapse:collapse}.rcpt td{padding:1.5px 0;vertical-align:top;font-weight:700}
+.rcpt td.q{text-align:center;white-space:nowrap;font-size:11.5px;padding:0 5px}.rcpt td.a{text-align:right;white-space:nowrap}
+.rt{display:flex;justify-content:space-between;padding:1px 0}
+.rt.g{font-size:17px;font-weight:800;border-top:1.5px dashed #000;margin-top:4px;padding-top:4px}
+.rt.py{font-size:12px}
+.ft{display:flex;align-items:center;gap:9px;border-top:1.5px dashed #000;margin-top:5px;padding-top:5px}
+.ft .qrw{flex:none;line-height:0}.ft svg{width:64px;height:64px}
+.ft .th{font-size:12px}.cid{font:700 9.5px ui-monospace,monospace;word-break:break-all;letter-spacing:.3px;margin-top:2px;color:#000}
+.rcpt pre.rp{font:700 12px/1.3 ui-monospace,monospace;white-space:pre-wrap;margin:4px 0;background:none;border:0;padding:0;color:#000}
+.ract{display:flex;gap:10px;margin-top:14px}.ract button{flex:1}
+#rc .sheet{background:transparent;box-shadow:none}
+#rc{backdrop-filter:blur(3px)}
+@media (min-width:1000px){
+ nav{top:0;bottom:0;right:auto;width:86px;flex-direction:column;justify-content:flex-start;padding-top:84px;border-top:0;border-right:1px solid var(--line)}
+ nav button{flex:none;padding:14px 4px}
+ nav button.on{box-shadow:inset 3px 0 0 var(--ac)!important}
+ body{padding-left:86px;padding-bottom:24px}
+ #bar{display:none!important}
+ .grid{grid-template-columns:repeat(auto-fill,minmax(168px,1fr))}
+}
+@page{margin:0}
+@media print{
+ html,body{background:#fff!important;padding:0!important;margin:0!important}
+ #rc{display:block!important;position:static!important;background:#fff!important;backdrop-filter:none!important}
+ #rc .sheet{background:#fff!important;padding:0!important;max-width:none!important;width:auto!important;max-height:none!important;overflow:visible!important;border-radius:0!important}
+ .rcpt{width:100%!important;max-width:none!important;padding:1.5mm 3mm!important;box-shadow:none!important;border-radius:0!important;color:#000!important;font-size:12px!important}
+ .ract,.noprint,#vb{display:none!important}
+}
 </style></head><body>
-<header><div class="brand"><svg width="40" height="40" viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="13" fill="#3f9a22"/><path d="M13 18h22l-2 17a3 3 0 0 1-3 2.7H18a3 3 0 0 1-3-2.7z" fill="#fff"/><path d="M18.5 18a5.5 5.5 0 0 1 11 0" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/><path d="M20 27.5l3 3 5.5-6" fill="none" stroke="#3f9a22" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="37" cy="11" r="4.2" fill="#f5b52e"/></svg><h1 id="shop"></h1></div><div class="hr"><button class="hb wide-only" id="lastinv" onclick="lastInv()"></button><span class="chip" id="today"></span><div class="lg" id="lg"></div></div></header>
+<header><div class="brand"><svg width="40" height="40" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#14454b"/><path d="M19 29h26v6a13 13 0 0 1-13 13 13 13 0 0 1-13-13z" fill="#fff"/><path d="M45 32h2.5a5 5 0 0 1 0 10H43" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><path d="M15 52h34" stroke="#f5b52e" stroke-width="3.4" stroke-linecap="round"/><path d="M22 24l4.5-8 5.5 8 5.5-8 4.5 8" fill="none" stroke="#f5b52e" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><h1 id="shop"></h1></div><div class="hr"><button class="hb wide-only" id="lastinv" onclick="lastInv()"></button><span class="chip" id="today"></span><div class="lg" id="lg"></div></div></header>
 <div id="ib"></div>
 <div id="sync" class="mute" style="text-align:center;font-size:12px;padding:0 16px 6px"></div><main id="m"></main><button id="bar" onclick="openCart()"></button><nav id="nav"></nav>
 <div class="ov" id="cs"><div class="sheet" id="cb"></div></div><div class="ov" id="rc"><div class="sheet" id="rb"></div></div><div id="toast"></div>
@@ -118,7 +159,7 @@ var D={en:{sell:'Sell',sales:'Sales',items:'Items',settings:'Settings',search:'S
 bn:{sell:'বিক্রি',sales:'হিসাব',items:'পণ্য',settings:'সেটিংস',search:'পণ্য খুঁজুন',all:'সব',noItems:'কোনো পণ্য নেই। "পণ্য" ট্যাবে যোগ করুন।',left:' টি আছে',out:'স্টক শেষ',view:'অর্ডার দেখুন',order:'অর্ডার',disc:'ছাড়',sub:'মোট (ছাড়ের আগে)',tax:'ট্যাক্স',total:'সর্বমোট',pay:'পেমেন্ট',Cash:'নগদ',Card:'কার্ড',Mobile:'মোবাইল',recv:'নগদ পেয়েছি',chg:'ফেরত',short:'কম আছে ',charge:'বিল করুন',cancel:'অর্ডার বাতিল',keep:'আরও যোগ করুন',rcpt:'রসিদ',share:'শেয়ার',print:'প্রিন্ট',done:'ঠিক আছে',today:'আজ',tsales:'আজকের বিক্রি',orders:'অর্ডার',top:'সেরা',nosale:'আজ এখনো বিক্রি হয়নি',csv:'সব বিক্রির CSV কপি',csvok:'CSV কপি হয়েছে',csvno:'কপি হয়নি',hist0:'বিক্রি হলে এখানে দেখা যাবে।',add:'পণ্য যোগ',edit:'পণ্য বদলান',nm:'নাম (English)',nb:'নাম (বাংলা, ঐচ্ছিক)',pr:'দাম',cat:'ধরন',stock:'স্টক (ফাঁকা = গোনা হবে না)',save:'সেভ করুন',del:'মুছুন',back:'বাতিল',shop:'দোকানের নাম',cur:'টাকার চিহ্ন',taxp:'ট্যাক্স / ভ্যাট %',lang:'ভাষা',data:'আপনার ডেটা',note:'ডেটা আপনার লগইনের অধীনে ক্লাউডে সেভ হয় এবং সব ডিভাইসে একই থাকে। তবুও মাঝে মাঝে হিসাব ট্যাব থেকে CSV কপি করে রাখুন।',erase:'সব বিক্রির হিসাব মুছুন',erase2:'আবার চাপুন, সব মুছে যাবে',thanks:'ধন্যবাদ!',paid:'পেমেন্ট',noc:'ধরন নেই',need:'নাম ও দাম দিন',rm:'বাদ দিন',void:'এই বিক্রি বাতিল করুন',void2:'আবার চাপুন, বিক্রি বাতিল হবে',voided:'বিক্রি বাতিল, স্টক ফিরেছে',itm:' টি পণ্য',rn:'রসিদ #',received:'পেয়েছি'}};
 var CB={Drinks:'পানীয়',Food:'খাবার'},BN={1:'চা',2:'কফি',3:'ঠান্ডা জুস',4:'পানির বোতল',5:'স্যান্ডউইচ',6:'কেক'};
 function load(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v||d}catch(e){return d}}
-var S=load('pos_s',{shop:'My Shop',cur:'৳',tax:0,lang:'bn'});
+var S=load('pos_s',{shop:'Musafir Cafe',cur:'৳',tax:0,lang:'bn'});
 var P=load('pos_p',[{id:1,name:'Tea',price:30,cat:'Drinks',stock:''},{id:2,name:'Coffee',price:60,cat:'Drinks',stock:''},{id:3,name:'Cold juice',price:80,cat:'Drinks',stock:''},{id:4,name:'Water bottle',price:20,cat:'Drinks',stock:50},{id:5,name:'Sandwich',price:120,cat:'Food',stock:''},{id:6,name:'Cake slice',price:90,cat:'Food',stock:20}]);
 P.forEach(function(p){if(p.bn===undefined)p.bn=BN[p.id]||''});
 var H=load('pos_h',[]),cart={},cat='All',q='',view='sell',edit=null,arm=0,vArm=0,pay='Cash',disc='',recv='';
@@ -136,7 +177,7 @@ function cSale(s){if(CU)w(FB.set('sales','s'+s.no,s))}
 function cDel(no){if(CU)w(FB.del('sales','s'+no))}
 function onPos(snap){var d={};snap.docs.forEach(function(x){d[x.id]=x.data()});
  if(!d.settings&&!d.products){if(snap.metadata.fromCache)return;ready=true;sy('on');push();return}
- if(d.settings)S=Object.assign({shop:'My Shop',cur:'৳',tax:0,lang:'bn'},d.settings);if(d.products)P=d.products.list||[];
+ if(d.settings)S=Object.assign({shop:'Musafir Cafe',cur:'৳',tax:0,lang:'bn'},d.settings);if(d.products)P=d.products.list||[];
  ready=true;lsave();sy('on');render()}
 function onSales(snap){var l=snap.docs.map(function(x){return x.data()});
  if(snap.metadata.fromCache&&!l.length)return;
@@ -162,7 +203,7 @@ function doReset(){var e=$('#le').value.trim();if(!e){showLogin(L('আগে ই
 function startAuth(){FB.watch(function(u){FB.stop();
  if(!u){CU=null;ready=false;upl=false;showLogin();return}
  CU=u.uid;CE=u.email||'';var lu=null;try{lu=localStorage.getItem('pos_uid');localStorage.setItem('pos_uid',CU)}catch(e){}
- if(lu&&lu!==CU){H=[];P=[];IMG={};S={shop:'My Shop',cur:'৳',tax:0,lang:S.lang}}
+ if(lu&&lu!==CU){H=[];P=[];IMG={};S={shop:'Musafir Cafe',cur:'৳',tax:0,lang:S.lang}}
  $('#lgn').classList.remove('show');upl=false;ready=false;sy('off');render();
  FB.listen('pos',onPos,onErr);FB.listen('sales',onSales,onErr)})}
 function boot(){if(!cfgOK){sy('cfg');$('#lgn').classList.add('show');$('#lb').innerHTML='<h2>Firebase setup</h2><p>index.html এর শুরুর দিকে <b>FIREBASE_CONFIG</b> এ আপনার Firebase কনফিগ বসান।<br>Paste your Firebase config into <b>FIREBASE_CONFIG</b> near the top of index.html.</p>';return}
@@ -301,7 +342,7 @@ function gridHtml(l){return l.map(function(p){var out=p.stock!==''&&p.stock<=0,l
  return '<button class="p" '+(out?'disabled':'')+' onclick="add('+p.id+')">'+(n?'<div class="qty">'+n+'</div>':'')+(u?'<img class="pimg" alt="" src="'+u+'">':'<div class="dot" style="background:hsl('+hue(p.name)+',45%,40%)">'+esc((nm(p)||'?').charAt(0).toUpperCase())+'</div>')+'<b>'+esc(nm(p))+'</b><span>'+$$(p.price)+'</span>'+(p.stock!==''?'<small style="'+(low?'color:var(--warn)':'')+'">'+(out?t('out'):p.stock+t('left'))+'</small>':'')+'</button>'}).join('')}
 function onPos(snap){var d={};snap.docs.forEach(function(x){d[x.id]=x.data()});
  if(!d.settings&&!d.products){if(snap.metadata.fromCache)return;ready=true;sy('on');push();Object.keys(IMG).forEach(function(k){FB.set('pos','img_'+k,{d:IMG[k]})});return}
- if(d.settings)S=Object.assign({shop:'My Shop',cur:'৳',tax:0,lang:'bn'},d.settings);if(d.products)P=d.products.list||[];
+ if(d.settings)S=Object.assign({shop:'Musafir Cafe',cur:'৳',tax:0,lang:'bn'},d.settings);if(d.products)P=d.products.list||[];
  var n={};Object.keys(d).forEach(function(k){if(k.indexOf('img_')==0&&d[k])n[k.slice(4)]=d[k].d});IMG=n;
  ready=true;lsave();sy('on');render()}
 function charge(){
@@ -1370,14 +1411,48 @@ var render1=render;render=function(){render1();info()};
 var _sl=showLogin;showLogin=function(a,b){_sl(a,b);$('#lb').insertAdjacentHTML('afterbegin','<div style="display:flex;justify-content:center;margin-bottom:8px">'+LOGO.replace('width="40" height="40"','width="64" height="64"')+'</div>')};
 setInterval(info,20000);
 
+IC.sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+IC.moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+function curTheme(){return document.documentElement.getAttribute('data-theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}
+function setTheme(m){if(m=='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',m);try{localStorage.setItem('pos_theme',m)}catch(e){}render()}
+function togTheme(){setTheme(curTheme()=='dark'?'light':'dark')}
+(function(){try{var m=localStorage.getItem('pos_theme');if(m&&m!='auto')document.documentElement.setAttribute('data-theme',m)}catch(e){}})();
+function themeBox(){var m='auto';try{m=localStorage.getItem('pos_theme')||'auto'}catch(e){}
+ return '<div class="box"><div class="hd">'+I('sun')+'<b>'+L('থিম','Theme')+'</b></div><div class="seg" style="margin:0">'+[['auto',L('অটো','Auto')],['light',L('দিন','Day')],['dark',L('রাত','Night')]].map(function(x){return '<button class="'+(m==x[0]?'on':'')+'" onclick="setTheme(\''+x[0]+'\')">'+x[1]+'</button>'}).join('')+'</div></div>'}
+var vSet1=vSet;vSet=function(){return themeBox()+vSet1()};
+function rcHtml(s){
+ var id=invCode(s),qr='INV:'+id+';D:'+day(s.t)+';T:'+s.total.toFixed(2)+';P:'+s.pay,tm=new Date(s.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+ var rows=s.items.map(function(i){var n=(S.lang=='bn'&&i.bn)?i.bn:i.name;return '<tr><td>'+esc(n)+'</td><td class="q">'+i.qty+' × '+i.price.toFixed(2)+'</td><td class="a">'+(i.qty*i.price).toFixed(2)+'</td></tr>'}).join('');
+ var pl=(s.pays&&s.pays.length?s.pays:[{m:s.pay,a:s.total}]);
+ var h='<div class="rcpt"><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+L('ইনভয়েস','Invoice')+' #'+s.sn+'</span><span>'+day(s.t)+' · '+tm+'</span></div><table>'+rows+'</table>';
+ if(s.disc||s.tax)h+='<div class="rt" style="margin-top:4px"><span>'+t('sub')+'</span><span>'+$$(s.sub)+'</span></div>';
+ if(s.disc)h+='<div class="rt"><span>'+t('disc')+'</span><span>−'+$$(s.disc)+'</span></div>';
+ if(s.tax)h+='<div class="rt"><span>'+t('tax')+'</span><span>'+$$(s.tax)+'</span></div>';
+ h+='<div class="rt g"><span>'+t('total')+'</span><span>'+$$(s.total)+'</span></div>';
+ pl.forEach(function(x){h+='<div class="rt py"><span>'+t(x.m)+'</span><span>'+$$(x.a)+'</span></div>'});
+ if(s.recv!=null&&(s.chg||0)>0)h+='<div class="rt py"><span>'+t('received')+'</span><span>'+$$(s.recv)+'</span></div><div class="rt py"><span>'+t('chg')+'</span><span>'+$$(s.chg)+'</span></div>';
+ return h+'<div class="ft"><div class="qrw">'+qrSvg(qr)+'</div><div><div class="th">'+t('thanks')+'</div><div class="cid">'+esc(id)+'</div></div></div></div>'}
+showRc=function(no){var s=H.find(function(h){return h.no==no});if(!s)return;vArm=0;
+ $('#rb').innerHTML=rcHtml(s)+'<div class="ract"><button onclick="share('+no+')">'+t('share')+'</button><button onclick="window.print()">'+I('print')+' '+t('print')+'</button><button class="pri" onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div><button class="bad noprint" id="vb" style="width:100%;margin-top:10px" onclick="voidSale('+no+')">'+I('trash')+' '+t('void')+'</button>';
+ $('#rc').classList.add('show')};
+showTxt=function(x,id,qr){window.__tx=x;
+ $('#rb').innerHTML='<div class="rcpt"><span class="rs">'+esc(S.shop)+'</span><pre class="rp">'+esc(x.split('\n').slice(1).join('\n'))+'</pre>'+(id?'<div class="ft"><div class="qrw">'+qrSvg(qr)+'</div><div class="cid">'+esc(id)+'</div></div>':'')+'</div><div class="ract"><button onclick="try{navigator.share?navigator.share({text:window.__tx}):navigator.clipboard.writeText(window.__tx)}catch(e){}">'+t('share')+'</button><button onclick="window.print()">'+I('print')+' '+t('print')+'</button><button class="pri" onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div>';
+ $('#rc').classList.add('show')};
+info=function(){var e=$('#ib');if(!e)return;var l=H.length?H.reduce(function(a,x){return x.t>a.t?x:a}):null,d=new Date();
+ e.innerHTML='<button class="lb" '+(l?'onclick="showRc('+l.no+')"':'disabled')+'>'+I('print')+' '+L('শেষ ইনভয়েস','Last invoice')+(l?' #'+l.sn+' · '+$$(l.total):'')+'</button><div style="display:flex;align-items:center;gap:10px"><button class="thm" aria-label="Theme" onclick="togTheme()">'+I(curTheme()=='dark'?'sun':'moon')+'</button><div class="clk"><b>'+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</b><span>'+d.toLocaleDateString(S.lang=='bn'?'bn-BD':'en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+'</span></div></div>'};
+var render3=render;render=function(){render3();document.title=S.shop};
+var sy1=sy;sy=function(k){sy1(k);var e=$('#sync');if(e&&!navigator.onLine){e.textContent=L('⚠ অফলাইন: বিক্রি ফোনে জমা হচ্ছে, নেট এলে নিজে সিঙ্ক হবে','⚠ Offline: sales are kept on this device and sync when online');e.style.color='var(--warn)';e.style.fontWeight='700'}};
+window.addEventListener('online',function(){sy('on');render()});window.addEventListener('offline',function(){sy();render()});
+if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+
 render();boot();
 </script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,doc,setDoc,deleteDoc,collection,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,doc,setDoc,deleteDoc,collection,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 if(!/PASTE/.test(window.FIREBASE_CONFIG.apiKey)){
- const app=initializeApp(window.FIREBASE_CONFIG),auth=getAuth(app),db=getFirestore(app);let un=[];
+ const app=initializeApp(window.FIREBASE_CONFIG),auth=getAuth(app),db=(function(){try{return initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){return getFirestore(app)}})();let un=[];
  const ref=(c,i)=>doc(db,'users',auth.currentUser.uid,c,i);
  window.FB={
   watch:cb=>onAuthStateChanged(auth,cb),
