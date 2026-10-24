@@ -146,6 +146,18 @@ body{font-weight:500}b,button,h1,h2,label{font-weight:700}
  .rcpt{width:100%!important;max-width:none!important;padding:1.5mm 3mm!important;box-shadow:none!important;border-radius:0!important;color:#000!important;font-size:12px!important}
  .ract,.noprint,#vb{display:none!important}
 }
+
+.ft svg{width:var(--q,64px);height:var(--q,64px)}
+.th{font-size:12.5px;line-height:1.3}.th2{font-size:11px}
+.xl{font-size:10.5px;text-align:center;border-top:1px dashed #000;margin-top:4px;padding-top:3px;line-height:1.3}
+.sw{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0 4px;border-top:1px solid var(--line)}.sw:first-of-type{border-top:0}
+.tg{width:48px;height:27px;border-radius:20px;background:var(--line);position:relative;border:0;padding:0;flex:none}
+.tg:after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:left .15s}
+.tg.on{background:var(--ac)}.tg.on:after{left:24px}
+.rb select,.rb input{margin:4px 0}
+#wel{position:fixed;inset:0;z-index:60;background:var(--head);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;animation:wf .5s ease both;transition:opacity .45s}
+#wel.out{opacity:0}#wel h2{font-size:30px;margin:10px 0 0;color:#fff}#wel p{margin:0;font-size:17px;opacity:.9}
+@keyframes wf{from{opacity:0}to{opacity:1}}
 </style></head><body>
 <header><div class="brand"><svg width="40" height="40" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#14454b"/><path d="M19 29h26v6a13 13 0 0 1-13 13 13 13 0 0 1-13-13z" fill="#fff"/><path d="M45 32h2.5a5 5 0 0 1 0 10H43" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><path d="M15 52h34" stroke="#f5b52e" stroke-width="3.4" stroke-linecap="round"/><path d="M22 24l4.5-8 5.5 8 5.5-8 4.5 8" fill="none" stroke="#f5b52e" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><h1 id="shop"></h1></div><div class="hr"><button class="hb wide-only" id="lastinv" onclick="lastInv()"></button><span class="chip" id="today"></span><div class="lg" id="lg"></div></div></header>
 <div id="ib"></div>
@@ -1444,6 +1456,55 @@ var render3=render;render=function(){render3();document.title=S.shop};
 var sy1=sy;sy=function(k){sy1(k);var e=$('#sync');if(e&&!navigator.onLine){e.textContent=L('⚠ অফলাইন: বিক্রি ফোনে জমা হচ্ছে, নেট এলে নিজে সিঙ্ক হবে','⚠ Offline: sales are kept on this device and sync when online');e.style.color='var(--warn)';e.style.fontWeight='700'}};
 window.addEventListener('online',function(){sy('on');render()});window.addEventListener('offline',function(){sy();render()});
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+
+var RD={foot:true,mode:'shop',custom:'',wifi:false,wn:'',wp:'',offer:false,offerTxt:'',info:false,hours:'',phone:'',qr:true,qm:'inv',l_maps:'',l_wa:'',l_fb:'',qs:44,welcome:true};
+function R(){return Object.assign({},RD,S.rc||{})}
+function rset(k,v){S.rc=R();S.rc[k]=v;save();render()}
+function greet(h){return h>=5&&h<11?L('সুপ্রভাত','Good morning'):h>=11&&h<16?L('শুভ দুপুর','Good afternoon'):h>=16&&h<19?L('শুভ সন্ধ্যা','Good evening'):L('শুভ রাত্রি','Good night')}
+function footMsg(s){var r=R();if(!r.foot)return '';var bn=S.lang=='bn',h=new Date(s.t).getHours(),k=r.mode,m;
+ if(k=='simple')m=bn?'ধন্যবাদ, আবার আসবেন':'Thank you, come again';
+ else if(k=='tri')m='ধন্যবাদ · Thank you · <span dir="rtl">شكراً لزيارتكم</span>';
+ else if(k=='rotate'){var P1=bn?['আজকের দিনটা ভালো কাটুক','এক কাপ চা, এক টুকরো গল্প','আপনার আসাই আমাদের আনন্দ','আবার দেখা হবে','পথ চলতে এখানে থামার জন্য ধন্যবাদ','আপনার পরিদর্শন আমাদের সম্মান','সুস্থ থাকুন, ভালো থাকুন','কেমন লাগল? জানাবেন']:['Have a lovely day','One cup of tea, one good story','Your visit makes our day','See you again soon','Thanks for stopping by on your journey','It is an honour to serve you','Stay well, stay happy','Loved your visit? Tell us!'];m=P1[(s.sn+(+day(s.t).slice(-2)))%P1.length]}
+ else if(k=='time')m=h>=5&&h<11?(bn?'সুপ্রভাত! দিনটা শুভ হোক':'Good morning! Have a great day'):h>=11&&h<16?(bn?'শুভ দুপুর! আবার আসবেন':'Good afternoon! Come again'):h>=16&&h<19?(bn?'শুভ সন্ধ্যা! আবার আসবেন':'Good evening! Come again'):(bn?'শুভ রাত্রি! নিরাপদে ফিরুন':'Good night! Travel safe');
+ else if(k=='custom'&&r.custom)m=esc(r.custom);
+ else m=bn?'ক্লান্ত পথিকের ঠিকানা, আবার আসবেন':'Every traveler is welcome here';
+ return '<div class="th">'+m+'</div><div class="th2">— '+esc(S.shop)+'</div>'}
+rcHtml=function(s){
+ var r=R(),id=invCode(s),qrT='INV:'+id+';D:'+day(s.t)+';T:'+s.total.toFixed(2)+';P:'+s.pay,tm=new Date(s.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+ var lk=r.qm!='inv'?r['l_'+r.qm]:'';if(lk)qrT=lk;var qz=lk?Math.max(+r.qs,56):+r.qs;
+ var rows=s.items.map(function(i){var n=(S.lang=='bn'&&i.bn)?i.bn:i.name;return '<tr><td>'+esc(n)+'</td><td class="q">'+i.qty+' × '+i.price.toFixed(2)+'</td><td class="a">'+(i.qty*i.price).toFixed(2)+'</td></tr>'}).join('');
+ var pl=(s.pays&&s.pays.length?s.pays:[{m:s.pay,a:s.total}]);
+ var h='<div class="rcpt"><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+L('ইনভয়েস','Invoice')+' #'+s.sn+'</span><span>'+day(s.t)+' · '+tm+'</span></div><table>'+rows+'</table>';
+ if(s.disc||s.tax)h+='<div class="rt" style="margin-top:4px"><span>'+t('sub')+'</span><span>'+$$(s.sub)+'</span></div>';
+ if(s.disc)h+='<div class="rt"><span>'+t('disc')+'</span><span>−'+$$(s.disc)+'</span></div>';
+ if(s.tax)h+='<div class="rt"><span>'+t('tax')+'</span><span>'+$$(s.tax)+'</span></div>';
+ h+='<div class="rt g"><span>'+t('total')+'</span><span>'+$$(s.total)+'</span></div>';
+ pl.forEach(function(x){h+='<div class="rt py"><span>'+t(x.m)+'</span><span>'+$$(x.a)+'</span></div>'});
+ if(s.recv!=null&&(s.chg||0)>0)h+='<div class="rt py"><span>'+t('received')+'</span><span>'+$$(s.recv)+'</span></div><div class="rt py"><span>'+t('chg')+'</span><span>'+$$(s.chg)+'</span></div>';
+ h+='<div class="ft">'+(r.qr?'<div class="qrw" style="--q:'+qz+'px">'+qrSvg(qrT)+'</div>':'')+'<div>'+footMsg(s)+'<div class="cid">'+esc(id)+'</div></div></div>';
+ if(r.wifi&&(r.wn||r.wp))h+='<div class="xl">Wi-Fi: <b>'+esc(r.wn)+'</b>'+(r.wp?' · '+esc(r.wp):'')+'</div>';
+ if(r.offer&&r.offerTxt)h+='<div class="xl">'+esc(r.offerTxt)+'</div>';
+ if(r.info&&(r.hours||r.phone))h+='<div class="xl">'+[r.hours,r.phone].filter(Boolean).map(esc).join(' · ')+'</div>';
+ return h+'</div>'};
+function sw(k,lab,extra){var r=R();return '<div class="sw"><b>'+lab+'</b><button class="tg'+(r[k]?' on':'')+'" role="switch" aria-checked="'+!!r[k]+'" aria-label="'+esc(lab)+'" onclick="rset(\''+k+'\','+!r[k]+')"></button></div>'+(extra||'')}
+function inp(k,ph){return '<input placeholder="'+esc(ph)+'" value="'+esc(R()[k])+'" onchange="rset(\''+k+'\',this.value)">'}
+function sel(k,opts){var v=R()[k];return '<select onchange="rset(\''+k+'\',this.value)">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(String(v)==String(o[0])?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select>'}
+function previewRc(){var s={no:0,sn:7,t:Date.now(),items:[{name:'Tea',bn:'চা',price:30,qty:2},{name:'Sandwich',bn:'স্যান্ডউইচ',price:120,qty:1}],sub:180,disc:0,tax:0,total:180,pay:'Cash',pays:[{m:'Cash',a:180}],recv:200,chg:20};
+ $('#rb').innerHTML=rcHtml(s)+'<div class="ract"><button class="pri" onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div>';$('#rc').classList.add('show')}
+function rcBox(){var r=R();
+ return '<div class="box rb"><div class="hd">'+I('print')+'<b>'+L('রসিদ ও স্বাগতম','Receipt & welcome')+'</b></div>'
+ +sw('foot',L('ধন্যবাদ / স্বাগতম বার্তা','Thank-you message'),sel('mode',[['simple',L('সহজ: ধন্যবাদ, আবার আসবেন','Simple: Thank you, come again')],['shop',L('দোকানের ধাঁচে: পথিকের ঠিকানা','Shop style: traveler')],['tri',L('তিন ভাষায়','Three languages')],['rotate',L('ঘুরে ঘুরে আলাদা বার্তা','Rotating messages')],['time',L('সময় অনুযায়ী','By time of day')],['custom',L('নিজের লেখা','My own text')]])+inp('custom',L('নিজের বার্তা (নিজের লেখা বাছলে)','Own message (for "My own text")'))+'<div class="mute" style="font-size:12px">'+L('প্রতিটা বার্তার শেষে "— দোকানের নাম" আসবে','Each message ends with "— shop name"')+'</div>')
+ +sw('wifi',L('Wi-Fi এর নাম ও পাসওয়ার্ড','Wi-Fi name & password'),inp('wn',L('Wi-Fi নাম','Wi-Fi name'))+inp('wp',L('পাসওয়ার্ড','Password')))
+ +sw('offer',L('পরের বারের ছাড়ের লাইন','Next-visit offer line'),inp('offerTxt',L('যেমন: এই রসিদ দেখালে পরের বার চা ফ্রি','e.g. Show this receipt for a free tea next time')))
+ +sw('info',L('খোলার সময় ও ফোন','Opening hours & phone'),inp('hours',L('যেমন: সকাল ৬টা – রাত ১২টা','e.g. 6 AM – 12 AM'))+inp('phone',L('ফোন নম্বর','Phone number')))
+ +sw('qr',L('রসিদে QR','QR on receipt'),sel('qm',[['inv',L('ইনভয়েস নম্বর','Invoice number')],['maps',L('Google Maps রিভিউ লিংক','Google Maps review link')],['wa',L('WhatsApp লিংক','WhatsApp link')],['fb',L('ফেসবুক পেজ লিংক','Facebook page link')]])+(r.qm!='inv'?inp('l_'+r.qm,L('লিংক বসান (https://…)','Paste link (https://…)')):'')+sel('qs',[[44,L('ছোট (৪৪px)','Small (44px)')],[56,L('মাঝারি (৫৬px)','Medium (56px)')],[70,L('বড় (৭০px)','Large (70px)')]])+'<div class="mute" style="font-size:12px">'+L('লিংক দিলে QR বড় লাগে, তাই ৫৬px এর নিচে নামবে না','Links need a bigger QR, so it will not go below 56px')+'</div>')
+ +sw('welcome',L('অ্যাপ খোলার স্বাগতম পর্দা','Welcome screen on open'))
+ +'<button style="width:100%;margin-top:12px" onclick="previewRc()">'+I('print')+' '+L('রসিদের নমুনা দেখুন','Preview receipt')+'</button></div>'}
+var vSet2=vSet;vSet=function(){return themeBox()+rcBox()+vSet2().replace(themeBox(),'')};
+function welcome(){var r=R();if(!r.welcome)return;try{if(sessionStorage.getItem('pos_wel'))return;sessionStorage.setItem('pos_wel','1')}catch(e){}
+ var e=document.createElement('div');e.id='wel';e.innerHTML=LOGO.replace('width="40" height="40"','width="96" height="96"')+'<h2>'+greet(new Date().getHours())+'</h2><p>'+L('স্বাগতম','Welcome')+'</p><p>— '+esc(S.shop)+'</p>';
+ document.body.appendChild(e);setTimeout(function(){e.classList.add('out');setTimeout(function(){e.remove()},500)},2200)}
+var onPos1=onPos;onPos=function(snap){onPos1(snap);if(ready)welcome()};
 
 render();boot();
 </script>
