@@ -56,7 +56,7 @@ nav button .i{width:23px;height:23px}
 #bar{position:fixed;left:12px;right:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px));background:var(--ac);color:#fff;border:0;display:flex;justify-content:space-between;padding:15px 18px;border-radius:16px;font-weight:800;z-index:6}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10;display:none;align-items:flex-end;justify-content:center}
 .ov.show{display:flex}
-.sheet{background:var(--bg);width:100%;max-width:520px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.sheet{background:var(--bg);width:100%;max-width:520px;max-height:92vh;max-height:92dvh;overflow:auto;border-radius:20px 20px 0 0;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 .sheet .lg,.box .lg{border-color:var(--line)}.sheet .lg button,.box .lg button{color:var(--ink)}.sheet .lg button.on,.box .lg button.on{background:var(--ink);color:var(--bg)}
 .q{display:flex;align-items:center;gap:6px}.q button{padding:5px 12px}.q .x{border:0;background:none;color:var(--warn);padding:5px 8px;font-size:18px}
 .tot{display:flex;justify-content:space-between;padding:3px 0}.tot.g{font-size:22px;font-weight:800;padding-top:8px}
@@ -107,6 +107,9 @@ button.pay:disabled{opacity:.5}
 .tg:after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:left .15s}
 .tg.on{background:var(--ac)}.tg.on:after{left:24px}
 .rb select,.rb input{margin:4px 0}
+@media (max-width:859px){.sheet{max-width:none}}
+.stk{position:sticky;bottom:calc(-16px - env(safe-area-inset-bottom,0px));background:var(--bg);margin:0 -16px;padding:6px 16px calc(12px + env(safe-area-inset-bottom,0px));z-index:2}
+.wa{background:#25a244!important;color:#fff!important;border-color:transparent!important}
 .ract{display:flex;gap:10px;margin-top:14px}.ract button{flex:1}
 #wel{position:fixed;inset:0;z-index:60;background:var(--head);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;animation:wf .5s ease both;transition:opacity .45s}
 #wel.out{opacity:0}#wel h2{font-size:30px;margin:10px 0 0;color:#fff}#wel p{margin:0;font-size:17px;opacity:.9}
@@ -173,7 +176,7 @@ var S = load('pos_s',{shop:'Musafir Cafe',cur:'৳',tax:0,lang:'bn'});
 var P = load('pos_p',[{id:1,name:'Tea',price:30,cat:'Drinks',stock:''},{id:2,name:'Coffee',price:60,cat:'Drinks',stock:''},{id:3,name:'Cold juice',price:80,cat:'Drinks',stock:''},{id:4,name:'Water bottle',price:20,cat:'Drinks',stock:50},{id:5,name:'Sandwich',price:120,cat:'Food',stock:''},{id:6,name:'Cake slice',price:90,cat:'Food',stock:20}]);
 P.forEach(function(p){if(p.bn===undefined)p.bn=BN[p.id]||''});
 
-var H=load('pos_h',[]), IMG=load('pos_img',{}), DU=load('pos_du',[]), cart={}, cat='All', q='', view='sell', edit=null, arm=0, vArm=0, pay='Cash', disc='', recv='', pays=null, dview=null, dq='', pdRow=null, pdPhoto='';
+var H=load('pos_h',[]), IMG=load('pos_img',{}), DU=load('pos_du',[]), cart={}, cat='All', q='', view='sell', edit=null, arm=0, vArm=0, pay='Cash', disc='', recv='', pays=null, pPhoto, dview=null, dq='', pdRow=null, pdPhoto='';
 var CU=null, CE='', ready=false, tm=0, ss='off', upl=false, cfgOK=!/PASTE/.test((window.FIREBASE_CONFIG||{}).apiKey||'PASTE');
 var dd=null, dm=null, curDay=null;
 
@@ -265,20 +268,27 @@ function add(id){var p=gp(id),n=(cart[id]||0)+1;if(p.stock!==''&&n>p.stock)retur
 function chg(id,d){var p=gp(id),n=(cart[id]||0)+d;if(n<=0)delete cart[id];else if(p.stock===''||n<=p.stock)cart[id]=n;render();openCart()}
 function rm(id){delete cart[id];render();openCart()}
 
+function rebal(){if(!pays||pays.length<2)return;var c=calc(),au=pays.find(function(p){return p.auto});if(!au)return;var o=pays.filter(function(p){return p!==au}).reduce(function(s,x){return s+(+x.a||0)},0);au.a=Math.max(0,c.t-o).toFixed(2)}
 function pst(){
- var c=calc();if(!pays&&Object.keys(cart).length)pays=[{m:'Cash',a:c.t.toFixed(2),auto:true}];var rows=pays||[],paid=rows.reduce(function(s,x){return s+(+x.a||0)},0),cash=rows.filter(function(x){return x.m=='Cash'}).reduce(function(s,x){return s+(+x.a||0)},0);
+ var c=calc();if(!pays&&Object.keys(cart).length)pays=[{m:'Cash',a:c.t.toFixed(2),auto:true}];rebal();var rows=pays||[],paid=rows.reduce(function(s,x){return s+(+x.a||0)},0),cash=rows.filter(function(x){return x.m=='Cash'}).reduce(function(s,x){return s+(+x.a||0)},0);
  var rem=Math.max(0,c.t-paid),chgVal=Math.max(0,paid-c.t);var dueOk=rows.every(function(x){return x.m!='Due'||x.debtor});
  return{rows:rows,paid:paid,rem:rem,chg:chgVal,ok:rows.length>0&&rem<0.005&&chgVal<=cash+0.005&&dueOk}
 }
-function setA(i,v){pays[i].a=v;pays[i].auto=false;openCart()}
+function setA(i,v){var c=calc(),n=+v||0;pays[i].a=v;pays[i].auto=false;
+ if(pays.length==2){var o=pays[1-i];if(n<c.t-0.004){o.auto=true}else{o.auto=false;o.a='0.00'}}
+ openCart()}
 function setM(i,m){pays[i].m=m;if(m=='Due')pickDebtor(i);openCart()}
 function addRow(m){
  if(m=='Due'){var c=calc(),def=pst().rem>0.004?pst().rem:c.t;var v=prompt(L('কত টাকা বাকি রাখবেন?','How much should remain due?'),def.toFixed(2));if(v==null)return;var a=parseFloat(v);if(!a||a<=0)return;
   var au=pays.find(function(p){return p.auto});if(au){au.a=Math.max(0,c.t-a).toFixed(2);au.auto=false}
   pays.push({m:'Due',a:a.toFixed(2)});pickDebtor(pays.length-1);openCart();return
  }
- var r=pst().rem;if(r<=0.004){toast(L('ইতমধ্যে পুরো টাকা ধরা আছে','Already fully allocated'));return}
- pays.forEach(function(p){p.auto=false});pays.push({m:m,a:r.toFixed(2)});openCart()
+ var r=pst().rem;
+ if(r>0.004){pays.forEach(function(p){p.auto=false});pays.push({m:m,a:r.toFixed(2)});openCart();return}
+ var c2=calc(),au2=pays.find(function(p){return p.auto});
+ if(au2){var half=c2.t>=2?Math.floor(c2.t/2):c2.t/2;pays.push({m:m,a:half.toFixed(2)})}
+ else pays.push({m:m,a:'0.00'});
+ openCart()
 }
 function delRow(i){pays.splice(i,1);if(pays.length==1){pays[0].a=calc().t.toFixed(2);pays[0].auto=true}openCart()}
 
@@ -299,7 +309,7 @@ function cartInner(sheet){
   pays.forEach(function(x,i){h+='<div class="prow"><select onchange="setM('+i+',this.value)">'+PM.map(function(m){return '<option value="'+m+'"'+(m==x.m?' selected':'')+'>'+t(m)+'</option>'}).join('')+'</select><input type="number" inputmode="decimal" value="'+esc(x.a)+'" onchange="setA('+i+',this.value)">'+(pays.length>1?'<button class="x" aria-label="'+t('rm')+'" onclick="delRow('+i+')">'+I('trash')+'</button>':'<span></span>')+'</div>'+(x.m=='Due'?'<div class="mute" style="font-size:12px;margin:-4px 0 8px;display:flex;justify-content:space-between"><span>'+(x.debtor?esc(x.debtor.name):t('needDebtor'))+'</span><button style="padding:2px 10px;font-size:12px" onclick="pickDebtor('+i+')">'+(x.debtor?t('swap'):t('selectDebtor'))+'</button></div>':'')});
   h+='<div class="qadd"><span class="mute">'+L('আরও যোগ:','Add:')+'</span>'+PM.map(function(m){return '<button onclick="addRow(\''+m+'\')">+ '+t(m)+'</button>'}).join('')+'</div>'
   +'<div class="sum"><div class="tot"><span>'+L('মোট প্রদেয়','Net payable')+'</span><b>'+$$(c.t)+'</b></div><div class="tot"><span>'+L('পেয়েছি','Paid')+'</span><b>'+$$(ps.paid)+'</b></div>'+(ps.rem>0.004?'<div class="tot rem"><span>'+L('বাকি আছে','Remaining')+'</span><b>'+$$(ps.rem)+'</b></div>':'<div class="tot ok"><span>'+t('chg')+'</span><b>'+$$(ps.chg)+'</b></div>')+'</div>'
-  +'<button class="pay" '+(ps.ok?'':'disabled')+' onclick="charge()">'+(ps.ok?L('পেমেন্ট','Payment')+' · '+$$(c.t):L('বাকি ','Remaining ')+$$(ps.rem))+'</button><div style="display:flex;gap:10px;margin-top:8px"><button class="bad" style="flex:1" onclick="cancelOrder()">'+I('trash')+' '+t('cancel')+'</button>'+(sheet?'<button style="flex:1" onclick="$(\'#cs\').classList.remove(\'show\')">'+t('keep')+'</button>':'')+'</div>'}
+  +'<div class="stk"><button class="pay" '+(ps.ok?'':'disabled')+' onclick="charge()">'+(ps.ok?L('পেমেন্ট','Payment')+' · '+$$(c.t):L('বাকি ','Remaining ')+$$(ps.rem))+'</button><div style="display:flex;gap:10px;margin-top:8px"><button class="bad" style="flex:1" onclick="cancelOrder()">'+I('trash')+' '+t('cancel')+'</button>'+(sheet?'<button style="flex:1" onclick="$(\'#cs\').classList.remove(\'show\')">'+t('keep')+'</button>':'')+'</div></div>'}
  else if(sheet)h+='<button style="width:100%;margin-top:10px" onclick="$(\'#cs\').classList.remove(\'show\')">'+t('keep')+'</button>';
  return h
 }
@@ -327,13 +337,13 @@ function charge(){
  var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode()};
  if(!CU)s.lc=true;
  H.push(s);
- dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,no:s.sn,items:items.map(function(i){return(S.lang=='bn'&&i.bn?i.bn:i.name)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
+ dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,no:s.sn,sid:s.no,items:items.map(function(i){return(S.lang=='bn'&&i.bn?i.bn:i.name)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
  save();if(dueRows.length)dusave();cSale(s);pubReceipt(s);cart={};disc='';recv='';pays=null;$('#cs').classList.remove('show');render();showRc(s.no);
 }
 
 function plainFoot(s){return footMsg(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
 function pubDue(d){if(!CU||!window.FB||!FB.setPub)return;if(!d.pc)d.pc=randCode();
- w(FB.setPub(d.pc,{type:'due',uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,name:d.name,phone:d.phone||'',nid:d.nid||'',photo:d.photo||'',total:duTotal(d),entries:(d.entries||[]).map(function(e){return{t:e.t,a:e.a,items:e.items||'',no:e.no}}),updated:Date.now()}))}
+ w(FB.setPub(d.pc,{type:'due',uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,name:d.name,phone:d.phone||'',nid:d.nid||'',photo:d.photo||'',total:duTotal(d),entries:(d.entries||[]).map(function(e){return{t:e.t,a:e.a,items:e.items||'',no:e.no}}),pays:(d.pays||[]).map(function(p){return{t:p.t,a:p.a}}),updated:Date.now()}))}
 function pubReceipt(s){if(!CU||!window.FB||!FB.setPub||!s.pc)return;var ids=[],m={};s.items.forEach(function(i){if(i.id&&IMG[i.id]&&ids.indexOf(i.id)<0)ids.push(i.id)});var left=ids.length;
  function fin(){w(FB.setPub(s.pc,{uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,t:s.t,sn:s.sn,day:day(s.t),total:s.total,sub:s.sub,disc:s.disc||0,tax:s.tax||0,pays:s.pays||[],msg:plainFoot(s),items:s.items.map(function(i){return{name:i.name,bn:i.bn||'',price:i.price,qty:i.qty,img:m[i.id]||''}})}))}
  if(!left)return fin();ids.forEach(function(id){thumb(IMG[id],function(x){if(x)m[id]=x;if(--left==0)fin()})})}
@@ -350,7 +360,7 @@ function footMsg(s){var r=RD();if(!r.foot)return '';var bn=S.lang=='bn',h=new Da
 
 function rcHtml(s){
  var r=RD(),id=invCode(s),qrT='INV:'+id+';D:'+day(s.t)+';T:'+s.total.toFixed(2)+';P:'+s.pay,tm=new Date(s.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
- var base=location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'');var lk=(r.qm=='view')?(s.pc?base+'?r='+s.pc:''):(r.qm!='inv'?r['l_'+r.qm]:'');if(lk)qrT=lk;var qz=lk?Math.max(+r.qs,60):+r.qs;
+ var base=location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'');var lk=(r.qm=='view')?(s.pc?base+'?r='+s.pc:''):(r.qm!='inv'?r['l_'+r.qm]:'');if(lk)qrT=lk;var qz=lk?Math.max(+r.qs,84):+r.qs;
  var rows=s.items.map(function(i){var n=(S.lang=='bn'&&i.bn)?i.bn:i.name,img=i.id&&IMG[i.id]?'<img src="'+IMG[i.id]+'" style="width:20px;height:20px;border-radius:5px;object-fit:cover;vertical-align:-5px;margin-right:5px">':'';return '<tr><td>'+img+esc(n)+'</td><td class="q">'+i.qty+' × '+i.price.toFixed(2)+'</td><td class="a">'+(i.qty*i.price).toFixed(2)+'</td></tr>'}).join('');
  var pl=(s.pays&&s.pays.length?s.pays:[{m:s.pay,a:s.total}]);
  var h='<div class="rcpt"><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+L('ইনভয়েস','Invoice')+' #'+s.sn+'</span><span>'+day(s.t)+' · '+tm+'</span></div><table>'+rows+'</table>';
@@ -370,7 +380,7 @@ function rcHtml(s){
 function showRc(no){
  var s=H.find(function(h){return h.no==no});if(!s)return;vArm=0;
  var id=invCode(s),qr='INV:'+id+';D:'+day(s.t)+';T:'+s.total.toFixed(2)+';P:'+s.pay;
- $('#rb').innerHTML=rcHtml(s)+'<div class="ract"><button onclick="share('+no+')">'+t('share')+'</button><button onclick="window.print()">'+I('print')+' '+t('print')+'</button><button class="pri" onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div><button class="bad noprint" id="vb" style="width:100%;margin-top:10px" onclick="voidSale('+no+')">'+I('trash')+' '+t('void')+'</button>';
+ $('#rb').innerHTML=rcHtml(s)+'<div class="ract"><button class="wa" onclick="waRc('+no+')">WhatsApp</button><button onclick="window.print()">'+I('print')+' '+t('print')+'</button><button class="pri" onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div><button class="bad noprint" id="vb" style="width:100%;margin-top:10px" onclick="voidSale('+no+')">'+I('trash')+' '+t('void')+'</button>';
  $('#rc').classList.add('show')
 }
 
@@ -379,6 +389,7 @@ function voidSale(no){
  var s=H.find(function(h){return h.no==no});if(!s)return;
  s.items.forEach(function(i){var p=i.id?gp(i.id):P.find(function(x){return x.name==i.name});if(p&&p.stock!=='')p.stock+=i.qty});
  if(s.pc&&CU&&window.FB&&FB.delPub)FB.delPub(s.pc).catch(function(){});
+ var dch=false;DU.forEach(function(d){var n0=(d.entries||[]).length;d.entries=(d.entries||[]).filter(function(e){return e.sid!=no});if(d.entries.length!=n0){dch=true;pubDue(d)}});if(dch)dusave();
  H=H.filter(function(h){return h.no!=no});save();cDel(no);$('#rc').classList.remove('show');render();toast(t('voided'))
 }
 
@@ -432,19 +443,19 @@ function dayReport(date){
  return o.join('\n');
 }
 function showDayRpt(d){var r=sums(H.filter(function(s){return day(s.t)==d}));
- showTxt(dayReport(d),'RPT'+d.replace(/-/g,''),'RPT:'+d.replace(/-/g,'')+';N:'+r.n+';T:'+r.t.toFixed(2)+';CASH:'+r.Cash.toFixed(2)+';CARD:'+r.Card.toFixed(2)+';MOB:'+r.Mobile.toFixed(2))}
+ showTxt(dayReport(d),'RPT'+d.replace(/-/g,''),'RPT:'+d.replace(/-/g,'')+';N:'+r.n+';T:'+r.t.toFixed(2)+';CASH:'+(r.Cash||0).toFixed(2)+';DUE:'+(r.Due||0).toFixed(2))}
 
 function monthReport(m){var l=H.filter(function(s){return day(s.t).slice(0,7)==m}),r=sums(l),by={};
  l.forEach(function(s){var k=day(s.t);by[k]=by[k]||{n:0,t:0};by[k].n++;by[k].t+=s.total});
  var o=[S.shop,L('মাসিক রিপোর্ট','Monthly report')+': '+m,'--------------------------------'];
  Object.keys(by).sort().forEach(function(k){o.push(k+'   '+by[k].n+L(' টি',' inv')+'   '+$$(by[k].t))});
- o.push('--------------------------------',L('ইনভয়েস','Invoices')+': '+r.n,t('Cash')+': '+$$(r.Cash),t('Card')+': '+$$(r.Card),t('Mobile')+': '+$$(r.Mobile));
+ o.push('--------------------------------',L('ইনভয়েস','Invoices')+': '+r.n,t('Cash')+': '+$$(r.Cash),L('মোবাইল ব্যাংকিং','Digital')+': '+$$((r.bKash||0)+(r.Nagad||0)+(r.Rocket||0)+(r.BanglaQR||0)),t('Due')+': '+$$(r.Due||0));
  if(r.disc)o.push(t('disc')+': '+$$(r.disc));if(r.tax)o.push(t('tax')+': '+$$(r.tax));
  o.push('--------------------------------',t('total')+': '+$$(r.t));return o.join('\n')}
 function showMonRpt(m){var r=sums(H.filter(function(s){return day(s.t).slice(0,7)==m}));
- showTxt(monthReport(m),'RPT'+m.replace('-',''),'RPT:'+m.replace('-','')+';N:'+r.n+';T:'+r.t.toFixed(2)+';CASH:'+r.Cash.toFixed(2)+';CARD:'+r.Card.toFixed(2)+';MOB:'+r.Mobile.toFixed(2))}
+ showTxt(monthReport(m),'RPT'+m.replace('-',''),'RPT:'+m.replace('-','')+';N:'+r.n+';T:'+r.t.toFixed(2)+';CASH:'+(r.Cash||0).toFixed(2)+';DUE:'+(r.Due||0).toFixed(2))}
 
-function csv(){var r=['no,invoice,date,time,items,subtotal,discount,tax,total,cash,card,mobile'];H.slice().sort(function(a,b){return a.t-b.t}).forEach(function(s){var q=sums([s]),d=new Date(s.t);r.push([s.no,s.sn,day(s.t),d.toLocaleTimeString(),'"'+s.items.map(function(i){return i.qty+'x '+i.name}).join('; ').replace(/"/g,'""')+'"',s.sub,s.disc,s.tax,s.total,q.Cash,q.Card,q.Mobile].join(','))});
+function csv(){var r=['no,invoice,date,time,items,subtotal,discount,tax,total,cash,digital,due'];H.slice().sort(function(a,b){return a.t-b.t}).forEach(function(s){var q=sums([s]),d=new Date(s.t);r.push([s.no,s.sn,day(s.t),d.toLocaleTimeString(),'"'+s.items.map(function(i){return i.qty+'x '+i.name}).join('; ').replace(/"/g,'""')+'"',s.sub,s.disc,s.tax,s.total,q.Cash||0,(q.bKash||0)+(q.Nagad||0)+(q.Rocket||0)+(q.BanglaQR||0),q.Due||0].join(','))});
  try{navigator.clipboard.writeText(r.join('\n'));toast(t('csvok'))}catch(e){toast(t('csvno'))}}
 
 function vSell(){var g=vSell0();return isWide()?'<div class="split"><aside class="side" id="side"></aside><div class="prods">'+g+'</div></div>':g}
@@ -452,14 +463,19 @@ function vSell(){var g=vSell0();return isWide()?'<div class="split"><aside class
 function vProd(){
  var e=edit?gp(edit):null;
  var h='<div class="box"><b>'+(e?t('edit'):t('add'))+'</b><label>'+t('nm')+'</label><input id="pn" value="'+esc(e?e.name:'')+'"><label>'+t('nb')+'</label><input id="pb" value="'+esc(e?e.bn||'':'')+'"><label>'+t('pr')+'</label><input id="pp" type="number" inputmode="decimal" value="'+(e?e.price:'')+'"><label>'+t('cat')+'</label><input id="pc" value="'+esc(e?e.cat:'')+'" placeholder="Drinks"><label>'+t('stock')+'</label><input id="ps" type="number" inputmode="numeric" value="'+(e?e.stock:'')+'">'
- +'<div style="display:flex;gap:10px;margin-top:14px"><button class="pri" style="flex:1" onclick="saveP()">'+t('save')+'</button>'+(e?'<button class="bad" onclick="delP()">'+t('del')+'</button><button onclick="edit=null;render()">'+t('back')+'</button>':'')+'</div></div><div class="box">';
- h+=P.map(function(p){return '<div class="row" onclick="edit='+p.id+';render();scrollTo(0,0)"><div><b>'+esc(nm(p))+'</b><div class="mute">'+esc(p.cat?tc(p.cat):t('noc'))+(p.stock!==''?' · '+p.stock:'')+'</div></div><b>'+$$(p.price)+'</b></div>'}).join('');
- return h+'</div>'+imgBox();
+ +'<label>'+L('ছবি (ঐচ্ছিক)','Photo (optional)')+'</label><div style="display:flex;align-items:center;gap:10px"><div id="pph">'+pphHtml(e)+'</div><label class="btn">'+I('camera')+' '+L('ছবি দিন / বদলান','Add / change photo')+'<input type="file" accept="image/*" hidden onchange="pickPhoto(this)"></label><button class="x" aria-label="'+t('rm')+'" onclick="rmPhoto()">'+I('trash')+'</button></div>'
+ +'<div style="display:flex;gap:10px;margin-top:14px"><button class="pri" style="flex:1" onclick="saveP()">'+t('save')+'</button>'+(e?'<button class="bad" onclick="delP()">'+t('del')+'</button><button onclick="edit=null;pPhoto=undefined;render()">'+t('back')+'</button>':'')+'</div></div><div class="box">';
+ h+=P.map(function(p){return '<div class="row" onclick="edit='+p.id+';pPhoto=undefined;render();scrollTo(0,0)"><div style="display:flex;align-items:center;gap:10px">'+pphHtml(p,38,true)+'<div><b>'+esc(nm(p))+'</b><div class="mute">'+esc(p.cat?tc(p.cat):t('noc'))+(p.stock!==''?' · '+p.stock:'')+'</div></div></div><b>'+$$(p.price)+'</b></div>'}).join('');
+ return h+'</div>';
 }
+function pphHtml(e,z,raw){z=z||56;var u=raw?(e&&IMG[e.id]):(pPhoto===null?null:(pPhoto||(e&&IMG[e.id])));return u?'<img class="pimg" style="width:'+z+'px;height:'+z+'px" alt="" src="'+u+'">':'<div class="dot" style="width:'+z+'px;height:'+z+'px;background:hsl('+hue(e?e.name:'x')+',45%,40%)">'+esc(((e&&nm(e))||'?').charAt(0).toUpperCase())+'</div>'}
+function pickPhoto(inp){var f=inp.files&&inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas'),s=360;c.width=c.height=s;var m=Math.min(im.width,im.height),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,s,s);pPhoto=c.toDataURL('image/jpeg',0.88);var b=$('#pph');if(b)b.innerHTML=pphHtml(edit?gp(edit):null)};im.src=r.result};r.readAsDataURL(f);inp.value=''}
+function rmPhoto(){pPhoto=null;var b=$('#pph');if(b)b.innerHTML=pphHtml(edit?gp(edit):null)}
 function saveP(){var n=$('#pn').value.trim(),b=$('#pb').value.trim(),pr=parseFloat($('#pp').value);if(!(n||b)||isNaN(pr)){toast(t('need'));return}
  var o={name:n||b,bn:b,price:pr,cat:$('#pc').value.trim(),stock:$('#ps').value===''?'':+$('#ps').value};
- if(edit)Object.assign(gp(edit),o);else{o.id=Date.now();P.push(o)}
- edit=null;save();render()}
+ var pid;if(edit){Object.assign(gp(edit),o);pid=edit}else{o.id=Date.now();P.push(o);pid=o.id}
+ if(pPhoto){IMG[pid]=pPhoto;if(CU)w(FB.set('pos','img_'+pid,{d:pPhoto}))}else if(pPhoto===null&&IMG[pid]){delete IMG[pid];if(CU)w(FB.del('pos','img_'+pid))}
+ pPhoto=undefined;edit=null;save();lsave();render()}
 function delP(){var p=gp(edit);if(!p)return;ask(L('"'+nm(p)+'" মুছে ফেলতে চান?','Delete "'+nm(p)+'"?'),function(){var id=p.id;P=P.filter(function(x){return x.id!=id});delete cart[id];if(IMG[id]){delete IMG[id];if(CU)w(FB.del('pos','img_'+id))}edit=null;save();render()})}
 
 function setImg(id,u){IMG[id]=u;lsave();if(CU)w(FB.set('pos','img_'+id,{d:u}));render()}
@@ -544,7 +560,7 @@ function openDU(id){var d=DU.find(function(x){return x.id==id});if(!d)return;dvi
  h+=(ev.length?ev.map(function(e){return '<div class="row"><div><div>'+e.txt+'</div><div class="mute" style="font-size:12px">'+new Date(e.t).toLocaleString()+'</div></div><b style="color:'+(e.a<0?'var(--ac)':'var(--warn)')+'">'+(e.a<0?'−':'')+$$(Math.abs(e.a))+'</b></div>'}).join(''):'<div class="empty">'+t('noDue')+'</div>');
  h+='</div>'+((d.archive||[]).length?'<button style="width:100%;margin-top:8px" onclick="showArchive('+d.id+')">'+L('আগের হিসাব দেখুন ('+d.archive.length+')','View past statements ('+d.archive.length+')')+'</button>':'');
  h+='<div style="display:flex;gap:10px;margin-top:10px"><button class="pri" style="flex:1" onclick="addDuPay('+d.id+')">'+t('addPayment')+'</button><button style="flex:1" onclick="printDU('+d.id+')">'+I('print')+' '+t('statement')+'</button></div>';
- h+=(d.phone?'<button style="width:100%;margin-top:8px" onclick="waDu('+d.id+')">'+L('হোয়াটসঅ্যাপে পাঠান','Send on WhatsApp')+'</button>':'');
+ h+='<button class="wa" style="width:100%;margin-top:8px" onclick="waDu('+d.id+')">'+L('WhatsApp-এ হিসাব পাঠান','Send on WhatsApp')+(d.phone?'':' ('+L('নম্বর বেছে নিন','pick contact')+')')+'</button>';
  h+='<button style="width:100%;margin-top:8px" onclick="$(\'#ds\').classList.remove(\'show\')">'+t('done')+'</button>';
  $('#dsb').innerHTML=h;$('#ds').classList.add('show')
 }
@@ -554,13 +570,23 @@ function showArchive(id){var d=DU.find(function(x){return x.id==id});if(!d)retur
  h+='<button style="width:100%;margin-top:8px" onclick="openDU('+id+')">'+t('back')+'</button>';
  $('#dsb').innerHTML=h
 }
-function waDu(id){var d=DU.find(function(x){return x.id==id});if(!d||!d.phone)return;
- var num=d.phone.replace(/[^0-9]/g,'');if(num.length==11&&num.charAt(0)=='0')num='88'+num;
- var msg=S.shop+' — '+t('totalDue')+': '+$$(duTotal(d))+'\n'+(d.entries||[]).map(function(e){return new Date(e.t).toLocaleDateString()+' · '+(e.items||'')+' · '+$$(e.a)}).join('\n');
- window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank')
-}
+function waNum(p){var n=String(p||'').replace(/[^0-9]/g,'');if(n.indexOf('00')==0)n=n.slice(2);if(n.indexOf('880')==0)return n;if(n.charAt(0)=='0')return '88'+n;if(n.length==10&&n.charAt(0)=='1')return '880'+n;return n}
+function waOpen(phone,msg){var n=waNum(phone);window.open('https://wa.me/'+(n?n:'')+'?text='+encodeURIComponent(msg),'_blank')}
+function pubLink(pc){return pc?location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'')+'?r='+pc:''}
+function waDu(id){var d=DU.find(function(x){return x.id==id});if(!d)return;
+ if(CU){pubDue(d);dusave()}
+ var lk=CU?pubLink(d.pc):'',bn=S.lang=='bn',tot=duTotal(d);
+ var ev=(d.entries||[]).slice(-8).map(function(e){return '• '+new Date(e.t).toLocaleDateString()+' · '+(e.items||'')+' · '+$$(e.a)}).join('\n');
+ var lp=(d.pays||[]).slice(-3).map(function(p){return '✔ '+new Date(p.t).toLocaleDateString()+' · '+L('জমা','Paid')+' · '+$$(p.a)}).join('\n');
+ var msg=S.shop+'\n'+(bn?'প্রিয় ':'Dear ')+d.name+(bn?',':',')+'\n'+(tot>0.004?t('totalDue')+': *'+$$(tot)+'*':L('আপনার কোনো বাকি নেই। ধন্যবাদ!','No dues. Thank you!'))+(ev?'\n\n'+ev:'')+(lp?'\n'+lp:'')+(lk?'\n\n'+L('পুরো হিসাব দেখুন:','View full statement:')+'\n'+lk:'');
+ waOpen(d.phone,msg)}
+function waRc(no){var s=H.find(function(h){return h.no==no});if(!s)return;
+ var dr=(s.pays||[]).find(function(x){return x.m=='Due'&&x.debtor}),du=dr?DU.find(function(x){return x.name==dr.debtor}):null;
+ var lk=(CU&&s.pc)?pubLink(s.pc):'',bn=S.lang=='bn';
+ var msg=lk?S.shop+'\n'+L('ইনভয়েস #','Invoice #')+s.sn+' · '+day(s.t)+'\n'+t('total')+': *'+$$(s.total)+'*'+(dr?'\n'+t('Due')+': '+$$(dr.a):'')+'\n\n'+L('রসিদ দেখুন:','View receipt:')+'\n'+lk:rcText(s);
+ waOpen(du?du.phone:'',msg)}
 function addDuPay(id){var d=DU.find(function(x){return x.id==id});if(!d)return;var max=duTotal(d);
- var v=prompt(t('addPayment')+' ('+t('totalDue')+' '+$$(max)+')',max>0?max.toFixed(2):'0');if(v==null)return;var a=parseFloat(v);if(!a||a<=0)return;
+ var v=prompt(t('addPayment')+' ('+t('totalDue')+' '+$$(max)+')',max>0?max.toFixed(2):'0');if(v==null)return;var a=parseFloat(v);if(!a||a<=0)return;if(a>max+0.004){toast(L('বাকির চেয়ে বেশি জমা নেওয়া যাবে না','Cannot exceed the amount due'));return}
  d.pays=d.pays||[];d.pays.push({t:Date.now(),a:a});
  if(duTotal(d)<=0.004){d.archive=d.archive||[];d.archive.push({closedAt:Date.now(),entries:d.entries||[],pays:d.pays||[]});d.entries=[];d.pays=[]}
  dusave();pubDue(d);openDU(id)
@@ -667,7 +693,7 @@ defs['QRMaskPattern']=function(m,e,r){m.exports={PATTERN000:0,PATTERN001:1,PATTE
 defs['QRMath']=function(m,e,r){var M={glog:function(n){if(n<1)throw new Error("glog("+n+")");return M.LOG_TABLE[n]},gexp:function(n){while(n<0)n+=255;while(n>=256)n-=255;return M.EXP_TABLE[n]},EXP_TABLE:new Array(256),LOG_TABLE:new Array(256)};for(var i=0;i<8;i++)M.EXP_TABLE[i]=1<<i;for(var i=8;i<256;i++)M.EXP_TABLE[i]=M.EXP_TABLE[i-4]^M.EXP_TABLE[i-5]^M.EXP_TABLE[i-6]^M.EXP_TABLE[i-8];for(var i=0;i<255;i++)M.LOG_TABLE[M.EXP_TABLE[i]]=i;m.exports=M};
 defs['QRPolynomial']=function(m,e,r){var M=r('./QRMath');function P(num,shift){var off=0;while(off<num.length&&num[off]===0)off++;this.num=new Array(num.length-off+shift);for(var i=0;i<num.length-off;i++)this.num[i]=num[i+off]}P.prototype={get:function(i){return this.num[i]},getLength:function(){return this.num.length},multiply:function(e){var num=new Array(this.getLength()+e.getLength()-1);for(var i=0;i<this.getLength();i++)for(var j=0;j<e.getLength();j++)num[i+j]^=M.gexp(M.glog(this.get(i))+M.glog(e.get(j)));return new P(num,0)},mod:function(e){if(this.getLength()-e.getLength()<0)return this;var ratio=M.glog(this.get(0))-M.glog(e.get(0));var num=new Array(this.getLength());for(var i=0;i<this.getLength();i++)num[i]=this.get(i);for(var x=0;x<e.getLength();x++)num[x]^=M.gexp(M.glog(e.get(x))+ratio);return new P(num,0).mod(e)}};m.exports=P};
 defs['QRUtil']=function(m,e,r){var M=r('./QRMode'),P=r('./QRPolynomial'),MathM=r('./QRMath'),MP=r('./QRMaskPattern');var U={PATTERN_POSITION_TABLE:[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],G15:(1<<10)|(1<<8)|(1<<5)|(1<<4)|(1<<2)|(1<<1)|1,G18:(1<<12)|(1<<11)|(1<<10)|(1<<9)|(1<<8)|(1<<5)|(1<<2)|1,G15_MASK:(1<<14)|(1<<12)|(1<<10)|(1<<4)|(1<<1),getBCHTypeInfo:function(d){var d2=d<<10;while(U.getBCHDigit(d2)-U.getBCHDigit(U.G15)>=0)d2^=(U.G15<<(U.getBCHDigit(d2)-U.getBCHDigit(U.G15)));return((d<<10)|d2)^U.G15_MASK},getBCHTypeNumber:function(d){var d2=d<<12;while(U.getBCHDigit(d2)-U.getBCHDigit(U.G18)>=0)d2^=(U.G18<<(U.getBCHDigit(d2)-U.getBCHDigit(U.G18)));return(d<<12)|d2},getBCHDigit:function(d){var digit=0;while(d!==0){digit++;d>>>=1}return digit},getPatternPosition:function(t){return U.PATTERN_POSITION_TABLE[t-1]},getMask:function(p,i,j){switch(p){case MP.PATTERN000:return(i+j)%2===0;case MP.PATTERN001:return i%2===0;case MP.PATTERN010:return j%3===0;case MP.PATTERN011:return(i+j)%3===0;case MP.PATTERN100:return(Math.floor(i/2)+Math.floor(j/3))%2===0;case MP.PATTERN101:return(i*j)%2+(i*j)%3===0;case MP.PATTERN110:return((i*j)%2+(i*j)%3)%2===0;case MP.PATTERN111:return((i*j)%3+(i+j)%2)%2===0;default:throw new Error("bad maskPattern:"+p)}},getErrorCorrectPolynomial:function(l){var a=new P([1],0);for(var i=0;i<l;i++)a=a.multiply(new P([1,MathM.gexp(i)],0));return a},getLengthInBits:function(m,t){if(1<=t&&t<10){switch(m){case M.MODE_NUMBER:return 10;case M.MODE_ALPHA_NUM:return 9;case M.MODE_8BIT_BYTE:return 8;case M.MODE_KANJI:return 8}}else if(t<27){switch(m){case M.MODE_NUMBER:return 12;case M.MODE_ALPHA_NUM:return 11;case M.MODE_8BIT_BYTE:return 16;case M.MODE_KANJI:return 10}}else if(t<41){switch(m){case M.MODE_NUMBER:return 14;case M.MODE_ALPHA_NUM:return 13;case M.MODE_8BIT_BYTE:return 16;case M.MODE_KANJI:return 12}}throw new Error("type:"+t)},getLostPoint:function(qr){var mc=qr.getModuleCount(),lp=0;for(var r=0;r<mc;r++)for(var c=0;c<mc;c++){var sc=0,dark=qr.isDark(r,c);for(var r2=-1;r2<=1;r2++){if(r+r2<0||mc<=r+r2)continue;for(var c2=-1;c2<=1;c2++){if(c+c2<0||mc<=c+c2)continue;if(r2===0&&c2===0)continue;if(dark===qr.isDark(r+r2,c+c2))sc++}}if(sc>5)lp+=(3+sc-5)}for(var r=0;r<mc-1;r++)for(var c=0;c<mc-1;c++){var cnt=0;if(qr.isDark(r,c))cnt++;if(qr.isDark(r+1,c))cnt++;if(qr.isDark(r,c+1))cnt++;if(qr.isDark(r+1,c+1))cnt++;if(cnt===0||cnt===4)lp+=3}var dc=0;for(var c=0;c<mc;c++)for(var r=0;r<mc;r++)if(qr.isDark(r,c))dc++;lp+=Math.abs(100*dc/mc/mc-50)/5*10;return lp}};m.exports=U};
-defs['QRRSBlock']=function(m,e,r){var L=r('./QRErrorCorrectLevel');function B(t,d){this.totalCount=t;this.dataCount=d}B.RS_BLOCK_TABLE=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9]];B.getRSBlocks=function(t,l){var b=B.getRsBlockTable(t,l);var list=[];for(var i=0;i<b.length/3;i++)for(var j=0;j<b[i*3];j++)list.push(new B(b[i*3+1],b[i*3+2]));return list};B.getRsBlockTable=function(t,l){return B.RS_BLOCK_TABLE[(t-1)*4+(l===L.L?0:l===L.M?1:l===L.Q?2:3)]};m.exports=B};
+defs['QRRSBlock']=function(m,e,r){var L=r('./QRErrorCorrectLevel');function B(t,d){this.totalCount=t;this.dataCount=d}B.RS_BLOCK_TABLE=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16]];B.getRSBlocks=function(t,l){var b=B.getRsBlockTable(t,l);var list=[];for(var i=0;i<b.length/3;i++)for(var j=0;j<b[i*3];j++)list.push(new B(b[i*3+1],b[i*3+2]));return list};B.getRsBlockTable=function(t,l){return B.RS_BLOCK_TABLE[(t-1)*4+(l===L.L?0:l===L.M?1:l===L.Q?2:3)]};m.exports=B};
 defs['QRBitBuffer']=function(m,e,r){var Buf=function(){this.buffer=[];this.length=0};Buf.prototype={get:function(i){return((this.buffer[Math.floor(i/8)]>>>(7-i%8))&1)==1},put:function(num,l){for(var i=0;i<l;i++)this.putBit(((num>>>(l-i-1))&1)==1)},getLengthInBits:function(){return this.length},putBit:function(bit){var bi=Math.floor(this.length/8);if(this.buffer.length<=bi)this.buffer.push(0);if(bit)this.buffer[bi]|=(0x80>>>(this.length%8));this.length++}};m.exports=Buf};
 defs['QR8bitByte']=function(m,e,r){var M=r('./QRMode');function Byte(d){this.mode=M.MODE_8BIT_BYTE;this.data=d}Byte.prototype={getLength:function(){return this.data.length},write:function(b){for(var i=0;i<this.data.length;i++)b.put(this.data.charCodeAt(i),8)}};m.exports=Byte};
 defs['index']=function(m,e,r){var Byte=r('./QR8bitByte'),U=r('./QRUtil'),P=r('./QRPolynomial'),B=r('./QRRSBlock'),Buf=r('./QRBitBuffer');function QR(t,l){this.typeNumber=t;this.errorCorrectLevel=l;this.modules=null;this.moduleCount=0;this.dataCache=null;this.dataList=[]}QR.prototype={addData:function(d){this.dataList.push(new Byte(d));this.dataCache=null},isDark:function(r,c){return this.modules[r][c]},getModuleCount:function(){return this.moduleCount},make:function(){if(this.typeNumber<1){var t=1;for(t=1;t<40;t++){var b=B.getRSBlocks(t,this.errorCorrectLevel);var buf=new Buf();var total=0;for(var i=0;i<b.length;i++)total+=b[i].dataCount;for(var x=0;x<this.dataList.length;x++){var d=this.dataList[x];buf.put(d.mode,4);buf.put(d.getLength(),U.getLengthInBits(d.mode,t));d.write(buf)}if(buf.getLengthInBits()<=total*8)break}this.typeNumber=t}this.makeImpl(false,this.getBestMaskPattern())},makeImpl:function(test,p){this.moduleCount=this.typeNumber*4+17;this.modules=new Array(this.moduleCount);for(var r=0;r<this.moduleCount;r++){this.modules[r]=new Array(this.moduleCount);for(var c=0;c<this.moduleCount;c++)this.modules[r][c]=null}this.setupPositionProbePattern(0,0);this.setupPositionProbePattern(this.moduleCount-7,0);this.setupPositionProbePattern(0,this.moduleCount-7);this.setupPositionAdjustPattern();this.setupTimingPattern();this.setupTypeInfo(test,p);if(this.typeNumber>=7)this.setupTypeNumber(test);if(this.dataCache===null)this.dataCache=QR.createData(this.typeNumber,this.errorCorrectLevel,this.dataList);this.mapData(this.dataCache,p)},setupPositionProbePattern:function(row,col){for(var r=-1;r<=7;r++){if(row+r<=-1||this.moduleCount<=row+r)continue;for(var c=-1;c<=7;c++){if(col+c<=-1||this.moduleCount<=col+c)continue;if((0<=r&&r<=6&&(c===0||c===6))||(0<=c&&c<=6&&(r===0||r===6))||(2<=r&&r<=4&&2<=c&&c<=4))this.modules[row+r][col+c]=true;else this.modules[row+r][col+c]=false}}},getBestMaskPattern:function(){var min=0,pat=0;for(var i=0;i<8;i++){this.makeImpl(true,i);var lp=U.getLostPoint(this);if(i===0||min>lp){min=lp;pat=i}}return pat},setupTimingPattern:function(){for(var r=8;r<this.moduleCount-8;r++){if(this.modules[r][6]!==null)continue;this.modules[r][6]=(r%2===0)}for(var c=8;c<this.moduleCount-8;c++){if(this.modules[6][c]!==null)continue;this.modules[6][c]=(c%2===0)}},setupPositionAdjustPattern:function(){var pos=U.getPatternPosition(this.typeNumber);for(var i=0;i<pos.length;i++)for(var j=0;j<pos.length;j++){var row=pos[i],col=pos[j];if(this.modules[row][col]!==null)continue;for(var r=-2;r<=2;r++)for(var c=-2;c<=2;c++)if(Math.abs(r)===2||Math.abs(c)===2||(r===0&&c===0))this.modules[row+r][col+c]=true;else this.modules[row+r][col+c]=false}},setupTypeNumber:function(test){var bits=U.getBCHTypeNumber(this.typeNumber);for(var i=0;i<18;i++){var mod=(!test&&((bits>>i)&1)===1);this.modules[Math.floor(i/3)][i%3+this.moduleCount-8-3]=mod;this.modules[i%3+this.moduleCount-8-3][Math.floor(i/3)]=mod}},setupTypeInfo:function(test,p){var bits=U.getBCHTypeInfo((this.errorCorrectLevel<<3)|p);for(var v=0;v<15;v++){var mod=(!test&&((bits>>v)&1)===1);if(v<6)this.modules[v][8]=mod;else if(v<8)this.modules[v+1][8]=mod;else this.modules[this.moduleCount-15+v][8]=mod;if(v<8)this.modules[8][this.moduleCount-v-1]=mod;else if(v<9)this.modules[8][15-v-1+1]=mod;else this.modules[8][15-v-1]=mod}this.modules[this.moduleCount-8][8]=(!test)},mapData:function(data,p){var inc=-1,row=this.moduleCount-1,bitIndex=7,byteIndex=0;for(var col=this.moduleCount-1;col>0;col-=2){if(col===6)col--;while(true){for(var c=0;c<2;c++)if(this.modules[row][col-c]===null){var dark=false;if(byteIndex<data.length)dark=(((data[byteIndex]>>>bitIndex)&1)===1);if(U.getMask(p,row,col-c))dark=!dark;this.modules[row][col-c]=dark;bitIndex--;if(bitIndex===-1){byteIndex++;bitIndex=7}}row+=inc;if(row<0||this.moduleCount<=row){row-=inc;inc=-inc;break}}}}};QR.PAD0=0xEC;QR.PAD1=0x11;QR.createData=function(t,l,dl){var rs=B.getRSBlocks(t,l);var buf=new Buf();for(var i=0;i<dl.length;i++){var d=dl[i];buf.put(d.mode,4);buf.put(d.getLength(),U.getLengthInBits(d.mode,t));d.write(buf)}var total=0;for(var x=0;x<rs.length;x++)total+=rs[x].dataCount;if(buf.getLengthInBits()+4<=total*8)buf.put(0,4);while(buf.getLengthInBits()%8!==0)buf.putBit(false);while(true){if(buf.getLengthInBits()>=total*8)break;buf.put(QR.PAD0,8);if(buf.getLengthInBits()>=total*8)break;buf.put(QR.PAD1,8)}return QR.createBytes(buf,rs)};QR.createBytes=function(buf,rs){var offset=0,maxDc=0,maxEc=0,dc=[],ec=[];for(var r=0;r<rs.length;r++){var dcCnt=rs[r].dataCount,ecCnt=rs[r].totalCount-dcCnt;maxDc=Math.max(maxDc,dcCnt);maxEc=Math.max(maxEc,ecCnt);dc[r]=new Array(dcCnt);for(var i=0;i<dc[r].length;i++)dc[r][i]=0xff&buf.buffer[i+offset];offset+=dcCnt;var rsP=U.getErrorCorrectPolynomial(ecCnt);var rawP=new P(dc[r],rsP.getLength()-1);var modP=rawP.mod(rsP);ec[r]=new Array(rsP.getLength()-1);for(var x=0;x<ec[r].length;x++){var idx=x+modP.getLength()-ec[r].length;ec[r][x]=(idx>=0)?modP.get(idx):0}}var totalCode=0;for(var y=0;y<rs.length;y++)totalCode+=rs[y].totalCount;var data=new Array(totalCode),index=0;for(var z=0;z<maxDc;z++)for(var s=0;s<rs.length;s++)if(z<dc[s].length)data[index++]=dc[s][z];for(var xx=0;xx<maxEc;xx++)for(var t=0;t<rs.length;t++)if(xx<ec[t].length)data[index++]=ec[t][xx];return data};m.exports=QR};
@@ -680,7 +706,7 @@ function code128Svg(txt){txt=String(txt).replace(/[^\x20-\x7e]/g,'?');var codes=
  codes.push(sum%103);codes.push(106);var x=10,r='';
  codes.forEach(function(c){var p=C128[c];for(var j=0;j<p.length;j++){var w=+p[j];if(j%2==0)r+='<rect x="'+x+'" y="0" width="'+w+'" height="60"/>';x+=w}});
  var W=x+10;return '<svg class="bc128" viewBox="0 0 '+W+' 60" preserveAspectRatio="none" role="img" aria-label="'+esc(txt)+'"><rect width="'+W+'" height="60" fill="#fff"/><g fill="#000">'+r+'</g></svg>'}
-function qrSvg(txt){try{var q=new QRCode(-1,QRL.M);q.addData(String(txt).replace(/[^\x20-\x7e]/g,'?'));q.make();var n=q.getModuleCount(),r='';
+function qrSvg(txt){try{var q=new QRCode(-1,String(txt).length>40?QRL.L:QRL.M);q.addData(String(txt).replace(/[^\x20-\x7e]/g,'?'));q.make();var n=q.getModuleCount(),r='';
  for(var y=0;y<n;y++){var x=0;while(x<n){if(q.modules[y][x]){var s=x;while(x<n&&q.modules[y][x])x++;r+='<rect x="'+(s+4)+'" y="'+(y+4)+'" width="'+(x-s)+'" height="1"/>'}else x++}}
  return '<svg class="qr" viewBox="0 0 '+(n+8)+' '+(n+8)+'" shape-rendering="crispEdges"><rect width="'+(n+8)+'" height="'+(n+8)+'" fill="#fff"/><g fill="#000">'+r+'</g></svg>'}catch(e){return ''}}
 
@@ -698,7 +724,8 @@ function pvHtml(d){var bn=d.lang=='bn',T2=function(k){return(D[d.lang]||D.en)[k]
  tt+='<div class="pvt g"><span>'+T2('total')+'</span><span>'+m(d.total)+'</span></div>'+(d.pays||[]).map(function(x){return '<div class="pvt"><span>'+T2(x.m)+'</span><span>'+m(x.a)+'</span></div>'}).join('');
  return '<div class="pvh">'+LOGO.replace('width="40" height="40"','width="60" height="60"')+'<h1>'+esc(d.shop)+'</h1><p>'+(bn?'ইনভয়েস':'Invoice')+' #'+d.sn+' · '+d.day+' · '+new Date(d.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</p></div><div class="pvc">'+it+tt+'<p class="pvm">'+esc(d.msg||'')+'</p></div>'}
 function pvDueHtml(d){var bn=d.lang=='bn',cu=d.cur||'',m=function(n){return cu+' '+(+n).toFixed(2)};
- var it=(d.entries||[]).map(function(e){return '<div class="pvi"><div class="pvn"><b>'+new Date(e.t).toLocaleDateString()+'</b><span>'+esc(e.items||'')+'</span></div><b>'+m(e.a)+'</b></div>'}).join('');
+ var ev=(d.entries||[]).map(function(e){return{t:e.t,x:e.items||'',a:e.a}}).concat((d.pays||[]).map(function(p){return{t:p.t,x:bn?'জমা':'Paid',a:-p.a}})).sort(function(a,b){return a.t-b.t});
+ var it=ev.map(function(e){return '<div class="pvi"><div class="pvn"><b>'+new Date(e.t).toLocaleDateString()+'</b><span>'+esc(e.x)+'</span></div><b'+(e.a<0?' style="color:#5cb82e"':'')+'>'+(e.a<0?'−':'')+m(Math.abs(e.a))+'</b></div>'}).join('');
  return '<div class="pvh">'+(d.photo?'<img src="'+d.photo+'" alt="" style="width:60px;height:60px;border-radius:14px;object-fit:cover">':LOGO.replace('width="40" height="40"','width="60" height="60"'))+'<h1>'+esc(d.name)+'</h1><p>'+esc(d.shop)+(d.phone?' · '+esc(d.phone):'')+(d.nid?' · NID '+esc(d.nid):'')+'</p></div><div class="pvc">'+it+'<div class="pvt g"><span>'+(bn?'মোট বাকি':'Total due')+'</span><span>'+m(d.total)+'</span></div></div>'}
 
 setInterval(function(){var k=tdy();if(k!=curDay){curDay=k;dd=k;dm=k.slice(0,7);render()}},20000);
