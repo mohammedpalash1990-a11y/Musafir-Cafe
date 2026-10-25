@@ -13,9 +13,10 @@
 :root[data-theme="light"]{--bg:#e9edf3;--card:#fff;--ink:#1b2733;--mute:#657386;--line:#d3dae5;--ac:#3f9a22;--acink:#fff;--soft:#e3f1dc;--warn:#c4311f;--blue:#3446b8;--head:#14454b;--hink:#fff}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45;font-family:"Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:140px;font-weight:500}
-html[data-fsz="sm"] body{font-size:13px}
-html[data-fsz="lg"] body{font-size:17px}
-html[data-fsz="xl"] body{font-size:19px}
+html[data-fsz="sm"]{zoom:.88}
+html[data-fsz="lg"]{zoom:1.15}
+html[data-fsz="xl"]{zoom:1.3}
+@media print{html[data-fsz]{zoom:1!important}}
 b,button,h1,h2,label{font-weight:700}
 header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--head);color:var(--hink);z-index:5;min-height:64px}
 h1{font-size:19px;margin:0;font-weight:800;color:var(--hink)}
@@ -53,6 +54,7 @@ nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--head);b
 nav button{flex:1;border:0;border-radius:0;background:none;padding:9px 4px 10px;color:rgba(255,255,255,.65);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px}
 nav button.on{color:#fff;box-shadow:inset 0 3px 0 #7bd34a}
 nav button .i{width:23px;height:23px}
+.sw7{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.sw7 button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 4px;border:2px solid transparent;border-radius:12px;background:none;font-size:11px;min-width:64px}.sw7 button.on{border-color:var(--ac)}.sw7 i{display:block;width:40px;height:40px;border-radius:50%;border:2px solid rgba(128,128,128,.4)}
 #bar{position:fixed;left:12px;right:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px));background:var(--ac);color:#fff;border:0;display:flex;justify-content:space-between;padding:15px 18px;border-radius:16px;font-weight:800;z-index:6}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10;display:none;align-items:flex-end;justify-content:center}
 .ov.show{display:flex}
@@ -118,15 +120,20 @@ button.pay:disabled{opacity:.5}
 @media (min-width:860px){
  .wide-only{display:inline-block}
  .split{display:grid;grid-template-columns:minmax(330px,410px) 1fr;gap:16px;align-items:start}
- .side{position:sticky;top:76px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;max-height:calc(100vh - 150px);overflow:auto}
+ .side{position:sticky;top:140px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;max-height:calc(100vh - 160px);overflow:auto}
  .grid{grid-template-columns:repeat(auto-fill,minmax(165px,1fr))}
  #bar{display:none!important}
 }
+@media (min-width:600px){
+ #ib{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:5;flex-wrap:wrap;background:var(--bg);margin:0 auto;padding:8px 16px}
+ #ib nav{position:static;order:3;width:100%;flex-direction:row;justify-content:flex-start;gap:6px;padding:0;border:0;background:none;overflow-x:auto}
+ #ib nav button{flex:none;flex-direction:row;gap:7px;padding:8px 14px;border-radius:20px;font-size:14px;color:var(--ink);white-space:nowrap}
+ #ib nav button .i{width:19px;height:19px}
+ #ib nav button.on{background:var(--soft);color:var(--ac);box-shadow:inset 0 0 0 1.5px var(--ac)}
+ #bar{bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+}
 @media (min-width:1000px){
- nav{position:sticky;top:64px;left:auto;right:auto;bottom:auto;width:auto;flex-direction:row;justify-content:flex-start;gap:6px;padding:8px 16px;border:0;border-bottom:1px solid var(--line);background:var(--card);z-index:6}
- nav button{flex:none;flex-direction:row;gap:8px;padding:9px 18px;border-radius:12px;font-size:14px;color:var(--ink)}
- nav button .i{width:20px;height:20px}
- nav button.on{background:var(--soft);color:var(--ac);box-shadow:none!important}
+ #ib nav{order:0;width:auto;flex:1;justify-content:center}
  body{padding-left:0;padding-bottom:24px}
  .grid{grid-template-columns:repeat(auto-fill,minmax(168px,1fr))}
 }
@@ -161,7 +168,6 @@ button.pay:disabled{opacity:.5}
 <div id="sync" class="mute" style="text-align:center;font-size:12px;padding:0 16px 6px"></div>
 <main id="m"></main>
 <button id="bar" onclick="openCart()"></button>
-<nav id="nav"></nav>
 
 <div class="ov" id="cs"><div class="sheet" id="cb"></div></div>
 <div class="ov" id="ds" style="z-index:25"><div class="sheet" id="dsb"></div></div>
@@ -216,10 +222,11 @@ var IC={
 function I(n){return '<svg class="i" viewBox="0 0 24 24">'+(IC[n]||'')+'</svg>'}
 var LOGO = document.querySelector('.brand svg').outerHTML;
 
-function t(k){return D[S.lang||'bn'][k]||D.en[k]||k}
-function nm(p){return S.lang=='bn'&&p.bn?p.bn:p.name}
-function tc(c){return S.lang=='bn'&&CB[c]?CB[c]:c}
-function L(bn,en){return S.lang=='en'?en:bn}
+function mkBi(){var o={},ks={};Object.keys(D.bn).concat(Object.keys(D.en)).forEach(function(k){ks[k]=1});Object.keys(ks).forEach(function(k){var a=D.bn[k],b=D.en[k];o[k]=(a&&b&&a!==b)?(/^\s|\s$/.test(a+b)?a.trim()+' / '+b.trim():a+' / '+b):(a||b)});D.bi=o}mkBi();
+function t(k){return (D[S.lang||'bn']||D.bn)[k]||D.en[k]||k}
+function nm(p){return S.lang=='bi'&&p.bn&&p.bn!==p.name?p.bn+' / '+p.name:S.lang=='bn'&&p.bn?p.bn:p.name}
+function tc(c){return S.lang=='bi'&&CB[c]?CB[c]+' / '+c:S.lang=='bn'&&CB[c]?CB[c]:c}
+function L(bn,en){return S.lang=='en'?en:S.lang=='bi'&&bn!==en?bn+' / '+en:bn}
 function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function $$(n){return S.cur+' '+(+n).toFixed(2)}
 function toast(m){var e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(function(){e.style.display='none'},2200)}
@@ -234,7 +241,7 @@ function push(){if(!CU||!ready)return;clearTimeout(tm);tm=setTimeout(function(){
 function cSale(s){if(CU)w(FB.set('sales','s'+s.no,s))}
 function cDel(no){if(CU)w(FB.del('sales','s'+no))}
 
-function sy(k){if(k)ss=k;var m={on:['☁ সিঙ্ক চালু · '+CE,'☁ Synced · '+CE],off:['⏳ সংযোগ হচ্ছে…','⏳ Connecting…'],err:['⚠ সিঙ্ক হয়নি, ইন্টারনেট দেখুন','⚠ Sync failed, check internet'],cfg:['⚠ Firebase সেটআপ বাকি','⚠ Firebase not set up yet']};var e=$('#sync');if(e){e.textContent=m[ss][S.lang=='en'?1:0];if(!navigator.onLine){e.textContent=L('⚠ অফলাইন: বিক্রি ফোনে জমা হচ্ছে, নেট এলে সিঙ্ক হবে','⚠ Offline: sales kept on device, auto syncs online');e.style.color='var(--warn)';e.style.fontWeight='700'}else{e.style.color=ss=='on'?'':'var(--warn)';e.style.fontWeight=ss=='on'?'':'700'}}}
+function sy(k){if(k)ss=k;var m={on:['☁ সিঙ্ক চালু · '+CE,'☁ Synced · '+CE],off:['⏳ সংযোগ হচ্ছে…','⏳ Connecting…'],err:['⚠ সিঙ্ক হয়নি, ইন্টারনেট দেখুন','⚠ Sync failed, check internet'],cfg:['⚠ Firebase সেটআপ বাকি','⚠ Firebase not set up yet']};var e=$('#sync');if(e){e.textContent=S.lang=='bi'?m[ss][0]+' / '+m[ss][1]:m[ss][S.lang=='en'?1:0];if(!navigator.onLine){e.textContent=L('⚠ অফলাইন: বিক্রি ফোনে জমা হচ্ছে, নেট এলে সিঙ্ক হবে','⚠ Offline: sales kept on device, auto syncs online');e.style.color='var(--warn)';e.style.fontWeight='700'}else{e.style.color=ss=='on'?'':'var(--warn)';e.style.fontWeight=ss=='on'?'':'700'}}}
 function w(p){p.then(function(){sy('on')}).catch(function(){sy('err')})}
 
 function day(t){var d=new Date(t-(+RD().dayStart||0)*3600000);return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
@@ -254,16 +261,28 @@ function isWide(){return !!(window.matchMedia&&window.matchMedia('(min-width:860
 
 function setLang(l){S.lang=l;save();render();if($('#cs').classList.contains('show'))openCart()}
 function curTheme(){return document.documentElement.getAttribute('data-theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}
-function setTheme(m){if(m=='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',m);try{localStorage.setItem('pos_theme',m)}catch(e){}render()}
+var NP={
+ teal:{n:['মুসাফির টিল','Musafir Teal'],bg:'#0b1b1e',card:'#12292d',ink:'#e6f0f1',mute:'#8fb0b3',line:'#25474d',ac:'#2aa58f',soft:'#14393b',warn:'#ff8a7a',blue:'#7fe0cc',head:'#14454b'},
+ green:{n:['সবুজ','Green'],bg:'#0b180e',card:'#122a17',ink:'#e8f3e8',mute:'#93b196',line:'#24462b',ac:'#4aa82a',soft:'#17381d',warn:'#ff8a7a',blue:'#a6e38a',head:'#14532d'},
+ blue:{n:['মিডনাইট নীল','Midnight Blue'],bg:'#0a1020',card:'#121b33',ink:'#e8eefc',mute:'#92a3c9',line:'#25345a',ac:'#3b78e7',soft:'#16264a',warn:'#ff8a7a',blue:'#8db4ff',head:'#17305f'},
+ purple:{n:['বেগুনি','Purple'],bg:'#120d1e',card:'#1c1530',ink:'#efe9fb',mute:'#a89cc7',line:'#3a2d5e',ac:'#8b5cf6',soft:'#2a1f4d',warn:'#ff8a7a',blue:'#c4a8ff',head:'#3a2370'},
+ gold:{n:['কালো ও সোনালি','Black & Gold'],bg:'#050505',card:'#131313',ink:'#f4efe2',mute:'#a39b86',line:'#2e2a20',ac:'#b7791f',soft:'#2a2210',warn:'#ff8a7a',blue:'#f5c04a',head:'#1a1608'},
+ maroon:{n:['মেরুন','Maroon'],bg:'#190c0f',card:'#29151a',ink:'#f8eaec',mute:'#c19aa1',line:'#4d2730',ac:'#d6455a',soft:'#3d1b23',warn:'#ffb199',blue:'#ff9aa8',head:'#5c1a26'},
+ coffee:{n:['কফি ব্রাউন','Coffee Brown'],bg:'#150f0b',card:'#231913',ink:'#f3ebe4',mute:'#b09c8c',line:'#43322a',ac:'#c06a22',soft:'#38261a',warn:'#ff8a7a',blue:'#e8a56a',head:'#4a2c1a'}
+};
+var PV=['bg','card','ink','mute','line','ac','soft','warn','blue','head'];
+function curNight(){var n='teal';try{n=localStorage.getItem('pos_night')||'teal'}catch(e){}return NP[n]?n:'teal'}
+function applyPal(){var el=document.documentElement,dk=curTheme()=='dark',p=NP[curNight()];PV.forEach(function(k){if(dk)el.style.setProperty('--'+k,p[k]);else el.style.removeProperty('--'+k)});var mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=dk?p.head:'#14454b'}
+function setNight(k){try{localStorage.setItem('pos_night',k)}catch(e){}setTheme('dark')}
+function setTheme(m){if(m=='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',m);try{localStorage.setItem('pos_theme',m)}catch(e){}applyPal();render()}
 function togTheme(){setTheme(curTheme()=='dark'?'light':'dark')}
+try{window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',function(){applyPal()})}catch(e){}
 
 function render(){
  fixSn();document.documentElement.lang=S.lang;$('#shop').textContent=S.shop;document.title=S.shop;sy();
- $('#lg').innerHTML=['bn','en'].map(function(l){return '<button class="'+(S.lang==l?'on':'')+'" onclick="setLang(\''+l+'\')">'+(l=='bn'?'বাং':'EN')+'</button>'}).join('');
+ $('#lg').innerHTML=['bn','en','bi'].map(function(l){return '<button class="'+(S.lang==l?'on':'')+'" onclick="setLang(\''+l+'\')">'+(l=='bn'?'বাং':l=='en'?'EN':'বাং+EN')+'</button>'}).join('');
  var td=H.filter(function(h){return day(h.t)==tdy()}).reduce(function(a,h){return a+h.total},0);
  $('#today').textContent=t('today')+' '+$$(td);
- var tabs=[['sell',L('বিক্রি','Sell'),'sell'],['due',t('dueTab'),'cash'],['dash',L('ড্যাশবোর্ড','Dashboard'),'dash'],['prod',L('পণ্য','Items'),'items'],['set',L('সেটিংস','Settings'),'set']];
- $('#nav').innerHTML=tabs.map(function(x){return '<button class="'+(view==x[0]?'on':'')+'" onclick="go(\''+x[0]+'\')">'+I(x[2])+'<span>'+x[1]+'</span></button>'}).join('');
  var b=$('#bar');b.style.display=(view=='sell'&&cnt()&&!isWide())?'flex':'none';
  b.innerHTML='<span>'+cnt()+t('itm')+' · '+t('view')+'</span><span>'+$$(calc().t)+'</span>';
  $('#m').innerHTML=view=='sell'?vSell():view=='due'?vDueTab():view=='dash'?vDash():view=='prod'?vProd():vSet();
@@ -350,7 +369,7 @@ function charge(){
  var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode()};
  if(!CU)s.lc=true;
  H.push(s);
- dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,no:s.sn,sid:s.no,items:items.map(function(i){return(S.lang=='bn'&&i.bn?i.bn:i.name)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
+ dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,no:s.sn,sid:s.no,items:items.map(function(i){returnnm(i)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
  save();if(dueRows.length)dusave();cSale(s);pubReceipt(s);cart={};disc='';recv='';pays=null;$('#cs').classList.remove('show');render();showRc(s.no);
 }
 
@@ -361,7 +380,7 @@ function pubReceipt(s){if(!CU||!window.FB||!FB.setPub||!s.pc)return;var ids=[],m
  function fin(){w(FB.setPub(s.pc,{uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,t:s.t,sn:s.sn,day:day(s.t),total:s.total,sub:s.sub,disc:s.disc||0,tax:s.tax||0,pays:s.pays||[],msg:plainFoot(s),items:s.items.map(function(i){return{name:i.name,bn:i.bn||'',price:i.price,qty:i.qty,img:m[i.id]||''}})}))}
  if(!left)return fin();ids.forEach(function(id){thumb(IMG[id],function(x){if(x)m[id]=x;if(--left==0)fin()})})}
 
-function footMsg(s){var r=RD();if(!r.foot)return '';var bn=S.lang=='bn',h=new Date(s.t).getHours(),k=r.mode,m;
+function footMsg(s){var r=RD();if(!r.foot)return '';var bn=S.lang!='en',h=new Date(s.t).getHours(),k=r.mode,m;
  if(k=='simple')m=bn?'ধন্যবাদ, আবার আসবেন':'Thank you, come again';
  else if(k=='tri')m='ধন্যবাদ · Thank you · <span dir="rtl">شكراً لزيارتكم</span>';
  else if(k=='rotate'){var P1=bn?['আজকের দিনটা ভালো কাটুক','এক কাপ চা, এক টুকরো গল্প','আপনার আসাই আমাদের আনন্দ','আবার দেখা হবে','পথ চলতে এখানে থামার জন্য ধন্যবাদ','আপনার পরিদর্শন আমাদের সম্মান','সুস্থ থাকুন, ভালো থাকুন','কেমন লাগল? জানাবেন']:['Have a lovely day','One cup of tea, one good story','Your visit makes our day','See you again soon','Thanks for stopping by on your journey','It is an honour to serve you','Stay well, stay happy','Loved your visit? Tell us!'];m=P1[(s.sn+(+day(s.t).slice(-2)))%P1.length]}
@@ -374,7 +393,7 @@ function footMsg(s){var r=RD();if(!r.foot)return '';var bn=S.lang=='bn',h=new Da
 function rcHtml(s){
  var r=RD(),id=invCode(s),qrT='INV:'+id+';D:'+day(s.t)+';T:'+s.total.toFixed(2)+';P:'+s.pay,tm=new Date(s.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
  var base=location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'');var lk=(r.qm=='view')?(s.pc?base+'?r='+s.pc:''):(r.qm!='inv'?r['l_'+r.qm]:'');if(lk)qrT=lk;var qz=lk?Math.max(+r.qs,84):+r.qs;
- var rows=s.items.map(function(i){var n=(S.lang=='bn'&&i.bn)?i.bn:i.name,img=i.id&&IMG[i.id]?'<img src="'+IMG[i.id]+'" style="width:20px;height:20px;border-radius:5px;object-fit:cover;vertical-align:-5px;margin-right:5px">':'';return '<tr><td>'+img+esc(n)+'</td><td class="q">'+i.qty+' × '+i.price.toFixed(2)+'</td><td class="a">'+(i.qty*i.price).toFixed(2)+'</td></tr>'}).join('');
+ var rows=s.items.map(function(i){var n=nm(i),img=i.id&&IMG[i.id]?'<img src="'+IMG[i.id]+'" style="width:20px;height:20px;border-radius:5px;object-fit:cover;vertical-align:-5px;margin-right:5px">':'';return '<tr><td>'+img+esc(n)+'</td><td class="q">'+i.qty+' × '+i.price.toFixed(2)+'</td><td class="a">'+(i.qty*i.price).toFixed(2)+'</td></tr>'}).join('');
  var pl=(s.pays&&s.pays.length?s.pays:[{m:s.pay,a:s.total}]);
  var h='<div class="rcpt"><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+L('ইনভয়েস','Invoice')+' #'+s.sn+'</span><span>'+day(s.t)+' · '+tm+'</span></div><table>'+rows+'</table>';
  if(s.disc||s.tax)h+='<div class="rt" style="margin-top:4px"><span>'+t('sub')+'</span><span>'+$$(s.sub)+'</span></div>';
@@ -409,7 +428,7 @@ function voidSale(no){
 
 function rcText(s){
  var o=[S.shop,L('ইনভয়েস #','Invoice #')+s.sn+'  ·  '+day(s.t),new Date(s.t).toLocaleTimeString(),'--------------------------------'];
- s.items.forEach(function(i){o.push((S.lang=='bn'&&i.bn?i.bn:i.name)+'\n   '+i.qty+' × '+i.price.toFixed(2)+'  =  '+(i.qty*i.price).toFixed(2))});
+ s.items.forEach(function(i){o.push(nm(i)+'\n   '+i.qty+' × '+i.price.toFixed(2)+'  =  '+(i.qty*i.price).toFixed(2))});
  o.push('--------------------------------',t('sub')+': '+$$(s.sub));
  if(s.disc)o.push(t('disc')+': −'+$$(s.disc));if(s.tax)o.push(t('tax')+': '+$$(s.tax));
  o.push(t('total')+': '+$$(s.total),'--------------------------------');
@@ -448,7 +467,7 @@ function showTxt(x,id,qr){window.__tx=x;
 
 function dayReport(date){
  var l=H.filter(function(s){return day(s.t)==date}).sort(function(a,b){return a.sn-b.sn}),r=sums(l),it={};
- l.forEach(function(s){s.items.forEach(function(i){var k=S.lang=='bn'&&i.bn?i.bn:i.name;it[k]=(it[k]||0)+i.qty})});
+ l.forEach(function(s){s.items.forEach(function(i){var k=nm(i);it[k]=(it[k]||0)+i.qty})});
  var o=[S.shop,L('দিনের রিপোর্ট','Daily report')+': '+date,'--------------------------------',L('ইনভয়েস','Invoices')+': '+r.n+(r.n?'  (#'+l[0].sn+' – #'+l[r.n-1].sn+')':''),
   t('Cash')+': '+$$(r.Cash),t('Card')+': '+$$(r.Card),t('Mobile')+': '+$$(r.Mobile)];
  if(r.disc)o.push(t('disc')+': '+$$(r.disc));if(r.tax)o.push(t('tax')+': '+$$(r.tax));
@@ -501,7 +520,7 @@ function imgBox(){return '<div class="box"><div class="hd">'+I('camera')+'<b>'+L
  +(P.length?P.map(function(p){var u=IMG[p.id];return '<div class="row"><div style="display:flex;align-items:center;gap:10px">'+(u?'<img class="pimg" style="width:48px;height:48px" alt="" src="'+u+'">':'<div class="dot" style="background:hsl('+hue(p.name)+',45%,40%)">'+esc((nm(p)||'?').charAt(0).toUpperCase())+'</div>')+'<b>'+esc(nm(p))+'</b></div><div class="q"><label class="btn">'+I('camera')+' '+(u?L('বদলান','Change'):L('ছবি দিন','Add'))+'<input type="file" accept="image/*" hidden onchange="pickImg('+p.id+',this)"></label>'+(u?'<button class="x" onclick="askImg('+p.id+')">'+I('trash')+'</button>':'')+'</div></div>'}).join(''):'<div class="empty">'+t('noItems')+'</div>')+'</div>'}
 
 function themeBox(){var m='auto';try{m=localStorage.getItem('pos_theme')||'auto'}catch(e){}
- return '<div class="box"><div class="hd">'+I('sun')+'<b>'+L('থিম','Theme')+'</b></div><div class="seg" style="margin:0;display:flex;gap:8px">'+[['auto',L('অটো','Auto')],['light',L('দিন','Day')],['dark',L('রাত','Night')]].map(function(x){return '<button style="flex:1" class="'+(m==x[0]?'pri':'')+'" onclick="setTheme(\''+x[0]+'\')">'+x[1]+'</button>'}).join('')+'</div></div>'}
+ return '<div class="box"><div class="hd">'+I('sun')+'<b>'+L('থিম','Theme')+'</b></div><div class="seg" style="margin:0;display:flex;gap:8px">'+[['auto',L('অটো','Auto')],['light',L('দিন','Day')],['dark',L('রাত','Night')]].map(function(x){return '<button style="flex:1" class="'+(m==x[0]?'pri':'')+'" onclick="setTheme(\''+x[0]+'\')">'+x[1]+'</button>'}).join('')+'</div><div class="mute" style="font-size:13px;margin-top:14px">'+L('রাতের রং বেছে নিন','Night colour')+'</div><div class="sw7">'+Object.keys(NP).map(function(k){var p=NP[k],on=curTheme()=='dark'&&curNight()==k;return '<button class="'+(on?'on':'')+'" onclick="setNight(\''+k+'\')"><i style="background:linear-gradient(135deg,'+p.head+' 50%,'+p.ac+' 50%)"></i><span>'+L(p.n[0],p.n[1])+'</span></button>'}).join('')+'</div></div>'}
 
 function sw(k,lab,extra){var r=RD();return '<div class="sw"><b>'+lab+'</b><button class="tg'+(r[k]?' on':'')+'" role="switch" aria-checked="'+!!r[k]+'" aria-label="'+esc(lab)+'" onclick="rset(\''+k+'\','+!r[k]+')"></button></div>'+(extra||'')}
 function inp(k,ph){return '<input placeholder="'+esc(ph)+'" value="'+esc(RD()[k])+'" onchange="rset(\''+k+'\',this.value)">'}
@@ -589,14 +608,14 @@ function waOpen(phone,msg){var n=waNum(phone);window.open('https://wa.me/'+(n?n:
 function pubLink(pc){return pc?location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'')+'?r='+pc:''}
 function waDu(id){var d=DU.find(function(x){return x.id==id});if(!d)return;
  if(CU){pubDue(d);dusave()}
- var lk=CU?pubLink(d.pc):'',bn=S.lang=='bn',tot=duTotal(d);
+ var lk=CU?pubLink(d.pc):'',bn=S.lang!='en',tot=duTotal(d);
  var ev=(d.entries||[]).slice(-8).map(function(e){return '• '+new Date(e.t).toLocaleDateString()+' · '+(e.items||'')+' · '+$$(e.a)}).join('\n');
  var lp=(d.pays||[]).slice(-3).map(function(p){return '✔ '+new Date(p.t).toLocaleDateString()+' · '+L('জমা','Paid')+' · '+$$(p.a)}).join('\n');
  var msg=S.shop+'\n'+(bn?'প্রিয় ':'Dear ')+d.name+(bn?',':',')+'\n'+(tot>0.004?t('totalDue')+': *'+$$(tot)+'*':L('আপনার কোনো বাকি নেই। ধন্যবাদ!','No dues. Thank you!'))+(ev?'\n\n'+ev:'')+(lp?'\n'+lp:'')+(lk?'\n\n'+L('পুরো হিসাব দেখুন:','View full statement:')+'\n'+lk:'');
  waOpen(d.phone,msg)}
 function waRc(no){var s=H.find(function(h){return h.no==no});if(!s)return;
  var dr=(s.pays||[]).find(function(x){return x.m=='Due'&&x.debtor}),du=dr?DU.find(function(x){return x.name==dr.debtor}):null;
- var lk=(CU&&s.pc)?pubLink(s.pc):'',bn=S.lang=='bn';
+ var lk=(CU&&s.pc)?pubLink(s.pc):'',bn=S.lang!='en';
  var msg=lk?S.shop+'\n'+L('ইনভয়েস #','Invoice #')+s.sn+' · '+day(s.t)+'\n'+t('total')+': *'+$$(s.total)+'*'+(dr?'\n'+t('Due')+': '+$$(dr.a):'')+'\n\n'+L('রসিদ দেখুন:','View receipt:')+'\n'+lk:rcText(s);
  waOpen(du?du.phone:'',msg)}
 function addDuPay(id){var d=DU.find(function(x){return x.id==id});if(!d)return;var max=duTotal(d);
@@ -630,8 +649,9 @@ function createDU(){var n=$('#ndn').value.trim();if(!n){toast(t('need'));return}
 }
 function chooseDU(id){var d=DU.find(function(x){return x.id==id});if(!d||pdRow==null)return;pays[pdRow].debtor={id:d.id,name:d.name};$('#ds').classList.remove('show');openCart()}
 
+function navHtml(){var tabs=[['sell',L('বিক্রি','Sell'),'sell'],['due',t('dueTab'),'cash'],['dash',L('ড্যাশবোর্ড','Dashboard'),'dash'],['prod',L('পণ্য','Items'),'items'],['set',L('সেটিংস','Settings'),'set']];return '<nav id="nav">'+tabs.map(function(x){return '<button class="'+(view==x[0]?'on':'')+'" onclick="go(\''+x[0]+'\')">'+I(x[2])+'<span>'+x[1]+'</span></button>'}).join('')+'</nav>'}
 function info(){var e=$('#ib');if(!e)return;var l=H.length?H.reduce(function(a,x){return x.t>a.t?x:a}):null,d=new Date();
- e.innerHTML='<button class="lb" '+(l?'onclick="showRc('+l.no+')"':'disabled')+'>'+I('print')+' '+L('শেষ ইনভয়েস','Last invoice')+(l?' #'+l.sn+' · '+$$(l.total):'')+'</button><div style="display:flex;align-items:center;gap:10px"><button class="thm" aria-label="Theme" onclick="togTheme()">'+I(curTheme()=='dark'?'sun':'moon')+'</button><div class="clk"><b>'+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</b><span>'+d.toLocaleDateString(S.lang=='bn'?'bn-BD':'en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+'</span></div></div>'}
+ e.innerHTML='<button class="lb" '+(l?'onclick="showRc('+l.no+')"':'disabled')+'>'+I('print')+' '+L('শেষ ইনভয়েস','Last invoice')+(l?' #'+l.sn+' · '+$$(l.total):'')+'</button>'+navHtml()+'<div style="display:flex;align-items:center;gap:10px"><button class="thm" aria-label="Theme" onclick="togTheme()">'+I(curTheme()=='dark'?'sun':'moon')+'</button><div class="clk"><b>'+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</b><span>'+d.toLocaleDateString(S.lang!='en'?'bn-BD':'en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+'</span></div></div>'}
 
 function lastInv(){var s=H.slice().sort(function(a,b){return b.t-a.t})[0];if(s)showRc(s.no);else toast(L('এখনো কোনো ইনভয়েস নেই','No invoice yet'))}
 
@@ -640,7 +660,7 @@ function ask(msg,fn,yes){var e=$('#cf');if(!e){e=document.createElement('div');e
 
 function showLogin(msg,em){
  $('#lgn').classList.add('show');
- $('#lb').innerHTML='<div style="display:flex;justify-content:center;margin-bottom:8px">'+LOGO.replace('width="40" height="40"','width="64" height="64"')+'</div><h2 style="margin:0 0 4px;text-align:center">'+esc(S.shop)+'</h2><p class="mute" style="text-align:center">'+L('লগইন করুন, সব ডিভাইসে একই হিসাব পাবেন','Log in to see the same data on every device')+'</p>'+(msg?'<p style="color:var(--warn);font-weight:600;text-align:center">'+esc(msg)+'</p>':'')+'<label>Email</label><input id="le" type="email" autocomplete="email" value="'+esc(em||'')+'"><label>'+L('পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)','Password (min 6 characters)')+'</label><input id="lp" type="password" autocomplete="current-password"><div style="display:flex;gap:10px;margin-top:14px"><button class="pri" style="flex:1" onclick="doAuth(0)">'+L('লগইন','Log in')+'</button><button style="flex:1" onclick="doAuth(1)">'+L('নতুন একাউন্ট','Sign up')+'</button></div><button style="width:100%;margin-top:10px;border:0;background:none;color:var(--ac)" onclick="doReset()">'+L('পাসওয়ার্ড ভুলে গেছেন?','Forgot password?')+'</button><div class="lg" style="width:max-content;margin:8px auto 0"><button class="'+(S.lang=='bn'?'on':'')+'" onclick="S.lang=\'bn\';showLogin()">বাংলা</button><button class="'+(S.lang=='en'?'on':'')+'" onclick="S.lang=\'en\';showLogin()">English</button></div><p class="mute" style="font-size:11px;text-align:center;margin:10px 0 0">Musafir Cafe POS · '+esc((window.FIREBASE_CONFIG||{}).projectId||'')+'</p>';
+ $('#lb').innerHTML='<div style="display:flex;justify-content:center;margin-bottom:8px">'+LOGO.replace('width="40" height="40"','width="64" height="64"')+'</div><h2 style="margin:0 0 4px;text-align:center">'+esc(S.shop)+'</h2><p class="mute" style="text-align:center">'+L('লগইন করুন, সব ডিভাইসে একই হিসাব পাবেন','Log in to see the same data on every device')+'</p>'+(msg?'<p style="color:var(--warn);font-weight:600;text-align:center">'+esc(msg)+'</p>':'')+'<label>Email</label><input id="le" type="email" autocomplete="email" value="'+esc(em||'')+'"><label>'+L('পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)','Password (min 6 characters)')+'</label><input id="lp" type="password" autocomplete="current-password"><div style="display:flex;gap:10px;margin-top:14px"><button class="pri" style="flex:1" onclick="doAuth(0)">'+L('লগইন','Log in')+'</button><button style="flex:1" onclick="doAuth(1)">'+L('নতুন একাউন্ট','Sign up')+'</button></div><button style="width:100%;margin-top:10px;border:0;background:none;color:var(--ac)" onclick="doReset()">'+L('পাসওয়ার্ড ভুলে গেছেন?','Forgot password?')+'</button><div class="lg" style="width:max-content;margin:8px auto 0"><button class="'+(S.lang=='bn'?'on':'')+'" onclick="S.lang=\'bn\';showLogin()">বাংলা</button><button class="'+(S.lang=='en'?'on':'')+'" onclick="S.lang=\'en\';showLogin()">English</button><button class="'+(S.lang=='bi'?'on':'')+'" onclick="S.lang=\'bi\';showLogin()">বাংলা+EN</button></div><p class="mute" style="font-size:11px;text-align:center;margin:10px 0 0">Musafir Cafe POS · '+esc((window.FIREBASE_CONFIG||{}).projectId||'')+'</p>';
 }
 
 function errMsg(x){var c=(x&&x.code)||'';
@@ -732,12 +752,12 @@ function startPub(){document.querySelectorAll('body>*').forEach(function(e){if(e
  var d=document.createElement('div');d.id='pv';d.className='pv';d.innerHTML='<div class="pvl">…</div>';document.body.appendChild(d);
  var tries=0,go2=function(){FB.pub(PUBR).then(function(x){if(!x&&tries++<4)return setTimeout(go2,1500);d.innerHTML=x?(x.type=='due'?pvDueHtml(x):pvHtml(x)):'<div class="pvl">Receipt not found</div>'}).catch(function(){if(tries++<4)return setTimeout(go2,1500);d.innerHTML='<div class="pvl">⚠ Could not load.</div>'})};
  if(window.FB)go2();else window.onFB=go2}
-function pvHtml(d){var bn=d.lang=='bn',T2=function(k){return(D[d.lang]||D.en)[k]||k},cu=d.cur||'',m=function(n){return cu+' '+(+n).toFixed(2)};
+function pvHtml(d){var bn=d.lang!='en',T2=function(k){return(D[d.lang]||D.en)[k]||D.en[k]||k},cu=d.cur||'',m=function(n){return cu+' '+(+n).toFixed(2)};
  var it=d.items.map(function(i){var n=bn&&i.bn?i.bn:i.name;return '<div class="pvi">'+(i.img?'<img src="'+i.img+'" alt="">':'<div class="dot" style="background:hsl('+hue(i.name)+',45%,40%)">'+esc((n||'?').charAt(0).toUpperCase())+'</div>')+'<div class="pvn"><b>'+esc(n)+'</b><span>'+i.qty+' × '+m(i.price)+'</span></div><b>'+m(i.qty*i.price)+'</b></div>'}).join('');
  var tt='';if(d.disc||d.tax)tt+='<div class="pvt"><span>'+T2('sub')+'</span><span>'+m(d.sub)+'</span></div>';if(d.disc)tt+='<div class="pvt"><span>'+T2('disc')+'</span><span>−'+m(d.disc)+'</span></div>';if(d.tax)tt+='<div class="pvt"><span>'+T2('tax')+'</span><span>'+m(d.tax)+'</span></div>';
  tt+='<div class="pvt g"><span>'+T2('total')+'</span><span>'+m(d.total)+'</span></div>'+(d.pays||[]).map(function(x){return '<div class="pvt"><span>'+T2(x.m)+'</span><span>'+m(x.a)+'</span></div>'}).join('');
  return '<div class="pvh">'+LOGO.replace('width="40" height="40"','width="60" height="60"')+'<h1>'+esc(d.shop)+'</h1><p>'+(bn?'ইনভয়েস':'Invoice')+' #'+d.sn+' · '+d.day+' · '+new Date(d.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</p></div><div class="pvc">'+it+tt+'<p class="pvm">'+esc(d.msg||'')+'</p></div>'}
-function pvDueHtml(d){var bn=d.lang=='bn',cu=d.cur||'',m=function(n){return cu+' '+(+n).toFixed(2)};
+function pvDueHtml(d){var bn=d.lang!='en',cu=d.cur||'',m=function(n){return cu+' '+(+n).toFixed(2)};
  var ev=(d.entries||[]).map(function(e){return{t:e.t,x:e.items||'',a:e.a}}).concat((d.pays||[]).map(function(p){return{t:p.t,x:bn?'জমা':'Paid',a:-p.a}})).sort(function(a,b){return a.t-b.t});
  var it=ev.map(function(e){return '<div class="pvi"><div class="pvn"><b>'+new Date(e.t).toLocaleDateString()+'</b><span>'+esc(e.x)+'</span></div><b'+(e.a<0?' style="color:#5cb82e"':'')+'>'+(e.a<0?'−':'')+m(Math.abs(e.a))+'</b></div>'}).join('');
  return '<div class="pvh">'+(d.photo?'<img src="'+d.photo+'" alt="" style="width:60px;height:60px;border-radius:14px;object-fit:cover">':LOGO.replace('width="40" height="40"','width="60" height="60"'))+'<h1>'+esc(d.name)+'</h1><p>'+esc(d.shop)+(d.phone?' · '+esc(d.phone):'')+(d.nid?' · NID '+esc(d.nid):'')+'</p></div><div class="pvc">'+it+'<div class="pvt g"><span>'+(bn?'মোট বাকি':'Total due')+'</span><span>'+m(d.total)+'</span></div></div>'}
@@ -749,7 +769,7 @@ window.addEventListener('offline',function(){sy();render()});
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 
 try{var tm0=localStorage.getItem('pos_theme');if(tm0&&tm0!='auto')document.documentElement.setAttribute('data-theme',tm0);var fz0=localStorage.getItem('pos_fsz');if(fz0&&fz0!='md')document.documentElement.setAttribute('data-fsz',fz0);var vw0=localStorage.getItem('pos_view');if(vw0)view=vw0}catch(e){}
-render();boot();
+applyPal();render();boot();
 </script>
 
 <script type="module">
