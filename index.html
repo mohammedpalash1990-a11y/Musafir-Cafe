@@ -12,7 +12,10 @@
 :root[data-theme="dark"]{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mute:#8fa5a8;--line:#244047;--ac:#5cb82e;--acink:#05200a;--soft:#17331f;--warn:#ff8a7a;--blue:#93a6ff;--head:#0b2a2e;--hink:#fff}
 :root[data-theme="light"]{--bg:#e9edf3;--card:#fff;--ink:#1b2733;--mute:#657386;--line:#d3dae5;--ac:#3f9a22;--acink:#fff;--soft:#e3f1dc;--warn:#c4311f;--blue:#3446b8;--head:#14454b;--hink:#fff}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:140px;font-weight:500}
+body{margin:0;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45;font-family:"Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:140px;font-weight:500}
+html[data-fsz="sm"] body{font-size:13px}
+html[data-fsz="lg"] body{font-size:17px}
+html[data-fsz="xl"] body{font-size:19px}
 b,button,h1,h2,label{font-weight:700}
 header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--head);color:var(--hink);z-index:5;min-height:64px}
 h1{font-size:19px;margin:0;font-weight:800;color:var(--hink)}
@@ -161,7 +164,7 @@ window.FIREBASE_CONFIG = {
 var $ = function(s){return document.querySelector(s)};
 var D = {
   en:{sell:'Sell',sales:'Sales',items:'Items',settings:'Settings',search:'Search items',all:'All',noItems:'No items yet. Add some in the Items tab.',left:' left',out:'Out of stock',view:'View order',order:'Order',disc:'Discount',sub:'Subtotal',tax:'Tax',total:'Total',pay:'Payment',Cash:'Cash',Card:'Card',Mobile:'Mobile',bKash:'bKash',Nagad:'Nagad',Rocket:'Rocket',BanglaQR:'Bangla QR',Due:'Due',recv:'Cash received',chg:'Change',short:'Short by ',charge:'Charge',cancel:'Cancel order',keep:'Keep selling',rcpt:'Receipt',share:'Share',print:'Print',done:'Done',today:'Today',tsales:"Today's sales",orders:'Orders',top:'Top',nosale:'No sales yet today',csv:'Copy all sales as CSV',csvok:'CSV copied',csvno:'Copy failed',hist0:'Completed sales will show up here.',add:'Add item',edit:'Edit item',nm:'Name (English)',nb:'Name (বাংলা, optional)',pr:'Price',cat:'Category',stock:'Stock (empty = not counted)',save:'Save item',del:'Delete',back:'Cancel',shop:'Shop name',cur:'Currency symbol',taxp:'Tax / VAT %',lang:'Language',data:'Your data',note:'Your data is saved in the cloud under your login and is the same on every device. A CSV backup from Sales now and then is still a good idea.',erase:'Erase all sales',erase2:'Tap again to erase all sales',thanks:'Thank you!',paid:'Paid by',noc:'No category',need:'Enter a name and a price',rm:'Remove',void:'Cancel this sale',void2:'Tap again to cancel sale',voided:'Sale cancelled, stock restored',itm:' items',rn:'Receipt #',received:'Received',dueTab:'Due',dueList:'Due list',searchDebtor:'Search name / phone / NID',debtorName:'Name',debtorPhone:'Phone',debtorNid:'NID number',debtorPhoto:'Photo',totalDue:'Total due',noDue:'No due customers yet',addPayment:'Add payment',statement:'Statement',selectDebtor:'Select who this is for',newPerson:'+ New person',existing:'Existing',history:'History',takenOn:'Taken',paidOn:'Paid',needDebtor:'Select or add a person first',saveDebtor:'Save',noMatch:'No match found',swap:'Change'},
-  bn:{sell:'বিক্রি',sales:'হিসাব',items:'পণ্য',settings:'সেটিংস',search:'পণ্য খুঁজুন',all:'সব',noItems:'কোনো পণ্য নেই। "পণ্য" ট্যাবে যোগ করুন।',left:' টি আছে',out:'স্টক শেষ',view:'অর্ডার দেখুন',order:'অর্ডার',disc:'ছাড়',sub:'মোট (ছাড়ের আগে)',tax:'ট্যাক্স',total:'সর্বমোট',pay:'পেমেন্ট',Cash:'নগদ',Card:'কার্ড',Mobile:'মোবাইল',bKash:'বিকাশ',Nagad:'নগদ (মোবাইল)',Rocket:'রকেট',BanglaQR:'বাংলা QR',Due:'বাকি',recv:'নগদ পেয়েছি',chg:'ফেরত',short:'কম আছে ',charge:'বিল করুন',cancel:'অর্ডার বাতিল',keep:'আরও যোগ করুন',rcpt:'রসিদ',share:'শেয়ার',print:'প্রিন্ট',done:'ঠিক আছে',today:'আজ',tsales:'আজকের বিক্রি',orders:'অর্ডার',top:'সেরা',nosale:'আজ এখনো বিক্রি হয়নি',csv:'সব বিক্রির CSV কপি',csvok:'CSV কপি হয়েছে',csvno:'কপি হয়নি',hist0:'বিক্রি হলে এখানে দেখা যাবে।',add:'পণ্য যোগ',edit:'পণ্য বদলান',nm:'নাম (English)',nb:'নাম (বাংলা, ঐচ্ছিক)',pr:'দাম',cat:'ধরন',stock:'স্টক (ফাঁকা = গোনা হবে না)',save:'সেভ করুন',del:'মুছুন',back:'বাতিল',shop:'দোকানের নাম',cur:'টাকার চিহ্ন',taxp:'ট্যাক্স / ভ্যাট %',lang:'ভাষা',data:'আপনার ডেটা',note:'ডেটা আপনার লগইনের অধীনে ক্লাউডে সেভ হয় এবং সব ডিভাইসে একই থাকে। তবুও মাঝে মাঝে হিসাব ট্যাব থেকে CSV কপি করে রাখুন।',erase:'সব বিক্রির হিসাব মুছুন',erase2:'আবার চাপুন, সব মুছে যাবে',thanks:'ধন্যবাদ!',paid:'পেমেন্ট',noc:'ধরন নেই',need:'নাম ও দাম দিন',rm:'বাদ দিন',void:'এই বিক্রি বাতিল করুন',void2:'আবার চাপুন, বিক্রি বাতিল হবে',voided:'বিক্রি বাতিল, স্টক ফিরেছে',itm:' টি পণ্য',rn:'রসিদ #',received:'পেয়েছি',dueTab:'বাকি',dueList:'বাকির তালিকা',searchDebtor:'নাম / ফোন / এনআইডি খুঁজুন',debtorName:'নাম',debtorPhone:'ফোন নাম্বার',debtorNid:'এনআইডি নাম্বার',debtorPhoto:'ছবি',totalDue:'মোট বাকি',noDue:'এখনো কোনো বাকি নেই',addPayment:'টাকা জমা দিন',statement:'হিসাব বিবরণী',selectDebtor:'কার নামে বাকি, বেছে নিন',newPerson:'+ নতুন মানুষ',existing:'পুরনো',history:'হিস্ট্রি',takenOn:'নিয়েছে',paidOn:'জমা দিয়েছে',needDebtor:'আগে একজনকে বেছে নিন বা যোগ করুন',saveDebtor:'সেভ করুন',noMatch:'কাউকে পাওয়া যায়নি',swap:'বদলান'}
+  bn:{sell:'বিক্রি',sales:'হিসাব',items:'পণ্য',settings:'সেটিংস',search:'পণ্য খুঁজুন',all:'সব',noItems:'কোনো পণ্য নেই। "পণ্য" ট্যাবে যোগ করুন।',left:' টি আছে',out:'স্টক শেষ',view:'অর্ডার দেখুন',order:'অর্ডার',disc:'ছাড়',sub:'মোট (ছাড়ের আগে)',tax:'ট্যাক্স',total:'সর্বমোট',pay:'পেমেন্ট',Cash:'ক্যাশ',Card:'কার্ড',Mobile:'মোবাইল',bKash:'বিকাশ',Nagad:'নগদ',Rocket:'রকেট',BanglaQR:'বাংলা QR',Due:'বাকি',recv:'নগদ পেয়েছি',chg:'ফেরত',short:'কম আছে ',charge:'বিল করুন',cancel:'অর্ডার বাতিল',keep:'আরও যোগ করুন',rcpt:'রসিদ',share:'শেয়ার',print:'প্রিন্ট',done:'ঠিক আছে',today:'আজ',tsales:'আজকের বিক্রি',orders:'অর্ডার',top:'সেরা',nosale:'আজ এখনো বিক্রি হয়নি',csv:'সব বিক্রির CSV কপি',csvok:'CSV কপি হয়েছে',csvno:'কপি হয়নি',hist0:'বিক্রি হলে এখানে দেখা যাবে।',add:'পণ্য যোগ',edit:'পণ্য বদলান',nm:'নাম (English)',nb:'নাম (বাংলা, ঐচ্ছিক)',pr:'দাম',cat:'ধরন',stock:'স্টক (ফাঁকা = গোনা হবে না)',save:'সেভ করুন',del:'মুছুন',back:'বাতিল',shop:'দোকানের নাম',cur:'টাকার চিহ্ন',taxp:'ট্যাক্স / ভ্যাট %',lang:'ভাষা',data:'আপনার ডেটা',note:'ডেটা আপনার লগইনের অধীনে ক্লাউডে সেভ হয় এবং সব ডিভাইসে একই থাকে। তবুও মাঝে মাঝে হিসাব ট্যাব থেকে CSV কপি করে রাখুন।',erase:'সব বিক্রির হিসাব মুছুন',erase2:'আবার চাপুন, সব মুছে যাবে',thanks:'ধন্যবাদ!',paid:'পেমেন্ট',noc:'ধরন নেই',need:'নাম ও দাম দিন',rm:'বাদ দিন',void:'এই বিক্রি বাতিল করুন',void2:'আবার চাপুন, বিক্রি বাতিল হবে',voided:'বিক্রি বাতিল, স্টক ফিরেছে',itm:' টি পণ্য',rn:'রসিদ #',received:'পেয়েছি',dueTab:'বাকি',dueList:'বাকির তালিকা',searchDebtor:'নাম / ফোন / এনআইডি খুঁজুন',debtorName:'নাম',debtorPhone:'ফোন নাম্বার',debtorNid:'এনআইডি নাম্বার',debtorPhoto:'ছবি',totalDue:'মোট বাকি',noDue:'এখনো কোনো বাকি নেই',addPayment:'টাকা জমা দিন',statement:'হিসাব বিবরণী',selectDebtor:'কার নামে বাকি, বেছে নিন',newPerson:'+ নতুন মানুষ',existing:'পুরনো',history:'হিস্ট্রি',takenOn:'নিয়েছে',paidOn:'জমা দিয়েছে',needDebtor:'আগে একজনকে বেছে নিন বা যোগ করুন',saveDebtor:'সেভ করুন',noMatch:'কাউকে পাওয়া যায়নি',swap:'বদলান'}
 };
 var CB = {Drinks:'পানীয়',Food:'খাবার'}, BN = {1:'চা',2:'কফি',3:'ঠান্ডা জুস',4:'পানির বোতল',5:'স্যান্ডউইচ',6:'কেক'};
 
@@ -247,7 +250,7 @@ function render(){
  info();if(view=='sell'&&isWide())openCart();
 }
 
-function go(v){view=v;edit=null;arm=0;render();scrollTo(0,0)}
+function go(v){view=v;edit=null;arm=0;try{localStorage.setItem('pos_view',v)}catch(e){}render();scrollTo(0,0)}
 function flt(){return P.filter(function(p){return(cat=='All'||p.cat==cat)&&(p.name+' '+(p.bn||'')).toLowerCase().indexOf(q.toLowerCase())>-1})}
 
 function vSell0(){
@@ -269,7 +272,14 @@ function pst(){
 }
 function setA(i,v){pays[i].a=v;pays[i].auto=false;openCart()}
 function setM(i,m){pays[i].m=m;if(m=='Due')pickDebtor(i);openCart()}
-function addRow(m){var r=pst().rem;pays.forEach(function(p){p.auto=false});pays.push({m:m,a:r>0?r.toFixed(2):'0'});if(m=='Due')pickDebtor(pays.length-1);openCart()}
+function addRow(m){
+ if(m=='Due'){var c=calc(),def=pst().rem>0.004?pst().rem:c.t;var v=prompt(L('কত টাকা বাকি রাখবেন?','How much should remain due?'),def.toFixed(2));if(v==null)return;var a=parseFloat(v);if(!a||a<=0)return;
+  var au=pays.find(function(p){return p.auto});if(au){au.a=Math.max(0,c.t-a).toFixed(2);au.auto=false}
+  pays.push({m:'Due',a:a.toFixed(2)});pickDebtor(pays.length-1);openCart();return
+ }
+ var r=pst().rem;if(r<=0.004){toast(L('ইতমধ্যে পুরো টাকা ধরা আছে','Already fully allocated'));return}
+ pays.forEach(function(p){p.auto=false});pays.push({m:m,a:r.toFixed(2)});openCart()
+}
 function delRow(i){pays.splice(i,1);if(pays.length==1){pays[0].a=calc().t.toFixed(2);pays[0].auto=true}openCart()}
 
 function cartInner(sheet){
@@ -317,11 +327,13 @@ function charge(){
  var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode()};
  if(!CU)s.lc=true;
  H.push(s);
- dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,no:s.sn,items:items.map(function(i){return(S.lang=='bn'&&i.bn?i.bn:i.name)+' x'+i.qty}).join(', ')})}});
+ dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,no:s.sn,items:items.map(function(i){return(S.lang=='bn'&&i.bn?i.bn:i.name)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
  save();if(dueRows.length)dusave();cSale(s);pubReceipt(s);cart={};disc='';recv='';pays=null;$('#cs').classList.remove('show');render();showRc(s.no);
 }
 
 function plainFoot(s){return footMsg(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
+function pubDue(d){if(!CU||!window.FB||!FB.setPub)return;if(!d.pc)d.pc=randCode();
+ w(FB.setPub(d.pc,{type:'due',uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,name:d.name,phone:d.phone||'',nid:d.nid||'',photo:d.photo||'',total:duTotal(d),entries:(d.entries||[]).map(function(e){return{t:e.t,a:e.a,items:e.items||'',no:e.no}}),updated:Date.now()}))}
 function pubReceipt(s){if(!CU||!window.FB||!FB.setPub||!s.pc)return;var ids=[],m={};s.items.forEach(function(i){if(i.id&&IMG[i.id]&&ids.indexOf(i.id)<0)ids.push(i.id)});var left=ids.length;
  function fin(){w(FB.setPub(s.pc,{uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,t:s.t,sn:s.sn,day:day(s.t),total:s.total,sub:s.sub,disc:s.disc||0,tax:s.tax||0,pays:s.pays||[],msg:plainFoot(s),items:s.items.map(function(i){return{name:i.name,bn:i.bn||'',price:i.price,qty:i.qty,img:m[i.id]||''}})}))}
  if(!left)return fin();ids.forEach(function(id){thumb(IMG[id],function(x){if(x)m[id]=x;if(--left==0)fin()})})}
@@ -339,14 +351,14 @@ function footMsg(s){var r=RD();if(!r.foot)return '';var bn=S.lang=='bn',h=new Da
 function rcHtml(s){
  var r=RD(),id=invCode(s),qrT='INV:'+id+';D:'+day(s.t)+';T:'+s.total.toFixed(2)+';P:'+s.pay,tm=new Date(s.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
  var base=location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'');var lk=(r.qm=='view')?(s.pc?base+'?r='+s.pc:''):(r.qm!='inv'?r['l_'+r.qm]:'');if(lk)qrT=lk;var qz=lk?Math.max(+r.qs,60):+r.qs;
- var rows=s.items.map(function(i){var n=(S.lang=='bn'&&i.bn)?i.bn:i.name;return '<tr><td>'+esc(n)+'</td><td class="q">'+i.qty+' × '+i.price.toFixed(2)+'</td><td class="a">'+(i.qty*i.price).toFixed(2)+'</td></tr>'}).join('');
+ var rows=s.items.map(function(i){var n=(S.lang=='bn'&&i.bn)?i.bn:i.name,img=i.id&&IMG[i.id]?'<img src="'+IMG[i.id]+'" style="width:20px;height:20px;border-radius:5px;object-fit:cover;vertical-align:-5px;margin-right:5px">':'';return '<tr><td>'+img+esc(n)+'</td><td class="q">'+i.qty+' × '+i.price.toFixed(2)+'</td><td class="a">'+(i.qty*i.price).toFixed(2)+'</td></tr>'}).join('');
  var pl=(s.pays&&s.pays.length?s.pays:[{m:s.pay,a:s.total}]);
  var h='<div class="rcpt"><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+L('ইনভয়েস','Invoice')+' #'+s.sn+'</span><span>'+day(s.t)+' · '+tm+'</span></div><table>'+rows+'</table>';
  if(s.disc||s.tax)h+='<div class="rt" style="margin-top:4px"><span>'+t('sub')+'</span><span>'+$$(s.sub)+'</span></div>';
  if(s.disc)h+='<div class="rt"><span>'+t('disc')+'</span><span>−'+$$(s.disc)+'</span></div>';
  if(s.tax)h+='<div class="rt"><span>'+t('tax')+'</span><span>'+$$(s.tax)+'</span></div>';
  h+='<div class="rt g"><span>'+t('total')+'</span><span>'+$$(s.total)+'</span></div>';
- pl.forEach(function(x){h+='<div class="rt py"><span>'+t(x.m)+'</span><span>'+$$(x.a)+'</span></div>'});
+ pl.forEach(function(x){h+='<div class="rt py"><span>'+t(x.m)+(x.debtor?' · '+esc(x.debtor):'')+'</span><span>'+$$(x.a)+'</span></div>'});
  if(s.recv!=null&&(s.chg||0)>0)h+='<div class="rt py"><span>'+t('received')+'</span><span>'+$$(s.recv)+'</span></div><div class="rt py"><span>'+t('chg')+'</span><span>'+$$(s.chg)+'</span></div>';
  h+='<div class="ft">'+(r.qr?'<div class="qrw" style="--q:'+qz+'px">'+qrSvg(qrT)+'</div>':'')+'<div>'+footMsg(s)+'<div class="cid">'+esc(id)+'</div></div></div>';
  if(r.wifi&&(r.wn||r.wp))h+='<div class="xl">Wi-Fi: <b>'+esc(r.wn)+'</b>'+(r.wp?' · '+esc(r.wp):'')+'</div>';
@@ -442,7 +454,7 @@ function vProd(){
  var h='<div class="box"><b>'+(e?t('edit'):t('add'))+'</b><label>'+t('nm')+'</label><input id="pn" value="'+esc(e?e.name:'')+'"><label>'+t('nb')+'</label><input id="pb" value="'+esc(e?e.bn||'':'')+'"><label>'+t('pr')+'</label><input id="pp" type="number" inputmode="decimal" value="'+(e?e.price:'')+'"><label>'+t('cat')+'</label><input id="pc" value="'+esc(e?e.cat:'')+'" placeholder="Drinks"><label>'+t('stock')+'</label><input id="ps" type="number" inputmode="numeric" value="'+(e?e.stock:'')+'">'
  +'<div style="display:flex;gap:10px;margin-top:14px"><button class="pri" style="flex:1" onclick="saveP()">'+t('save')+'</button>'+(e?'<button class="bad" onclick="delP()">'+t('del')+'</button><button onclick="edit=null;render()">'+t('back')+'</button>':'')+'</div></div><div class="box">';
  h+=P.map(function(p){return '<div class="row" onclick="edit='+p.id+';render();scrollTo(0,0)"><div><b>'+esc(nm(p))+'</b><div class="mute">'+esc(p.cat?tc(p.cat):t('noc'))+(p.stock!==''?' · '+p.stock:'')+'</div></div><b>'+$$(p.price)+'</b></div>'}).join('');
- return h+'</div>';
+ return h+'</div>'+imgBox();
 }
 function saveP(){var n=$('#pn').value.trim(),b=$('#pb').value.trim(),pr=parseFloat($('#pp').value);if(!(n||b)||isNaN(pr)){toast(t('need'));return}
  var o={name:n||b,bn:b,price:pr,cat:$('#pc').value.trim(),stock:$('#ps').value===''?'':+$('#ps').value};
@@ -495,13 +507,17 @@ function bkBox(){var t0=0;try{t0=+localStorage.getItem('pos_bk')||0}catch(e){}va
  +'<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="pri" style="flex:1" onclick="backup()">'+I('copy')+' '+L('ডেটা ডাউনলোড','Download data')+'</button><label class="btn" style="flex:1;text-align:center">'+L('ব্যাকআপ থেকে ফেরান','Restore')+'<input type="file" accept=".json,application/json" hidden onchange="restoreFile(this)"></label></div></div>'}
 
 function vSet0(){
- return '<div class="box"><label>'+t('lang')+'</label><div class="lg" style="width:max-content"><button class="'+(S.lang=='bn'?'on':'')+'" onclick="setLang(\'bn\')">বাংলা</button><button class="'+(S.lang=='en'?'on':'')+'" onclick="setLang(\'en\')">English</button></div><label>'+t('shop')+'</label><input value="'+esc(S.shop)+'" onchange="S.shop=this.value;save();render()"><label>'+t('cur')+'</label><input value="'+esc(S.cur)+'" onchange="S.cur=this.value;save();render()"><label>'+t('taxp')+'</label><input type="number" inputmode="decimal" value="'+S.tax+'" onchange="S.tax=+this.value||0;save();render()"></div>'
+ return '<div class="box"><label>'+t('shop')+'</label><input value="'+esc(S.shop)+'" onchange="S.shop=this.value;save();render()"><label>'+t('cur')+'</label><input value="'+esc(S.cur)+'" onchange="S.cur=this.value;save();render()"><label>'+t('taxp')+'</label><input type="number" inputmode="decimal" value="'+S.tax+'" onchange="S.tax=+this.value||0;save();render()"></div>'
  +'<div class="box"><b>'+t('data')+'</b><p class="mute">'+esc(CE||'')+'</p><button onclick="FB.out()">'+L('লগআউট','Log out')+'</button><p class="mute">'+t('note')+'</p><button class="bad" onclick="wipe()">'+(arm?t('erase2'):t('erase'))+'</button></div>'
 }
 
 function wipe(){ask(L('সব বিক্রির হিসাব মুছে ফেলতে চান?','Delete ALL sales records?'),function(){H.forEach(function(s){cDel(s.no)});H=[];save();render()})}
 
-function vSet(){return themeBox()+rcBox()+accBox()+imgBox()+bkBox()+vSet0()}
+function fontBox(){var m='md';try{m=localStorage.getItem('pos_fsz')||'md'}catch(e){}
+ return '<div class="box"><div class="hd">'+I('sun')+'<b>'+L('ফন্ট সাইজ','Font size')+'</b></div><div style="display:flex;gap:8px">'+[['sm',L('ছোট','Small')],['md',L('মাঝারি','Medium')],['lg',L('বড়','Large')],['xl',L('অনেক বড়','XL')]].map(function(x){return '<button style="flex:1" class="'+(m==x[0]?'pri':'')+'" onclick="setFsz(\''+x[0]+'\')">'+x[1]+'</button>'}).join('')+'</div></div>'}
+function setFsz(v){if(v=='md')document.documentElement.removeAttribute('data-fsz');else document.documentElement.setAttribute('data-fsz',v);try{localStorage.setItem('pos_fsz',v)}catch(e){}render()}
+function sec(ttl,html,open){return '<details'+(open?' open':'')+' style="margin:14px 0"><summary style="cursor:pointer;font-weight:800;font-size:16px;padding:10px 2px;color:var(--ink)">'+ttl+'</summary><div style="margin-top:4px">'+html+'</div></details>'}
+function vSet(){return sec(L('থীম ও ফন্ট','Theme & font'),themeBox()+fontBox(),true)+sec(L('রসিদ, স্বাগতম ও দিনের হিসাব','Receipt, welcome & daily accounts'),rcBox()+accBox())+sec(L('দোকান, ব্যাকআপ ও লগইন','Shop, backup & login'),vSet0()+bkBox())}
 
 function findDU(nid,name,phone){
  if(nid)for(var i=0;i<DU.length;i++)if(DU[i].nid&&DU[i].nid==nid)return DU[i];
@@ -526,18 +542,33 @@ function openDU(id){var d=DU.find(function(x){return x.id==id});if(!d)return;dvi
  var ev=(d.entries||[]).map(function(e){return{t:e.t,txt:t('takenOn')+' · '+(e.items||'')+' · #'+e.no,a:e.a}}).concat((d.pays||[]).map(function(p){return{t:p.t,txt:t('paidOn'),a:-p.a}}));
  ev.sort(function(a,b){return b.t-a.t});
  h+=(ev.length?ev.map(function(e){return '<div class="row"><div><div>'+e.txt+'</div><div class="mute" style="font-size:12px">'+new Date(e.t).toLocaleString()+'</div></div><b style="color:'+(e.a<0?'var(--ac)':'var(--warn)')+'">'+(e.a<0?'−':'')+$$(Math.abs(e.a))+'</b></div>'}).join(''):'<div class="empty">'+t('noDue')+'</div>');
- h+='</div><div style="display:flex;gap:10px;margin-top:10px"><button class="pri" style="flex:1" onclick="addDuPay('+d.id+')">'+t('addPayment')+'</button><button style="flex:1" onclick="printDU('+d.id+')">'+I('print')+' '+t('statement')+'</button></div>';
+ h+='</div>'+((d.archive||[]).length?'<button style="width:100%;margin-top:8px" onclick="showArchive('+d.id+')">'+L('আগের হিসাব দেখুন ('+d.archive.length+')','View past statements ('+d.archive.length+')')+'</button>':'');
+ h+='<div style="display:flex;gap:10px;margin-top:10px"><button class="pri" style="flex:1" onclick="addDuPay('+d.id+')">'+t('addPayment')+'</button><button style="flex:1" onclick="printDU('+d.id+')">'+I('print')+' '+t('statement')+'</button></div>';
+ h+=(d.phone?'<button style="width:100%;margin-top:8px" onclick="waDu('+d.id+')">'+L('হোয়াটসঅ্যাপে পাঠান','Send on WhatsApp')+'</button>':'');
  h+='<button style="width:100%;margin-top:8px" onclick="$(\'#ds\').classList.remove(\'show\')">'+t('done')+'</button>';
  $('#dsb').innerHTML=h;$('#ds').classList.add('show')
 }
+function showArchive(id){var d=DU.find(function(x){return x.id==id});if(!d)return;
+ var h='<div class="hd"><b>'+L('পুরনো হিসাব','Past statements')+' — '+esc(d.name)+'</b></div>';
+ (d.archive||[]).slice().reverse().forEach(function(ar){h+='<div class="box"><div class="mute" style="font-size:12px">'+new Date(ar.closedAt).toLocaleString()+'</div>'+(ar.entries||[]).map(function(e){return '<div class="row"><div>'+t('takenOn')+' · '+(e.items||'')+'</div><b>'+$$(e.a)+'</b></div>'}).join('')+(ar.pays||[]).map(function(p){return '<div class="row"><div>'+t('paidOn')+'</div><b style="color:var(--ac)">−'+$$(p.a)+'</b></div>'}).join('')+'</div>'});
+ h+='<button style="width:100%;margin-top:8px" onclick="openDU('+id+')">'+t('back')+'</button>';
+ $('#dsb').innerHTML=h
+}
+function waDu(id){var d=DU.find(function(x){return x.id==id});if(!d||!d.phone)return;
+ var num=d.phone.replace(/[^0-9]/g,'');if(num.length==11&&num.charAt(0)=='0')num='88'+num;
+ var msg=S.shop+' — '+t('totalDue')+': '+$$(duTotal(d))+'\n'+(d.entries||[]).map(function(e){return new Date(e.t).toLocaleDateString()+' · '+(e.items||'')+' · '+$$(e.a)}).join('\n');
+ window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank')
+}
 function addDuPay(id){var d=DU.find(function(x){return x.id==id});if(!d)return;var max=duTotal(d);
  var v=prompt(t('addPayment')+' ('+t('totalDue')+' '+$$(max)+')',max>0?max.toFixed(2):'0');if(v==null)return;var a=parseFloat(v);if(!a||a<=0)return;
- d.pays=d.pays||[];d.pays.push({t:Date.now(),a:a});dusave();openDU(id)
+ d.pays=d.pays||[];d.pays.push({t:Date.now(),a:a});
+ if(duTotal(d)<=0.004){d.archive=d.archive||[];d.archive.push({closedAt:Date.now(),entries:d.entries||[],pays:d.pays||[]});d.entries=[];d.pays=[]}
+ dusave();pubDue(d);openDU(id)
 }
 function printDU(id){var d=DU.find(function(x){return x.id==id});if(!d)return;
- var qr='DUE:'+d.id+';N:'+d.name+';T:'+duTotal(d).toFixed(2);
+ var base=location.href.split('#')[0].split('?')[0];var qr=(CU&&d.pc)?base+'?r='+d.pc:'DUE:'+d.id+';N:'+d.name+';T:'+duTotal(d).toFixed(2);
  var rows=(d.entries||[]).map(function(e){return '<tr><td>'+new Date(e.t).toLocaleDateString()+' · '+esc(e.items||'')+'</td><td class="a">'+e.a.toFixed(2)+'</td></tr>'}).join('');
- var h='<div class="rcpt"><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+t('statement')+'</span><span>'+tdy()+'</span></div><div style="font-weight:800;margin:4px 0">'+esc(d.name)+(d.nid?' · NID '+esc(d.nid):'')+(d.phone?' · '+esc(d.phone):'')+'</div><table>'+rows+'</table><div class="rt g"><span>'+t('totalDue')+'</span><span>'+$$(duTotal(d))+'</span></div><div class="ft"><div class="qrw">'+qrSvg(qr)+'</div><div class="th2">'+esc(d.name)+' · '+esc(d.nid||d.phone||'')+'</div></div></div>';
+ var h='<div class="rcpt"><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+t('statement')+'</span><span>'+tdy()+'</span></div><div style="display:flex;align-items:center;gap:8px;margin:4px 0">'+(d.photo?'<img src="'+d.photo+'" style="width:34px;height:34px;border-radius:8px;object-fit:cover">':'')+'<div style="font-weight:800">'+esc(d.name)+(d.nid?' · NID '+esc(d.nid):'')+(d.phone?' · '+esc(d.phone):'')+'</div></div><table>'+rows+'</table><div class="rt g"><span>'+t('totalDue')+'</span><span>'+$$(duTotal(d))+'</span></div><div class="ft"><div class="qrw">'+qrSvg(qr)+'</div><div class="th2">'+esc(d.name)+' · '+esc(d.nid||d.phone||'')+'</div></div></div>';
  $('#rb').innerHTML=h+'<div class="ract"><button onclick="window.print()">'+I('print')+' '+t('print')+'</button><button class="pri" onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div>';
  $('#rc').classList.add('show')
 }
@@ -555,7 +586,7 @@ function createDU(){var n=$('#ndn').value.trim();if(!n){toast(t('need'));return}
  var nn=$('#ndi').value.trim(),pp2=$('#ndp').value.trim();
  var ex=findDU(nn,null,pp2);if(ex){toast(t('existing')+': '+ex.name);chooseDU(ex.id);return}
  var d={id:Date.now(),name:n,phone:pp2,nid:nn,photo:pdPhoto,entries:[],pays:[]};
- DU.push(d);dusave();chooseDU(d.id)
+ DU.push(d);dusave();pubDue(d);chooseDU(d.id)
 }
 function chooseDU(id){var d=DU.find(function(x){return x.id==id});if(!d||pdRow==null)return;pays[pdRow].debtor={id:d.id,name:d.name};$('#ds').classList.remove('show');openCart()}
 
@@ -659,13 +690,16 @@ function codesHtml(id,qr){return '<div class="codes">'+code128Svg(id)+'<div clas
 var PUBR=new URLSearchParams(location.search).get('r');
 function startPub(){document.querySelectorAll('body>*').forEach(function(e){if(e.tagName!='SCRIPT')e.style.display='none'});
  var d=document.createElement('div');d.id='pv';d.className='pv';d.innerHTML='<div class="pvl">…</div>';document.body.appendChild(d);
- var go2=function(){FB.pub(PUBR).then(function(x){d.innerHTML=x?pvHtml(x):'<div class="pvl">Receipt not found</div>'}).catch(function(){d.innerHTML='<div class="pvl">⚠ Could not load.</div>'})};
+ var go2=function(){FB.pub(PUBR).then(function(x){d.innerHTML=x?(x.type=='due'?pvDueHtml(x):pvHtml(x)):'<div class="pvl">Receipt not found</div>'}).catch(function(){d.innerHTML='<div class="pvl">⚠ Could not load.</div>'})};
  if(window.FB)go2();else window.onFB=go2}
 function pvHtml(d){var bn=d.lang=='bn',T2=function(k){return(D[d.lang]||D.en)[k]||k},cu=d.cur||'',m=function(n){return cu+' '+(+n).toFixed(2)};
  var it=d.items.map(function(i){var n=bn&&i.bn?i.bn:i.name;return '<div class="pvi">'+(i.img?'<img src="'+i.img+'" alt="">':'<div class="dot" style="background:hsl('+hue(i.name)+',45%,40%)">'+esc((n||'?').charAt(0).toUpperCase())+'</div>')+'<div class="pvn"><b>'+esc(n)+'</b><span>'+i.qty+' × '+m(i.price)+'</span></div><b>'+m(i.qty*i.price)+'</b></div>'}).join('');
  var tt='';if(d.disc||d.tax)tt+='<div class="pvt"><span>'+T2('sub')+'</span><span>'+m(d.sub)+'</span></div>';if(d.disc)tt+='<div class="pvt"><span>'+T2('disc')+'</span><span>−'+m(d.disc)+'</span></div>';if(d.tax)tt+='<div class="pvt"><span>'+T2('tax')+'</span><span>'+m(d.tax)+'</span></div>';
  tt+='<div class="pvt g"><span>'+T2('total')+'</span><span>'+m(d.total)+'</span></div>'+(d.pays||[]).map(function(x){return '<div class="pvt"><span>'+T2(x.m)+'</span><span>'+m(x.a)+'</span></div>'}).join('');
  return '<div class="pvh">'+LOGO.replace('width="40" height="40"','width="60" height="60"')+'<h1>'+esc(d.shop)+'</h1><p>'+(bn?'ইনভয়েস':'Invoice')+' #'+d.sn+' · '+d.day+' · '+new Date(d.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</p></div><div class="pvc">'+it+tt+'<p class="pvm">'+esc(d.msg||'')+'</p></div>'}
+function pvDueHtml(d){var bn=d.lang=='bn',cu=d.cur||'',m=function(n){return cu+' '+(+n).toFixed(2)};
+ var it=(d.entries||[]).map(function(e){return '<div class="pvi"><div class="pvn"><b>'+new Date(e.t).toLocaleDateString()+'</b><span>'+esc(e.items||'')+'</span></div><b>'+m(e.a)+'</b></div>'}).join('');
+ return '<div class="pvh">'+(d.photo?'<img src="'+d.photo+'" alt="" style="width:60px;height:60px;border-radius:14px;object-fit:cover">':LOGO.replace('width="40" height="40"','width="60" height="60"'))+'<h1>'+esc(d.name)+'</h1><p>'+esc(d.shop)+(d.phone?' · '+esc(d.phone):'')+(d.nid?' · NID '+esc(d.nid):'')+'</p></div><div class="pvc">'+it+'<div class="pvt g"><span>'+(bn?'মোট বাকি':'Total due')+'</span><span>'+m(d.total)+'</span></div></div>'}
 
 setInterval(function(){var k=tdy();if(k!=curDay){curDay=k;dd=k;dm=k.slice(0,7);render()}},20000);
 window.addEventListener('resize',function(){if(view=='sell')render()});
@@ -673,6 +707,7 @@ window.addEventListener('online',function(){sy('on');render()});
 window.addEventListener('offline',function(){sy();render()});
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 
+try{var tm0=localStorage.getItem('pos_theme');if(tm0&&tm0!='auto')document.documentElement.setAttribute('data-theme',tm0);var fz0=localStorage.getItem('pos_fsz');if(fz0&&fz0!='md')document.documentElement.setAttribute('data-fsz',fz0);var vw0=localStorage.getItem('pos_view');if(vw0)view=vw0}catch(e){}
 render();boot();
 </script>
 
