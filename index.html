@@ -174,6 +174,19 @@ button.pay:disabled{opacity:.5}
  @page{margin:0}
  .ract,.noprint,#vb{display:none!important}
 }
+.cw{display:flex;flex-direction:column;max-height:calc(100vh - 200px);max-height:calc(100dvh - 200px)}
+@media (max-width:859px){.cw{max-height:calc(92dvh - 40px)}}
+.cl{overflow:auto;flex:1 1 auto;min-height:64px}.cl .row{padding:6px 0}
+.cp{flex:none;border-top:1px solid var(--line);padding-top:6px}
+.cp .tbar{margin-top:0;padding:8px 12px}.cp .tbar b{font-size:22px}
+.dl{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0}.dl input{width:130px;padding:8px 10px;text-align:right}
+.pm{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}.pm button{padding:9px 4px;font-size:13px;border-radius:10px;line-height:1.15}
+.qc{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.qc button{padding:7px 10px;font-size:13px;flex:1 1 auto;border-radius:10px;background:var(--soft);color:var(--ac);border-color:transparent}
+.sm1{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;margin:6px 0;flex-wrap:wrap}
+.lk{border:0;background:none;color:var(--ac);padding:4px 0;font-size:13px;text-decoration:underline}
+.cp button.pay{margin-top:6px;padding:13px;font-size:17px}
+.ab{display:flex;gap:8px;margin-top:6px}.ab button{flex:1;padding:8px;font-size:13px}
+.prow select,.prow input{padding:8px 10px}.prow{margin-bottom:6px}
 </style></head><body>
 <header><div class="brand"><svg width="40" height="40" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#14454b"/><path d="M19 29h26v6a13 13 0 0 1-13 13 13 13 0 0 1-13-13z" fill="#fff"/><path d="M45 32h2.5a5 5 0 0 1 0 10H43" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><path d="M15 52h34" stroke="#f5b52e" stroke-width="3.4" stroke-linecap="round"/><path d="M22 24l4.5-8 5.5 8 5.5-8 4.5 8" fill="none" stroke="#f5b52e" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><h1 id="shop">Musafir Cafe</h1></div><div class="hr"><button class="hb wide-only" id="lastinv" onclick="lastInv()"></button><span class="chip" id="today"></span><div class="lg" id="lg"></div></div></header>
 <div id="ib"></div>
@@ -251,6 +264,29 @@ function save(){lsave();push()}
 function dusave(){lsave();push()}
 function push(){if(!CU||!ready)return;clearTimeout(tm);tm=setTimeout(function(){w(FB.set('pos','settings',S));w(FB.set('pos','products',{list:P}));w(FB.set('pos','due',{list:DU}))},400)}
 function cSale(s){if(CU)w(FB.set('sales','s'+s.no,s))}
+function rqGet(){try{return JSON.parse(localStorage.getItem('pos_rq'))||[]}catch(e){return[]}}
+function rqSet(q){try{localStorage.setItem('pos_rq',JSON.stringify(q))}catch(e){}}
+function rpOn(){var r=S.rp||{};return !!(r.on&&r.url)}
+var rqBusy=false;
+function rqAdd(ev){if(!rpOn())return;var q=rqGet();q.push(ev);rqSet(q);rqFlush()}
+function rqFlush(){if(!rpOn()||rqBusy||!navigator.onLine||!rqGet().length)return;rqBusy=true;
+ (function next(){var q=rqGet();if(!q.length){rqBusy=false;return}
+  fetch(S.rp.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:S.rp.token||'',ev:q[0]})}).then(function(){var q2=rqGet();q2.shift();rqSet(q2);next()}).catch(function(){rqBusy=false})})()}
+function rqSale(s){return{k:'sale',id:s.no,sn:s.sn,t:s.t,day:day(s.t),items:s.items.map(function(i){return{n:i.name||'',b:i.bn||'',q:i.qty,p:i.price}}),sub:s.sub,disc:s.disc||0,tax:s.tax||0,total:s.total,pays:(s.pays||[]).map(function(x){return{m:x.m,a:x.a,d:x.debtor||''}}),shop:S.shop,cur:S.cur}}
+function rpSet(k,v){S.rp=S.rp||{};S.rp[k]=v;save();render();rqFlush()}
+function rpTest(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}rqAdd({k:'test',t:Date.now(),shop:S.shop});toast(L('টেস্ট পাঠানো হয়েছে, ইমেইল দেখুন','Test sent, check your email'))}
+function rpNow(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var d=tdy();H.filter(function(h){return day(h.t)==d}).forEach(function(h){rqAdd(rqSale(h))});rqAdd({k:'report',day:d,shop:S.shop});toast(L('আজকের রিপোর্ট পাঠানো হচ্ছে','Sending today\'s report'))}
+function rpHist(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}H.forEach(function(h){rqAdd(rqSale(h))});toast(L('সব পুরনো বিক্রি পাঠানো হচ্ছে','Sending all past sales'))}
+var APP_V='v3 · 2026-10-26';
+function updApp(){if(!navigator.onLine){toast(L('আপডেটের জন্য নেট লাগবে','Internet needed to update'));return}toast(L('আপডেট হচ্ছে…','Updating…'));var p=[];try{if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}))}catch(e){}Promise.all(p).catch(function(){}).then(function(){location.reload()})}
+function verBox(){return '<div class="box"><div class="hd">'+I('set')+'<b>'+L('অ্যাপ ভার্সন','App version')+'</b></div><div class="dl"><span>'+APP_V+'</span><button class="pri" onclick="updApp()">'+L('এখনই আপডেট করুন','Update now')+'</button></div><div class="mute" style="font-size:12px">'+L('আপনার বিক্রি ও ডেটা মুছবে না। নতুন ফাইল GitHub-এ দেওয়ার পর এটা চাপলে নতুন ভার্সন চলে আসবে।','Your sales and data are kept. Press this after uploading new files to GitHub.')+'</div></div>'}
+function rpBox(){var r=S.rp||{};return '<div class="box"><div class="hd">'+I('cash')+'<b>'+L('দৈনিক রিপোর্ট (ইমেইল ও ড্রাইভ)','Daily report (email & Drive)')+'</b></div>'
+ +'<div class="sw" style="border:0"><b>'+L('চালু','Enabled')+'</b><button class="tg'+(r.on?' on':'')+'" role="switch" aria-checked="'+!!r.on+'" onclick="rpSet(\'on\','+!r.on+')"></button></div>'
+ +'<label>Web App URL</label><input value="'+esc(r.url||'')+'" placeholder="https://script.google.com/macros/s/…/exec" onchange="rpSet(\'url\',this.value.trim())">'
+ +'<label>'+L('গোপন কোড (স্ক্রিপ্টের কোডের সাথে হুবহু এক)','Secret code (same as in the script)')+'</label><input value="'+esc(r.token||'')+'" onchange="rpSet(\'token\',this.value.trim())">'
+ +'<div class="qadd" style="margin-top:10px"><button onclick="rpTest()">'+L('টেস্ট','Test')+'</button><button onclick="rpNow()">'+L('আজকের রিপোর্ট এখনই','Send today now')+'</button><button onclick="rpHist()">'+L('সব পুরনো বিক্রি পাঠান','Upload all history')+'</button></div>'
+ +'<div class="mute" style="font-size:12px;margin-top:8px">'+L('পাঠানো বাকি: ','Waiting to send: ')+rqGet().length+'</div></div>'}
+setInterval(function(){rqFlush()},60000);window.addEventListener('online',function(){rqFlush()});setTimeout(function(){rqFlush()},4000);
 function cDel(no){if(CU)w(FB.del('sales','s'+no))}
 
 function sy(k){if(k)ss=k;var m={on:['☁ সিঙ্ক চালু · '+CE,'☁ Synced · '+CE],off:['⏳ সংযোগ হচ্ছে…','⏳ Connecting…'],err:['⚠ সিঙ্ক হয়নি, ইন্টারনেট দেখুন','⚠ Sync failed, check internet'],cfg:['⚠ Firebase সেটআপ বাকি','⚠ Firebase not set up yet']};var e=$('#sync');if(e){e.textContent=S.lang=='bi'?m[ss][0]+' / '+m[ss][1]:m[ss][S.lang=='en'?1:0];if(!navigator.onLine){e.textContent=L('⚠ অফলাইন: বিক্রি ফোনে জমা হচ্ছে, নেট এলে সিঙ্ক হবে','⚠ Offline: sales kept on device, auto syncs online');e.style.color='var(--warn)';e.style.fontWeight='700'}else{e.style.color=ss=='on'?'':'var(--warn)';e.style.fontWeight=ss=='on'?'':'700'}}}
@@ -336,26 +372,38 @@ function addRow(m){
 }
 function delRow(i){pays.splice(i,1);if(pays.length==1){pays[0].a=calc().t.toFixed(2);pays[0].auto=true}openCart()}
 
+function quickCash(t){var o=[],seen={};seen[Math.round(t)]=1;[10,50,100,500,1000].forEach(function(u){var v=Math.ceil(t/u-1e-9)*u;if(v>t&&!seen[v]){seen[v]=1;o.push(v)}});return o.slice(0,4)}
+function setM1(m){pays[0].auto=true;pays[0].a=calc().t.toFixed(2);setM(0,m)}
+function exactCash(){pays[0].auto=true;openCart()}
+function splitPay(on){pays.sp=!!on;openCart()}
 function cartInner(sheet){
  var ids=Object.keys(cart),c=calc();if(!ids.length)pays=null;
- var h='<div class="oh"><b>'+L('অর্ডার','Order')+' #'+nextSn()+'</b><span>'+day(Date.now())+' · '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span></div>';
+ var h='<div class="cw"><div class="cl"><div class="oh"><b>'+L('অর্ডার','Order')+' #'+nextSn()+'</b><span>'+day(Date.now())+' · '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span></div>';
  if(!ids.length)h+='<div class="empty">'+L('পণ্যে চাপ দিয়ে অর্ডার শুরু করুন','Tap an item to start an order')+'</div>';
  ids.forEach(function(id){var p=gp(id);h+='<div class="row"><div><b class="nl">'+esc(nm(p))+'</b><div class="mute">'+$$(p.price)+' × '+cart[id]+' = '+$$(p.price*cart[id])+'</div></div><div class="q"><button onclick="chg('+id+',-1)">−</button><b>'+cart[id]+'</b><button onclick="chg('+id+',1)">+</button><button class="x" aria-label="'+t('rm')+'" onclick="rm('+id+')">'+I('trash')+'</button></div></div>'});
+ h+='</div>';
  if(ids.length){
   if(!pays)pays=[{m:'Cash',a:c.t.toFixed(2),auto:true}];
   if(pays.length==1&&pays[0].auto)pays[0].a=c.t.toFixed(2);
-  var ps=pst();
-  h+='<div class="tbar"><span class="mute">'+cnt()+t('itm')+'</span><span>'+t('total')+': <b>'+$$(c.t)+'</b></span></div>'
-  +'<label>'+t('disc')+' ('+esc(S.cur)+')</label><input type="number" inputmode="decimal" value="'+esc(disc)+'" onchange="disc=this.value;openCart();render()">'
-  +((c.d||+S.tax)?'<div class="tot" style="margin-top:8px"><span>'+t('sub')+'</span><span>'+$$(c.s)+'</span></div>'+(c.d?'<div class="tot"><span>'+t('disc')+'</span><span>−'+$$(c.d)+'</span></div>':'')+(+S.tax?'<div class="tot"><span>'+t('tax')+' '+S.tax+'%</span><span>'+$$(c.tx)+'</span></div>':''):'')
-  +'<div class="payh">'+I('cash')+'<b>'+L('পেমেন্ট','Payments')+'</b></div>';
-  var PM=['Cash','bKash','Nagad','Rocket','BanglaQR','Due'];
-  pays.forEach(function(x,i){h+='<div class="prow"><select onchange="setM('+i+',this.value)">'+PM.map(function(m){return '<option value="'+m+'"'+(m==x.m?' selected':'')+'>'+t(m)+'</option>'}).join('')+'</select><input type="number" inputmode="decimal" placeholder="0.00" value="'+esc(x.a)+'" onchange="setA('+i+',this.value)">'+(pays.length>1?'<button class="x" aria-label="'+t('rm')+'" onclick="delRow('+i+')">'+I('trash')+'</button>':'<span></span>')+'</div>'+(x.m=='Due'?'<div class="mute" style="font-size:12px;margin:-4px 0 8px;display:flex;justify-content:space-between"><span>'+(x.debtor?esc(x.debtor.name):t('needDebtor'))+'</span><button style="padding:2px 10px;font-size:12px" onclick="pickDebtor('+i+')">'+(x.debtor?t('swap'):t('selectDebtor'))+'</button></div>':'')});
-  h+='<div class="qadd"><span class="mute">'+L('আরও যোগ:','Add:')+'</span>'+PM.map(function(m){return '<button onclick="addRow(\''+m+'\')">+ '+t(m)+'</button>'}).join('')+'</div>'
-  +'<div class="sum"><div class="tot"><span>'+L('মোট প্রদেয়','Net payable')+'</span><b>'+$$(c.t)+'</b></div><div class="tot"><span>'+L('পেয়েছি','Paid')+'</span><b>'+$$(ps.paid)+'</b></div>'+(ps.rem>0.004?'<div class="tot rem"><span>'+L('বাকি আছে','Remaining')+'</span><b>'+$$(ps.rem)+'</b></div>':'<div class="tot ok"><span>'+t('chg')+'</span><b>'+$$(ps.chg)+'</b></div>')+'</div>'
-  +'<div class="stk"><button class="pay" '+(ps.ok?'':'disabled')+' onclick="charge()">'+(ps.ok?L('পেমেন্ট','Payment')+' · '+$$(c.t):L('বাকি ','Remaining ')+$$(ps.rem))+'</button><div style="display:flex;gap:10px;margin-top:8px"><button class="bad" style="flex:1" onclick="cancelOrder()">'+I('trash')+' '+t('cancel')+'</button>'+(sheet?'<button style="flex:1" onclick="$(\'#cs\').classList.remove(\'show\')">'+t('keep')+'</button>':'')+'</div></div>'}
+  var ps=pst(),PM=['Cash','bKash','Nagad','Rocket','BanglaQR','Due'],split=pays.length>1||pays.sp,x0=pays[0];
+  h+='<div class="cp"><div class="tbar"><span class="mute">'+cnt()+t('itm')+'</span><span>'+t('total')+': <b>'+$$(c.t)+'</b></span></div>'
+  +'<div class="dl"><span>'+t('disc')+' ('+esc(S.cur)+')</span><input type="number" inputmode="decimal" value="'+esc(disc)+'" onchange="disc=this.value;openCart();render()"></div>'
+  +((c.d||+S.tax)?'<div class="sm1 mute"><span>'+t('sub')+' '+$$(c.s)+'</span>'+(c.d?'<span>'+t('disc')+' −'+$$(c.d)+'</span>':'')+(+S.tax?'<span>'+t('tax')+' '+S.tax+'% '+$$(c.tx)+'</span>':'')+'</div>':'');
+  if(!split){
+   h+='<div class="pm">'+PM.map(function(m){return '<button class="'+(x0.m==m?'pri':'')+'" onclick="setM1(\''+m+'\')">'+t(m)+'</button>'}).join('')+'</div>';
+   if(x0.m=='Cash'){
+    h+='<div class="qc"><button onclick="exactCash()">'+L('সঠিক','Exact')+'</button>'+quickCash(c.t).map(function(v){return '<button onclick="setA(0,'+v+')">'+esc(S.cur)+v+'</button>'}).join('')+'</div>'
+    +'<div class="dl"><span>'+t('recv')+'</span><input type="number" inputmode="decimal" value="'+esc(x0.a)+'" onchange="setA(0,this.value)"></div>'}
+   if(x0.m=='Due')h+='<div class="sm1"><span>'+(x0.debtor?esc(x0.debtor.name):t('needDebtor'))+'</span><button style="padding:4px 12px;font-size:12px" onclick="pickDebtor(0)">'+(x0.debtor?t('swap'):t('selectDebtor'))+'</button></div>';
+  }else{
+   pays.forEach(function(x,i){h+='<div class="prow"><select onchange="setM('+i+',this.value)">'+PM.map(function(m){return '<option value="'+m+'"'+(m==x.m?' selected':'')+'>'+t(m)+'</option>'}).join('')+'</select><input type="number" inputmode="decimal" placeholder="0.00" value="'+esc(x.a)+'" onchange="setA('+i+',this.value)">'+(pays.length>1?'<button class="x" aria-label="'+t('rm')+'" onclick="delRow('+i+')">'+I('trash')+'</button>':'<span></span>')+'</div>'+(x.m=='Due'?'<div class="mute" style="font-size:12px;margin:-4px 0 6px;display:flex;justify-content:space-between"><span>'+(x.debtor?esc(x.debtor.name):t('needDebtor'))+'</span><button style="padding:2px 10px;font-size:12px" onclick="pickDebtor('+i+')">'+(x.debtor?t('swap'):t('selectDebtor'))+'</button></div>':'')});
+   h+='<div class="qadd"><span class="mute">'+L('আরও যোগ:','Add:')+'</span>'+PM.map(function(m){return '<button onclick="addRow(\''+m+'\')">+ '+t(m)+'</button>'}).join('')+'</div>'}
+  h+='<div class="sm1">'+(split?(pays.length==1?'<button class="lk" onclick="splitPay(0)">'+L('একক পেমেন্ট','Single payment')+'</button>':'<span class="mute">'+L('পেয়েছি','Paid')+' '+$$(ps.paid)+'</span>'):'<button class="lk" onclick="splitPay(1)">'+L('ভাগ করে নিন','Split payment')+'</button>')
+  +(ps.rem>0.004?'<b style="color:var(--warn)">'+L('বাকি আছে','Remaining')+' '+$$(ps.rem)+'</b>':(ps.chg>0.004?'<b style="color:var(--ac)">'+t('chg')+': '+$$(ps.chg)+'</b>':'<span></span>'))+'</div>'
+  +'<button class="pay" '+(ps.ok?'':'disabled')+' onclick="charge()">'+(ps.ok?L('পেমেন্ট','Payment')+' · '+$$(c.t):L('বাকি ','Remaining ')+$$(ps.rem))+'</button>'
+  +'<div class="ab"><button class="bad" onclick="cancelOrder()">'+I('trash')+' '+t('cancel')+'</button>'+(sheet?'<button onclick="$(\'#cs\').classList.remove(\'show\')">'+t('keep')+'</button>':'')+'</div></div>'}
  else if(sheet)h+='<button style="width:100%;margin-top:10px" onclick="$(\'#cs\').classList.remove(\'show\')">'+t('keep')+'</button>';
- return h
+ return h+'</div>'
 }
 
 function openCart(){
@@ -381,8 +429,8 @@ function charge(){
  var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode()};
  if(!CU)s.lc=true;
  H.push(s);
- dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,no:s.sn,sid:s.no,items:items.map(function(i){returnnm(i)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
- save();if(dueRows.length)dusave();cSale(s);pubReceipt(s);cart={};disc='';recv='';pays=null;$('#cs').classList.remove('show');render();showRc(s.no);
+ dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,no:s.sn,sid:s.no,items:items.map(function(i){return nm(i)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
+ save();if(dueRows.length)dusave();cSale(s);rqAdd(rqSale(s));pubReceipt(s);cart={};disc='';recv='';pays=null;$('#cs').classList.remove('show');render();showRc(s.no);
 }
 
 function plainFoot(s){return footMsg(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
@@ -435,7 +483,7 @@ function voidSale(no){
  s.items.forEach(function(i){var p=i.id?gp(i.id):P.find(function(x){return x.name==i.name});if(p&&p.stock!=='')p.stock+=i.qty});
  if(s.pc&&CU&&window.FB&&FB.delPub)FB.delPub(s.pc).catch(function(){});
  var dch=false;DU.forEach(function(d){var n0=(d.entries||[]).length;d.entries=(d.entries||[]).filter(function(e){return e.sid!=no});if(d.entries.length!=n0){dch=true;pubDue(d)}});if(dch)dusave();
- H=H.filter(function(h){return h.no!=no});save();cDel(no);$('#rc').classList.remove('show');render();toast(t('voided'))
+ H=H.filter(function(h){return h.no!=no});save();cDel(no);rqAdd({k:'void',id:no});$('#rc').classList.remove('show');render();toast(t('voided'))
 }
 
 function rcText(s){
@@ -578,7 +626,7 @@ function fontBox(){var m='md';try{m=localStorage.getItem('pos_fsz')||'md'}catch(
  return '<div class="box"><div class="hd">'+I('sun')+'<b>'+L('ফন্ট সাইজ','Font size')+'</b></div><div style="display:flex;gap:8px">'+[['sm',L('ছোট','Small')],['md',L('মাঝারি','Medium')],['lg',L('বড়','Large')],['xl',L('অনেক বড়','XL')]].map(function(x){return '<button style="flex:1" class="'+(m==x[0]?'pri':'')+'" onclick="setFsz(\''+x[0]+'\')">'+x[1]+'</button>'}).join('')+'</div></div>'}
 function setFsz(v){if(v=='md')document.documentElement.removeAttribute('data-fsz');else document.documentElement.setAttribute('data-fsz',v);try{localStorage.setItem('pos_fsz',v)}catch(e){}render()}
 function sec(ttl,html,open){return '<details'+(open?' open':'')+' style="margin:14px 0"><summary style="cursor:pointer;font-weight:800;font-size:16px;padding:10px 2px;color:var(--ink)">'+ttl+'</summary><div style="margin-top:4px">'+html+'</div></details>'}
-function vSet(){return sec(L('থীম ও ফন্ট','Theme & font'),themeBox()+fontBox(),true)+sec(L('রসিদ, স্বাগতম ও দিনের হিসাব','Receipt, welcome & daily accounts'),rcBox()+accBox())+sec(L('দোকান, ব্যাকআপ ও লগইন','Shop, backup & login'),vSet0()+bkBox())}
+function vSet(){return sec(L('থীম ও ফন্ট','Theme & font'),themeBox()+fontBox(),true)+sec(L('রসিদ, স্বাগতম ও দিনের হিসাব','Receipt, welcome & daily accounts'),rcBox()+accBox())+sec(L('দোকান, ব্যাকআপ ও লগইন','Shop, backup & login'),verBox()+vSet0()+rpBox()+bkBox())}
 
 function findDU(nid,name,phone){
  if(nid)for(var i=0;i<DU.length;i++)if(DU[i].nid&&DU[i].nid==nid)return DU[i];
