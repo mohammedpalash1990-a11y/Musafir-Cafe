@@ -262,7 +262,7 @@ function rset(k,v){S.rc=RD();S.rc[k]=v;save();render()}
 function lsave(){try{localStorage.setItem('pos_s',JSON.stringify(S));localStorage.setItem('pos_p',JSON.stringify(P));localStorage.setItem('pos_h',JSON.stringify(H));localStorage.setItem('pos_img',JSON.stringify(IMG));localStorage.setItem('pos_du',JSON.stringify(DU));localStorage.setItem('pos_exp',JSON.stringify(E))}catch(e){}}
 function save(){lsave();push()}
 function dusave(){lsave();push()}
-function push(){if(!CU||!ready)return;clearTimeout(tm);tm=setTimeout(function(){w(FB.set('pos','settings',S));w(FB.set('pos','products',{list:P}));w(FB.set('pos','due',{list:DU}))},400)}
+function push(){if(!CU||!ready)return;clearTimeout(tm);tm=setTimeout(function(){w(FB.set('pos','settings',S));w(FB.set('pos','products',{list:P}));w(FB.set('pos','due',{list:DU}));w(FB.set('pos','expenses',{list:E}))},400)}
 function cSale(s){if(CU)w(FB.set('sales','s'+s.no,s))}
 function rqGet(){try{return JSON.parse(localStorage.getItem('pos_rq'))||[]}catch(e){return[]}}
 function rqSet(q){try{localStorage.setItem('pos_rq',JSON.stringify(q))}catch(e){}}
@@ -473,7 +473,7 @@ function showRc(no){
  var s=H.find(function(h){return h.no==no});if(!s)return;vArm=0;
  if(CU){if(!s.pc){s.pc=randCode();save();cSale(s)}pubReceipt(s)}
  var id=invCode(s),qr='INV:'+id+';D:'+day(s.t)+';T:'+s.total.toFixed(2)+';P:'+s.pay;
- $('#rb').innerHTML=rcHtml(s)+'<div class="ract"><button class="wa" onclick="waRc('+no+')">WhatsApp</button><button onclick="window.print()">'+I('print')+' '+t('print')+'</button><button class="pri" onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div><button class="bad noprint" id="vb" style="width:100%;margin-top:10px" onclick="voidSale('+no+')">'+I('trash')+' '+t('void')+'</button>';
+ $('#rb').innerHTML=rcHtml(s)+'<div class="ract"><button class="wa" onclick="waRc('+no+')">WhatsApp</button><button onclick="imoRc('+no+')">IMO</button><button onclick="window.print()">'+I('print')+' '+t('print')+'</button><button class="pri" onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div><button class="bad noprint" id="vb" style="width:100%;margin-top:10px" onclick="voidSale('+no+')">'+I('trash')+' '+t('void')+'</button>';
  $('#rc').classList.add('show')
 }
 
@@ -508,27 +508,27 @@ function expSum(list){return list.reduce(function(a,x){return a+(x.type=='salary
 function addExpense(){
  var type=$('#exType').value,desc=$('#exDesc').value.trim(),amount=+$('#exAmount').value||0,paid=+($('#exPaid')?$('#exPaid').value:0)||0,worker=$('#exWorker')?$('#exWorker').value.trim():'';
  if(type=='salary'){
-  if(!worker||amount<=0||paid<0||paid>amount){toast('কাজের লোকের নাম, মোট বেতন ও সঠিক পরিশোধের টাকা দিন');return}
+  if(!worker||amount<=0||paid<0||paid>amount){toast(L('কাজের লোকের নাম, মোট বেতন ও সঠিক পরিশোধের টাকা দিন','Enter worker name, salary and a valid paid amount'));return}
   E.push({id:Date.now(),date:dd,type:type,worker:worker,desc:desc||'বেতন',amount:amount,paid:paid,t:Date.now()});
  }else{
-  if(!desc||amount<=0){toast('খরচের বিবরণ ও টাকার পরিমাণ দিন');return}
+  if(!desc||amount<=0){toast(L('খরচের বিবরণ ও টাকার পরিমাণ দিন','Enter an expense description and amount'));return}
   E.push({id:Date.now(),date:dd,type:type,desc:desc,amount:amount,paid:amount,t:Date.now()});
  }
- save();render();toast('হিসাব যোগ হয়েছে');
+ save();render();toast(L('হিসাব যোগ হয়েছে','Entry added'));
 }
-function delExpense(id){ask('এই খরচের হিসাব মুছবেন?',function(){E=E.filter(function(x){return x.id!=id});save();render()})}
+function delExpense(id){ask(L('এই খরচের হিসাব মুছবেন?','Delete this expense entry?'),function(){E=E.filter(function(x){return x.id!=id});save();render()})}
 function expenseBox(date){
  var list=expFor(date),spent=expSum(list),sales=sums(H.filter(function(x){return day(x.t)==date})).t;
- var h='<div class="box"><div class="hd">'+I('cash')+'<b>দৈনিক খরচ, বেতন ও দোকানের মালামাল</b></div><div class="stats"><div class="box"><span class="mute">মোট খরচ</span><b>'+$$(spent)+'</b></div><div class="box"><span class="mute">বিক্রি − খরচ</span><b style="color:'+(sales-spent>=0?'var(--ac)':'var(--warn)')+'">'+$$(sales-spent)+'</b></div></div>'
- +'<label>হিসাবের ধরন</label><select id="exType" onchange="expenseFields()"><option value="salary">কাজের লোকের বেতন</option><option value="purchase">দোকানের মালামাল কেনা</option><option value="special">বিশেষ খরচ</option></select><div id="exFields"><label>কাজের লোকের নাম</label><input id="exWorker" placeholder="নাম"><label>মোট বেতন</label><input id="exAmount" type="number" min="0" placeholder="মোট বেতন"><label>এখন কত টাকা দিলেন</label><input id="exPaid" type="number" min="0" placeholder="পরিশোধের টাকা"><label>বিবরণ (ঐচ্ছিক)</label><input id="exDesc" placeholder="যেমন: মাসিক বেতন"></div><button class="pri" style="width:100%;margin-top:10px" onclick="addExpense()">+ হিসাব যোগ করুন</button>'
- +'<div style="margin-top:12px"><b>এই দিনের খরচের তালিকা</b>';
- h+=list.length?list.map(function(x){var label=x.type=='salary'?'বেতন — '+x.worker:x.type=='purchase'?'মালামাল কেনা':'বিশেষ খরচ';return '<div class="row"><div><b>'+esc(label)+'</b><div class="mute">'+esc(x.desc||'')+'</div>'+(x.type=='salary'?'<div class="mute">মোট বেতন: '+$$(x.amount)+' · দিয়েছেন: '+$$(x.paid)+' · বাকি: '+$$(Math.max(0,x.amount-x.paid))+'</div>':'')+'</div><div style="text-align:right"><b>'+$$(x.type=='salary'?x.paid:x.amount)+'</b><button class="bad" style="display:block;margin-top:4px;padding:4px 8px" onclick="delExpense('+x.id+')">মুছুন</button></div></div>'}).join(''):'<div class="empty">এই দিনে কোনো খরচ যোগ করা হয়নি</div>';
+ var h='<div class="box"><div class="hd">'+I('cash')+'<b>'+L('দৈনিক খরচ, বেতন ও দোকানের মালামাল','Daily expenses, salaries and purchases')+'</b></div><div class="stats"><div class="box"><span class="mute">'+L('মোট খরচ','Total expenses')+'</span><b>'+$$(spent)+'</b></div><div class="box"><span class="mute">'+L('বিক্রি − খরচ','Sales − expenses')+'</span><b style="color:'+(sales-spent>=0?'var(--ac)':'var(--warn)')+'">'+$$(sales-spent)+'</b></div></div>'
+ +'<label>'+L('হিসাবের ধরন','Entry type')+'</label><select id="exType" onchange="expenseFields()"><option value="salary">'+L('কাজের লোকের বেতন','Worker salary')+'</option><option value="purchase">'+L('দোকানের মালামাল কেনা','Shop stock purchase')+'</option><option value="special">'+L('বিশেষ খরচ','Special expense')+'</option></select><div id="exFields"><label>'+L('কাজের লোকের নাম','Worker name')+'</label><input id="exWorker" placeholder="'+L('নাম','Name')+'"><label>'+L('মোট বেতন','Total salary')+'</label><input id="exAmount" type="number" min="0" placeholder="'+L('মোট বেতন','Total salary')+'"><label>'+L('এখন কত টাকা দিলেন','Amount paid now')+'</label><input id="exPaid" type="number" min="0" placeholder="'+L('পরিশোধের টাকা','Paid amount')+'"><label>'+L('বিবরণ (ঐচ্ছিক)','Description (optional)')+'</label><input id="exDesc" placeholder="'+L('যেমন: মাসিক বেতন','e.g. monthly salary')+'"></div><button class="pri" style="width:100%;margin-top:10px" onclick="addExpense()">+ '+L('হিসাব যোগ করুন','Add entry')+'</button>'
+ +'<div style="margin-top:12px"><b>'+L('এই দিনের খরচের তালিকা','Expenses for this day')+'</b>';
+ h+=list.length?list.map(function(x){var label=x.type=='salary'?L('বেতন','Salary')+' — '+x.worker:x.type=='purchase'?L('মালামাল কেনা','Stock purchase'):L('বিশেষ খরচ','Special expense');return '<div class="row"><div><b>'+esc(label)+'</b><div class="mute">'+esc(x.desc||'')+'</div>'+(x.type=='salary'?'<div class="mute">'+L('মোট বেতন','Total salary')+': '+$$(x.amount)+' · '+L('দিয়েছেন','Paid')+': '+$$(x.paid)+' · '+L('বাকি','Due')+': '+$$(Math.max(0,x.amount-x.paid))+'</div>':'')+'</div><div style="text-align:right"><b>'+$$(x.type=='salary'?x.paid:x.amount)+'</b><button class="bad" style="display:block;margin-top:4px;padding:4px 8px" onclick="delExpense('+x.id+')">'+L('মুছুন','Delete')+'</button></div></div>'}).join(''):'<div class="empty">'+L('এই দিনে কোনো খরচ যোগ করা হয়নি','No expenses added for this day')+'</div>';
  return h+'</div></div>';
 }
 function expenseFields(){
  var type=$('#exType').value,el=$('#exFields');
- if(type=='salary')el.innerHTML='<label>কাজের লোকের নাম</label><input id="exWorker" placeholder="নাম"><label>মোট বেতন</label><input id="exAmount" type="number" min="0" placeholder="মোট বেতন"><label>এখন কত টাকা দিলেন</label><input id="exPaid" type="number" min="0" placeholder="পরিশোধের টাকা"><label>বিবরণ (ঐচ্ছিক)</label><input id="exDesc" placeholder="যেমন: মাসিক বেতন">';
- else el.innerHTML='<label>'+(type=='purchase'?'কোন মালামাল কিনেছেন?':'বিশেষ খরচের বিবরণ')+'</label><input id="exDesc" placeholder="'+(type=='purchase'?'যেমন: চিনি, চা পাতা, দুধ':'যেমন: মেরামত, যাতায়াত')+'"><label>টাকার পরিমাণ</label><input id="exAmount" type="number" min="0" placeholder="টাকা">';
+ if(type=='salary')el.innerHTML='<label>'+L('কাজের লোকের নাম','Worker name')+'</label><input id="exWorker" placeholder="'+L('নাম','Name')+'"><label>'+L('মোট বেতন','Total salary')+'</label><input id="exAmount" type="number" min="0" placeholder="'+L('মোট বেতন','Total salary')+'"><label>'+L('এখন কত টাকা দিলেন','Amount paid now')+'</label><input id="exPaid" type="number" min="0" placeholder="'+L('পরিশোধের টাকা','Paid amount')+'"><label>'+L('বিবরণ (ঐচ্ছিক)','Description (optional)')+'</label><input id="exDesc" placeholder="'+L('যেমন: মাসিক বেতন','e.g. monthly salary')+'">';
+ else el.innerHTML='<label>'+(type=='purchase'?L('কোন মালামাল কিনেছেন?','What stock did you buy?'):L('বিশেষ খরচের বিবরণ','Special expense description'))+'</label><input id="exDesc" placeholder="'+(type=='purchase'?L('যেমন: চিনি, চা পাতা, দুধ','e.g. sugar, tea leaves, milk'):L('যেমন: মেরামত, যাতায়াত','e.g. repair, transport'))+'"><label>'+L('টাকার পরিমাণ','Amount')+'</label><input id="exAmount" type="number" min="0" placeholder="'+L('টাকা','Amount')+'">';
 }
 function vDash(){
  var ds=H.filter(function(s){return day(s.t)==dd}).sort(function(a,b){return b.sn-a.sn}),r=sums(ds);
@@ -562,9 +562,9 @@ function dayReport(date){
  o.push('--------------------------------',t('total')+': '+$$(r.t),'','--------------------------------');
  Object.keys(it).sort(function(a,b){return it[b]-it[a]}).forEach(function(k){o.push(k+'  ×'+it[k])});
  var ex=expFor(date),spent=expSum(ex),sales=r.t;
- o.push('','--------------------------------','খরচ ও বেতনের হিসাব');
- ex.forEach(function(x){o.push((x.type=='salary'?'বেতন: '+x.worker:x.type=='purchase'?'মালামাল কেনা':'বিশেষ খরচ')+' — '+(x.desc||'')+' : '+$$(x.type=='salary'?x.paid:x.amount));if(x.type=='salary')o.push('  মোট বেতন: '+$$(x.amount)+' | দিয়েছেন: '+$$(x.paid)+' | বাকি: '+$$(Math.max(0,x.amount-x.paid)))});
- o.push('মোট খরচ (পরিশোধিত): '+$$(spent),'বিক্রি থেকে খরচ বাদে: '+$$(sales-spent),'নোট: পণ্যের ক্রয়মূল্য আলাদা করে না দিলে এটি বিক্রি থেকে নথিভুক্ত খরচ বাদে হিসাব।');
+ o.push('','--------------------------------',L('খরচ ও বেতনের হিসাব','Expenses and salary report'));
+ ex.forEach(function(x){o.push((x.type=='salary'?L('বেতন: ','Salary: ')+x.worker:x.type=='purchase'?L('মালামাল কেনা','Stock purchase'):L('বিশেষ খরচ','Special expense'))+' — '+(x.desc||'')+' : '+$$(x.type=='salary'?x.paid:x.amount));if(x.type=='salary')o.push('  '+L('মোট বেতন','Total salary')+': '+$$(x.amount)+' | '+L('দিয়েছেন','Paid')+': '+$$(x.paid)+' | '+L('বাকি','Due')+': '+$$(Math.max(0,x.amount-x.paid)))});
+ o.push(L('মোট খরচ (পরিশোধিত): ','Total expenses paid: ')+$$(spent),L('বিক্রি থেকে খরচ বাদে: ','Sales minus recorded expenses: ')+$$(sales-spent),L('নোট: পণ্যের ক্রয়মূল্য আলাদা করে না দিলে এটি বিক্রি থেকে নথিভুক্ত খরচ বাদে হিসাব।','Note: this is sales minus recorded expenses, not true net profit unless cost of goods sold is recorded separately.'));
  return o.join('\n');
 }
 function showDayRpt(d){var r=sums(H.filter(function(s){return day(s.t)==d}));
@@ -685,7 +685,7 @@ function openDU(id){var d=DU.find(function(x){return x.id==id});if(!d)return;dvi
  h+=(ev.length?ev.map(function(e){return '<div class="row"><div><div>'+e.txt+'</div><div class="mute" style="font-size:12px">'+new Date(e.t).toLocaleString()+'</div></div><b style="color:'+(e.a<0?'var(--ac)':'var(--warn)')+'">'+(e.a<0?'−':'')+$$(Math.abs(e.a))+'</b></div>'}).join(''):'<div class="empty">'+t('noDue')+'</div>');
  h+='</div>'+((d.archive||[]).length?'<button style="width:100%;margin-top:8px" onclick="showArchive('+d.id+')">'+L('আগের হিসাব দেখুন ('+d.archive.length+')','View past statements ('+d.archive.length+')')+'</button>':'');
  h+='<div style="display:flex;gap:10px;margin-top:10px"><button class="pri" style="flex:1" onclick="addDuPay('+d.id+')">'+t('addPayment')+'</button><button style="flex:1" onclick="printDU('+d.id+')">'+I('print')+' '+t('statement')+'</button></div>';
- h+='<button class="wa" style="width:100%;margin-top:8px" onclick="waDu('+d.id+')">'+L('WhatsApp-এ হিসাব পাঠান','Send on WhatsApp')+(d.phone?'':' ('+L('নম্বর বেছে নিন','pick contact')+')')+'</button>';
+ h+='<div style="display:flex;gap:8px;margin-top:8px"><button class="wa" style="flex:1" onclick="waDu('+d.id+')">WhatsApp</button><button style="flex:1" onclick="imoDu('+d.id+')">IMO</button></div>';
  h+='<button style="width:100%;margin-top:8px" onclick="$(\'#ds\').classList.remove(\'show\')">'+t('done')+'</button>';
  $('#dsb').innerHTML=h;$('#ds').classList.add('show')
 }
@@ -697,6 +697,8 @@ function showArchive(id){var d=DU.find(function(x){return x.id==id});if(!d)retur
 }
 function waNum(p){var n=String(p||'').replace(/[^0-9]/g,'');if(n.indexOf('00')==0)n=n.slice(2);if(n.indexOf('880')==0)return n;if(n.charAt(0)=='0')return '88'+n;if(n.length==10&&n.charAt(0)=='1')return '880'+n;return n}
 function waOpen(phone,msg){var n=waNum(phone);window.open('https://wa.me/'+(n?n:'')+'?text='+encodeURIComponent(msg),'_blank')}
+function imoShare(msg){if(navigator.share){navigator.share({title:S.shop+' · '+L('হিসাব','Statement'),text:msg}).catch(function(e){if(e&&e.name!='AbortError')copyShareText(msg)})}else{copyShareText(msg)}}
+function copyShareText(msg){try{var q=navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(msg):Promise.reject();q.then(function(){toast(L('হিসাব কপি হয়েছে; IMO খুলে পেস্ট করুন','Message copied; open IMO and paste it'))}).catch(function(){var a=document.createElement('textarea');a.value=msg;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast(L('হিসাব কপি হয়েছে; IMO খুলে পেস্ট করুন','Message copied; open IMO and paste it'))}catch(e){prompt(L('এই লেখা কপি করে IMO-তে পাঠান','Copy this message and send it in IMO'),msg)}a.remove()})}catch(e){prompt(L('এই লেখা কপি করে IMO-তে পাঠান','Copy this message and send it in IMO'),msg)}}
 function pubLink(pc){return pc?location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'')+'?r='+pc:''}
 function waDu(id){var d=DU.find(function(x){return x.id==id});if(!d)return;
  if(CU){pubDue(d);dusave()}
@@ -710,6 +712,8 @@ function waRc(no){var s=H.find(function(h){return h.no==no});if(!s)return;
  var lk=(CU&&s.pc)?pubLink(s.pc):'',bn=S.lang!='en';
  var msg=lk?S.shop+'\n'+L('ইনভয়েস #','Invoice #')+s.sn+' · '+day(s.t)+'\n'+t('total')+': *'+$$(s.total)+'*'+(dr?'\n'+t('Due')+': '+$$(dr.a):'')+'\n\n'+L('রসিদ দেখুন:','View receipt:')+'\n'+lk:rcText(s);
  waOpen(du?du.phone:'',msg)}
+function imoDu(id){var d=DU.find(function(x){return x.id==id});if(!d)return;if(CU){pubDue(d);dusave()}var lk=CU?pubLink(d.pc):'',tot=duTotal(d);var ev=(d.entries||[]).slice(-8).map(function(e){return '• '+new Date(e.t).toLocaleDateString()+' · '+(e.items||'')+' · '+$$(e.a)}).join('\n');var lp=(d.pays||[]).slice(-3).map(function(p){return '✔ '+new Date(p.t).toLocaleDateString()+' · '+L('জমা','Paid')+' · '+$$(p.a)}).join('\n');var msg=S.shop+'\n'+L('প্রিয় ','Dear ')+d.name+'\n'+(tot>0.004?t('totalDue')+': *'+$$(tot)+'*':L('আপনার কোনো বাকি নেই। ধন্যবাদ!','No dues. Thank you!'))+(ev?'\n\n'+ev:'')+(lp?'\n'+lp:'')+(lk?'\n\n'+L('পুরো হিসাব দেখুন:','View full statement:')+'\n'+lk:'');imoShare(msg)}
+function imoRc(no){var s=H.find(function(h){return h.no==no});if(!s)return;var dr=(s.pays||[]).find(function(x){return x.m=='Due'&&x.debtor}),du=dr?DU.find(function(x){return x.name==dr.debtor}):null;var lk=(CU&&s.pc)?pubLink(s.pc):'',msg=lk?S.shop+'\n'+L('ইনভয়েস #','Invoice #')+s.sn+' · '+day(s.t)+'\n'+t('total')+': *'+$$(s.total)+'*'+(dr?'\n'+t('Due')+': '+$$(dr.a):'')+'\n\n'+L('রসিদ দেখুন:','View receipt:')+'\n'+lk:rcText(s);imoShare(msg)}
 function addDuPay(id){var d=DU.find(function(x){return x.id==id});if(!d)return;var max=duTotal(d);
  var v=prompt(t('addPayment')+' ('+t('totalDue')+' '+$$(max)+')',max>0?max.toFixed(2):'0');if(v==null)return;var a=parseFloat(v);if(!a||a<=0)return;if(a>max+0.004){toast(L('বাকির চেয়ে বেশি জমা নেওয়া যাবে না','Cannot exceed the amount due'));return}
  d.pays=d.pays||[];d.pays.push({t:Date.now(),a:a});
@@ -776,9 +780,9 @@ function doReset(){var e=$('#le').value.trim();if(!e){showLogin(L('আগে ই
 
 function onPos(snap){var d={};snap.docs.forEach(function(x){d[x.id]=x.data()});
  if(!d.settings&&!d.products){if(snap.metadata.fromCache)return;ready=true;sy('on');push();Object.keys(IMG).forEach(function(k){FB.set('pos','img_'+k,{d:IMG[k]})});welcome();return}
- if(d.settings)S=Object.assign({shop:'Musafir Cafe',cur:'৳',tax:0,lang:'bn'},d.settings);if(d.products)P=d.products.list||[];if(d.due)DU=d.due.list||[];
+ if(d.settings)S=Object.assign({shop:'Musafir Cafe',cur:'৳',tax:0,lang:'bn'},d.settings);if(d.products)P=d.products.list||[];if(d.due)DU=d.due.list||[];if(d.expenses&&Array.isArray(d.expenses.list)){var merged={},cloudE=d.expenses.list;cloudE.concat(E).forEach(function(x){if(x&&x.id!=null)merged[x.id]=x});E=Object.keys(merged).map(function(k){return merged[k]}).sort(function(a,b){return (a.t||0)-(b.t||0)})}
  var n={};Object.keys(d).forEach(function(k){if(k.indexOf('img_')==0&&d[k])n[k.slice(4)]=d[k].d});IMG=n;
- ready=true;lsave();sy('on');render();welcome()
+ ready=true;lsave();push();sy('on');render();welcome()
 }
 
 function onSales(snap){var l=snap.docs.map(function(x){return x.data()});
@@ -795,7 +799,7 @@ function onErr(){sy('err')}
 function startAuth(){FB.watch(function(u){FB.stop();
  if(!u){CU=null;ready=false;upl=false;showLogin();return}
  CU=u.uid;CE=u.email||'';var lu=null;try{lu=localStorage.getItem('pos_uid');localStorage.setItem('pos_uid',CU)}catch(e){}
- if(lu&&lu!==CU){H=[];P=[];IMG={};S={shop:'Musafir Cafe',cur:'৳',tax:0,lang:S.lang}}
+ if(lu&&lu!==CU){H=[];P=[];IMG={};DU=[];E=[];S={shop:'Musafir Cafe',cur:'৳',tax:0,lang:S.lang}}
  $('#lgn').classList.remove('show');upl=false;ready=false;sy('off');render();
  FB.listen('pos',onPos,onErr);FB.listen('sales',onSales,onErr)
 })}
@@ -857,7 +861,7 @@ function pvDueHtml(d){var bn=d.lang!='en',cu=d.cur||'',m=function(n){return cu+'
 setInterval(function(){var k=tdy();if(k!=curDay){curDay=k;dd=k;dm=k.slice(0,7);render()}},20000);
 window.addEventListener('resize',function(){if(view=='sell')render()});
 window.addEventListener('online',function(){sy('on');render()});
-window.addEventListener('offline',function(){sy();render()});
+window.addEventListener('offline',function(){sy();render()});window.addEventListener('online',function(){sy();if(CU&&ready)push();rqFlush();render()});
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 
 try{var tm0=localStorage.getItem('pos_theme');if(tm0&&tm0!='auto')document.documentElement.setAttribute('data-theme',tm0);var fz0=localStorage.getItem('pos_fsz');if(fz0&&fz0!='md')document.documentElement.setAttribute('data-fsz',fz0);localStorage.removeItem('pos_view')}catch(e){}
