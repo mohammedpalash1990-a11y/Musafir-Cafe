@@ -285,7 +285,7 @@ function rpSet(k,v){S.rp=S.rp||{};S.rp[k]=v;save();render();rqFlush()}
 function rpTest(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}rqAdd({k:'test',t:Date.now(),shop:S.shop});toast(L('টেস্ট পাঠানো হয়েছে, ইমেইল দেখুন','Test sent, check your email'))}
 function rpNow(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var d=tdy();H.filter(function(h){return day(h.t)==d}).forEach(function(h){rqAdd(rqSale(h))});rqAdd({k:'report',day:d,shop:S.shop});toast(L('আজকের রিপোর্ট পাঠানো হচ্ছে','Sending today\'s report'))}
 function rpHist(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}H.forEach(function(h){rqAdd(rqSale(h))});toast(L('সব পুরনো বিক্রি পাঠানো হচ্ছে','Sending all past sales'))}
-var APP_V='v4 · 2026-10-27';
+var APP_V='v5 · 2026-10-27';
 function updApp(){if(!navigator.onLine){toast(L('আপডেটের জন্য নেট লাগবে','Internet needed to update'));return}toast(L('আপডেট হচ্ছে…','Updating…'));var p=[];try{if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}))}catch(e){}Promise.all(p).catch(function(){}).then(function(){location.reload()})}
 function verBox(){return '<div class="box"><div class="hd">'+I('set')+'<b>'+L('অ্যাপ ভার্সন','App version')+'</b></div><div class="dl"><span>'+APP_V+'</span><button class="pri" onclick="updApp()">'+L('এখনই আপডেট করুন','Update now')+'</button></div><div class="mute" style="font-size:12px">'+L('আপনার বিক্রি ও ডেটা মুছবে না। নতুন ফাইল GitHub-এ দেওয়ার পর এটা চাপলে নতুন ভার্সন চলে আসবে।','Your sales and data are kept. Press this after uploading new files to GitHub.')+'</div></div>'}
 function rpBox(){var r=S.rp||{};return '<div class="box"><div class="hd">'+I('cash')+'<b>'+L('দৈনিক রিপোর্ট (ইমেইল ও ড্রাইভ)','Daily report (email & Drive)')+'</b></div>'
@@ -427,6 +427,7 @@ function thumb(u,cb){var im=new Image();im.onload=function(){var c=document.crea
 
 function charge(){
  if(!Object.keys(cart).length)return;var ps=pst();if(!ps.ok){toast(ps.rows.some(function(x){return x.m=='Due'&&!x.debtor})?t('needDebtor'):L('পেমেন্ট পুরো হয়নি','Payment is not complete'));return}
+ if(otpOn()&&!otpPass){var oq=otpQueue(ps);if(oq.length){otpStart(oq);return}}otpPass=false;
  var c=calc(),items=[];
  for(var id in cart){var p=gp(id);items.push({id:p.id,name:p.name,bn:p.bn,price:p.price,qty:cart[id]});if(p.stock!=='')p.stock-=cart[id]}
  var left=ps.chg,mg={},cashGiven=0,dueRows=[];
@@ -437,8 +438,8 @@ function charge(){
  var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode()};
  if(!CU)s.lc=true;
  H.push(s);
- dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,no:s.sn,sid:s.no,items:items.map(function(i){return nm(i)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
- save();if(dueRows.length)dusave();cSale(s);rqAdd(rqSale(s));pubReceipt(s);cart={};disc='';recv='';pays=null;$('#cs').classList.remove('show');render();showRc(s.no);
+ dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,otp:!!otpDone[x.debtor.id],no:s.sn,sid:s.no,items:items.map(function(i){return nm(i)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
+ save();if(dueRows.length)dusave();cSale(s);rqAdd(rqSale(s));pubReceipt(s);cart={};disc='';recv='';pays=null;otpDone={};$('#cs').classList.remove('show');render();showRc(s.no);
 }
 
 function plainFoot(s){return footMsg(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
@@ -634,7 +635,7 @@ function fontBox(){var m='md';try{m=localStorage.getItem('pos_fsz')||'md'}catch(
  return '<div class="box"><div class="hd">'+I('sun')+'<b>'+L('ফন্ট সাইজ','Font size')+'</b></div><div style="display:flex;gap:8px">'+[['sm',L('ছোট','Small')],['md',L('মাঝারি','Medium')],['lg',L('বড়','Large')],['xl',L('অনেক বড়','XL')]].map(function(x){return '<button style="flex:1" class="'+(m==x[0]?'pri':'')+'" onclick="setFsz(\''+x[0]+'\')">'+x[1]+'</button>'}).join('')+'</div></div>'}
 function setFsz(v){if(v=='md')document.documentElement.removeAttribute('data-fsz');else document.documentElement.setAttribute('data-fsz',v);try{localStorage.setItem('pos_fsz',v)}catch(e){}render()}
 function sec(ttl,html,open){return '<details'+(open?' open':'')+' style="margin:14px 0"><summary style="cursor:pointer;font-weight:800;font-size:16px;padding:10px 2px;color:var(--ink)">'+ttl+'</summary><div style="margin-top:4px">'+html+'</div></details>'}
-function vSet(){return sec(L('থীম ও ফন্ট','Theme & font'),themeBox()+fontBox(),true)+sec(L('রসিদ, স্বাগতম ও দিনের হিসাব','Receipt, welcome & daily accounts'),rcBox()+accBox())+sec(L('দোকান, ব্যাকআপ ও লগইন','Shop, backup & login'),verBox()+vSet0()+rpBox()+bkBox())}
+function vSet(){return sec(L('থীম ও ফন্ট','Theme & font'),themeBox()+fontBox(),true)+sec(L('রসিদ, স্বাগতম ও দিনের হিসাব','Receipt, welcome & daily accounts'),rcBox()+accBox())+sec(L('দোকান, ব্যাকআপ ও লগইন','Shop, backup & login'),verBox()+otpBox()+vSet0()+rpBox()+bkBox())}
 
 function findDU(nid,name,phone){
  if(nid)for(var i=0;i<DU.length;i++)if(DU[i].nid&&DU[i].nid==nid)return DU[i];
@@ -656,7 +657,7 @@ function keepDue(){var e=$('#dul');if(e)e.innerHTML=duListHtml(DU.filter(functio
 function openDU(id){var d=DU.find(function(x){return x.id==id});if(!d)return;dview=id;
  var tot=duTotal(d),h='<div class="hd">'+(d.photo?'<img class="pimg" style="width:40px;height:40px" alt="" src="'+d.photo+'">':'')+'<b>'+esc(d.name)+'</b><button style="margin-left:auto;padding:7px 12px" onclick="duSet('+d.id+')">⚙ '+L('সেটিংস','Settings')+'</button></div><div class="mute">'+esc(d.phone||'')+(d.nid?' · NID '+esc(d.nid):'')+'</div><div class="big">'+$$(tot)+'<span>'+t('totalDue')+'</span></div>';
  h+='<div class="box"><b>'+t('history')+'</b>';
- var ev=(d.entries||[]).map(function(e){return{t:e.t,txt:t('takenOn')+' · '+(e.items||'')+' · #'+e.no,a:e.a}}).concat((d.pays||[]).map(function(p){return{t:p.t,txt:t('paidOn'),a:-p.a}}));
+ var ev=(d.entries||[]).map(function(e){return{t:e.t,txt:t('takenOn')+' · '+(e.items||'')+' · #'+e.no+(e.otp?' ✔':''),a:e.a}}).concat((d.pays||[]).map(function(p){return{t:p.t,txt:t('paidOn'),a:-p.a}}));
  ev.sort(function(a,b){return b.t-a.t});
  h+=(ev.length?ev.map(function(e){return '<div class="row"><div><div>'+e.txt+'</div><div class="mute" style="font-size:12px">'+new Date(e.t).toLocaleString()+'</div></div><b style="color:'+(e.a<0?'var(--ac)':'var(--warn)')+'">'+(e.a<0?'−':'')+$$(Math.abs(e.a))+'</b></div>'}).join(''):'<div class="empty">'+t('noDue')+'</div>');
  h+='</div>'+((d.archive||[]).length?'<button style="width:100%;margin-top:8px" onclick="showArchive('+d.id+')">'+L('আগের হিসাব দেখুন ('+d.archive.length+')','View past statements ('+d.archive.length+')')+'</button>':'');
@@ -893,6 +894,46 @@ function kChart(){var pm={};KH.p.forEach(function(p){pm[p.id]=p});
  var pb={};tx.forEach(function(x){pb[x.pid]=(pb[x.pid]||0)+(+x.a||0)});
  h+='<div class="box"><b>'+L('ব্যক্তি অনুযায়ী','By person')+'</b>'+kBarRows(Object.keys(pb).sort(function(a,b){return pb[b]-pb[a]}).map(function(k){return{n:esc(pm[k].name),v:pb[k],c:KCOL[pm[k].type]}}),KCOL.staff)+'</div>';
  return h}
+
+/* ===== বাকির কনফার্মেশন কোড (WhatsApp / IMO) ===== */
+var otpS=null,otpPass=false,otpDone={};
+function otpOn(){return S.otp!==false}
+function otpSet(v){S.otp=v;save();render()}
+function otpBox(){var on=otpOn();return '<div class="box"><div class="hd">'+I('phone')+'<b>'+L('বাকির কনফার্মেশন কোড','Due confirmation code')+'</b></div><div class="sw" style="border:0"><b>'+L('চালু','Enabled')+'</b><button class="tg'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="otpSet('+!on+')"></button></div><div class="mute" style="font-size:12px">'+L('বাকিতে বিক্রির সময় কাস্টমারকে ৫ ডিজিটের কোড পাঠানো হয়। কাস্টমার কোড বললে তবেই বাকি সেভ হয়। বন্ধ রাখলে আগের মতো সরাসরি সেভ হবে।','On a due sale, a 5-digit code is sent to the customer. The due is saved only after the customer tells you the code. Turn off to save directly as before.')+'</div></div>'}
+function otpGen(){var a=new Uint32Array(1);try{window.crypto.getRandomValues(a)}catch(e){a[0]=Math.floor(Math.random()*4294967295)}return String(10000+a[0]%90000)}
+function otpFresh(){otpS.code=otpGen();otpS.exp=Date.now()+600000;otpS.tries=0;otpS.show=false}
+function otpQueue(ps){var m={},q=[];ps.rows.forEach(function(x){var a=+x.a||0;if(x.m=='Due'&&x.debtor&&a>0.004){if(!m[x.debtor.id]){m[x.debtor.id]={id:x.debtor.id,name:x.debtor.name,a:0};q.push(m[x.debtor.id])}m[x.debtor.id].a+=a}});return q}
+function otpStart(q){otpS={q:q,i:0,done:{},code:'',exp:0,tries:0,show:false};otpFresh();otpView()}
+function otpCur(){var c=otpS.q[otpS.i];return{c:c,d:DU.find(function(x){return x.id==c.id})||{}}}
+function otpMsg(){var o=otpS,c=otpCur().c,bn=S.lang!='en';
+ return S.shop+'\n'+(bn?'আপনি '+$$(c.a)+' বাকি নিচ্ছেন। কনফার্ম করতে এই কোডটি আমাদের বলুন (১০ মিনিট চলবে):':'You are taking '+$$(c.a)+' on credit. To confirm, tell us this code (valid 10 minutes):')+'\n*'+o.code+'*'}
+function otpView(){var o=otpS,x=otpCur(),c=x.c,d=x.d;
+ var h='<div class="hd">'+I('phone')+'<b>'+L('বাকির কনফার্মেশন কোড','Due confirmation code')+'</b>'+(o.q.length>1?'<span class="mute" style="margin-left:auto">'+(o.i+1)+'/'+o.q.length+'</span>':'')+'</div>';
+ h+='<div class="box"><div style="display:flex;align-items:center;gap:10px">'+kAv({photo:d.photo,name:c.name},44)+'<div><b>'+esc(c.name)+'</b><div class="mute" style="font-size:12px">'+L('বাকি নিচ্ছে','Taking on credit')+'</div></div></div><div class="big">'+$$(c.a)+'</div>';
+ h+='<label>'+t('debtorPhone')+'</label><input id="otph" inputmode="tel" value="'+esc(d.phone||'')+'" placeholder="01XXXXXXXXX">';
+ h+='<button class="wa" style="width:100%;margin-top:10px" onclick="otpSend()">'+L('WhatsApp-এ কোড পাঠান','Send code on WhatsApp')+'</button>';
+ h+='<div style="display:flex;gap:8px;margin-top:8px"><button style="flex:1" onclick="otpShare()">'+L('শেয়ার (IMO ইত্যাদি)','Share (IMO etc.)')+'</button><button style="flex:1" onclick="otpCopy()">'+I('copy')+' '+L('মেসেজ কপি','Copy message')+'</button></div>';
+ h+='<button style="width:100%;margin-top:8px" onclick="otpS.show=!otpS.show;otpView()">'+(o.show?L('কোড লুকান','Hide code'):L('কাস্টমারকে স্ক্রিনে কোড দেখান','Show code on screen'))+'</button>';
+ if(o.show)h+='<div class="big" style="text-align:center;letter-spacing:8px">'+o.code+'</div>';
+ h+='</div><div class="box"><label style="margin-top:0">'+L('কাস্টমার যে কোড বলল, এখানে লিখুন','Enter the code the customer tells you')+'</label><input id="otpin" inputmode="numeric" maxlength="5" autocomplete="one-time-code" placeholder="_ _ _ _ _" style="text-align:center;font-size:24px;letter-spacing:8px" onkeydown="if(event.key==\'Enter\')otpOk()">'
+  +'<button class="pri" style="width:100%;margin-top:10px" onclick="otpOk()">'+t('done')+'</button><button style="width:100%;margin-top:8px" onclick="otpNew()">'+L('নতুন কোড বানান','New code')+'</button></div>';
+ h+='<button style="width:100%;margin-top:6px" onclick="otpCancel()">'+t('back')+'</button>';
+ $('#dsb').innerHTML=h;$('#ds').classList.add('show')}
+function otpPhone(){var x=otpCur(),d=x.d,e=$('#otph'),p=(e?e.value:d.phone||'').trim();
+ if(p.replace(/\D/g,'').length<10){toast(L('সঠিক ফোন নম্বর দিন','Enter a valid phone number'));return null}
+ if(d.id!==undefined&&d.phone!==p){d.phone=p;dusave()}return p}
+function otpAlive(){if(Date.now()>otpS.exp){otpFresh();toast(L('আগের কোডের মেয়াদ শেষ, নতুন কোড বানানো হয়েছে','Old code expired, new code made'))}}
+function otpSend(){var p=otpPhone();if(!p)return;otpAlive();waOpen(p,otpMsg())}
+function otpShare(){var p=otpPhone();if(!p)return;otpAlive();var m=otpMsg();try{if(navigator.share){navigator.share({text:m});return}}catch(e){}otpCopy()}
+function otpCopy(){otpAlive();try{navigator.clipboard.writeText(otpMsg());toast(L('মেসেজ কপি হয়েছে','Message copied'))}catch(e){toast(t('csvno'))}}
+function otpNew(){otpFresh();toast(L('নতুন কোড বানানো হয়েছে, আগেরটা আর চলবে না','New code made, the old one is void'));otpView()}
+function otpCancel(){otpS=null;closeDs()}
+function otpOk(){var o=otpS,c=otpCur().c,v=($('#otpin').value||'').trim();
+ if(Date.now()>o.exp){otpFresh();toast(L('কোডের মেয়াদ শেষ, নতুন কোড পাঠান','Code expired, send a new one'));otpView();return}
+ if(v!==o.code){o.tries++;if(o.tries>=5){otpFresh();toast(L('পাঁচবার ভুল, নতুন কোড বানানো হয়েছে','Five wrong tries, new code made'));otpView()}else{toast(L('কোড মেলেনি, আবার দিন','Code does not match'));$('#otpin').value=''}return}
+ o.done[c.id]=true;o.i++;
+ if(o.i<o.q.length){otpFresh();otpView();return}
+ otpDone=o.done;otpPass=true;otpS=null;closeDs();window.charge()}
 
 function navHtml(){var tabs=[['sell',L('বিক্রি','Sell'),'sell'],['due',t('dueTab'),'cash'],['dash',L('ড্যাশবোর্ড','Dashboard'),'dash'],['prod',L('পণ্য','Items'),'items'],['set',L('সেটিংস','Settings'),'set'],['kh',L('খাতা','Khata'),'book']];return '<nav id="nav">'+tabs.map(function(x){return '<button class="'+(view==x[0]?'on':'')+'" onclick="go(\''+x[0]+'\')">'+I(x[2])+'<span>'+x[1]+'</span></button>'}).join('')+'</nav>'}
 function info(){var e=$('#ib');if(!e)return;var l=H.length?H.reduce(function(a,x){return x.t>a.t?x:a}):null,d=new Date();
