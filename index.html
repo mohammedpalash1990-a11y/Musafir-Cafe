@@ -858,4 +858,147 @@ if(!/PASTE/.test(window.FIREBASE_CONFIG.apiKey)){
 }
 if(window.onFB)window.onFB();
 </script>
+<!-- ===== MUSAFIR PATCH p2 START (v4 এর জন্য) : </body> এর ঠিক আগে বসান। আগের কোনো প্যাচ থাকলে সেটা মুছে দিন ===== -->
+<script>
+var PATCH_V='p2';
+(function(){
+if(typeof PUBR!=='undefined'&&PUBR)return;
+try{
+var LS_OK='pos_rp_ok',LS_DEAD='pos_rq_dead',BATCH=40,ST={msg:'',chk:'',verify:false};
+function lget(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
+function lset(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+function good(x){return '<b style="color:var(--ac)">'+x+'</b>'}
+function bad(x){return '<b style="color:var(--warn)">'+x+'</b>'}
+function stamp(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+
+/* ---------- সারি (queue) ---------- */
+window.rqSet=function(q){var ok=lset('pos_rq',q);if(!ok)toast(L('⚠ ফোনের জায়গা ভর্তি, সারি সেভ হয়নি','⚠ Storage full, queue not saved'));return ok};
+
+/* বিক্রির স্থায়ী আইডি (rid): অফলাইনে করা বিক্রির নম্বর পরে বদলালেও শিটে বাতিল ঠিক ধরা পড়বে */
+var _rqSale=rqSale;
+window.rqSale=function(s){if(!s.rid)s.rid=s.no;var e=_rqSale(s);e.id=s.rid;return e};
+var _charge=charge;
+window.charge=function(){var n=H.length;_charge.apply(this,arguments);if(H.length>n)lsave()};
+var _vr=null;
+window.rqAdd=function(ev){if(!rpOn())return;if(ev&&ev.k=='void'&&_vr!=null)ev.id=_vr;var q=rqGet();q.push(ev);rqSet(q);rqFlush()};
+var _void=voidSale;
+window.voidSale=function(no){var s=H.find(function(h){return h.no==no});_vr=(s&&s.rid)?s.rid:null;try{_void(no)}finally{_vr=null}};
+
+/* হিস্ট্রি কাজ: বিক্রিগুলো সারিতে আলাদা আলাদা না রেখে একটা "কাজ" হিসেবে রাখা হয়, ৪০টা করে ব্যাচে যায় */
+function selSales(j){return H.filter(function(s){var d=day(s.t);return j.day?d==j.day:j.month?d.slice(0,7)==j.month:true}).sort(function(a,b){return a.t-b.t||a.no-b.no})}
+function addJob(o){var n=selSales(o).length;if(!n)return 0;o.k='hist';o.from=0;o.total=n;o.id=Date.now()+'-'+Math.floor(Math.random()*1e6);rqAdd(o);return n}
+
+/* ---------- পাঠানো ---------- */
+function withTimeout(p,ms){return new Promise(function(res,rej){var t=setTimeout(function(){rej({name:'AbortError'})},ms);p.then(function(v){clearTimeout(t);res(v)},function(e){clearTimeout(t);rej(e)})})}
+function post(ev){
+ var url=S.rp.url,body=JSON.stringify({token:(S.rp||{}).token||'',ev:ev}),hd={'Content-Type':'text/plain;charset=utf-8'};
+ var need=ev.k=='batch'||ev.k=='stat'||ev.k=='month';
+ return withTimeout(fetch(url,{method:'POST',headers:hd,body:body}).then(function(r){return r.text()}),45000).then(function(tx){
+  tx=(tx||'').trim();
+  if(tx=='bad token')return{fatal:true,msg:L('✗ গোপন কোড মেলেনি। অ্যাপ আর স্ক্রিপ্টের কোড হুবহু এক করুন','✗ Secret code does not match')};
+  if(tx.charAt(0)=='<')return{fatal:true,msg:L('✗ Deploy-এ Who has access = Anyone দিয়ে New version করে Deploy করুন','✗ Deploy as "Anyone" and publish a new version')};
+  if(need&&tx=='ok')return{fatal:true,msg:L('✗ স্ক্রিপ্ট পুরনো। নতুন daily-report কোড বসিয়ে New version Deploy করুন','✗ Script is old. Paste the new script and deploy a new version')};
+  if(tx=='ok'||tx.indexOf('ok:')==0)return{ok:true,txt:tx};
+  return{err:true,msg:tx.slice(0,80)||'empty'};
+ }).catch(function(e){
+  if(e&&e.name=='AbortError')return{net:true,msg:L('সাড়া আসেনি (৪৫ সেকেন্ড)','No response (45s)')};
+  return withTimeout(fetch(url,{method:'POST',mode:'no-cors',headers:hd,body:body}),45000).then(function(){return{ok:true,unv:true,txt:''}}).catch(function(e2){return{net:true,msg:L('নেট বা সংযোগ সমস্যা','Network problem')}});
+ });
+}
+
+var busy=false,fails=0;
+function fin(){busy=false;rpShow()}
+function bump(id,n){var q=rqGet();if(q[0]&&q[0].id==id){q[0].from=(q[0].from||0)+n;rqSet(q)}}
+function dropHead(h){var q=rqGet();if(q.length&&JSON.stringify(q[0])==JSON.stringify(h)){q.shift();rqSet(q)}}
+function toDead(ev){var d=lget(LS_DEAD,[]);d.push(ev);lset(LS_DEAD,d)}
+window.rqFlush=function(){if(!rpOn()||busy||!navigator.onLine)return;if(!rqGet().length){rpShow();return}busy=true;step()};
+function step(){
+ var q=rqGet();
+ if(!q.length){if(ST.verify){ST.verify=false;rpCheck(true)}fin();return}
+ var h=q[0],ev,done,n=1;
+ if(h.k=='hist'){
+  var list=selSales(h),from=h.from||0;
+  if(from>=list.length){q.shift();rqSet(q);ST.msg=good('✓ '+L('হিস্ট্রি পাঠানো শেষ','History upload finished'))+' · '+stamp();step();return}
+  if(h.single){ev=rqSale(list[from]);done=function(){bump(h.id,1)}}
+  else{var part=list.slice(from,from+BATCH);n=part.length;ev={k:'batch',list:part.map(function(s){return rqSale(s)}),shop:S.shop,cur:S.cur};done=function(){bump(h.id,part.length)}}
+ }else{ev=h;done=function(){dropHead(h)}}
+ post(ev).then(function(r){
+  if(r.ok){fails=0;done();lset(LS_OK,Date.now());
+   ST.msg=good('✓ '+(h.k=='hist'?n+L(' টি বিক্রি শিটে গেছে',' sales sent'):L('পাঠানো হয়েছে','Sent')))+(r.unv?' <span class="mute">'+L('(নিশ্চিত নয়, "শিট যাচাই" চাপুন)','(unconfirmed, press Check sheet)')+'</span>':'')+' · '+stamp();
+   rpShow();step();return}
+  if(r.fatal){ST.msg=bad(r.msg);fin();return}
+  if(r.net){ST.msg=bad(L('✗ ','✗ ')+r.msg)+' <span class="mute">'+L('১ মিনিট পরে নিজে আবার চেষ্টা হবে','will retry in 1 minute')+'</span>';fin();return}
+  fails++;
+  if(h.k=='hist'&&!h.single){var q2=rqGet();if(q2[0]&&q2[0].id==h.id){q2[0].single=true;rqSet(q2)}fails=0;ST.msg=bad('✗ '+esc(r.msg))+' · '+L('একটা একটা করে পাঠানো হচ্ছে','sending one by one');rpShow();setTimeout(step,800);return}
+  if(fails>=3){toDead(ev);if(h.k=='hist')bump(h.id,1);else dropHead(h);fails=0;ST.msg=bad('✗ '+esc(r.msg))+' · '+L('একটা ইভেন্ট ব্যর্থ তালিকায় গেছে','one event moved to failed list');rpShow();step();return}
+  ST.msg=bad('✗ '+esc(r.msg));rpShow();setTimeout(step,1500);
+ });
+}
+
+/* ---------- বাটনের কাজ ---------- */
+window.rpNow=function(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var d=tdy();addJob({day:d});rqAdd({k:'report',day:d,shop:S.shop});toast(L('আজকের রিপোর্ট পাঠানো হচ্ছে','Sending today\'s report'));rpShow()};
+window.rpMonth=function(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var el=document.getElementById('rpm'),m=(el&&el.value)||tdy().slice(0,7);addJob({month:m});rqAdd({k:'month',month:m,shop:S.shop});toast(L('মাসিক রিপোর্ট পাঠানো হচ্ছে','Sending monthly report'));rpShow()};
+window.rpHist=function(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var n=addJob({});if(!n){toast(L('পাঠানোর মতো বিক্রি নেই','No sales to send'));return}ST.verify=true;toast(n+L(' টি বিক্রি পাঠানো শুরু',' sales: upload started'));rpShow()};
+window.rpCheck=function(auto){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}
+ post({k:'stat',shop:S.shop}).then(function(r){
+  if(r.ok&&r.txt&&r.txt.indexOf('ok:')==0){var p=r.txt.split(':'),mine=H.length;ST.chk='<b>'+L('শিটে এখন ','Sheet has ')+p[1]+L(' টি বিক্রি আছে, শেষ দিন ',' sales, last day ')+esc(p[2]||'-')+'</b> · '+L('অ্যাপে আছে ','app has ')+mine}
+  else if(r.ok&&r.unv)ST.chk=L('যাচাই করা যায়নি (ব্রাউজার উত্তর পড়তে দিচ্ছে না)','Could not verify (browser blocked the reply)');
+  else if(r.fatal)ST.chk=bad(r.msg);
+  else ST.chk=bad(L('যাচাই হয়নি: ','Check failed: ')+esc(r.msg||''));
+  rpShow();if(!auto)toast(L('যাচাই শেষ','Check done'))});
+};
+window.rpRetry=function(){var d=lget(LS_DEAD,[]);if(!d.length)return;var q=rqGet();d.forEach(function(e){q.push(e)});rqSet(q);lset(LS_DEAD,[]);rqFlush();rpShow()};
+window.rpClr=function(){rqSet([]);lset(LS_DEAD,[]);ST.msg='';ST.chk='';render()};
+
+/* ---------- দেখানো ---------- */
+function statusHtml(){
+ var q=rqGet(),dead=lget(LS_DEAD,[]),ok=lget(LS_OK,0),h='';
+ if(!rpOn())h+='<div>'+L('চালু করে URL দিলে রিপোর্ট কাজ করবে।','Turn it on and add the URL.')+'</div>';
+ if(ST.msg)h+='<div>'+ST.msg+'</div>';
+ if(ST.chk)h+='<div style="margin-top:4px">'+ST.chk+'</div>';
+ var pend=0,jt=0,jd=0;q.forEach(function(e){if(e.k=='hist'){jt+=e.total||0;jd+=Math.min(e.from||0,e.total||0)}else pend++});
+ if(jt){var pc=Math.round(jd/jt*100);h+='<div style="margin-top:6px">'+L('বিক্রি পাঠানো: ','Sales sent: ')+jd+' / '+jt+'<div style="height:8px;background:var(--line);border-radius:6px;margin-top:4px"><div style="height:8px;width:'+pc+'%;background:var(--ac);border-radius:6px"></div></div></div>'}
+ if(pend)h+='<div>'+L('অন্য ইভেন্ট বাকি: ','Other events waiting: ')+pend+'</div>';
+ if(dead.length)h+='<div style="color:var(--warn)">'+L('ব্যর্থ: ','Failed: ')+dead.length+' <button class="lk" onclick="rpRetry()">'+L('আবার পাঠান','Retry')+'</button></div>';
+ if(ok)h+='<div>'+L('শেষ সফল: ','Last OK: ')+new Date(ok).toLocaleString()+'</div>';
+ return h+'<div><button class="lk" onclick="rpClr()">'+L('সারি মুছুন','Clear queue')+'</button></div>'}
+window.rpShow=function(){var e=document.getElementById('rps');if(e)e.innerHTML=statusHtml()};
+
+window.rpBox=function(){var r=S.rp||{};return '<div class="box"><div class="hd">'+I('cash')+'<b>'+L('রিপোর্ট (ইমেইল ও ড্রাইভ)','Reports (email & Drive)')+'</b></div>'
+ +'<div class="sw" style="border:0"><b>'+L('চালু','Enabled')+'</b><button class="tg'+(r.on?' on':'')+'" role="switch" aria-checked="'+!!r.on+'" onclick="rpSet(\'on\','+!r.on+')"></button></div>'
+ +'<label>Web App URL</label><input value="'+esc(r.url||'')+'" placeholder="https://script.google.com/macros/s/…/exec" onchange="rpSet(\'url\',this.value.trim())">'
+ +'<label>'+L('গোপন কোড (স্ক্রিপ্টের কোডের সাথে হুবহু এক)','Secret code (same as in the script)')+'</label><input value="'+esc(r.token||'')+'" onchange="rpSet(\'token\',this.value.trim())">'
+ +'<div class="qadd" style="margin-top:10px"><button onclick="rpTest()">'+L('টেস্ট ইমেইল','Test email')+'</button><button onclick="rpCheck()">'+L('শিট যাচাই','Check sheet')+'</button></div>'
+ +'<div class="mute" style="font-size:13px;margin:14px 0 6px">'+L('রিপোর্ট ইমেইলে পাঠান','Email a report')+'</div>'
+ +'<div class="qadd"><button class="pri" onclick="rpNow()">'+L('আজকের রিপোর্ট','Today\'s report')+'</button></div>'
+ +'<div class="dl" style="margin-top:8px"><input type="month" id="rpm" value="'+tdy().slice(0,7)+'" style="width:150px;text-align:left"><button class="pri" onclick="rpMonth()">'+L('মাসিক রিপোর্ট পাঠান','Send monthly report')+'</button></div>'
+ +'<div class="mute" style="font-size:13px;margin:14px 0 6px">'+L('পুরনো বিক্রি শিটে জমা (ইমেইল যাবে না)','Save old sales to the sheet (no email)')+'</div>'
+ +'<div class="qadd"><button onclick="rpHist()">'+L('সব পুরনো বিক্রি পাঠান','Upload all history')+'</button></div>'
+ +'<div id="rps" class="mute" style="font-size:13px;margin-top:12px">'+statusHtml()+'</div></div>'};
+
+/* ---------- অ্যাপ আপডেট ---------- */
+function curKey(){return APP_V+'|'+PATCH_V}
+function srvKey(tx){var a=/var APP_V\s*=\s*'([^']*)'/.exec(tx),b=/var PATCH_V\s*=\s*'([^']*)'/.exec(tx);return(a?a[1]:'?')+'|'+(b?b[1]:'-')}
+function setUpd(m){var e=document.getElementById('upds');if(e)e.textContent=m}
+function pageUrl(){return location.origin+location.pathname}
+window.updApp=function(){
+ if(!navigator.onLine){toast(L('আপডেটের জন্য নেট লাগবে','Internet needed to update'));return}
+ setUpd(L('চেক করা হচ্ছে…','Checking…'));
+ var p=Promise.resolve();
+ try{if(navigator.serviceWorker)p=navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))})}catch(e){}
+ p.then(function(){return window.caches?caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}):0}).catch(function(){})
+ .then(function(){return fetch(pageUrl()+'?nocache='+Date.now(),{cache:'reload'})}).then(function(r){return r.text()})
+ .then(function(tx){var sk=srvKey(tx),ck=curKey();
+  if(sk==ck){setUpd(L('✓ সার্ভারেও এই ভার্সনই আছে (','✓ Server has the same version (')+ck.replace('|',' + ')+L('). নতুন ফাইল GitHub-এ কমিট না হলে বা ডিপ্লয় চললে ১-২ মিনিট পরে আবার চাপুন।','). If you just uploaded, wait 1-2 minutes and try again.'));return}
+  fetch(pageUrl(),{cache:'reload'}).catch(function(){}).then(function(){setUpd(L('নতুন ভার্সন পাওয়া গেছে (','New version found (')+sk.replace('|',' + ')+L('), চালু হচ্ছে…','), loading…'));setTimeout(function(){location.reload()},700)});
+ }).catch(function(){setUpd(L('✗ চেক করা যায়নি, নেট দেখুন','✗ Could not check, see your internet'))});
+};
+window.verBox=function(){return '<div class="box"><div class="hd">'+I('set')+'<b>'+L('অ্যাপ ভার্সন','App version')+'</b></div><div class="dl"><span>'+esc(APP_V)+' · '+PATCH_V+'</span><button class="pri" onclick="updApp()">'+L('এখনই আপডেট করুন','Update now')+'</button></div><div id="upds" class="mute" style="font-size:12px">'+L('আপনার বিক্রি ও ডেটা মুছবে না। নতুন ফাইল GitHub-এ দেওয়ার পর এটা চাপুন। সার্ভারে নতুন ভার্সন না থাকলে এখানে সেটা লেখা আসবে।','Your data is kept. Press after uploading new files. If the server has no newer version, this line will say so.')+'</div></div>'};
+setTimeout(function(){try{fetch(pageUrl()+'?nocache='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(tx){if(srvKey(tx)!=curKey())toast(L('নতুন ভার্সন এসেছে: সেটিংসে "এখনই আপডেট করুন" চাপুন','New version available: press Update now in Settings'))}).catch(function(){})}catch(e){}},6000);
+
+try{if(view=='set')render()}catch(e){}
+}catch(err){console.error('Musafir patch p2 error',err)}
+})();
+</script>
+<!-- ===== MUSAFIR PATCH p2 END ===== -->
 </body></html>
