@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="cup-192.png">
+<title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
 <style>
 :root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#0b2a2e;--z:1;--cw:150px}
@@ -41,8 +41,10 @@ input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px
 </style></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getFirestore,doc,getDoc,setDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-const db=getFirestore(initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"}));
+import {getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,doc,getDoc,setDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const fbApp=initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});
+/* অফলাইন ক্যাশ: মেনু, ছবি ও পাঠানো অর্ডার ফোনে জমা থাকবে */
+let db;try{db=initializeFirestore(fbApp,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){db=getFirestore(fbApp)}
 const SHOP='';const P=new URLSearchParams(location.search),uid=P.get('s')||SHOP,oid=P.get('o');let tbl=(P.get('t')||'').slice(0,10);
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}return null};
@@ -50,10 +52,10 @@ const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);v===null?lo
 const SZ=[{z:.82,cw:104},{z:1,cw:150},{z:1.18,cw:180},{z:1.35,cw:230}];
 let lang=ls('qo_lang')==='en'?'en':'bn',si=+ls('qo_sz');if(!(si>=0&&si<SZ.length)||ls('qo_sz')===null)si=1;
 const TX={
-bn:{bad:'QR বা লিংকটি ঠিক নয়',nopub:'মেনু এখনো প্রকাশ হয়নি',closed:'এখন অর্ডার নেওয়া বন্ধ আছে, মেনু দেখতে পারেন।',search:'পণ্য খুঁজুন',all:'সব',other:'অন্যান্য',add:'+ যোগ করুন',out:'স্টক শেষ',none:'কিছু পাওয়া যায়নি',cartN:n=>'🛒 '+n+'টি',view:'দেখুন ›',tapDrag:'ধরে সরানো যাবে',yours:'আপনার অর্ডার',total:'মোট',tno:'টেবিল নম্বর',tph:'যেমন: 5',yname:'আপনার নাম (ঐচ্ছিক)',note:'নোট (ঐচ্ছিক, যেমন: চিনি কম)',confirm:'✔ অর্ডার কনফার্ম করুন',closedBtn:'এখন অর্ডার নেওয়া বন্ধ',back:'← মেনুতে ফিরুন',needT:'টেবিল নম্বর দিন',wait:'একটু অপেক্ষা করে আবার চেষ্টা করুন',fail:'পাঠানো যায়নি, আবার চেষ্টা করুন',table:'টেবিল ',nf:'অর্ডার পাওয়া যায়নি',sorry:'দুঃখিত, অর্ডারটি নেওয়া যায়নি',sent:'অর্ডার পাঠানো হয়েছে!',steps:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','খাবার প্রস্তুত','পরিবেশন'],
+bn:{bad:'QR বা লিংকটি ঠিক নয়',off:'ইন্টারনেট নেই। একবার নেট দিয়ে এই পাতা খুললে পরে অফলাইনেও মেনু দেখা যাবে।',offb:'📴 অফলাইন · ফোনে জমানো মেনু দেখাচ্ছে',pend:'📴 ইন্টারনেট নেই। অর্ডারটি আপনার ফোনে জমা আছে, নেট আসলেই নিজে থেকে দোকানে চলে যাবে। তাড়া থাকলে এই স্ক্রিনটা কাউন্টারে দেখান।',nopub:'মেনু এখনো প্রকাশ হয়নি',closed:'এখন অর্ডার নেওয়া বন্ধ আছে, মেনু দেখতে পারেন।',search:'পণ্য খুঁজুন',all:'সব',other:'অন্যান্য',add:'+ যোগ করুন',out:'স্টক শেষ',none:'কিছু পাওয়া যায়নি',cartN:n=>'🛒 '+n+'টি',view:'দেখুন ›',tapDrag:'ধরে সরানো যাবে',yours:'আপনার অর্ডার',total:'মোট',tno:'টেবিল নম্বর',tph:'যেমন: 5',yname:'আপনার নাম (ঐচ্ছিক)',note:'নোট (ঐচ্ছিক, যেমন: চিনি কম)',confirm:'✔ অর্ডার কনফার্ম করুন',closedBtn:'এখন অর্ডার নেওয়া বন্ধ',back:'← মেনুতে ফিরুন',needT:'টেবিল নম্বর দিন',wait:'একটু অপেক্ষা করে আবার চেষ্টা করুন',fail:'পাঠানো যায়নি, আবার চেষ্টা করুন',table:'টেবিল ',nf:'অর্ডার পাওয়া যায়নি',sorry:'দুঃখিত, অর্ডারটি নেওয়া যায়নি',sent:'অর্ডার পাঠানো হয়েছে!',steps:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','খাবার প্রস্তুত','পরিবেশন'],
 vw:['⏳ অপেক্ষা করুন','🍽 খাবার প্রস্তুত!','😋 মজা করে খান'],vt:['খাবার তৈরি হচ্ছে… একটু অপেক্ষা করুন','আপনার খাবার তৈরি হয়ে গেছে','ধন্যবাদ, আবার আসবেন ❤'],foot:'আপনার আসাই আমাদের আনন্দ ☕ এই পাতা খোলা রাখলে অবস্থা নিজে থেকেই বদলাবে।',more:'আরও অর্ডার করুন',welcome:'স্বাগতম',tag:'মেনু দেখে অর্ডার দিন',g:['শুভ রাত্রি','সুপ্রভাত','শুভ দুপুর','শুভ বিকাল','শুভ সন্ধ্যা'],
 rate:'আমাদের সার্ভিস কেমন লাগলো?',rcm:'মন্তব্য (ঐচ্ছিক)',rsend:'রেটিং পাঠান',rpick:'তারা দিয়ে রেটিং দিন',rthx:'ধন্যবাদ! আপনার রেটিং পেয়েছি',rfail:'রেটিং পাঠানো যায়নি, আবার চেষ্টা করুন',rl:['','খুব খারাপ','খারাপ','মোটামুটি','ভালো','চমৎকার'],sizeS:'ছোট',sizeL:'বড়'},
-en:{bad:'Invalid QR or link',nopub:'The menu is not published yet',closed:'Orders are closed right now. You can still browse the menu.',search:'Search items',all:'All',other:'Other',add:'+ Add',out:'Out of stock',none:'Nothing found',cartN:n=>'🛒 '+n+(n==1?' item':' items'),view:'View ›',tapDrag:'drag to move',yours:'Your order',total:'Total',tno:'Table number',tph:'e.g. 5',yname:'Your name (optional)',note:'Note (optional, e.g. less sugar)',confirm:'✔ Confirm order',closedBtn:'Orders are closed',back:'← Back to menu',needT:'Enter table number',wait:'Please wait a moment and try again',fail:'Could not send, please try again',table:'Table ',nf:'Order not found',sorry:'Sorry, the order could not be accepted',sent:'Order sent!',steps:['Sent','Accepted by shop','Food ready','Served'],
+en:{bad:'Invalid QR or link',off:'No internet. Open this page once online and the menu will also work offline.',offb:'📴 Offline · showing the saved menu',pend:'📴 No internet. Your order is saved on this phone and will reach the shop automatically when the net returns. If you are in a hurry, show this screen at the counter.',nopub:'The menu is not published yet',closed:'Orders are closed right now. You can still browse the menu.',search:'Search items',all:'All',other:'Other',add:'+ Add',out:'Out of stock',none:'Nothing found',cartN:n=>'🛒 '+n+(n==1?' item':' items'),view:'View ›',tapDrag:'drag to move',yours:'Your order',total:'Total',tno:'Table number',tph:'e.g. 5',yname:'Your name (optional)',note:'Note (optional, e.g. less sugar)',confirm:'✔ Confirm order',closedBtn:'Orders are closed',back:'← Back to menu',needT:'Enter table number',wait:'Please wait a moment and try again',fail:'Could not send, please try again',table:'Table ',nf:'Order not found',sorry:'Sorry, the order could not be accepted',sent:'Order sent!',steps:['Sent','Accepted by shop','Food ready','Served'],
 vw:['⏳ Please wait','🍽 Food is ready!','😋 Enjoy your meal'],vt:['Your food is being prepared… please wait a little','Your food is ready','Thank you, see you again ❤'],foot:'Thank you for visiting ☕ Keep this page open and the status will update by itself.',more:'Order more',welcome:'Welcome',tag:'Browse the menu and order',g:['Good night','Good morning','Good afternoon','Good evening','Good evening'],
 rate:'How was our service?',rcm:'Comment (optional)',rsend:'Send rating',rpick:'Tap the stars to rate',rthx:'Thank you! We got your rating',rfail:'Could not send rating, please try again',rl:['','Very bad','Bad','Okay','Good','Excellent'],sizeS:'Smaller',sizeL:'Bigger'}};
 const t=k=>{const v=TX[lang][k];return v===undefined?TX.bn[k]:v};
@@ -72,18 +74,22 @@ function rerender(){document.documentElement.lang=lang;document.title=C.name||(l
 async function init(){
  applySz();document.documentElement.lang=lang;
  if(!uid){$('#app').innerHTML='<p class="w">'+t('bad')+'</p>';return}
- const s=await getDoc(doc(db,'shops',uid));if(!s.exists()){$('#app').innerHTML='<p class="w">'+t('nopub')+'</p>';return}
- C=s.data();Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(C.color)document.documentElement.style.setProperty('--hd',C.color);
+ let sd=null,fromSaved=false;const SK='qo_shop_'+uid;
+ if(navigator.onLine!==false){try{const s=await Promise.race([getDoc(doc(db,'shops',uid)),new Promise((_,j)=>setTimeout(()=>j('to'),7000))]);
+  if(s.exists()){sd=s.data();ls(SK,JSON.stringify(sd))}else{ls(SK,null);$('#app').innerHTML='<p class="w">'+t('nopub')+'</p>';return}}catch(e){sd=null}}
+ if(!sd){try{sd=JSON.parse(ls(SK)||'null')}catch(e){sd=null}fromSaved=!!sd}
+ if(!sd){$('#app').innerHTML='<p class="w">'+t('off')+'</p>';return}
+ C=sd;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(C.color)document.documentElement.style.setProperty('--hd',C.color);
  if(!oid)restoreCart();
  hdr();if(!oid&&!sessionStorage.getItem('sp'))splash();oid?track():list();bar()}
-function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="cup-192.png"><h1>${greet()}!</h1><p>${esc(lang==='en'?t('welcome'):(Q.welcome||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(lang==='en'?t('tag'):(Q.tag||t('tag')))}</p>`;document.body.appendChild(d);
+function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(lang==='en'?t('welcome'):(Q.welcome||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(lang==='en'?t('tag'):(Q.tag||t('tag')))}</p>`;document.body.appendChild(d);
  const x=()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)};d.onclick=x;setTimeout(x,2200)}
-function hdr(){$('#app').innerHTML=`<header><img src="cup-192.png" alt=""><b>${esc(C.name||(lang==='en'?'Menu':'মেনু'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
+function hdr(){$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><b>${esc(C.name||(lang==='en'?'Menu':'মেনু'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
  <div class="hb"><button data-lang="bn" class="${lang==='bn'?'on':''}">বাং</button><button data-lang="en" class="${lang==='en'?'on':''}">EN</button></div>
  <div class="hb"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div></header><div class="w" id="bd"></div>`}
 function list(){
  const cs=[...new Set(items.map(i=>i.c||t('other')))];
- let h=(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
+ let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
  `<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
  $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar()}
 const soldOut=i=>i.s!==''&&i.s!=null&&i.s<=0;
@@ -124,7 +130,9 @@ async function send(){
  const tn=tbl||($('#tn')?$('#tn').value.trim():'');if(Q.needTable!==false&&!tn){alert(t('needT'));return}
  try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<20000){alert(t('wait'));return}}catch(e){}
  $('#sd').disabled=true;const id=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
- try{await setDoc(doc(db,'orders',id),{uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),table:tn||'-',note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),total:sub()});
+ try{const pw=setDoc(doc(db,'orders',id),{uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),table:tn||'-',note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),total:sub()});
+  /* নেট না থাকলে অপেক্ষা না করে ফোনে জমিয়ে রাখা হয়, নেট আসলে নিজে যাবে */
+  await Promise.race([pw,new Promise(r=>setTimeout(r,navigator.onLine===false?500:9000))]);pw.catch(()=>{});
   try{localStorage.setItem('qo_t',Date.now())}catch(e){}cart={};saveCart();F.nt='';saveF();location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+'&o='+id}catch(e){alert(t('fail'));$('#sd').disabled=false}}
 /* ---------- অর্ডার ট্র্যাকিং + সার্ভিস রেটিং ---------- */
 const nmId=x=>{if(lang!=='en')return x.n;const it=items.find(i=>i.id==x.id);return (it&&it.e)||x.n};
@@ -137,7 +145,7 @@ window.__rate=async()=>{if(!R.s||!lastO)return;const b=$('#rs');if(b)b.disabled=
 function paint(){const o=lastO;if(!o)return;if(document.activeElement&&document.activeElement.id==='rc'){dirty=true;return}
  const can=o.status=='cancelled',st=o.status=='new'?0:o.status=='accepted'?1:o.status=='ready'?2:3;
  const vs=o.status=='ready'?1:(o.status=='served'||o.status=='billed')?2:0,VF=['wait','ready','served'],VA=[1,1.304,1.837];
- $('#bd').innerHTML=(can?'':`<div class="vh"><i class="bgi" style="background-image:url(video/${VF[vs]}.jpg)"></i><div class="fr" style="--a:${VA[vs]}"><video id="vv" src="video/${VF[vs]}.mp4" poster="video/${VF[vs]}.jpg" muted loop autoplay playsinline preload="auto"></video></div></div>`)+`<div style="text-align:center">${can?'<div class="ok">✕</div>':`<span class="bdg">${t('vw')[vs]}</span>`}<h2 style="margin:6px 0">${can?t('sorry'):(vs==0?t('sent'):vs==1?t('vt')[1]:'❤')}</h2><div class="mu">${can?'':(vs==0?t('vt')[0]+'<br>':vs==2?t('vt')[2]+'<br>':'')}${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
+ $('#bd').innerHTML=(lastPend&&o.status=='new'&&navigator.onLine===false?`<div class="cd" style="margin-bottom:10px;background:#5a3b12;animation:none">${t('pend')}</div>`:'')+(can?'':`<div class="vh"><i class="bgi" style="background-image:url(${VF[vs]}.jpg)"></i><div class="fr" style="--a:${VA[vs]}"><video id="vv" src="${VF[vs]}.mp4" poster="${VF[vs]}.jpg" muted loop autoplay playsinline preload="auto"></video></div></div>`)+`<div style="text-align:center">${can?'<div class="ok">✕</div>':`<span class="bdg">${t('vw')[vs]}</span>`}<h2 style="margin:6px 0">${can?t('sorry'):(vs==0?t('sent'):vs==1?t('vt')[1]:'❤')}</h2><div class="mu">${can?'':(vs==0?t('vt')[0]+'<br>':vs==2?t('vt')[2]+'<br>':'')}${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
  ${can?'':`<div class="stp">${t('steps').map((s,k)=>`<div class="${k<=st?'d':''}"><i>${k<=st?'✓':k+1}</i>${s}</div>`).join('')}</div>`}
  <div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(nmId(x))} × ${x.q}</span><b>${m(x.p*x.q)}</b></div>`).join('')}<div class="row" style="border-top:1px solid var(--ln)"><span><b>${t('total')}</b></span><b>${m(o.total)}</b></div></div>
  ${can||st<1?'':ratingHTML()}
@@ -162,6 +170,11 @@ function draw(){cx.clearRect(0,0,cv.width,cv.height);
   else{p.r+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.scale(1,Math.cos(p.f));cx.fillStyle=p.c;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore()}
   return p.y<cv.height+150*D});
  if(ps.length)requestAnimationFrame(draw);else{run=0;cx.clearRect(0,0,cv.width,cv.height)}}
-function track(){onSnapshot(doc(db,'orders',oid),s=>{if(!s.exists()){$('#bd').textContent=t('nf');return}lastO=s.data();paint()})}
+let lastPend=false;function track(){onSnapshot(doc(db,'orders',oid),{includeMetadataChanges:true},s=>{if(!s.exists()){if(!lastO)$('#bd').textContent=t('nf');return}lastO=s.data();lastPend=s.metadata.hasPendingWrites;paint()})}
+addEventListener('online',()=>{if(oid&&lastO)paint()});addEventListener('offline',()=>{if(oid&&lastO)paint()});
 init();
+/* অফলাইন প্রস্তুতি: সার্ভিস ওয়ার্কার চালু করে Firebase ফাইল ও ভিডিও ক্যাশে রাখা */
+if('serviceWorker' in navigator)addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
+ const B='https://www.gstatic.com/firebasejs/10.12.2/';['firebase-app.js','firebase-firestore.js','firebase-component.js','firebase-logger.js','firebase-util.js'].forEach(f=>fetch(B+f,{mode:'no-cors'}).catch(()=>{}));
+ ['wait.mp4','ready.mp4','served.mp4','wait.jpg','ready.jpg','served.jpg','logo-192.png'].forEach(f=>fetch(f).catch(()=>{}))}).catch(()=>{})});
 </script></body></html>

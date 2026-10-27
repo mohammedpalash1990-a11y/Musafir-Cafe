@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Musafir Cafe - POS</title>
 <link rel="manifest" href="manifest.json?v=2">
-<link rel="apple-touch-icon" href="cup-192.png">
+<link rel="apple-touch-icon" href="logo-192.png">
 <meta name="theme-color" content="#14454b">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20viewBox=%220%200%2064%2064%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22%2314454b%22/%3E%3Cpath%20d=%22M19%2029h26v6a13%2013%200%200%201-13%2013%2013%2013%200%200%201-13-13z%22%20fill=%22%23fff%22/%3E%3Cpath%20d=%22M45%2032h2.5a5%205%200%200%201%200%2010H43%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%223.2%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M15%2052h34%22%20stroke=%22%23f5b52e%22%20stroke-width=%223.4%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M22%2024l4.5-8%205.5%208%205.5-8%204.5%208%22%20fill=%22none%22%20stroke=%22%23f5b52e%22%20stroke-width=%223.4%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -533,7 +533,7 @@ function vDash(){
  +'<div class="big">'+$$(r.t)+'<span>'+r.n+L(' টি ইনভয়েস',' invoices')+(dd==tdy()?' · '+L('আজ','Today'):'')+'</span></div>'+pp(r)
  +(r.disc?'<div class="mute" style="margin-top:8px">'+t('disc')+': '+$$(r.disc)+'</div>':'')
  +'<div style="display:flex;gap:10px;margin-top:12px"><button class="pri" style="flex:1" onclick="showDayRpt(dd)">'+I('print')+' '+L('রিপোর্ট প্রিন্ট','Print report')+'</button><button onclick="csv()">'+I('copy')+' CSV</button></div><button style="width:100%;margin-top:10px" onclick="rpNow()">'+L('আজকের রিপোর্ট ইমেইলে পাঠান','Email today\'s report')+'</button></div>';
- h+='<div class="box"><b>'+L('ইনভয়েস','Invoices')+'</b>'+(ds.length?ds.map(function(s){return '<div class="row" onclick="showRc('+s.no+')"><div><b>#'+s.sn+'</b> <span class="mute">'+new Date(s.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span><div class="mute">'+s.items.length+t('itm')+' · '+t(s.pay)+'</div></div><b>'+$$(s.total)+'</b></div>'}).join(''):'<div class="empty">'+t('hist0')+'</div>')+'</div>';
+ h+='<div class="box"><b>'+L('ইনভয়েস','Invoices')+'</b>'+(ds.length?ds.map(function(s){return '<div class="row" onclick="showRc('+s.no+')"><div><b>'+(s.refund?'↩ ':'')+'#'+s.sn+'</b> <span class="mute">'+new Date(s.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span><div class="mute">'+s.items.length+t('itm')+' · '+t(s.pay)+'</div></div><b>'+$$(s.total)+'</b></div>'}).join(''):'<div class="empty">'+t('hist0')+'</div>')+'</div>';
  h+=vExtras(dd);
  h+='<div class="box"><div class="hd">'+I('dash')+'<b>'+L('মাসিক হিসাব','Monthly summary')+'</b></div><input type="month" id="rpm" value="'+dm+'" onchange="dm=this.value||tdy().slice(0,7);render()">'
  +'<div class="big">'+$$(mr.t)+'<span>'+mr.n+L(' টি ইনভয়েস',' invoices')+'</span></div>'+pp(mr)+'<button class="pri" style="width:100%;margin-top:12px" onclick="showMonRpt(dm)">'+I('print')+' '+L('মাসিক রিপোর্ট প্রিন্ট','Print monthly report')+'</button>'+'<button style="width:100%;margin-top:8px" onclick="rpMonth()">'+L('মাসিক রিপোর্ট ইমেইলে পাঠান','Email monthly report')+'</button>'
@@ -1312,6 +1312,82 @@ try{if(view=='set')render()}catch(e){}
 })();
 </script>
 <!-- ===== MUSAFIR PATCH p2 END ===== -->
+<!-- ===== MUSAFIR REFUND START ===== -->
+<script>
+(function(){
+var RF=null;
+function r2(n){return Math.round((+n+1e-9)*100)/100}
+function origOf(no){return H.find(function(h){return h.no==no})}
+function refundedQty(no){var m={};H.filter(function(h){return h.ref==no}).forEach(function(h){h.items.forEach(function(i){m[i.ix]=(m[i.ix]||0)-i.qty})});return m}
+function refundedAmt(no){var a=0;H.filter(function(h){return h.ref==no}).forEach(function(h){a+=-h.total});return r2(a)}
+function rfCalc(){
+ var s=origOf(RF.no),sub=0,left=0;
+ s.items.forEach(function(i,ix){sub+=i.price*RF.q[ix];left+=RF.rem[ix]-RF.q[ix]});
+ var ratio=s.sub>0?s.total/s.sub:1,R=r2(sub*ratio),cap=r2(s.total-refundedAmt(RF.no));
+ if(sub>0&&left==0)R=cap;
+ if(R>cap)R=cap;if(R<0)R=0;
+ return {sub:r2(sub),R:R,left:left}}
+function rfPays(s,R){
+ var pl=(s.pays&&s.pays.length?s.pays:[{m:s.pay,a:s.total}]),tot=0,used=0,out=[];
+ pl.forEach(function(p){tot+=p.a});
+ pl.forEach(function(p,ix){var a=ix==pl.length-1?r2(R-used):r2(R*p.a/(tot||1));used=r2(used+a);var o={m:p.m,a:-a};if(p.debtor)o.debtor=p.debtor;out.push(o)});
+ return out.filter(function(p){return Math.abs(p.a)>0.004})}
+function keep(){var w=document.getElementById('rfWhy'),k=document.getElementById('rfStk');if(w)RF.why=w.value;if(k)RF.stk=k.checked}
+function rfDraw(){
+ var s=origOf(RF.no),c=rfCalc(),pl=rfPays(s,c.R);
+ var h='<div><b style="font-size:19px">↩ '+L('রিফান্ড','Refund')+' · '+L('ইনভয়েস','Invoice')+' #'+s.sn+'</b><div class="mute" style="margin:4px 0 6px">'+L('যে পণ্য ফেরত হচ্ছে তার সংখ্যা ঠিক করুন','Set the quantity being returned')+'</div>';
+ s.items.forEach(function(i,ix){var dis=RF.rem[ix]?'':'disabled ';
+  h+='<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><b>'+esc(nm(i))+'</b><div class="mute">'+$$(i.price)+' · '+RF.rem[ix]+L(' টি ফেরতযোগ্য',' refundable')+'</div></div>'
+  +'<button '+dis+'onclick="rfChg('+ix+',-1)" style="width:40px;height:40px;font-size:20px">−</button><b style="min-width:24px;text-align:center;font-size:17px">'+RF.q[ix]+'</b><button '+dis+'onclick="rfChg('+ix+',1)" style="width:40px;height:40px;font-size:20px">+</button></div>'});
+ h+='<input id="rfWhy" maxlength="80" placeholder="'+L('কারণ (ঐচ্ছিক), যেমন: ভুল অর্ডার','Reason (optional), e.g. wrong order')+'" value="'+esc(RF.why)+'" style="width:100%;margin-top:10px">'
+ +'<label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input type="checkbox" id="rfStk" '+(RF.stk?'checked':'')+' onchange="rfKeep()"> '+L('পণ্য স্টকে ফেরত যোগ হবে','Add items back to stock')+'</label>'
+ +'<div style="display:flex;justify-content:space-between;align-items:center;font-size:18px;padding:8px 0;border-top:2px solid var(--line)"><b>'+L('রিফান্ডের পরিমাণ','Refund amount')+'</b><b style="color:var(--warn)">'+$$(c.R)+'</b></div>'
+ +(c.R>0?'<div class="mute" style="font-size:13px">'+pl.map(function(p){return t(p.m)+(p.debtor?' ('+esc(p.debtor)+')':'')+': '+$$(-p.a)}).join(' · ')+(s.disc||s.tax?'<br>'+L('ছাড়/ট্যাক্স অনুপাতে ধরা হয়েছে','Discount/tax counted proportionally'):'')+'</div>':'')
+ +'<button class="bad" '+(c.R>0?'':'disabled ')+'style="width:100%;margin-top:12px;padding:14px;font-weight:800" onclick="rfGo()">↩ '+L('রিফান্ড নিশ্চিত করুন','Confirm refund')+'</button>'
+ +'<button style="width:100%;margin-top:8px" onclick="showRc('+s.no+')">'+L('ফিরে যান','Back')+'</button></div>';
+ document.getElementById('rb').innerHTML=h;document.getElementById('rc').classList.add('show')}
+window.rfKeep=function(){if(RF)keep()};
+window.rfChg=function(ix,d){if(!RF)return;keep();var n=RF.q[ix]+d;if(n<0||n>RF.rem[ix])return;RF.q[ix]=n;rfDraw()};
+window.refundSale=function(no){
+ var s=origOf(no);if(!s||s.refund)return;
+ var done=refundedQty(no),rem=s.items.map(function(i,ix){return Math.max(0,i.qty-(done[ix]||0))});
+ if(!rem.some(function(x){return x>0})){toast(L('এই বিলের সবকিছু আগেই রিফান্ড হয়েছে','Everything on this sale is already refunded'));return}
+ RF={no:no,rem:rem,q:s.items.map(function(){return 0}),why:'',stk:true};rfDraw()};
+window.rfGo=function(){
+ if(!RF)return;keep();var s=origOf(RF.no);if(!s){RF=null;return}
+ var c=rfCalc();if(!(c.R>0)){toast(L('কোনো পণ্য বাছাই করুন','Pick at least one item'));return}
+ ask(L('রিফান্ড দেবেন: ','Refund ')+$$(c.R)+'?',function(){doRefund(s,c)},L('হ্যাঁ, রিফান্ড দিন','Yes, refund'))};
+function doRefund(s,c){
+ if(!RF)return;var now=Date.now(),no=H.reduce(function(a,x){return Math.max(a,x.no)},1000)+1,items=[],why=(RF.why||'').trim(),stk=RF.stk;
+ s.items.forEach(function(i,ix){var q=RF.q[ix];if(q>0){items.push({id:i.id,name:i.name,bn:i.bn,price:i.price,qty:-q,ix:ix});
+  if(stk){var p=i.id?gp(i.id):P.find(function(x){return x.name==i.name});if(p&&p.stock!=='')p.stock+=q}}});
+ var pl=rfPays(s,c.R),tax=c.R>c.sub?r2(c.R-c.sub):0,disc=c.sub>c.R?r2(c.sub-c.R):0;
+ var r={no:no,sn:snFor(now),t:now,items:items,sub:-c.sub,disc:disc?-disc:0,tax:tax?-tax:0,total:-c.R,pay:pl.length>1?'Split':(pl[0]?pl[0].m:s.pay),pays:pl,recv:null,chg:0,pc:randCode(),refund:true,ref:s.no,refSn:s.sn,why:why,stk:!!stk};
+ if(!CU)r.lc=true;
+ H.push(r);
+ var dch=false;
+ pl.forEach(function(p){if(p.m=='Due'&&p.debtor){var d=DU.find(function(x){return x.name==p.debtor&&(x.entries||[]).some(function(e){return e.sid==s.no})})||DU.find(function(x){return x.name==p.debtor});
+  if(d){d.entries=d.entries||[];d.entries.push({t:now,a:p.a,no:r.sn,sid:r.no,items:'↩ '+L('রিফান্ড','Refund')});dch=true;pubDue(d)}}});
+ lglog(L('রিফান্ড','Refund')+' #'+r.sn+' ('+L('ইনভয়েস','Invoice')+' #'+s.sn+')'+(why?' · '+why:'')+' · '+items.map(function(i){return nm(i)+'×'+(-i.qty)}).join(', '),c.R);
+ save();if(dch)dusave();cSale(r);rqAdd(rqSale(r));pubReceipt(r);RF=null;render();showRc(r.no);toast(L('রিফান্ড হয়েছে','Refund done'))}
+/* রসিদ পাতায় রিফান্ড বাটন ও রিফান্ড রসিদের লেবেল */
+var _sr=window.showRc;
+window.showRc=function(no){
+ _sr(no);var s=origOf(no),rb=document.getElementById('rb'),b=document.getElementById('vb');if(!s||!rb)return;
+ if(s.refund){
+  rb.insertAdjacentHTML('afterbegin','<div style="background:#c4311f22;color:var(--warn);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-weight:800;text-align:center">↩ '+L('রিফান্ড রসিদ · মূল ইনভয়েস #','Refund receipt · original invoice #')+s.refSn+(s.why?'<div style="font-weight:500">'+esc(s.why)+'</div>':'')+'</div>');
+  if(b)b.remove();
+ }else{
+  var had=H.some(function(h){return h.ref==no});
+  if(had)rb.insertAdjacentHTML('afterbegin','<div class="noprint" style="background:#c4311f22;color:var(--warn);border-radius:10px;padding:6px 10px;margin-bottom:8px;font-weight:700;text-align:center">↩ '+L('এই বিলে রিফান্ড হয়েছে','This sale has refunds')+' · '+$$(refundedAmt(no))+'</div>');
+  if(b)b.insertAdjacentHTML('beforebegin','<button class="noprint" style="width:100%;margin-top:10px" onclick="refundSale('+no+')">↩ '+L('রিফান্ড','Refund')+'</button>');
+ }};
+var _vs=window.voidSale;
+window.voidSale=function(no){var s=origOf(no);if(s&&!s.refund&&H.some(function(h){return h.ref==no})){toast(L('এই বিলে রিফান্ড আছে, তাই বাতিল করা যাবে না','This sale has refunds, so it cannot be voided'));return}return _vs(no)};
+})();
+</script>
+<!-- ===== MUSAFIR REFUND END ===== -->
+
 <!-- ===== MUSAFIR QR ORDERS START ===== -->
 <script type="module">
 import {getApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -1325,9 +1401,9 @@ const st=document.createElement('style');st.textContent='#qb{display:none;width:
 const b=document.createElement('button');b.id='qb';const mn=document.getElementById('m');mn.parentNode.insertBefore(b,mn);const p=document.createElement('div');p.id='qp';document.body.appendChild(p);
 b.onclick=()=>{op=true;tab='o';draw()};
 const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const pend=()=>ords.filter(o=>o.status=='new'||o.status=='accepted'||o.status=='ready'||o.status=='served'),link=()=>location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'')+'order.html?s='+uid,qrimg=n=>'https://api.qrserver.com/v1/create-qr-code/?size='+n+'x'+n+'&margin=8&data='+encodeURIComponent(link());
+const pend=()=>ords.filter(o=>o.status=='new'||o.status=='accepted'||o.status=='ready'||o.status=='served'),link=()=>location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'')+'order.html?s='+uid;
 function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.4)}catch(e){}try{navigator.vibrate&&navigator.vibrate([250,100,250])}catch(e){}}
-function notifyOrder(list){try{if(!('Notification' in window)||Notification.permission!=='granted')return;const body=(list.length?list.map(o=>'টেবিল '+o.table+(o.name?' · '+o.name:'')+': '+o.items.map(i=>i.n+'×'+i.q).join(', ')).join('\n'):'নতুন অর্ডার এসেছে').slice(0,300),title='📲 নতুন QR অর্ডার'+(list.length>1?' ('+list.length+'টি)':''),opt={body:body,tag:'qr-order',renotify:true,vibrate:[300,120,300,120,300],icon:'cup-192.png',badge:'cup-192.png',requireInteraction:true};
+function notifyOrder(list){try{if(!('Notification' in window)||Notification.permission!=='granted')return;const body=(list.length?list.map(o=>'টেবিল '+o.table+(o.name?' · '+o.name:'')+': '+o.items.map(i=>i.n+'×'+i.q).join(', ')).join('\n'):'নতুন অর্ডার এসেছে').slice(0,300),title='📲 নতুন QR অর্ডার'+(list.length>1?' ('+list.length+'টি)':''),opt={body:body,tag:'qr-order',renotify:true,vibrate:[300,120,300,120,300],icon:'logo-192.png',badge:'logo-192.png',requireInteraction:true};
  if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(r=>r.showNotification(title,opt)).catch(()=>{try{new Notification(title,opt)}catch(e){}});else new Notification(title,opt)}catch(e){}}
 function askNotif(){try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{draw()})}catch(e){}}
 document.addEventListener('click',askNotif,{once:true});
@@ -1339,7 +1415,7 @@ function draw(){const a=pend(),nw=a.filter(o=>o.status=='new').length;b.style.di
   if(tab=='o')h+=a.length?a.map(o=>'<div class="qo"><b style="font-size:17px">টেবিল '+E(o.table)+'</b>'+(o.name?' · '+E(o.name):'')+' <span style="opacity:.6">'+new Date(o.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span>'+(o.status=='accepted'?' <b style="color:var(--ac)">✔ গ্রহণ করা</b>':o.status=='ready'?' <b style="color:#d98a00">🍽 প্রস্তুত</b>':o.status=='served'?' <b style="color:var(--ac)">✔ পরিবেশিত</b>':' <b style="color:#e0301e">নতুন</b>')+
   '<div style="margin:6px 0">'+o.items.map(i=>E(i.n)+' × <b>'+i.q+'</b>').join('<br>')+'</div>'+(o.note?'<div style="opacity:.7">নোট: '+E(o.note)+'</div>':'')+'<div>মোট (কাস্টমারের হিসাবে): <b>'+o.total+'</b></div>'+
   (o.status=='new'?'<button class="g" data-x="acc" data-id="'+o.id+'">✔ গ্রহণ করুন</button>':'')+(o.status=='accepted'?'<button class="g" data-x="rdy" data-id="'+o.id+'">👨‍🍳 খাবার প্রস্তুত</button>':'')+(o.status=='ready'?'<button class="g" data-x="srv" data-id="'+o.id+'">🍽 পরিবেশন হয়েছে</button>':'')+'<button data-x="bill" data-id="'+o.id+'">বিলে নিন</button><button style="color:#e0301e" data-x="can" data-id="'+o.id+'">বাতিল</button></div>').join(''):'<p style="opacity:.7;text-align:center;padding:24px">এখন কোনো অপেক্ষমাণ অর্ডার নেই</p>';
- if(tab=='q')h+='<div style="text-align:center"><img src="'+qrimg(300)+'" style="width:260px;max-width:80%;background:#fff;border-radius:14px"><p style="opacity:.7;word-break:break-all;font-size:12px">'+E(link())+'</p><div style="display:flex"><button class="g" style="flex:1;font:inherit;border:0;border-radius:10px;padding:12px;margin:3px" data-x="print">🖨 QR ছাপুন</button><button style="flex:1;font:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;margin:3px;background:var(--card);color:var(--ink)" data-x="copy">লিংক কপি</button></div><p style="opacity:.7;font-size:13px">একটাই QR সব টেবিলের জন্য। কাস্টমার নিজে টেবিল নম্বর দেবে।</p><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:12px" data-x="pub">মেনু এখনই আপডেট করুন</button></div>';
+ if(tab=='q')h+='<div style="text-align:center"><div style="width:260px;max-width:80%;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden">'+qrSvg(link()).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"')+'</div><p style="opacity:.7;word-break:break-all;font-size:12px">'+E(link())+'</p><div style="display:flex"><button class="g" style="flex:1;font:inherit;border:0;border-radius:10px;padding:12px;margin:3px" data-x="print">🖨 QR ছাপুন</button><button style="flex:1;font:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;margin:3px;background:var(--card);color:var(--ink)" data-x="copy">লিংক কপি</button></div><p style="opacity:.7;font-size:13px">একটাই QR সব টেবিলের জন্য। কাস্টমার নিজে টেবিল নম্বর দেবে।</p><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:12px" data-x="pub">মেনু এখনই আপডেট করুন</button></div>';
  if(tab=='r'){const av=rts.length?(rts.reduce((x,y)=>x+(+y.stars||0),0)/rts.length).toFixed(1):'-';h+='<div style="text-align:center;margin:8px 0"><b style="font-size:34px">⭐ '+av+'</b><div style="opacity:.7">'+rts.length+'টি রেটিং</div></div>'+(rts.length?rts.slice(0,60).map(x=>'<div class="qo"><b style="color:#f5b301">'+'★'.repeat(+x.stars||0)+'</b><span style="opacity:.3">'+'★'.repeat(5-(+x.stars||0))+'</span> <span style="opacity:.65">টেবিল '+E(x.table)+(x.name?' · '+E(x.name):'')+' · '+new Date(x.t).toLocaleDateString([],{day:'2-digit',month:'short'})+'</span>'+(x.comment?'<div style="margin-top:6px">'+E(x.comment)+'</div>':'')+'</div>').join(''):'<p style="opacity:.7;text-align:center;padding:24px">এখনো কোনো রেটিং আসেনি</p>')}
   if(tab=='s')h+='<label><input type="checkbox" id="s_open" '+(QS.open?'checked':'')+'> অর্ডার নেওয়া চালু</label><label><input type="checkbox" id="s_nt" '+(QS.needTable?'checked':'')+'> টেবিল নম্বর বাধ্যতামূলক</label><br><label>স্বাগতম লেখা</label><input type="text" id="s_w" value="'+E(QS.welcome)+'"><label>ছোট লেখা (স্বাগতম পর্দায়)</label><input type="text" id="s_t" value="'+E(QS.tag)+'"><label>মেনুর ওপরে নোটিশ (ঐচ্ছিক, যেমন: আজ কেক শেষ)</label><input type="text" id="s_n" value="'+E(QS.note)+'"><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:13px;font-weight:700" data-x="save">সেভ ও প্রকাশ করুন</button>';
  p.innerHTML=h+'</div>'}
@@ -1348,7 +1424,7 @@ p.onclick=e=>{if(e.target==p){op=false;draw();return}const t=e.target.closest('[
  else if(x=='acc'||x=='can'||x=='rdy'||x=='srv')updateDoc(doc(db,'orders',id),{status:{acc:'accepted',can:'cancelled',rdy:'ready',srv:'served'}[x]}).catch(()=>toast('হয়নি, নেট দেখুন'));
  else if(x=='notif')askNotif();else if(x=='bill')bill(id);else if(x=='pub')qrPub(1);
  else if(x=='copy'){try{navigator.clipboard.writeText(link());toast('লিংক কপি হয়েছে')}catch(e){}}
- else if(x=='print'){const w=window.open('','_blank');if(!w)return;w.document.write('<title>QR</title><body style="font-family:sans-serif;text-align:center;padding:30px"><h1 style="font-size:40px;margin:0">'+E(S.shop)+'</h1><p style="font-size:22px">'+E(QS.tag)+'</p><img src="'+qrimg(420)+'" style="width:420px"><h2>স্ক্যান করুন, অর্ডার দিন</h2></body>');w.document.close();setTimeout(()=>w.print(),1200)}
+ else if(x=='print'){const w=window.open('','_blank');if(!w)return;w.document.write('<title>QR</title><body style="font-family:sans-serif;text-align:center;padding:30px"><h1 style="font-size:40px;margin:0">'+E(S.shop)+'</h1><p style="font-size:22px">'+E(QS.tag)+'</p><div style="width:420px;max-width:90vw;margin:0 auto">'+qrSvg(link()).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"')+'</div><h2>স্ক্যান করুন, অর্ডার দিন</h2></body>');w.document.close();setTimeout(()=>w.print(),1200)}
  else if(x=='save'){QS.open=document.getElementById('s_open').checked;QS.needTable=document.getElementById('s_nt').checked;QS.welcome=document.getElementById('s_w').value.trim();QS.tag=document.getElementById('s_t').value.trim();QS.note=document.getElementById('s_n').value.trim();try{localStorage.setItem('qr_set',JSON.stringify(QS))}catch(e){}qrPub(1);draw()}};
 function bill(id){const o=ords.find(x=>x.id==id);if(!o)return;
  const go=()=>{let miss=0;o.items.forEach(i=>{const q=gp(i.id);if(!q){miss++;return}let n=(cart[i.id]||0)+i.q;if(q.stock!==''&&n>q.stock)n=q.stock;if(n>0)cart[i.id]=n});
