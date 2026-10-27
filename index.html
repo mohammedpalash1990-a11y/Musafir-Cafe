@@ -1079,13 +1079,21 @@ window.addEventListener('online',function(){sy('on');render()});
 window.addEventListener('offline',function(){sy();render()});
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 
-try{var tm0=localStorage.getItem('pos_theme');if(tm0&&tm0!='auto')document.documentElement.setAttribute('data-theme',tm0);var fz0=localStorage.getItem('pos_fsz');if(fz0&&fz0!='md')document.documentElement.setAttribute('data-fsz',fz0);localStorage.removeItem('pos_view')}catch(e){}
+try{var tm0=localStorage.getItem('pos_theme');if(tm0&&tm0!='auto')document.documentElement.setAttribute('data-theme',tm0);var fz0=localStorage.getItem('pos_fsz');if(fz0&&fz0!='md')document.documentElement.setAttribute('data-fsz',fz0);}catch(e){}
 /* ===== draft order survives refresh / app switch ===== */
 function saveDraft(){try{if(Object.keys(cart).length){localStorage.setItem('pos_draft',JSON.stringify({t:Date.now(),cart:cart,disc:disc,recv:recv,pays:pays,sp:!!(pays&&pays.sp)}))}else localStorage.removeItem('pos_draft')}catch(e){}}
 function restoreDraft(){try{var d=JSON.parse(localStorage.getItem('pos_draft')||'null');if(!d||Date.now()-d.t>86400000||!d.cart)return;var c={},k;for(k in d.cart){var p=gp(k);if(!p)continue;var n=+d.cart[k]||0;if(p.stock!==''&&n>p.stock)n=p.stock;if(n>0)c[k]=n}if(!Object.keys(c).length)return;cart=c;disc=d.disc||'';recv=d.recv||'';pays=Array.isArray(d.pays)?d.pays:null;if(pays&&d.sp)pays.sp=true}catch(e){}}
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')saveDraft()});
 window.addEventListener('pagehide',saveDraft);
 restoreDraft();
+/* ===== remember tab / category / open order sheet across refresh ===== */
+function saveUI(){try{var cs=document.getElementById('cs');localStorage.setItem('pos_ui',JSON.stringify({t:Date.now(),view:view,cat:cat,cs:!!(cs&&cs.classList.contains('show')&&Object.keys(cart).length)}))}catch(e){}}
+var __ui=null;try{__ui=JSON.parse(localStorage.getItem('pos_ui')||'null')}catch(e){}
+var __restoreCs=false;
+if(__ui&&Date.now()-__ui.t<43200000){if(['sell','due','dash','prod','set','kh'].indexOf(__ui.view)>-1)view=__ui.view;if(__ui.cat)cat=__ui.cat;__restoreCs=!!__ui.cs}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')saveUI()});
+window.addEventListener('pagehide',saveUI);
+document.addEventListener('click',function(){setTimeout(function(){saveDraft();saveUI()},300)},true);
 /* ===== movable cart button ===== */
 (function(){var b=document.getElementById('bar');if(!b)return;b.removeAttribute('onclick');var dn=false,mv=false,sx=0,sy=0,ox=0,oy=0;
 function put(x,y){var w=b.offsetWidth||200,h=b.offsetHeight||70;x=Math.max(4,Math.min(innerWidth-w-4,x));y=Math.max(4,Math.min(innerHeight-h-4,y));b.style.left=x+'px';b.style.top=y+'px';b.style.right='auto';b.style.bottom='auto'}
@@ -1096,7 +1104,7 @@ b.addEventListener('pointermove',function(e){if(!dn)return;var dx=e.clientX-sx,d
 function end(){if(!dn)return;dn=false;b.classList.remove('drag');if(mv){try{localStorage.setItem('pos_barpos',JSON.stringify({x:parseFloat(b.style.left),y:parseFloat(b.style.top)}))}catch(e){}}}
 b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
 b.addEventListener('click',function(){if(mv){mv=false;return}openCart()})})();
-applyPal();render();boot();
+applyPal();render();boot();if(__restoreCs&&typeof openCart=='function'&&Object.keys(cart).length&&!PUBR)setTimeout(function(){try{openCart()}catch(e){}},300);
 document.addEventListener('keydown',function(ev){var tg=(ev.target&&ev.target.tagName)||'';if(ev.key=='/'&&!/INPUT|TEXTAREA|SELECT/.test(tg)){var q0=$('#sq');if(q0){ev.preventDefault();q0.focus();q0.select()}}if(ev.key=='Escape'){var o=document.querySelector('.ov.show:not(#lgn)');if(o)o.classList.remove('show')}});
 </script>
 
@@ -1271,6 +1279,7 @@ import {getApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js
 import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc,updateDoc,collection,query,where,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 try{
+if(new URLSearchParams(location.search).get('r'))throw 'pub';
 const app=getApp(),auth=getAuth(app),db=getFirestore(app);let uid=null,un=null,un2=null,rts=[],rc0=null,ords=[],seen=null,op=false,tab='o',lastSig='',pi={},QS={open:true,needTable:true,welcome:'স্বাগতম!',tag:'মেনু দেখে অর্ডার দিন',note:''};
 try{pi=JSON.parse(localStorage.getItem('qr_img')||'{}');Object.assign(QS,JSON.parse(localStorage.getItem('qr_set')||'{}'))}catch(e){}
 const st=document.createElement('style');st.textContent='#qb{display:none;width:calc(100% - 32px);margin:6px 16px 10px;padding:16px 18px;border:0;border-radius:16px;font:inherit;font-size:18px;font-weight:800;background:linear-gradient(90deg,var(--ac),#2f9d7a);color:var(--acink);box-shadow:0 4px 16px #0005;justify-content:space-between;align-items:center;cursor:pointer}#qb i{font-style:normal;background:#e0301e;color:#fff;border-radius:99px;padding:2px 12px;font-size:17px}#qb.nw{animation:qbp 1s infinite}@keyframes qbp{50%{transform:scale(1.03);box-shadow:0 0 0 6px #e0301e55}}#qp{position:fixed;inset:0;background:#0008;z-index:35;display:none;align-items:flex-end;justify-content:center}#qp>div{background:var(--card);color:var(--ink);width:100%;max-width:600px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:14px}.qo{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}.qo button,.qt button{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:6px 6px 0 0;background:var(--card);color:var(--ink);cursor:pointer}.qo .g{background:var(--ac);color:var(--acink);border:0;font-weight:700}.qt{display:flex;gap:6px;margin:10px 0}.qt button{flex:1;margin:0;font-weight:700}.qt .on{background:var(--ac);color:var(--acink);border:0}#qp input[type=text]{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;margin:4px 0 10px}#qp label{display:block}';document.head.appendChild(st);
@@ -1317,7 +1326,7 @@ onAuthStateChanged(auth,async u=>{if(un){un();un=null}if(un2){un2();un2=null}uid
  un2=onSnapshot(query(collection(db,'ratings'),where('uid','==',u.uid)),sn=>{rts=sn.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>y.t-x.t);if(rc0!==null&&sn.size>rc0)toast('⭐ নতুন সার্ভিস রেটিং এসেছে');rc0=sn.size;if(op&&tab=='r')draw()},()=>{});
  setTimeout(()=>qrPub(0),3000)});
 setInterval(()=>{if(uid)qrPub(0)},20000);
-}catch(err){console.error('QR orders patch error',err)}
+}catch(err){if(err!=='pub')console.error('QR orders patch error',err)}
 </script>
 <!-- ===== MUSAFIR QR ORDERS END ===== -->
 
