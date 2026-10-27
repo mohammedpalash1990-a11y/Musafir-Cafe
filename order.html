@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>মেনু</title>
+<style>
+:root{--ac:#14454b;--bg:#f3f5f7;--ink:#1b2733;--mu:#667;--ln:#d9dfe6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,"Hind Siliguri",sans-serif;padding-bottom:90px}
+header{background:var(--ac);color:#fff;padding:14px 16px;font-size:18px;font-weight:700;display:flex;justify-content:space-between}
+.w{max-width:620px;margin:auto;padding:10px}.ch{display:flex;gap:6px;overflow-x:auto;padding:6px 0}
+.ch b{white-space:nowrap;padding:6px 12px;border-radius:99px;background:#fff;border:1px solid var(--ln);font-weight:500;cursor:pointer}.ch b.on{background:var(--ac);color:#fff}
+.it{display:flex;gap:10px;background:#fff;border:1px solid var(--ln);border-radius:12px;padding:8px;margin:8px 0;align-items:center}
+.it img,.ph{width:60px;height:60px;border-radius:10px;object-fit:cover;background:#e5ebe9;flex:none}.in{flex:1;min-width:0}.pr{color:var(--ac);font-weight:700}
+.q{display:flex;gap:8px;align-items:center}button,input{font:inherit}button{border:0;border-radius:8px;background:var(--ac);color:#fff;padding:6px 12px;cursor:pointer}
+.q button{width:34px;padding:5px}.off{opacity:.5}input{width:100%;padding:9px;border:1px solid var(--ln);border-radius:8px;margin:4px 0 10px;background:#fff}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--ln);padding:10px;display:flex;justify-content:space-between;align-items:center}
+.bar button{padding:10px 18px;font-size:16px}.box{background:#fff;border:1px solid var(--ln);border-radius:12px;padding:12px;margin:10px 0}.mu{color:var(--mu)}
+.st{display:inline-block;padding:4px 12px;border-radius:99px;background:#e3f1dc;font-weight:700}
+</style></head><body><header><span id="hd">…</span><span id="tb"></span></header><div class="w" id="app">লোড হচ্ছে…</div><div class="bar" id="bar" hidden></div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,doc,getDoc,setDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const db=getFirestore(initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"}));
+const SHOP='';/* চাইলে এখানে দোকানের UID বসিয়ে লিংক ছোট করা যায় */
+const P=new URLSearchParams(location.search),uid=P.get('s')||SHOP,oid=P.get('o'),tbl=(P.get('t')||'').slice(0,10);
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ST={new:'অর্ডার পাঠানো হয়েছে, দোকান নিশ্চিত করবে…',accepted:'নিশ্চিত হয়েছে, তৈরি হচ্ছে',billed:'নিশ্চিত হয়েছে, তৈরি হচ্ছে',done:'সম্পন্ন, ধন্যবাদ!',cancelled:'দুঃখিত, দোকান অর্ডারটি নিতে পারেনি'};
+let C={},items=[],cart={},cat='';
+const m=n=>(C.cur||'৳')+Math.round(n*100)/100,sub=()=>Object.values(cart).reduce((a,x)=>a+x.p*x.q,0),cnt=()=>Object.values(cart).reduce((a,x)=>a+x.q,0);
+async function init(){
+ if(!uid){$('#app').textContent='QR/লিংকটি ঠিক নয়';return}
+ const s=await getDoc(doc(db,'shops',uid));if(!s.exists()){$('#app').textContent='মেনু এখনো প্রকাশ হয়নি';return}
+ C=s.data();items=C.items||[];$('#hd').textContent=C.name||'মেনু';document.title=C.name||'মেনু';$('#tb').textContent=tbl?'টেবিল '+tbl:'';
+ if(C.color)document.documentElement.style.setProperty('--ac',C.color);
+ oid?track():list()}
+function list(){
+ const cs=[...new Set(items.map(i=>i.c||'অন্যান্য'))];
+ let h=`<div class="ch"><b class="${cat?'':'on'}" data-c="">সব</b>${cs.map(c=>`<b class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</b>`).join('')}</div>`;
+ items.filter(i=>!cat||(i.c||'অন্যান্য')==cat).forEach(i=>{const out=i.s!==''&&i.s!=null&&i.s<=0;
+  h+=`<div class="it ${out?'off':''}"><div class="ph" id="im${i.id}"></div><div class="in"><b>${esc(i.n)}</b><div class="pr">${m(i.p)}</div></div>
+  ${out?'<span class="mu">স্টক শেষ</span>':`<div class="q"><button data-a="-1" data-i="${i.id}">−</button><b id="q${i.id}">${(cart[i.id]||{}).q||0}</b><button data-a="1" data-i="${i.id}">+</button></div>`}</div>`});
+ $('#app').innerHTML=h;items.forEach(img);bar()}
+const imc={};async function img(i){try{if(imc[i.id]===undefined){const d=await getDoc(doc(db,'shops',uid,'img',String(i.id)));imc[i.id]=d.exists()?d.data().d:''}
+ if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img id="im${i.id}" src="${imc[i.id]}" alt="">`}}catch(e){}}
+function bar(){const b=$('#bar');if(!cnt()){b.hidden=true;return}b.hidden=false;b.innerHTML=`<div><b>${cnt()}টি</b> · ${m(sub())}</div><button id="go">দেখুন ও কনফার্ম</button>`;$('#go').onclick=form}
+function add(id,a){const it=items.find(x=>x.id==id),x=cart[id]||(cart[id]={id,n:it.n,p:it.p,q:0});x.q=Math.max(0,x.q+a);if(!x.q)delete cart[id];
+ const e=$('#q'+id);if(e)e.textContent=x.q||0;bar()}
+document.addEventListener('click',e=>{const t=e.target;if(t.dataset.a)add(t.dataset.i,+t.dataset.a);else if(t.dataset.c!==undefined&&t.closest('.ch')){cat=t.dataset.c;list()}});
+function form(){$('#bar').hidden=true;
+ $('#app').innerHTML=`<div class="box"><b>আপনার অর্ডার</b>${Object.values(cart).map(x=>`<div>${esc(x.n)} × ${x.q}<span style="float:right">${m(x.p*x.q)}</span></div>`).join('')}<hr><b>মোট <span style="float:right">${m(sub())}</span></b></div>
+ <div class="box">${tbl?'':'<label>টেবিল নম্বর</label><input id="tn" inputmode="numeric" maxlength="10">'}<label>আপনার নাম (ঐচ্ছিক)</label><input id="nm" maxlength="60"><label>নোট (ঐচ্ছিক, যেমন: চিনি কম)</label><input id="nt" maxlength="150"></div>
+ <button id="sd" style="width:100%;padding:12px;font-size:16px">✔ কনফার্ম করুন</button><button id="bk" style="width:100%;margin-top:8px;background:#778">← মেনুতে ফিরুন</button>`;
+ $('#bk').onclick=list;$('#sd').onclick=send}
+async function send(){
+ const tn=tbl||($('#tn')?$('#tn').value.trim():'');if(!tn){alert('টেবিল নম্বর দিন');return}
+ try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<20000){alert('একটু অপেক্ষা করে আবার চেষ্টা করুন');return}}catch(e){}
+ $('#sd').disabled=true;const id=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
+ try{await setDoc(doc(db,'orders',id),{uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),table:tn,note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),total:sub()});
+  try{localStorage.setItem('qo_t',Date.now())}catch(e){}location.href='?s='+uid+'&t='+encodeURIComponent(tn)+'&o='+id}catch(e){alert('পাঠানো যায়নি, আবার চেষ্টা করুন');$('#sd').disabled=false}}
+function track(){$('#bar').hidden=true;onSnapshot(doc(db,'orders',oid),s=>{if(!s.exists()){$('#app').textContent='অর্ডার পাওয়া যায়নি';return}const o=s.data();
+ $('#app').innerHTML=`<div class="box"><div class="mu">টেবিল ${esc(o.table)}</div><p><span class="st">${ST[o.status]||o.status}</span></p>
+ ${o.items.map(x=>`<div>${esc(x.n)} × ${x.q}</div>`).join('')}<hr><b>মোট ${m(o.total)}</b></div><a href="?s=${uid}&t=${encodeURIComponent(o.table)}"><button style="width:100%;padding:12px">আরও অর্ডার করুন</button></a>`})}
+init();
+</script></body></html>

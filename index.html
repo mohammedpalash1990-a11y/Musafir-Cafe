@@ -1240,4 +1240,49 @@ try{if(view=='set')render()}catch(e){}
 })();
 </script>
 <!-- ===== MUSAFIR PATCH p2 END ===== -->
+<!-- ===== MUSAFIR QR ORDERS START ===== -->
+<script type="module">
+import {getApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,doc,setDoc,updateDoc,collection,query,where,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+try{
+const app=getApp(),auth=getAuth(app),db=getFirestore(app);let uid=null,un=null,ords=[],seen=null,open=false,lastSig='',pi={};
+try{pi=JSON.parse(localStorage.getItem('qr_img')||'{}')}catch(e){}
+const st=document.createElement('style');st.textContent='#qb{position:fixed;right:12px;bottom:88px;z-index:21;border:0;border-radius:99px;padding:11px 16px;font:inherit;font-weight:700;background:var(--ac);color:var(--acink);box-shadow:0 3px 12px #0004;display:none}#qb i{font-style:normal;background:#e0301e;color:#fff;border-radius:99px;padding:1px 8px;margin-left:6px}#qb.nw{animation:qbp 1s infinite}@keyframes qbp{50%{transform:scale(1.12)}}#qp{position:fixed;inset:0;background:#0007;z-index:35;display:none;align-items:flex-end;justify-content:center}#qp>div{background:var(--card);color:var(--ink);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:14px}.qo{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}.qo button{margin:3px 3px 0 0}';document.head.appendChild(st);
+const b=document.createElement('button');b.id='qb';document.body.appendChild(b);const p=document.createElement('div');p.id='qp';document.body.appendChild(p);
+b.onclick=()=>{open=true;draw()};p.onclick=e=>{if(e.target==p){open=false;draw()}};
+const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pend=()=>ords.filter(o=>o.status=='new'||o.status=='accepted');
+function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.35)}catch(e){}try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
+function draw(){const a=pend(),nw=a.filter(o=>o.status=='new').length;b.style.display=uid?'block':'none';b.className=nw?'nw':'';b.innerHTML='📲 QR অর্ডার'+(a.length?'<i>'+a.length+'</i>':'');
+ p.style.display=open?'flex':'none';if(!open)return;
+ p.innerHTML='<div><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:17px">📲 QR অর্ডার</b><span><button onclick="qrTables()">টেবিল QR ছাপুন</button><button onclick="qrPub(1)">মেনু আপডেট</button></span></div><div id="qm" class="mute" style="font-size:12px"></div>'+
+ (a.length?a.map(o=>'<div class="qo"><b>টেবিল '+E(o.table)+'</b>'+(o.name?' · '+E(o.name):'')+' <span class="mute">'+new Date(o.t).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'</span>'+(o.status=='accepted'?' <b style="color:var(--ac)">✔ গ্রহণ করা</b>':' <b style="color:#e0301e">নতুন</b>')+
+ '<div>'+o.items.map(i=>E(i.n)+' × '+i.q).join('<br>')+'</div>'+(o.note?'<div class="mute">নোট: '+E(o.note)+'</div>':'')+'<b>মোট (কাস্টমারের হিসাবে) '+o.total+'</b><br>'+
+ (o.status=='new'?'<button onclick="qrSt(\''+o.id+'\',\'accepted\')">গ্রহণ করুন</button>':'')+'<button onclick="qrBill(\''+o.id+'\')">বিলে নিন</button><button style="background:#b3321f;color:#fff" onclick="qrSt(\''+o.id+'\',\'cancelled\')">বাতিল</button></div>').join(''):'<p class="mute">এখন কোনো অপেক্ষমাণ অর্ডার নেই</p>')+'<button style="width:100%;margin-top:8px" onclick="qrClose()">বন্ধ করুন</button></div>'}
+window.qrClose=()=>{open=false;draw()};
+window.qrSt=(id,s)=>updateDoc(doc(db,'orders',id),{status:s}).catch(()=>toast('হয়নি, নেট দেখুন'));
+window.qrBill=id=>{const o=ords.find(x=>x.id==id);if(!o)return;
+ const go=()=>{let miss=0;o.items.forEach(i=>{const q=gp(i.id);if(!q){miss++;return}let n=(cart[i.id]||0)+i.q;if(q.stock!==''&&n>q.stock)n=q.stock;if(n>0)cart[i.id]=n});
+  updateDoc(doc(db,'orders',id),{status:'billed'}).catch(()=>{});open=false;draw();go2('sell');openCart();if(miss)toast(miss+'টি পণ্য POS-এ নেই, বাদ গেছে')};
+ Object.keys(cart).length?ask('এখন একটা অর্ডার চলছে। এই QR অর্ডার (টেবিল '+o.table+') তাতে যোগ হবে। চালাবেন?',go,'হ্যাঁ, যোগ করুন'):go()};
+const go2=v=>window.go(v);
+window.qrTables=()=>{const n=+prompt('কয়টি টেবিলের QR চান?','10');if(!n)return;const base=location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'')+'order.html?s='+uid;
+ const w=window.open('','_blank');if(!w)return;let h='<title>QR</title><style>body{font-family:sans-serif;display:flex;flex-wrap:wrap;gap:14px}div{width:220px;text-align:center;border:1px dashed #999;padding:8px;page-break-inside:avoid}img{width:200px}</style>';
+ for(let i=1;i<=n;i++)h+='<div><b style="font-size:18px">'+E(S.shop)+'</b><br><img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='+encodeURIComponent(base+'&t='+i)+'"><br><b>টেবিল '+i+'</b><br>স্ক্যান করে অর্ডার দিন</div>';
+ w.document.write(h);w.document.close();setTimeout(()=>w.print(),1200)};
+window.qrPub=async f=>{if(!uid||!CU)return;const it=P.map(x=>({id:x.id,n:x.bn||x.name,p:x.price,c:x.cat||'',s:x.stock===''?'':x.stock})),sig=JSON.stringify([it,S.shop,S.cur]);
+ if(!f&&sig==lastSig)return;const m=document.getElementById('qm');if(f&&m)m.textContent='মেনু আপডেট হচ্ছে…';
+ try{await setDoc(doc(db,'shops',uid),{name:S.shop||'',cur:S.cur||'৳',color:getComputedStyle(document.documentElement).getPropertyValue('--head').trim()||'#14454b',items:it,updated:Date.now()});lastSig=sig;
+  for(const k in IMG){const key=k+':'+IMG[k].length;if(pi[k]!==key){await setDoc(doc(db,'shops',uid,'img',String(k)),{d:IMG[k]});pi[k]=key;try{localStorage.setItem('qr_img',JSON.stringify(pi))}catch(e){}}}
+  if(f)toast('মেনু আপডেট হয়েছে ('+it.length+'টি পণ্য)')}catch(e){if(f)toast('মেনু আপডেট হয়নি: নেট/Rules দেখুন')}finally{const m2=document.getElementById('qm');if(m2)m2.textContent=''}};
+onAuthStateChanged(auth,u=>{if(un){un();un=null}uid=u?u.uid:null;ords=[];seen=null;draw();if(!u)return;
+ un=onSnapshot(query(collection(db,'orders'),where('uid','==',u.uid)),sn=>{ords=sn.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>y.t-x.t);const ids=new Set(pend().filter(o=>o.status=='new').map(o=>o.id));
+  if(seen){let n=0;ids.forEach(i=>{if(!seen.has(i))n++});if(n){beep();toast('📲 নতুন QR অর্ডার এসেছে ('+n+'টি)')}}seen=ids;draw()},()=>{});
+ setTimeout(()=>qrPub(0),3000)});
+setInterval(()=>{if(uid)qrPub(0)},20000);
+}catch(err){console.error('QR orders patch error',err)}
+</script>
+<!-- ===== MUSAFIR QR ORDERS END ===== -->
+
 </body></html>
