@@ -1,5 +1,5 @@
-var V='musafir-pos-v11';
-var CORE=['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
+var V='musafir-pos-v12';
+var CORE=['./','./index.html','./manifest.json','./logo-192.png','./logo-512.png'];
 var CDN=['https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js','https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap'];
 self.addEventListener('install',function(e){e.waitUntil(caches.open(V).then(function(c){
  var core=CORE.map(function(u){return fetch(new Request(u,{cache:'reload'})).then(function(r){if(r&&r.ok)return c.put(u,r)}).catch(function(){})});
