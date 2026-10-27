@@ -1,5 +1,5 @@
-var V='musafir-pos-v17';
-var CORE=['./','./index.html','./order.html','./manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png'];
+var V='musafir-pos-v19';
+var CORE=['./','./index.html','./order.html','./manifest.json','./cup-192.png','./cup-512.png','./favicon-32.png'];
 var CDN=['https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js','https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap'];
 self.addEventListener('install',function(e){e.waitUntil(caches.open(V).then(function(c){
  var core=CORE.map(function(u){return fetch(new Request(u,{cache:'reload'})).then(function(r){if(r&&r.ok)return c.put(u,r)}).catch(function(){})});
@@ -10,6 +10,7 @@ self.addEventListener('fetch',function(e){
  var r=e.request;if(r.method!=='GET')return;var u=new URL(r.url);var NAV=/order\.html$/.test(u.pathname)?'./order.html':'./index.html';
  var ok=u.origin===location.origin||u.host==='www.gstatic.com'||u.host==='fonts.gstatic.com'||u.host==='fonts.googleapis.com';
  if(!ok)return;
+ if(/\.(mp4|webm)$/.test(u.pathname))return;
  if(r.mode==='navigate'){
   e.respondWith(new Promise(function(res){
    var done=false,tm=setTimeout(function(){caches.match(NAV,{ignoreSearch:true}).then(function(h){if(h&&!done){done=true;res(h)}})},8000);

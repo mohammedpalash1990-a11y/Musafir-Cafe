@@ -2,8 +2,8 @@
 <html lang="bn"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Musafir Cafe - POS</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="logo-192.png">
+<link rel="manifest" href="manifest.json?v=2">
+<link rel="apple-touch-icon" href="cup-192.png">
 <meta name="theme-color" content="#14454b">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20viewBox=%220%200%2064%2064%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22%2314454b%22/%3E%3Cpath%20d=%22M19%2029h26v6a13%2013%200%200%201-13%2013%2013%2013%200%200%201-13-13z%22%20fill=%22%23fff%22/%3E%3Cpath%20d=%22M45%2032h2.5a5%205%200%200%201%200%2010H43%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%223.2%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M15%2052h34%22%20stroke=%22%23f5b52e%22%20stroke-width=%223.4%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M22%2024l4.5-8%205.5%208%205.5-8%204.5%208%22%20fill=%22none%22%20stroke=%22%23f5b52e%22%20stroke-width=%223.4%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -499,6 +499,7 @@ function showRc(no){
 function voidSale(no){
  if(!vArm){vArm=1;$('#vb').textContent=t('void2');return}
  var s=H.find(function(h){return h.no==no});if(!s)return;
+ lglog(L('বিল বাতিল','Sale voided')+' #'+s.sn+(day(s.t)!=tdy()?' ('+day(s.t)+')':'')+' · '+s.items.map(function(i){return nm(i)+'×'+i.qty}).join(', '),s.total);
  s.items.forEach(function(i){var p=i.id?gp(i.id):P.find(function(x){return x.name==i.name});if(p&&p.stock!=='')p.stock+=i.qty});
  if(s.pc&&CU&&window.FB&&FB.delPub)FB.delPub(s.pc).catch(function(){});
  var dch=false;DU.forEach(function(d){var n0=(d.entries||[]).length;d.entries=(d.entries||[]).filter(function(e){return e.sid!=no});if(d.entries.length!=n0){dch=true;pubDue(d)}});if(dch)dusave();
@@ -533,6 +534,7 @@ function vDash(){
  +(r.disc?'<div class="mute" style="margin-top:8px">'+t('disc')+': '+$$(r.disc)+'</div>':'')
  +'<div style="display:flex;gap:10px;margin-top:12px"><button class="pri" style="flex:1" onclick="showDayRpt(dd)">'+I('print')+' '+L('রিপোর্ট প্রিন্ট','Print report')+'</button><button onclick="csv()">'+I('copy')+' CSV</button></div><button style="width:100%;margin-top:10px" onclick="rpNow()">'+L('আজকের রিপোর্ট ইমেইলে পাঠান','Email today\'s report')+'</button></div>';
  h+='<div class="box"><b>'+L('ইনভয়েস','Invoices')+'</b>'+(ds.length?ds.map(function(s){return '<div class="row" onclick="showRc('+s.no+')"><div><b>#'+s.sn+'</b> <span class="mute">'+new Date(s.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span><div class="mute">'+s.items.length+t('itm')+' · '+t(s.pay)+'</div></div><b>'+$$(s.total)+'</b></div>'}).join(''):'<div class="empty">'+t('hist0')+'</div>')+'</div>';
+ h+=vExtras(dd);
  h+='<div class="box"><div class="hd">'+I('dash')+'<b>'+L('মাসিক হিসাব','Monthly summary')+'</b></div><input type="month" id="rpm" value="'+dm+'" onchange="dm=this.value||tdy().slice(0,7);render()">'
  +'<div class="big">'+$$(mr.t)+'<span>'+mr.n+L(' টি ইনভয়েস',' invoices')+'</span></div>'+pp(mr)+'<button class="pri" style="width:100%;margin-top:12px" onclick="showMonRpt(dm)">'+I('print')+' '+L('মাসিক রিপোর্ট প্রিন্ট','Print monthly report')+'</button>'+'<button style="width:100%;margin-top:8px" onclick="rpMonth()">'+L('মাসিক রিপোর্ট ইমেইলে পাঠান','Email monthly report')+'</button>'
  +(ks.length?'<div class="bars">'+ks.map(function(k){return '<div class="bc" onclick="dd=\''+k+'\';render();scrollTo(0,0)"><i style="height:'+Math.max(4,Math.round(by[k]/mx*100))+'px"></i><small>'+k.slice(8)+'</small></div>'}).join('')+'</div><div class="mute" style="font-size:12px;margin-top:6px">'+L('কোনো দিনের দণ্ডে চাপলে ওই দিনের হিসাব খুলবে','Tap a bar to open that day')+'</div>':'')+'</div>';
@@ -544,14 +546,35 @@ function showTxt(x,id,qr){window.__tx=x;
  $('#rc').classList.add('show')
 }
 
+var LG=load('pos_lg',[]),lgT;
+function lglog(txt,a){LG.push({id:Date.now()+'_'+Math.random().toString(36).slice(2,6),t:Date.now(),txt:txt,a:+a||0});if(LG.length>2000)LG=LG.slice(-2000);try{localStorage.setItem('pos_lg',JSON.stringify(LG))}catch(e){}lgPush()}
+function lgPush(){if(!CU||!ready||!window.FB)return;clearTimeout(lgT);lgT=setTimeout(function(){w(FB.set('pos','log',{list:LG}))},400)}
+function lgIn(cl){var m={},extra=false;cl.forEach(function(x){m[x.id]=x});LG.forEach(function(x){if(!m[x.id]){m[x.id]=x;extra=true}});LG=Object.keys(m).map(function(k){return m[k]}).sort(function(a,b){return a.t-b.t});try{localStorage.setItem('pos_lg',JSON.stringify(LG))}catch(e){}if(extra)lgPush()}
+function dayExtras(date){var dues=[],rec=[];
+ DU.forEach(function(d){(d.entries||[]).forEach(function(e){if(day(e.t)==date)dues.push({n:d.name,a:+e.a||0,no:e.no,it:e.items||''})});(d.pays||[]).forEach(function(p){if(day(p.t)==date)rec.push({n:d.name,a:+p.a||0})})});
+ var ex=KH.ex.filter(function(x){return (x.d||'')==date}),lg=LG.filter(function(x){return day(x.t)==date});
+ var sm=function(a,f){return a.reduce(function(s,x){return s+(+x[f]||0)},0)};
+ return{dues:dues,rec:rec,ex:ex,lg:lg,td:sm(dues,'a'),tr:sm(rec,'a'),te:sm(ex,'a'),tl:sm(lg,'a')}}
+function vExtras(date){var x=dayExtras(date),h='',tm=function(t){return new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})};
+ var box=function(title,tot,rows,empty){return '<div class="box"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+title+'</b>'+(tot!==null?'<b>'+$$(tot)+'</b>':'')+'</div>'+(rows.length?rows.join(''):'<div class="empty">'+empty+'</div>')+'</div>'};
+ h+=box(L('বাকি নিয়েছেন','Took on due'),x.td,x.dues.map(function(e){return '<div class="row"><div><b>'+esc(e.n)+'</b><div class="mute" style="font-size:12px">#'+e.no+(e.it?' · '+esc(e.it):'')+'</div></div><b style="color:var(--warn)">'+$$(e.a)+'</b></div>'}),L('এই দিন কেউ বাকি নেয়নি','No one took on due'));
+ if(x.rec.length)h+=box(L('বাকি জমা পেয়েছেন','Due payments received'),x.tr,x.rec.map(function(e){return '<div class="row"><b>'+esc(e.n)+'</b><b style="color:var(--ac)">'+$$(e.a)+'</b></div>'}),'');
+ if(x.ex.length)h+=box(L('খরচ','Expenses'),x.te,x.ex.map(function(e){return '<div class="row"><div><b>'+kLbl(KE_K,e.kind)+'</b>'+(e.note?'<div class="mute" style="font-size:12px">'+esc(e.note)+'</div>':'')+'</div><b>'+$$(e.a)+'</b></div>'}),'');
+ h+=box(L('বাতিল / মুছে ফেলা','Cancelled / deleted'),x.lg.length?x.tl:null,x.lg.map(function(e){return '<div class="row"><div><div>'+esc(e.txt)+'</div><div class="mute" style="font-size:12px">'+tm(e.t)+'</div></div>'+(e.a?'<b style="color:var(--warn)">'+$$(e.a)+'</b>':'')+'</div>'}),L('এই দিন কিছু বাতিল বা মুছে ফেলা হয়নি','Nothing cancelled or deleted'));
+ return h}
 function dayReport(date){
  var l=H.filter(function(s){return day(s.t)==date}).sort(function(a,b){return a.sn-b.sn}),r=sums(l),it={};
  l.forEach(function(s){s.items.forEach(function(i){var k=nm(i);it[k]=(it[k]||0)+i.qty})});
  var o=[S.shop,L('দিনের রিপোর্ট','Daily report')+': '+date,'--------------------------------',L('ইনভয়েস','Invoices')+': '+r.n+(r.n?'  (#'+l[0].sn+' – #'+l[r.n-1].sn+')':''),
-  t('Cash')+': '+$$(r.Cash),t('Card')+': '+$$(r.Card),t('Mobile')+': '+$$(r.Mobile)];
+  t('Cash')+': '+$$(r.Cash||0),L('মোবাইল ব্যাংকিং','Digital')+': '+$$((r.bKash||0)+(r.Nagad||0)+(r.Rocket||0)+(r.BanglaQR||0)),t('Due')+': '+$$(r.Due||0)];
  if(r.disc)o.push(t('disc')+': '+$$(r.disc));if(r.tax)o.push(t('tax')+': '+$$(r.tax));
  o.push('--------------------------------',t('total')+': '+$$(r.t),'','--------------------------------');
  Object.keys(it).sort(function(a,b){return it[b]-it[a]}).forEach(function(k){o.push(k+'  ×'+it[k])});
+ var x=dayExtras(date),sec=function(title,tot){o.push('','--------------------------------',title+(tot!==null?': '+$$(tot):''))};
+ sec(L('বাকি নিয়েছেন','Took on due'),x.dues.length?x.td:null);if(!x.dues.length)o.push(L('কেউ নেই','None'));x.dues.forEach(function(e){o.push('• '+e.n+' — '+$$(e.a)+' (#'+e.no+')')});
+ if(x.rec.length){sec(L('বাকি জমা পেয়েছেন','Due received'),x.tr);x.rec.forEach(function(e){o.push('• '+e.n+' — '+$$(e.a))})}
+ if(x.ex.length){sec(L('খরচ','Expenses'),x.te);x.ex.forEach(function(e){o.push('• '+kLbl(KE_K,e.kind)+(e.note?' ('+e.note+')':'')+' — '+$$(e.a))})}
+ sec(L('বাতিল / মুছে ফেলা','Cancelled / deleted'),x.lg.length?x.tl:null);if(!x.lg.length)o.push(L('কিছু নেই','None'));x.lg.forEach(function(e){o.push('• '+new Date(e.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' '+e.txt+(e.a?' — '+$$(e.a):''))});
  return o.join('\n');
 }
 function showDayRpt(d){var r=sums(H.filter(function(s){return day(s.t)==d}));
@@ -764,11 +787,12 @@ function duSetSave(){var e=dsE,d=DU.find(function(x){return x.id==e.id});if(!d)r
  var ex=findDU(nid,null,p);if(ex&&ex.id!=d.id){toast(t('existing')+': '+ex.name);return}
  d.name=n;d.phone=p;d.nid=nid;d.photo=e.photo||'';dusave();pubDue(d);render();openDU(d.id);toast(L('সেভ হয়েছে','Saved'))}
 function duDelLine(k,i){var d=DU.find(function(x){return x.id==dsE.id});if(!d)return;
- ask(L('এই লাইনটি মুছবেন?','Delete this line?'),function(){var a=k=='e'?d.entries:d.pays;if(a&&a[i]!==undefined)a.splice(i,1);dusave();pubDue(d);render();duSetView()})}
+ ask(L('এই লাইনটি মুছবেন?','Delete this line?'),function(){var a=k=='e'?d.entries:d.pays;if(a&&a[i]!==undefined){lglog((k=='e'?L('বাকির এন্ট্রি মুছেছেন','Due entry deleted'):L('বাকি জমা মুছেছেন','Due payment deleted'))+' · '+d.name+(k=='e'&&a[i].no?' #'+a[i].no:''),a[i].a);a.splice(i,1)}dusave();pubDue(d);render();duSetView()})}
 function duDelCust(id){var d=DU.find(function(x){return x.id==id});if(!d)return;var tot=duTotal(d);
  var msg=tot>0.004?L('⚠ '+d.name+'-এর '+$$(tot)+' বাকি আছে। তবুও মুছবেন?','⚠ '+d.name+' still owes '+$$(tot)+'. Delete anyway?'):L(d.name+'-কে মুছবেন?','Delete '+d.name+'?');
  ask(msg,function(){var i=DU.findIndex(function(x){return x.id==id});if(i<0)return;
   if(d.pc&&CU&&window.FB&&FB.delPub){try{w(FB.delPub(d.pc))}catch(e){}}
+  lglog(L('কাস্টমার মুছেছেন','Customer deleted')+' · '+d.name+(tot>0.004?' ('+L('বাকি ছিল','owed')+' '+$$(tot)+')':''),tot>0.004?tot:0);
   DU.splice(i,1);dusave();closeDs();render();toast(L('কাস্টমার মুছে গেছে, স্ক্যান লিংক বন্ধ','Customer deleted, scan link closed'))},L('হ্যাঁ, মুছুন','Yes, delete'))}
 
 /* ---------- ২. খাতা ---------- */
@@ -878,6 +902,8 @@ function kSave(){var f=kf,a=parseFloat(f.a);if(!a||a<=0){toast(L('টাকা�
  if(f.chg||!f.id){if(f.img)kImgSet(id,f.img);else kImgDel(id)}
  khSave();render();if(isT)khOpenP(f.pid);else closeDs()}
 function kDel(){var f=kf;ask(L('এই লাইনটি মুছবেন?','Delete this line?'),function(){
+ var kx=(f.m=='t'?KH.tx:KH.ex).find(function(x){return x.id==f.id});
+ if(kx){var kp=f.m=='t'?KH.p.find(function(p){return p.id==kx.pid}):null;lglog((f.m=='t'?L('খাতার লেনদেন মুছেছেন','Ledger line deleted')+(kp?' · '+kp.name:'')+' · '+kLbl(KT_K,kx.kind):L('খরচ মুছেছেন','Expense deleted')+' · '+kLbl(KE_K,kx.kind))+(kx.note?' ('+kx.note+')':'')+' · '+(kx.d||''),kx.a)}
  if(f.m=='t')KH.tx=KH.tx.filter(function(x){return x.id!=f.id});else KH.ex=KH.ex.filter(function(x){return x.id!=f.id});
  kImgDel(f.id);khSave();render();if(f.m=='t')khOpenP(f.pid);else closeDs()})}
 
@@ -1003,7 +1029,7 @@ function doReset(){var e=$('#le').value.trim();if(!e){showLogin(L('আগে ই
 
 function onPos(snap){var d={};snap.docs.forEach(function(x){d[x.id]=x.data()});
  if(!d.settings&&!d.products){if(snap.metadata.fromCache)return;ready=true;sy('on');push();Object.keys(IMG).forEach(function(k){FB.set('pos','img_'+k,{d:IMG[k]})});welcome();return}
- if(d.settings)S=Object.assign({shop:'Musafir Cafe',cur:'৳',tax:0,lang:'bn'},d.settings);if(d.products)P=d.products.list||[];if(d.due)DU=d.due.list||[];khIn(d);
+ if(d.settings)S=Object.assign({shop:'Musafir Cafe',cur:'৳',tax:0,lang:'bn'},d.settings);if(d.products)P=d.products.list||[];if(d.due)DU=d.due.list||[];if(d.log)lgIn(d.log.list||[]);else if(LG.length)lgPush();khIn(d);
  var n={};Object.keys(d).forEach(function(k){if(k.indexOf('img_')==0&&d[k])n[k.slice(4)]=d[k].d});IMG=n;
  ready=true;lsave();sy('on');render();welcome()
 }
@@ -1299,9 +1325,9 @@ const st=document.createElement('style');st.textContent='#qb{display:none;width:
 const b=document.createElement('button');b.id='qb';const mn=document.getElementById('m');mn.parentNode.insertBefore(b,mn);const p=document.createElement('div');p.id='qp';document.body.appendChild(p);
 b.onclick=()=>{op=true;tab='o';draw()};
 const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const pend=()=>ords.filter(o=>o.status=='new'||o.status=='accepted'),link=()=>location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'')+'order.html?s='+uid,qrimg=n=>'https://api.qrserver.com/v1/create-qr-code/?size='+n+'x'+n+'&margin=8&data='+encodeURIComponent(link());
+const pend=()=>ords.filter(o=>o.status=='new'||o.status=='accepted'||o.status=='ready'||o.status=='served'),link=()=>location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'')+'order.html?s='+uid,qrimg=n=>'https://api.qrserver.com/v1/create-qr-code/?size='+n+'x'+n+'&margin=8&data='+encodeURIComponent(link());
 function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.4)}catch(e){}try{navigator.vibrate&&navigator.vibrate([250,100,250])}catch(e){}}
-function notifyOrder(list){try{if(!('Notification' in window)||Notification.permission!=='granted')return;const body=(list.length?list.map(o=>'টেবিল '+o.table+(o.name?' · '+o.name:'')+': '+o.items.map(i=>i.n+'×'+i.q).join(', ')).join('\n'):'নতুন অর্ডার এসেছে').slice(0,300),title='📲 নতুন QR অর্ডার'+(list.length>1?' ('+list.length+'টি)':''),opt={body:body,tag:'qr-order',renotify:true,vibrate:[300,120,300,120,300],icon:'logo-192.png',badge:'logo-192.png',requireInteraction:true};
+function notifyOrder(list){try{if(!('Notification' in window)||Notification.permission!=='granted')return;const body=(list.length?list.map(o=>'টেবিল '+o.table+(o.name?' · '+o.name:'')+': '+o.items.map(i=>i.n+'×'+i.q).join(', ')).join('\n'):'নতুন অর্ডার এসেছে').slice(0,300),title='📲 নতুন QR অর্ডার'+(list.length>1?' ('+list.length+'টি)':''),opt={body:body,tag:'qr-order',renotify:true,vibrate:[300,120,300,120,300],icon:'cup-192.png',badge:'cup-192.png',requireInteraction:true};
  if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(r=>r.showNotification(title,opt)).catch(()=>{try{new Notification(title,opt)}catch(e){}});else new Notification(title,opt)}catch(e){}}
 function askNotif(){try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{draw()})}catch(e){}}
 document.addEventListener('click',askNotif,{once:true});
@@ -1310,16 +1336,16 @@ function draw(){const a=pend(),nw=a.filter(o=>o.status=='new').length;b.style.di
  const T=(k,t)=>'<button data-x="tab" data-v="'+k+'" class="'+(tab==k?'on':'')+'">'+t+'</button>';
  let h='<div><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:19px">📲 QR অর্ডার</b><button data-x="x" style="font-size:22px;border:0;background:none;color:var(--ink)">✕</button></div><div class="qt">'+T('o','অর্ডার'+(a.length?' ('+a.length+')':''))+T('q','QR কোড')+T('r','⭐ রেটিং')+T('s','সেটিংস')+'</div>';
  if(tab=='o'&&'Notification' in window&&Notification.permission!=='granted')h+=(Notification.permission=='default'?'<button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:11px;margin:0 0 6px;font-weight:700" data-x="notif">🔔 নোটিফিকেশন চালু করুন</button>':'<p style="opacity:.7;font-size:12px;margin:4px 0">🔕 নোটিফিকেশন বন্ধ আছে। ব্রাউজার/অ্যাপ সেটিংস থেকে অনুমতি দিন।</p>');
-  if(tab=='o')h+=a.length?a.map(o=>'<div class="qo"><b style="font-size:17px">টেবিল '+E(o.table)+'</b>'+(o.name?' · '+E(o.name):'')+' <span style="opacity:.6">'+new Date(o.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span>'+(o.status=='accepted'?' <b style="color:var(--ac)">✔ গ্রহণ করা</b>':' <b style="color:#e0301e">নতুন</b>')+
+  if(tab=='o')h+=a.length?a.map(o=>'<div class="qo"><b style="font-size:17px">টেবিল '+E(o.table)+'</b>'+(o.name?' · '+E(o.name):'')+' <span style="opacity:.6">'+new Date(o.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span>'+(o.status=='accepted'?' <b style="color:var(--ac)">✔ গ্রহণ করা</b>':o.status=='ready'?' <b style="color:#d98a00">🍽 প্রস্তুত</b>':o.status=='served'?' <b style="color:var(--ac)">✔ পরিবেশিত</b>':' <b style="color:#e0301e">নতুন</b>')+
   '<div style="margin:6px 0">'+o.items.map(i=>E(i.n)+' × <b>'+i.q+'</b>').join('<br>')+'</div>'+(o.note?'<div style="opacity:.7">নোট: '+E(o.note)+'</div>':'')+'<div>মোট (কাস্টমারের হিসাবে): <b>'+o.total+'</b></div>'+
-  (o.status=='new'?'<button class="g" data-x="acc" data-id="'+o.id+'">✔ গ্রহণ করুন</button>':'')+'<button data-x="bill" data-id="'+o.id+'">বিলে নিন</button><button style="color:#e0301e" data-x="can" data-id="'+o.id+'">বাতিল</button></div>').join(''):'<p style="opacity:.7;text-align:center;padding:24px">এখন কোনো অপেক্ষমাণ অর্ডার নেই</p>';
+  (o.status=='new'?'<button class="g" data-x="acc" data-id="'+o.id+'">✔ গ্রহণ করুন</button>':'')+(o.status=='accepted'?'<button class="g" data-x="rdy" data-id="'+o.id+'">👨‍🍳 খাবার প্রস্তুত</button>':'')+(o.status=='ready'?'<button class="g" data-x="srv" data-id="'+o.id+'">🍽 পরিবেশন হয়েছে</button>':'')+'<button data-x="bill" data-id="'+o.id+'">বিলে নিন</button><button style="color:#e0301e" data-x="can" data-id="'+o.id+'">বাতিল</button></div>').join(''):'<p style="opacity:.7;text-align:center;padding:24px">এখন কোনো অপেক্ষমাণ অর্ডার নেই</p>';
  if(tab=='q')h+='<div style="text-align:center"><img src="'+qrimg(300)+'" style="width:260px;max-width:80%;background:#fff;border-radius:14px"><p style="opacity:.7;word-break:break-all;font-size:12px">'+E(link())+'</p><div style="display:flex"><button class="g" style="flex:1;font:inherit;border:0;border-radius:10px;padding:12px;margin:3px" data-x="print">🖨 QR ছাপুন</button><button style="flex:1;font:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;margin:3px;background:var(--card);color:var(--ink)" data-x="copy">লিংক কপি</button></div><p style="opacity:.7;font-size:13px">একটাই QR সব টেবিলের জন্য। কাস্টমার নিজে টেবিল নম্বর দেবে।</p><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:12px" data-x="pub">মেনু এখনই আপডেট করুন</button></div>';
  if(tab=='r'){const av=rts.length?(rts.reduce((x,y)=>x+(+y.stars||0),0)/rts.length).toFixed(1):'-';h+='<div style="text-align:center;margin:8px 0"><b style="font-size:34px">⭐ '+av+'</b><div style="opacity:.7">'+rts.length+'টি রেটিং</div></div>'+(rts.length?rts.slice(0,60).map(x=>'<div class="qo"><b style="color:#f5b301">'+'★'.repeat(+x.stars||0)+'</b><span style="opacity:.3">'+'★'.repeat(5-(+x.stars||0))+'</span> <span style="opacity:.65">টেবিল '+E(x.table)+(x.name?' · '+E(x.name):'')+' · '+new Date(x.t).toLocaleDateString([],{day:'2-digit',month:'short'})+'</span>'+(x.comment?'<div style="margin-top:6px">'+E(x.comment)+'</div>':'')+'</div>').join(''):'<p style="opacity:.7;text-align:center;padding:24px">এখনো কোনো রেটিং আসেনি</p>')}
   if(tab=='s')h+='<label><input type="checkbox" id="s_open" '+(QS.open?'checked':'')+'> অর্ডার নেওয়া চালু</label><label><input type="checkbox" id="s_nt" '+(QS.needTable?'checked':'')+'> টেবিল নম্বর বাধ্যতামূলক</label><br><label>স্বাগতম লেখা</label><input type="text" id="s_w" value="'+E(QS.welcome)+'"><label>ছোট লেখা (স্বাগতম পর্দায়)</label><input type="text" id="s_t" value="'+E(QS.tag)+'"><label>মেনুর ওপরে নোটিশ (ঐচ্ছিক, যেমন: আজ কেক শেষ)</label><input type="text" id="s_n" value="'+E(QS.note)+'"><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:13px;font-weight:700" data-x="save">সেভ ও প্রকাশ করুন</button>';
  p.innerHTML=h+'</div>'}
 p.onclick=e=>{if(e.target==p){op=false;draw();return}const t=e.target.closest('[data-x]');if(!t)return;const x=t.dataset.x,id=t.dataset.id;
  if(x=='x'){op=false;draw()}else if(x=='tab'){tab=t.dataset.v;draw()}
- else if(x=='acc'||x=='can')updateDoc(doc(db,'orders',id),{status:x=='acc'?'accepted':'cancelled'}).catch(()=>toast('হয়নি, নেট দেখুন'));
+ else if(x=='acc'||x=='can'||x=='rdy'||x=='srv')updateDoc(doc(db,'orders',id),{status:{acc:'accepted',can:'cancelled',rdy:'ready',srv:'served'}[x]}).catch(()=>toast('হয়নি, নেট দেখুন'));
  else if(x=='notif')askNotif();else if(x=='bill')bill(id);else if(x=='pub')qrPub(1);
  else if(x=='copy'){try{navigator.clipboard.writeText(link());toast('লিংক কপি হয়েছে')}catch(e){}}
  else if(x=='print'){const w=window.open('','_blank');if(!w)return;w.document.write('<title>QR</title><body style="font-family:sans-serif;text-align:center;padding:30px"><h1 style="font-size:40px;margin:0">'+E(S.shop)+'</h1><p style="font-size:22px">'+E(QS.tag)+'</p><img src="'+qrimg(420)+'" style="width:420px"><h2>স্ক্যান করুন, অর্ডার দিন</h2></body>');w.document.close();setTimeout(()=>w.print(),1200)}

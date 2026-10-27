@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
+<title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="cup-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
 <style>
 :root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#0b2a2e;--z:1;--cw:150px}
@@ -30,9 +30,15 @@ input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px
 .ok{width:96px;height:96px;border-radius:50%;background:var(--ac);color:var(--acink);font-size:54px;display:flex;align-items:center;justify-content:center;margin:20px auto 8px;animation:pop .7s both}
 .stp{display:flex;margin:18px 0}.stp div{flex:1 1 0;min-width:0;padding:0 3px;overflow-wrap:break-word;line-height:1.25;text-align:center;font-size:12px;color:var(--mu)}.stp i{display:block;width:30px;height:30px;line-height:30px;margin:0 auto 5px;border-radius:50%;background:var(--ln);font-style:normal}.stp .d{color:var(--ink)}.stp .d i{background:var(--ac);color:var(--acink);font-weight:800}
 .rt{margin-top:14px;text-align:center}.stars{display:flex;justify-content:center;gap:6px;margin:8px 0}.stars button{background:none;font-size:42px;line-height:1;padding:2px 4px;color:#556;filter:grayscale(1);opacity:.6}.stars button.on{color:#f5b301;filter:none;opacity:1}
-.cf{position:fixed;top:-30px;font-size:26px;z-index:60;animation:fall 3s linear forwards;pointer-events:none}
+#cfx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+.vh{position:relative;display:grid;place-items:center;height:min(46dvh,360px);margin:6px -12px 4px;overflow:hidden}
+.vh .bgi{position:absolute;inset:-25%;background-size:cover;background-position:center;filter:blur(36px) saturate(1.3);opacity:.6}
+.vh .fr{--a:1;position:relative;width:min(80vw,calc(40dvh*var(--a)));aspect-ratio:var(--a);border-radius:28px;overflow:hidden;background:#0006;box-shadow:0 16px 44px #000a,0 0 0 4px #f5b52ee6;animation:flt 3.2s ease-in-out infinite alternate}
+.vh video{width:100%;height:100%;object-fit:contain;display:block}
+.bdg{display:inline-block;padding:4px 14px;border-radius:99px;background:#f5b52e;color:#3b2a00;font-weight:800;font-size:calc(14px*var(--z))}
+@keyframes flt{to{transform:translateY(-6px) rotate(.4deg)}}
 @keyframes up{from{opacity:0;transform:translateY(16px)}}@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
-</style></head><body><div id="app"></div><div id="bar"></div><div id="ovl"></div>
+</style></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getFirestore,doc,getDoc,setDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -44,9 +50,11 @@ const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);v===null?lo
 const SZ=[{z:.82,cw:104},{z:1,cw:150},{z:1.18,cw:180},{z:1.35,cw:230}];
 let lang=ls('qo_lang')==='en'?'en':'bn',si=+ls('qo_sz');if(!(si>=0&&si<SZ.length)||ls('qo_sz')===null)si=1;
 const TX={
-bn:{bad:'QR বা লিংকটি ঠিক নয়',nopub:'মেনু এখনো প্রকাশ হয়নি',closed:'এখন অর্ডার নেওয়া বন্ধ আছে, মেনু দেখতে পারেন।',search:'পণ্য খুঁজুন',all:'সব',other:'অন্যান্য',add:'+ যোগ করুন',out:'স্টক শেষ',none:'কিছু পাওয়া যায়নি',cartN:n=>'🛒 '+n+'টি',view:'দেখুন ›',tapDrag:'ধরে সরানো যাবে',yours:'আপনার অর্ডার',total:'মোট',tno:'টেবিল নম্বর',tph:'যেমন: 5',yname:'আপনার নাম (ঐচ্ছিক)',note:'নোট (ঐচ্ছিক, যেমন: চিনি কম)',confirm:'✔ অর্ডার কনফার্ম করুন',closedBtn:'এখন অর্ডার নেওয়া বন্ধ',back:'← মেনুতে ফিরুন',needT:'টেবিল নম্বর দিন',wait:'একটু অপেক্ষা করে আবার চেষ্টা করুন',fail:'পাঠানো যায়নি, আবার চেষ্টা করুন',table:'টেবিল ',nf:'অর্ডার পাওয়া যায়নি',sorry:'দুঃখিত, অর্ডারটি নেওয়া যায়নি',sent:'অর্ডার পাঠানো হয়েছে!',steps:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','তৈরি/পরিবেশন'],foot:'আপনার আসাই আমাদের আনন্দ ☕ এই পাতা খোলা রাখলে অবস্থা নিজে থেকেই বদলাবে।',more:'আরও অর্ডার করুন',welcome:'স্বাগতম',tag:'মেনু দেখে অর্ডার দিন',g:['শুভ রাত্রি','সুপ্রভাত','শুভ দুপুর','শুভ বিকাল','শুভ সন্ধ্যা'],
+bn:{bad:'QR বা লিংকটি ঠিক নয়',nopub:'মেনু এখনো প্রকাশ হয়নি',closed:'এখন অর্ডার নেওয়া বন্ধ আছে, মেনু দেখতে পারেন।',search:'পণ্য খুঁজুন',all:'সব',other:'অন্যান্য',add:'+ যোগ করুন',out:'স্টক শেষ',none:'কিছু পাওয়া যায়নি',cartN:n=>'🛒 '+n+'টি',view:'দেখুন ›',tapDrag:'ধরে সরানো যাবে',yours:'আপনার অর্ডার',total:'মোট',tno:'টেবিল নম্বর',tph:'যেমন: 5',yname:'আপনার নাম (ঐচ্ছিক)',note:'নোট (ঐচ্ছিক, যেমন: চিনি কম)',confirm:'✔ অর্ডার কনফার্ম করুন',closedBtn:'এখন অর্ডার নেওয়া বন্ধ',back:'← মেনুতে ফিরুন',needT:'টেবিল নম্বর দিন',wait:'একটু অপেক্ষা করে আবার চেষ্টা করুন',fail:'পাঠানো যায়নি, আবার চেষ্টা করুন',table:'টেবিল ',nf:'অর্ডার পাওয়া যায়নি',sorry:'দুঃখিত, অর্ডারটি নেওয়া যায়নি',sent:'অর্ডার পাঠানো হয়েছে!',steps:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','খাবার প্রস্তুত','পরিবেশন'],
+vw:['⏳ অপেক্ষা করুন','🍽 খাবার প্রস্তুত!','😋 মজা করে খান'],vt:['খাবার তৈরি হচ্ছে… একটু অপেক্ষা করুন','আপনার খাবার তৈরি হয়ে গেছে','ধন্যবাদ, আবার আসবেন ❤'],foot:'আপনার আসাই আমাদের আনন্দ ☕ এই পাতা খোলা রাখলে অবস্থা নিজে থেকেই বদলাবে।',more:'আরও অর্ডার করুন',welcome:'স্বাগতম',tag:'মেনু দেখে অর্ডার দিন',g:['শুভ রাত্রি','সুপ্রভাত','শুভ দুপুর','শুভ বিকাল','শুভ সন্ধ্যা'],
 rate:'আমাদের সার্ভিস কেমন লাগলো?',rcm:'মন্তব্য (ঐচ্ছিক)',rsend:'রেটিং পাঠান',rpick:'তারা দিয়ে রেটিং দিন',rthx:'ধন্যবাদ! আপনার রেটিং পেয়েছি',rfail:'রেটিং পাঠানো যায়নি, আবার চেষ্টা করুন',rl:['','খুব খারাপ','খারাপ','মোটামুটি','ভালো','চমৎকার'],sizeS:'ছোট',sizeL:'বড়'},
-en:{bad:'Invalid QR or link',nopub:'The menu is not published yet',closed:'Orders are closed right now. You can still browse the menu.',search:'Search items',all:'All',other:'Other',add:'+ Add',out:'Out of stock',none:'Nothing found',cartN:n=>'🛒 '+n+(n==1?' item':' items'),view:'View ›',tapDrag:'drag to move',yours:'Your order',total:'Total',tno:'Table number',tph:'e.g. 5',yname:'Your name (optional)',note:'Note (optional, e.g. less sugar)',confirm:'✔ Confirm order',closedBtn:'Orders are closed',back:'← Back to menu',needT:'Enter table number',wait:'Please wait a moment and try again',fail:'Could not send, please try again',table:'Table ',nf:'Order not found',sorry:'Sorry, the order could not be accepted',sent:'Order sent!',steps:['Sent','Accepted by shop','Preparing / served'],foot:'Thank you for visiting ☕ Keep this page open and the status will update by itself.',more:'Order more',welcome:'Welcome',tag:'Browse the menu and order',g:['Good night','Good morning','Good afternoon','Good evening','Good evening'],
+en:{bad:'Invalid QR or link',nopub:'The menu is not published yet',closed:'Orders are closed right now. You can still browse the menu.',search:'Search items',all:'All',other:'Other',add:'+ Add',out:'Out of stock',none:'Nothing found',cartN:n=>'🛒 '+n+(n==1?' item':' items'),view:'View ›',tapDrag:'drag to move',yours:'Your order',total:'Total',tno:'Table number',tph:'e.g. 5',yname:'Your name (optional)',note:'Note (optional, e.g. less sugar)',confirm:'✔ Confirm order',closedBtn:'Orders are closed',back:'← Back to menu',needT:'Enter table number',wait:'Please wait a moment and try again',fail:'Could not send, please try again',table:'Table ',nf:'Order not found',sorry:'Sorry, the order could not be accepted',sent:'Order sent!',steps:['Sent','Accepted by shop','Food ready','Served'],
+vw:['⏳ Please wait','🍽 Food is ready!','😋 Enjoy your meal'],vt:['Your food is being prepared… please wait a little','Your food is ready','Thank you, see you again ❤'],foot:'Thank you for visiting ☕ Keep this page open and the status will update by itself.',more:'Order more',welcome:'Welcome',tag:'Browse the menu and order',g:['Good night','Good morning','Good afternoon','Good evening','Good evening'],
 rate:'How was our service?',rcm:'Comment (optional)',rsend:'Send rating',rpick:'Tap the stars to rate',rthx:'Thank you! We got your rating',rfail:'Could not send rating, please try again',rl:['','Very bad','Bad','Okay','Good','Excellent'],sizeS:'Smaller',sizeL:'Bigger'}};
 const t=k=>{const v=TX[lang][k];return v===undefined?TX.bn[k]:v};
 const nmOf=i=>lang==='en'?(i.e||i.n):i.n;
@@ -68,9 +76,9 @@ async function init(){
  C=s.data();Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(C.color)document.documentElement.style.setProperty('--hd',C.color);
  if(!oid)restoreCart();
  hdr();if(!oid&&!sessionStorage.getItem('sp'))splash();oid?track():list();bar()}
-function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(lang==='en'?t('welcome'):(Q.welcome||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(lang==='en'?t('tag'):(Q.tag||t('tag')))}</p>`;document.body.appendChild(d);
+function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="cup-192.png"><h1>${greet()}!</h1><p>${esc(lang==='en'?t('welcome'):(Q.welcome||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(lang==='en'?t('tag'):(Q.tag||t('tag')))}</p>`;document.body.appendChild(d);
  const x=()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)};d.onclick=x;setTimeout(x,2200)}
-function hdr(){$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><b>${esc(C.name||(lang==='en'?'Menu':'মেনু'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
+function hdr(){$('#app').innerHTML=`<header><img src="cup-192.png" alt=""><b>${esc(C.name||(lang==='en'?'Menu':'মেনু'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
  <div class="hb"><button data-lang="bn" class="${lang==='bn'?'on':''}">বাং</button><button data-lang="en" class="${lang==='en'?'on':''}">EN</button></div>
  <div class="hb"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div></header><div class="w" id="bd"></div>`}
 function list(){
@@ -127,13 +135,33 @@ function ratingHTML(){const done=ls('rt_'+oid);
 window.__rate=async()=>{if(!R.s||!lastO)return;const b=$('#rs');if(b)b.disabled=true;
  try{await setDoc(doc(db,'ratings',oid),{uid,oid,table:lastO.table||'-',name:lastO.name||'',stars:R.s,comment:R.c.trim().slice(0,300),t:Date.now()});ls('rt_'+oid,R.s);paint()}catch(e){alert(t('rfail'));if(b)b.disabled=false}};
 function paint(){const o=lastO;if(!o)return;if(document.activeElement&&document.activeElement.id==='rc'){dirty=true;return}
- const can=o.status=='cancelled',st=o.status=='new'?0:o.status=='accepted'?1:2;
- $('#bd').innerHTML=`<div style="text-align:center"><div class="ok">${can?'✕':'✔'}</div><h2 style="margin:6px 0">${can?t('sorry'):t('sent')}</h2><div class="mu">${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
+ const can=o.status=='cancelled',st=o.status=='new'?0:o.status=='accepted'?1:o.status=='ready'?2:3;
+ const vs=o.status=='ready'?1:(o.status=='served'||o.status=='billed')?2:0,VF=['wait','ready','served'],VA=[1,1.304,1.837];
+ $('#bd').innerHTML=(can?'':`<div class="vh"><i class="bgi" style="background-image:url(video/${VF[vs]}.jpg)"></i><div class="fr" style="--a:${VA[vs]}"><video id="vv" src="video/${VF[vs]}.mp4" poster="video/${VF[vs]}.jpg" muted loop autoplay playsinline preload="auto"></video></div></div>`)+`<div style="text-align:center">${can?'<div class="ok">✕</div>':`<span class="bdg">${t('vw')[vs]}</span>`}<h2 style="margin:6px 0">${can?t('sorry'):(vs==0?t('sent'):vs==1?t('vt')[1]:'❤')}</h2><div class="mu">${can?'':(vs==0?t('vt')[0]+'<br>':vs==2?t('vt')[2]+'<br>':'')}${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
  ${can?'':`<div class="stp">${t('steps').map((s,k)=>`<div class="${k<=st?'d':''}"><i>${k<=st?'✓':k+1}</i>${s}</div>`).join('')}</div>`}
  <div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(nmId(x))} × ${x.q}</span><b>${m(x.p*x.q)}</b></div>`).join('')}<div class="row" style="border-top:1px solid var(--ln)"><span><b>${t('total')}</b></span><b>${m(o.total)}</b></div></div>
  ${can||st<1?'':ratingHTML()}
  <p class="mu" style="text-align:center">${t('foot')}</p><button class="big" onclick="location.href='?s=${uid}${tbl?'&t='+encodeURIComponent(tbl):''}'">${t('more')}</button>`;
- if(!sessionStorage.getItem('cf'+oid)&&!can){sessionStorage.setItem('cf'+oid,1);for(let i=0;i<18;i++){const c=document.createElement('span');c.className='cf';c.textContent=['☕','🍰','✨','🥪'][i%4];c.style.left=Math.random()*95+'vw';c.style.animationDelay=Math.random()*1.2+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),4500)}}}
+ const v=$('#vv');if(v){v.muted=true;const p=v.play();if(p&&p.catch)p.catch(()=>{})}
+ if(!can&&vs<2)lock();else unlock();
+ if(!sessionStorage.getItem('cf'+oid)&&!can){sessionStorage.setItem('cf'+oid,1);pop()}}
+let wl=null;async function lock(){try{if(!wl&&navigator.wakeLock){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null})}}catch(e){wl=null}}
+function unlock(){try{if(wl)wl.release()}catch(e){}wl=null}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&lastO&&oid&&['new','accepted','ready'].includes(lastO.status))lock()});
+/* পার্টি পপার: স্ক্রিনের নিচের মাঝখান থেকে জরি ও কুচি */
+const cv=$('#cfx'),cx=cv.getContext('2d'),CL=['#f5b52e','#e8472f','#2f8f8a','#7c3aed','#ff6fa5','#3aa0ff','#7fd13b'];let ps=[],run=0;
+function pop(){const D=window.devicePixelRatio||1;cv.width=innerWidth*D;cv.height=innerHeight*D;const ox=cv.width/2,oy=cv.height-10*D;
+ for(let i=0;i<150;i++){const a=-Math.PI/2+(Math.random()-.5)*1.25,v=(9+Math.random()*19)*D;ps.push({k:0,D,x:ox,y:oy,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:Math.random()*6,vr:(Math.random()-.5)*.4,w:(5+Math.random()*6)*D,h:(8+Math.random()*8)*D,c:CL[i%CL.length],f:Math.random()*6})}
+ for(let i=0;i<30;i++){const a=-Math.PI/2+(Math.random()-.5)*1,v=(11+Math.random()*17)*D;ps.push({k:1,D,x:ox,y:oy,vx:Math.cos(a)*v,vy:Math.sin(a)*v,L:(60+Math.random()*80)*D,c:CL[i%CL.length],f:Math.random()*6})}
+ if(!run){run=1;requestAnimationFrame(draw)}}
+function draw(){cx.clearRect(0,0,cv.width,cv.height);
+ ps=ps.filter(p=>{const D=p.D;p.vy+=(p.k?.22:.45)*D;p.vx*=p.k?.975:.985;p.vy*=p.k?.975:.99;p.x+=p.vx;p.y+=p.vy;p.f+=.12;
+  if(p.k){const n=14;let dx=-p.vx,dy=-p.vy;const m=Math.hypot(dx,dy)||1;dx/=m;dy/=m;cx.beginPath();cx.moveTo(p.x,p.y);
+   for(let j=1;j<=n;j++){const s=p.L*j/n,w=Math.sin(p.f+j*.7)*7*D*(j/n);cx.lineTo(p.x+dx*s-dy*w,p.y+dy*s+dx*w)}
+   cx.strokeStyle=p.c;cx.lineWidth=4*D;cx.lineCap='round';cx.stroke()}
+  else{p.r+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.scale(1,Math.cos(p.f));cx.fillStyle=p.c;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore()}
+  return p.y<cv.height+150*D});
+ if(ps.length)requestAnimationFrame(draw);else{run=0;cx.clearRect(0,0,cv.width,cv.height)}}
 function track(){onSnapshot(doc(db,'orders',oid),s=>{if(!s.exists()){$('#bd').textContent=t('nf');return}lastO=s.data();paint()})}
 init();
 </script></body></html>
