@@ -2,23 +2,34 @@
 <title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
 <style>
-:root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#0b2a2e}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:var(--bg);color:var(--ink);font:500 15px/1.45 "Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:110px}
-header{background:var(--hd);padding:calc(10px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
-header img{width:40px;height:40px;border-radius:11px}header b{font-size:18px;flex:1}.chip{background:var(--card);border:1px solid var(--ln);border-radius:99px;padding:4px 12px;font-size:13px}
-.w{max-width:640px;margin:auto;padding:10px 12px}input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;margin:4px 0 10px}
-.ch{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px}.ch span{white-space:nowrap;padding:7px 14px;border-radius:99px;background:var(--card);border:1px solid var(--ln);cursor:pointer}.ch .on{background:var(--ac);color:var(--acink);font-weight:700}
-.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cd{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:4px;animation:up .4s both}
-.av{width:100%;height:96px;border-radius:12px;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:#fff}.nm{font-weight:700}.pr{color:var(--ac);font-weight:800}
+:root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#0b2a2e;--z:1;--cw:150px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 calc(15px*var(--z))/1.45 "Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:140px;overflow-x:hidden}
+header{background:var(--hd);padding:calc(8px + env(safe-area-inset-top)) 10px 8px;display:flex;align-items:center;gap:6px;position:sticky;top:0;z-index:5}
+header img{width:36px;height:36px;border-radius:10px;flex:none}header b{font-size:17px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip{background:var(--card);border:1px solid var(--ln);border-radius:99px;padding:3px 10px;font-size:12px;white-space:nowrap;flex:none}
+.hb{display:flex;gap:4px;flex:none}.hb button{min-width:34px;height:34px;padding:0 8px;border-radius:10px;background:var(--card);border:1px solid var(--ln);color:var(--ink);font-size:13px;font-weight:700}.hb button.on{background:var(--ac);color:var(--acink);border-color:var(--ac)}.hb button:disabled{opacity:.35}
+.w{max-width:1100px;margin:auto;padding:10px 12px}
+input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;font-size:max(16px,1em);margin:4px 0 10px}
+.ch{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch}.ch span{white-space:nowrap;padding:7px 14px;border-radius:99px;background:var(--card);border:1px solid var(--ln);cursor:pointer}.ch .on{background:var(--ac);color:var(--acink);font-weight:700}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--cw),1fr));gap:10px}
+.cd{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:4px;min-width:0;animation:up .4s both}
+.av{width:100%;aspect-ratio:4/3;height:auto;border-radius:12px;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:calc(34px*var(--z));font-weight:800;color:#fff}
+.nm{font-weight:700;overflow-wrap:anywhere}.pr{color:var(--ac);font-weight:800}
 .ct{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:38px}button{font:inherit;border:0;cursor:pointer}
-.ad{flex:1;background:var(--ac);color:var(--acink);border-radius:10px;padding:9px;font-weight:700}.ct b{font-size:17px}.ct button:not(.ad),.qb{width:38px;height:38px;border-radius:10px;background:var(--ln);color:var(--ink);font-size:20px}.off{opacity:.5}
-.bar{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));background:var(--ac);color:var(--acink);border-radius:16px;padding:14px 16px;display:flex;justify-content:space-between;font-weight:800;font-size:16px;box-shadow:0 6px 24px #0008;animation:up .3s both;cursor:pointer}
-.ov{position:fixed;inset:0;background:#000a;z-index:20;display:flex;align-items:flex-end;justify-content:center}.sh{background:var(--hd);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:16px;animation:up .3s both}
+.ad{flex:1;background:var(--ac);color:var(--acink);border-radius:10px;padding:9px 6px;font-weight:700}.ct b{font-size:1.1em}
+.ct button:not(.ad),.qb{height:38px;border-radius:10px;background:var(--ln);color:var(--ink);font-size:20px}.qb{width:38px;flex:none}.ct button:not(.ad){flex:1 1 0;min-width:0}.ct b{flex:none;min-width:1.2em;text-align:center}.off{opacity:.5}
+#bar{position:fixed;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:15;touch-action:none;user-select:none;-webkit-user-select:none}
+.bar{background:var(--ac);color:var(--acink);border-radius:20px;padding:15px 20px;display:flex;flex-direction:column;gap:2px;font-weight:800;font-size:17px;box-shadow:0 8px 28px #000a;cursor:grab;min-width:170px;animation:up .3s both}
+#bar.drag .bar{cursor:grabbing;opacity:.92;transform:scale(1.03)}.bar small{font-size:.75em;font-weight:600;opacity:.8}
+.ov{position:fixed;inset:0;background:#000a;z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sh{background:var(--hd);width:100%;max-width:640px;max-height:92vh;max-height:92dvh;overflow:auto;border-radius:22px 22px 0 0;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));animation:up .3s both}
 .big{width:100%;padding:15px;border-radius:14px;background:var(--ac);color:var(--acink);font-weight:800;font-size:17px;margin-top:6px}.mu{color:var(--mu)}.row{display:flex;align-items:center;gap:8px;padding:6px 0}.row span:first-child{flex:1}
 #sp{position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 35%,#14606a,#0b2a2e 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity .6s;padding:20px}
 #sp img{width:110px;height:110px;border-radius:28px;animation:pop .9s both;box-shadow:0 10px 40px #0008}#sp h1{margin:18px 0 4px;font-size:28px;animation:up .7s .3s both}#sp p{margin:0;color:#bcd;animation:up .7s .5s both}
 .ok{width:96px;height:96px;border-radius:50%;background:var(--ac);color:var(--acink);font-size:54px;display:flex;align-items:center;justify-content:center;margin:20px auto 8px;animation:pop .7s both}
-.stp{display:flex;margin:18px 0}.stp div{flex:1;text-align:center;font-size:12px;color:var(--mu)}.stp i{display:block;width:30px;height:30px;line-height:30px;margin:0 auto 5px;border-radius:50%;background:var(--ln);font-style:normal}.stp .d{color:var(--ink)}.stp .d i{background:var(--ac);color:var(--acink);font-weight:800}
+.stp{display:flex;margin:18px 0}.stp div{flex:1 1 0;min-width:0;padding:0 3px;overflow-wrap:break-word;line-height:1.25;text-align:center;font-size:12px;color:var(--mu)}.stp i{display:block;width:30px;height:30px;line-height:30px;margin:0 auto 5px;border-radius:50%;background:var(--ln);font-style:normal}.stp .d{color:var(--ink)}.stp .d i{background:var(--ac);color:var(--acink);font-weight:800}
+.rt{margin-top:14px;text-align:center}.stars{display:flex;justify-content:center;gap:6px;margin:8px 0}.stars button{background:none;font-size:42px;line-height:1;padding:2px 4px;color:#556;filter:grayscale(1);opacity:.6}.stars button.on{color:#f5b301;filter:none;opacity:1}
 .cf{position:fixed;top:-30px;font-size:26px;z-index:60;animation:fall 3s linear forwards;pointer-events:none}
 @keyframes up{from{opacity:0;transform:translateY(16px)}}@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
 </style></head><body><div id="app"></div><div id="bar"></div><div id="ovl"></div>
@@ -28,49 +39,101 @@ import {getFirestore,doc,getDoc,setDoc,onSnapshot} from "https://www.gstatic.com
 const db=getFirestore(initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"}));
 const SHOP='';const P=new URLSearchParams(location.search),uid=P.get('s')||SHOP,oid=P.get('o');let tbl=(P.get('t')||'').slice(0,10);
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let C={},Q={},items=[],cart={},cat='',q='';
+const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}return null};
+/* ---------- ভাষা (ডিফল্ট বাংলা) ও সাইজ ---------- */
+const SZ=[{z:.82,cw:104},{z:1,cw:150},{z:1.18,cw:180},{z:1.35,cw:230}];
+let lang=ls('qo_lang')==='en'?'en':'bn',si=+ls('qo_sz');if(!(si>=0&&si<SZ.length)||ls('qo_sz')===null)si=1;
+const TX={
+bn:{bad:'QR বা লিংকটি ঠিক নয়',nopub:'মেনু এখনো প্রকাশ হয়নি',closed:'এখন অর্ডার নেওয়া বন্ধ আছে, মেনু দেখতে পারেন।',search:'পণ্য খুঁজুন',all:'সব',other:'অন্যান্য',add:'+ যোগ করুন',out:'স্টক শেষ',none:'কিছু পাওয়া যায়নি',cartN:n=>'🛒 '+n+'টি',view:'দেখুন ›',tapDrag:'ধরে সরানো যাবে',yours:'আপনার অর্ডার',total:'মোট',tno:'টেবিল নম্বর',tph:'যেমন: 5',yname:'আপনার নাম (ঐচ্ছিক)',note:'নোট (ঐচ্ছিক, যেমন: চিনি কম)',confirm:'✔ অর্ডার কনফার্ম করুন',closedBtn:'এখন অর্ডার নেওয়া বন্ধ',back:'← মেনুতে ফিরুন',needT:'টেবিল নম্বর দিন',wait:'একটু অপেক্ষা করে আবার চেষ্টা করুন',fail:'পাঠানো যায়নি, আবার চেষ্টা করুন',table:'টেবিল ',nf:'অর্ডার পাওয়া যায়নি',sorry:'দুঃখিত, অর্ডারটি নেওয়া যায়নি',sent:'অর্ডার পাঠানো হয়েছে!',steps:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','তৈরি/পরিবেশন'],foot:'আপনার আসাই আমাদের আনন্দ ☕ এই পাতা খোলা রাখলে অবস্থা নিজে থেকেই বদলাবে।',more:'আরও অর্ডার করুন',welcome:'স্বাগতম',tag:'মেনু দেখে অর্ডার দিন',g:['শুভ রাত্রি','সুপ্রভাত','শুভ দুপুর','শুভ বিকাল','শুভ সন্ধ্যা'],
+rate:'আমাদের সার্ভিস কেমন লাগলো?',rcm:'মন্তব্য (ঐচ্ছিক)',rsend:'রেটিং পাঠান',rpick:'তারা দিয়ে রেটিং দিন',rthx:'ধন্যবাদ! আপনার রেটিং পেয়েছি',rfail:'রেটিং পাঠানো যায়নি, আবার চেষ্টা করুন',rl:['','খুব খারাপ','খারাপ','মোটামুটি','ভালো','চমৎকার'],sizeS:'ছোট',sizeL:'বড়'},
+en:{bad:'Invalid QR or link',nopub:'The menu is not published yet',closed:'Orders are closed right now. You can still browse the menu.',search:'Search items',all:'All',other:'Other',add:'+ Add',out:'Out of stock',none:'Nothing found',cartN:n=>'🛒 '+n+(n==1?' item':' items'),view:'View ›',tapDrag:'drag to move',yours:'Your order',total:'Total',tno:'Table number',tph:'e.g. 5',yname:'Your name (optional)',note:'Note (optional, e.g. less sugar)',confirm:'✔ Confirm order',closedBtn:'Orders are closed',back:'← Back to menu',needT:'Enter table number',wait:'Please wait a moment and try again',fail:'Could not send, please try again',table:'Table ',nf:'Order not found',sorry:'Sorry, the order could not be accepted',sent:'Order sent!',steps:['Sent','Accepted by shop','Preparing / served'],foot:'Thank you for visiting ☕ Keep this page open and the status will update by itself.',more:'Order more',welcome:'Welcome',tag:'Browse the menu and order',g:['Good night','Good morning','Good afternoon','Good evening','Good evening'],
+rate:'How was our service?',rcm:'Comment (optional)',rsend:'Send rating',rpick:'Tap the stars to rate',rthx:'Thank you! We got your rating',rfail:'Could not send rating, please try again',rl:['','Very bad','Bad','Okay','Good','Excellent'],sizeS:'Smaller',sizeL:'Bigger'}};
+const t=k=>{const v=TX[lang][k];return v===undefined?TX.bn[k]:v};
+const nmOf=i=>lang==='en'?(i.e||i.n):i.n;
+let C={},Q={},items=[],cart={},cat='',q='',lastO=null,F={tn:'',nm:'',nt:''},R={s:0,c:''},dirty=false;
+try{F=Object.assign(F,JSON.parse(ls('qo_f')||'{}'))}catch(e){}
+const saveF=()=>ls('qo_f',JSON.stringify(F));
+const cartKey=()=>'qo_cart_'+uid;
+const saveCart=()=>{Object.keys(cart).length?ls(cartKey(),JSON.stringify({t:Date.now(),c:cart})):ls(cartKey(),null)};
+function restoreCart(){try{const d=JSON.parse(ls(cartKey())||'null');if(!d||Date.now()-d.t>6*3600*1000)return;Object.keys(d.c||{}).forEach(id=>{const it=items.find(x=>x.id==id);if(!it||(it.s!==''&&it.s!=null&&it.s<=0))return;let n=+d.c[id].q||0;if(it.s!==''&&it.s!=null&&n>it.s)n=it.s;if(n>0)cart[id]={id:it.id,n:it.n,e:it.e,p:it.p,q:n}})}catch(e){}}
 const m=n=>(C.cur||'৳')+Math.round(n*100)/100,sub=()=>Object.values(cart).reduce((a,x)=>a+x.p*x.q,0),cnt=()=>Object.values(cart).reduce((a,x)=>a+x.q,0);
 const hue=id=>{let h=0;String(id).split('').forEach(c=>h=(h*31+c.charCodeAt(0))%360);return h};
-const greet=()=>{const h=new Date().getHours();return h<5?'শুভ রাত্রি':h<12?'সুপ্রভাত':h<16?'শুভ দুপুর':h<19?'শুভ বিকাল':'শুভ সন্ধ্যা'};
+const greet=()=>{const h=new Date().getHours(),g=t('g');return h<5?g[0]:h<12?g[1]:h<16?g[2]:h<19?g[3]:g[4]};
+function applySz(){const r=document.documentElement.style;r.setProperty('--z',SZ[si].z);r.setProperty('--cw',SZ[si].cw+'px');ls('qo_sz',si)}
+function rerender(){document.documentElement.lang=lang;document.title=C.name||(lang==='en'?'Menu':'মেনু');hdr();oid?paint():list();bar();if($('#sh'))sheet()}
 async function init(){
- if(!uid){$('#app').innerHTML='<p class="w">QR বা লিংকটি ঠিক নয়</p>';return}
- const s=await getDoc(doc(db,'shops',uid));if(!s.exists()){$('#app').innerHTML='<p class="w">মেনু এখনো প্রকাশ হয়নি</p>';return}
+ applySz();document.documentElement.lang=lang;
+ if(!uid){$('#app').innerHTML='<p class="w">'+t('bad')+'</p>';return}
+ const s=await getDoc(doc(db,'shops',uid));if(!s.exists()){$('#app').innerHTML='<p class="w">'+t('nopub')+'</p>';return}
  C=s.data();Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(C.color)document.documentElement.style.setProperty('--hd',C.color);
- hdr();if(!oid&&!sessionStorage.getItem('sp'))splash();oid?track():list()}
-function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(Q.welcome||'স্বাগতম')} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(Q.tag||'মেনু দেখে অর্ডার দিন')}</p>`;document.body.appendChild(d);
+ if(!oid)restoreCart();
+ hdr();if(!oid&&!sessionStorage.getItem('sp'))splash();oid?track():list();bar()}
+function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(lang==='en'?t('welcome'):(Q.welcome||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(lang==='en'?t('tag'):(Q.tag||t('tag')))}</p>`;document.body.appendChild(d);
  const x=()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)};d.onclick=x;setTimeout(x,2200)}
-function hdr(){$('#app').innerHTML=`<header><img src="logo-192.png"><b>${esc(C.name||'মেনু')}</b>${tbl?`<span class="chip">টেবিল ${esc(tbl)}</span>`:''}</header><div class="w" id="bd"></div>`}
+function hdr(){$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><b>${esc(C.name||(lang==='en'?'Menu':'মেনু'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
+ <div class="hb"><button data-lang="bn" class="${lang==='bn'?'on':''}">বাং</button><button data-lang="en" class="${lang==='en'?'on':''}">EN</button></div>
+ <div class="hb"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div></header><div class="w" id="bd"></div>`}
 function list(){
- const cs=[...new Set(items.map(i=>i.c||'অন্যান্য'))];
- let h=(Q.open===false?'<div class="cd" style="background:#5a2a22;margin-bottom:10px">এখন অর্ডার নেওয়া বন্ধ আছে, মেনু দেখতে পারেন।</div>':'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
- `<input id="sq" placeholder="পণ্য খুঁজুন" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">সব</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
+ const cs=[...new Set(items.map(i=>i.c||t('other')))];
+ let h=(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
+ `<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
  $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar()}
-const ctl=i=>{const n=(cart[i.id]||{}).q||0;return i.s!==''&&i.s!=null&&i.s<=0?'<span class="mu">স্টক শেষ</span>':n?`<button data-a="-1" data-i="${i.id}">−</button><b>${n}</b><button data-a="1" data-i="${i.id}">+</button>`:`<button class="ad" data-a="1" data-i="${i.id}">+ যোগ করুন</button>`};
-function grid(){const L=items.filter(i=>(!cat||(i.c||'অন্যান্য')==cat)&&(i.n+'').toLowerCase().includes(q.toLowerCase()));
- $('#gr').innerHTML=L.map((i,k)=>`<div class="cd ${i.s!==''&&i.s!=null&&i.s<=0?'off':''}" style="animation-delay:${Math.min(k,12)*40}ms"><div class="av" id="im${i.id}" style="background:hsl(${hue(i.id)} 42% 34%)">${esc((i.n||'?')[0])}</div><div class="nm">${esc(i.n)}</div><div class="pr">${m(i.p)}</div><div class="ct" id="q${i.id}">${ctl(i)}</div></div>`).join('')||'<p class="mu">কিছু পাওয়া যায়নি</p>';L.forEach(img)}
+const soldOut=i=>i.s!==''&&i.s!=null&&i.s<=0;
+const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)?`<span class="mu">${t('out')}</span>`:n?`<button data-a="-1" data-i="${i.id}">−</button><b>${n}</b><button data-a="1" data-i="${i.id}">+</button>`:`<button class="ad" data-a="1" data-i="${i.id}">${t('add')}</button>`};
+function grid(){const qq=q.toLowerCase(),L=items.filter(i=>(!cat||(i.c||t('other'))==cat)&&((i.n+'').toLowerCase().includes(qq)||((i.e||'')+'').toLowerCase().includes(qq)));
+ $('#gr').innerHTML=L.map((i,k)=>`<div class="cd ${soldOut(i)?'off':''}" style="animation-delay:${Math.min(k,12)*40}ms"><div class="av" id="im${i.id}" style="background:hsl(${hue(i.id)} 42% 34%)">${esc((nmOf(i)||'?')[0])}</div><div class="nm">${esc(nmOf(i))}</div><div class="pr">${m(i.p)}</div><div class="ct" id="q${i.id}">${ctl(i)}</div></div>`).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
 const imc={};async function img(i){try{if(imc[i.id]===undefined){const d=await getDoc(doc(db,'shops',uid,'img',String(i.id)));imc[i.id]=d.exists()?d.data().d:''}
  if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}}catch(e){}}
-function bar(){const b=$('#bar');if(!cnt()||oid){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>🛒 ${cnt()}টি</span><span>${m(sub())} · দেখুন ›</span></div>`;$('#go').onclick=sheet}
-function add(id,a){const it=items.find(x=>x.id==id),x=cart[id]||(cart[id]={id,n:it.n,p:it.p,q:0});x.q=Math.max(0,x.q+a);if(it.s!==''&&it.s!=null&&x.q>it.s)x.q=it.s;if(!x.q)delete cart[id];
+/* ---------- ভাসমান কার্ট বাটন (ধরে সরানো যায়) ---------- */
+function bar(){const b=$('#bar');if(!cnt()||oid||$('#sh')){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>${t('cartN')(cnt())}</span><span>${m(sub())} · ${t('view')}</span><small>↔ ${t('tapDrag')}</small></div>`}
+(function(){const b=$('#bar');let dn=false,mv=false,sx=0,sy=0,ox=0,oy=0;
+ const put=(x,y)=>{const w=b.offsetWidth,h=b.offsetHeight;x=Math.max(4,Math.min(innerWidth-w-4,x));y=Math.max(4,Math.min(innerHeight-h-4,y));b.style.left=x+'px';b.style.top=y+'px';b.style.right='auto';b.style.bottom='auto'};
+ try{const p=JSON.parse(ls('qo_bpos')||'null');if(p)put(p.x,p.y)}catch(e){}
+ addEventListener('resize',()=>{if(b.style.left)put(parseFloat(b.style.left),parseFloat(b.style.top))});
+ b.addEventListener('pointerdown',e=>{dn=true;mv=false;const r=b.getBoundingClientRect();sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;try{b.setPointerCapture(e.pointerId)}catch(_){}});
+ b.addEventListener('pointermove',e=>{if(!dn)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(!mv&&Math.abs(dx)+Math.abs(dy)<8)return;mv=true;b.classList.add('drag');put(ox+dx,oy+dy)});
+ const end=()=>{if(!dn)return;dn=false;b.classList.remove('drag');if(mv)ls('qo_bpos',JSON.stringify({x:parseFloat(b.style.left),y:parseFloat(b.style.top)}))};
+ b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
+ b.addEventListener('click',()=>{if(mv){mv=false;return}if(cnt())sheet()})})();
+function add(id,a){const it=items.find(x=>x.id==id),x=cart[id]||(cart[id]={id,n:it.n,e:it.e,p:it.p,q:0});x.q=Math.max(0,x.q+a);if(it.s!==''&&it.s!=null&&x.q>it.s)x.q=it.s;if(!x.q)delete cart[id];saveCart();
  const e=$('#q'+id);if(e)e.innerHTML=ctl(it);bar();if($('#sh'))sheet()}
-document.addEventListener('click',e=>{const t=e.target;if(t.dataset&&t.dataset.a)add(t.dataset.i,+t.dataset.a);else if(t.dataset&&t.dataset.c!==undefined&&t.closest('.ch')){cat=t.dataset.c;list()}});
-function sheet(){if(!cnt()){$('#ovl').innerHTML='';return}const need=Q.needTable!==false&&!tbl,closed=Q.open===false;
- $('#ovl').innerHTML=`<div class="ov" id="sh"><div class="sh"><b style="font-size:18px">আপনার অর্ডার</b>${Object.values(cart).map(x=>`<div class="row"><span>${esc(x.n)}<br><span class="mu">${m(x.p)}</span></span><button class="qb" data-a="-1" data-i="${x.id}">−</button><b>${x.q}</b><button class="qb" data-a="1" data-i="${x.id}">+</button></div>`).join('')}
- <div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span><b>মোট</b></span><b style="font-size:19px">${m(sub())}</b></div>
- ${need?'<label class="mu">টেবিল নম্বর</label><input id="tn" inputmode="numeric" maxlength="10" placeholder="যেমন: 5">':''}<label class="mu">আপনার নাম (ঐচ্ছিক)</label><input id="nm" maxlength="60"><label class="mu">নোট (ঐচ্ছিক, যেমন: চিনি কম)</label><input id="nt" maxlength="150">
- <button class="big" id="sd" ${closed?'disabled style="opacity:.5"':''}>${closed?'এখন অর্ডার নেওয়া বন্ধ':'✔ অর্ডার কনফার্ম করুন'}</button><button class="big" id="cl" style="background:var(--ln);color:var(--ink)">← মেনুতে ফিরুন</button></div></div>`;
- $('#cl').onclick=()=>$('#ovl').innerHTML='';$('#sd').onclick=send;$('#sh').onclick=e=>{if(e.target.id=='sh')$('#ovl').innerHTML=''}}
+document.addEventListener('click',e=>{const t0=e.target;if(!t0.dataset)return;
+ if(t0.dataset.a)add(t0.dataset.i,+t0.dataset.a);
+ else if(t0.dataset.lang){if(lang!==t0.dataset.lang){lang=t0.dataset.lang;ls('qo_lang',lang);rerender()}}
+ else if(t0.dataset.sz){si=Math.max(0,Math.min(SZ.length-1,si+(+t0.dataset.sz)));applySz();rerender()}
+ else if(t0.dataset.star){R.s=+t0.dataset.star;paint()}
+ else if(t0.dataset.c!==undefined&&t0.closest('.ch')){cat=t0.dataset.c;list()}});
+document.addEventListener('input',e=>{const i=e.target.id;if(i==='tn'){F.tn=e.target.value;saveF()}else if(i==='nm'){F.nm=e.target.value;saveF()}else if(i==='nt'){F.nt=e.target.value;saveF()}else if(i==='rc')R.c=e.target.value});
+document.addEventListener('focusout',e=>{if(e.target.id==='rc'&&dirty){dirty=false;setTimeout(paint,150)}});
+const closeSh=()=>{$('#ovl').innerHTML='';bar()};
+function sheet(){if(!cnt()){closeSh();return}const need=Q.needTable!==false&&!tbl,closed=Q.open===false;
+ $('#ovl').innerHTML=`<div class="ov" id="sh"><div class="sh"><b style="font-size:18px">${t('yours')}</b>${Object.values(cart).map(x=>`<div class="row"><span>${esc(nmOf(x))}<br><span class="mu">${m(x.p)}</span></span><button class="qb" data-a="-1" data-i="${x.id}">−</button><b>${x.q}</b><button class="qb" data-a="1" data-i="${x.id}">+</button></div>`).join('')}
+ <div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span><b>${t('total')}</b></span><b style="font-size:19px">${m(sub())}</b></div>
+ ${need?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" placeholder="${t('tph')}" value="${esc(F.tn)}">`:''}<label class="mu">${t('yname')}</label><input id="nm" maxlength="60" value="${esc(F.nm)}"><label class="mu">${t('note')}</label><input id="nt" maxlength="150" value="${esc(F.nt)}">
+ <button class="big" id="sd" ${closed?'disabled style="opacity:.5"':''}>${closed?t('closedBtn'):t('confirm')}</button><button class="big" id="cl" style="background:var(--ln);color:var(--ink)">${t('back')}</button></div></div>`;
+ $('#cl').onclick=closeSh;$('#sd').onclick=send;$('#sh').onclick=e=>{if(e.target.id=='sh')closeSh()};bar()}
 async function send(){
- const tn=tbl||($('#tn')?$('#tn').value.trim():'');if(Q.needTable!==false&&!tn){alert('টেবিল নম্বর দিন');return}
- try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<20000){alert('একটু অপেক্ষা করে আবার চেষ্টা করুন');return}}catch(e){}
+ const tn=tbl||($('#tn')?$('#tn').value.trim():'');if(Q.needTable!==false&&!tn){alert(t('needT'));return}
+ try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<20000){alert(t('wait'));return}}catch(e){}
  $('#sd').disabled=true;const id=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
  try{await setDoc(doc(db,'orders',id),{uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),table:tn||'-',note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),total:sub()});
-  try{localStorage.setItem('qo_t',Date.now())}catch(e){}location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+'&o='+id}catch(e){alert('পাঠানো যায়নি, আবার চেষ্টা করুন');$('#sd').disabled=false}}
-function track(){onSnapshot(doc(db,'orders',oid),s=>{if(!s.exists()){$('#bd').textContent='অর্ডার পাওয়া যায়নি';return}const o=s.data(),can=o.status=='cancelled',st=o.status=='new'?0:o.status=='accepted'?1:2;
- $('#bd').innerHTML=`<div style="text-align:center"><div class="ok">${can?'✕':'✔'}</div><h2 style="margin:6px 0">${can?'দুঃখিত, অর্ডারটি নেওয়া যায়নি':'অর্ডার পাঠানো হয়েছে!'}</h2><div class="mu">${o.table&&o.table!='-'?'টেবিল '+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
- ${can?'':`<div class="stp">${['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','তৈরি/পরিবেশন'].map((t,k)=>`<div class="${k<=st?'d':''}"><i>${k<=st?'✓':k+1}</i>${t}</div>`).join('')}</div>`}
- <div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(x.n)} × ${x.q}</span><b>${m(x.p*x.q)}</b></div>`).join('')}<div class="row" style="border-top:1px solid var(--ln)"><span><b>মোট</b></span><b>${m(o.total)}</b></div></div>
- <p class="mu" style="text-align:center">আপনার আসাই আমাদের আনন্দ ☕ এই পাতা খোলা রাখলে অবস্থা নিজে থেকেই বদলাবে।</p><button class="big" onclick="location.href='?s=${uid}${tbl?'&t='+encodeURIComponent(tbl):''}'">আরও অর্ডার করুন</button>`;
- if(!sessionStorage.getItem('cf'+oid)&&!can){sessionStorage.setItem('cf'+oid,1);for(let i=0;i<18;i++){const c=document.createElement('span');c.className='cf';c.textContent=['☕','🍰','✨','🥪'][i%4];c.style.left=Math.random()*95+'vw';c.style.animationDelay=Math.random()*1.2+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),4500)}}})}
+  try{localStorage.setItem('qo_t',Date.now())}catch(e){}cart={};saveCart();F.nt='';saveF();location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+'&o='+id}catch(e){alert(t('fail'));$('#sd').disabled=false}}
+/* ---------- অর্ডার ট্র্যাকিং + সার্ভিস রেটিং ---------- */
+const nmId=x=>{if(lang!=='en')return x.n;const it=items.find(i=>i.id==x.id);return (it&&it.e)||x.n};
+function ratingHTML(){const done=ls('rt_'+oid);
+ if(done)return `<div class="cd rt" style="animation:none"><div class="stars">${[1,2,3,4,5].map(k=>`<button class="${k<=+done?'on':''}" disabled>★</button>`).join('')}</div><b>${t('rthx')}</b></div>`;
+ return `<div class="cd rt" style="animation:none"><b>${t('rate')}</b><div class="stars">${[1,2,3,4,5].map(k=>`<button class="${k<=R.s?'on':''}" data-star="${k}" aria-label="${k}">★</button>`).join('')}</div><div class="mu">${R.s?t('rl')[R.s]:t('rpick')}</div>
+ <input id="rc" maxlength="300" placeholder="${t('rcm')}" value="${esc(R.c)}" style="margin-top:10px"><button class="big" id="rs" ${R.s?'':'disabled style="opacity:.5"'} onclick="window.__rate()">${t('rsend')}</button></div>`}
+window.__rate=async()=>{if(!R.s||!lastO)return;const b=$('#rs');if(b)b.disabled=true;
+ try{await setDoc(doc(db,'ratings',oid),{uid,oid,table:lastO.table||'-',name:lastO.name||'',stars:R.s,comment:R.c.trim().slice(0,300),t:Date.now()});ls('rt_'+oid,R.s);paint()}catch(e){alert(t('rfail'));if(b)b.disabled=false}};
+function paint(){const o=lastO;if(!o)return;if(document.activeElement&&document.activeElement.id==='rc'){dirty=true;return}
+ const can=o.status=='cancelled',st=o.status=='new'?0:o.status=='accepted'?1:2;
+ $('#bd').innerHTML=`<div style="text-align:center"><div class="ok">${can?'✕':'✔'}</div><h2 style="margin:6px 0">${can?t('sorry'):t('sent')}</h2><div class="mu">${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
+ ${can?'':`<div class="stp">${t('steps').map((s,k)=>`<div class="${k<=st?'d':''}"><i>${k<=st?'✓':k+1}</i>${s}</div>`).join('')}</div>`}
+ <div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(nmId(x))} × ${x.q}</span><b>${m(x.p*x.q)}</b></div>`).join('')}<div class="row" style="border-top:1px solid var(--ln)"><span><b>${t('total')}</b></span><b>${m(o.total)}</b></div></div>
+ ${can||st<1?'':ratingHTML()}
+ <p class="mu" style="text-align:center">${t('foot')}</p><button class="big" onclick="location.href='?s=${uid}${tbl?'&t='+encodeURIComponent(tbl):''}'">${t('more')}</button>`;
+ if(!sessionStorage.getItem('cf'+oid)&&!can){sessionStorage.setItem('cf'+oid,1);for(let i=0;i<18;i++){const c=document.createElement('span');c.className='cf';c.textContent=['☕','🍰','✨','🥪'][i%4];c.style.left=Math.random()*95+'vw';c.style.animationDelay=Math.random()*1.2+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),4500)}}}
+function track(){onSnapshot(doc(db,'orders',oid),s=>{if(!s.exists()){$('#bd').textContent=t('nf');return}lastO=s.data();paint()})}
 init();
 </script></body></html>
