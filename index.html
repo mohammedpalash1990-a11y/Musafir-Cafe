@@ -453,7 +453,7 @@ function charge(){
 
 function plainFoot(s){return footMsg(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
 function pubDue(d){if(!CU||!window.FB||!FB.setPub)return;if(!d.pc)d.pc=randCode();
- w(FB.setPub(d.pc,{type:'due',uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,name:d.name,phone:d.phone||'',nid:d.nid||'',photo:d.photo||'',total:duTotal(d),entries:(d.entries||[]).map(function(e){return{t:e.t,a:e.a,items:e.items||'',no:e.no}}),pays:(d.pays||[]).map(function(p){return{t:p.t,a:p.a}}),updated:Date.now()}))}
+ w(FB.setPub(d.pc,{type:'due',uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,name:d.name,phone:d.phone||'',nid:d.nid||'',photo:d.photo||'',total:duTotal(d),entries:(d.entries||[]).map(function(e,ix,ar){var o={t:e.t,a:e.a,items:e.items||'',no:e.no};if(e.sid&&ix>=ar.length-40){var sl=H.find(function(h){return h.no==e.sid});if(sl){o.tot=sl.total;o.lines=sl.items.map(function(i){return{name:i.name,bn:i.bn||'',qty:i.qty,price:i.price}})}}return o}),pays:(d.pays||[]).map(function(p){return{t:p.t,a:p.a}}),updated:Date.now()}))}
 function pubReceipt(s){if(!CU||!window.FB||!FB.setPub||!s.pc)return;var ids=[],m={};s.items.forEach(function(i){if(i.id&&IMG[i.id]&&ids.indexOf(i.id)<0)ids.push(i.id)});var left=ids.length;
  function fin(){w(FB.setPub(s.pc,{uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,t:s.t,sn:s.sn,day:day(s.t),total:s.total,sub:s.sub,disc:s.disc||0,tax:s.tax||0,pays:s.pays||[],msg:plainFoot(s),items:s.items.map(function(i){return{name:i.name,bn:i.bn||'',price:i.price,qty:i.qty,img:m[i.id]||''}})}))}
  if(!left)return fin();ids.forEach(function(id){thumb(IMG[id],function(x){if(x)m[id]=x;if(--left==0)fin()})})}
@@ -694,7 +694,8 @@ function waDu(id){var d=DU.find(function(x){return x.id==id});if(!d)return;
 function waRc(no){var s=H.find(function(h){return h.no==no});if(!s)return;
  var dr=(s.pays||[]).find(function(x){return x.m=='Due'&&x.debtor}),du=dr?DU.find(function(x){return x.name==dr.debtor}):null;
  var lk=(CU&&s.pc)?pubLink(s.pc):'',bn=S.lang!='en';
- var msg=lk?S.shop+'\n'+L('ইনভয়েস #','Invoice #')+s.sn+' · '+day(s.t)+'\n'+t('total')+': *'+$$(s.total)+'*'+(dr?'\n'+t('Due')+': '+$$(dr.a):'')+'\n\n'+L('রসিদ দেখুন:','View receipt:')+'\n'+lk:rcText(s);
+ var it=s.items.map(function(i){return '• '+nm(i)+' × '+i.qty+' · '+$$(i.qty*i.price)}).join('\n');
+  var msg=lk?S.shop+'\n🧾 '+L('ইনভয়েস #','Invoice #')+s.sn+' · '+day(s.t)+'\n\n'+it+'\n'+(s.disc?'\n'+t('disc')+': −'+$$(s.disc):'')+(s.tax?'\n'+t('tax')+': '+$$(s.tax):'')+'\n'+t('total')+': *'+$$(s.total)+'*'+(dr?'\n'+t('Due')+': '+$$(dr.a):'')+'\n\n'+L('রসিদ দেখুন:','View receipt:')+'\n'+lk:rcText(s);
  waOpen(du?du.phone:'',msg)}
 function addDuPay(id){var d=DU.find(function(x){return x.id==id});if(!d)return;var max=duTotal(d);
  var v=prompt(t('addPayment')+' ('+t('totalDue')+' '+$$(max)+')',max>0?max.toFixed(2):'0');if(v==null)return;var a=parseFloat(v);if(!a||a<=0)return;if(a>max+0.004){toast(L('বাকির চেয়ে বেশি জমা নেওয়া যাবে না','Cannot exceed the amount due'));return}
@@ -909,30 +910,35 @@ var otpS=null,otpPass=false,otpDone={};
 function otpOn(){return S.otp!==false}
 function otpSet(v){S.otp=v;save();render()}
 function otpBox(){var on=otpOn();return '<div class="box"><div class="hd">'+I('phone')+'<b>'+L('বাকির কনফার্মেশন কোড','Due confirmation code')+'</b></div><div class="sw" style="border:0"><b>'+L('চালু','Enabled')+'</b><button class="tg'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="otpSet('+!on+')"></button></div><div class="mute" style="font-size:12px">'+L('বাকিতে বিক্রির সময় কাস্টমারকে ৫ ডিজিটের কোড পাঠানো হয়। কাস্টমার কোড বললে তবেই বাকি সেভ হয়। বন্ধ রাখলে আগের মতো সরাসরি সেভ হবে।','On a due sale, a 5-digit code is sent to the customer. The due is saved only after the customer tells you the code. Turn off to save directly as before.')+'</div></div>'}
+function otpItems(){var a=[];for(var id in cart){var p=gp(id);if(p)a.push({name:p.name,bn:p.bn||'',price:p.price,qty:cart[id]})}return a}
+function otpItemsTxt(){var a=otpItems();return a.length?a.map(function(i){return '• '+nm(i)+' × '+i.qty+' · '+$$(i.qty*i.price)}).join('\n')+'\n':''}
 function otpGen(){var a=new Uint32Array(1);try{window.crypto.getRandomValues(a)}catch(e){a[0]=Math.floor(Math.random()*4294967295)}return String(10000+a[0]%90000)}
 function otpQueue(ps){var m={},q=[];ps.rows.forEach(function(x){var a=+x.a||0;if(x.m=='Due'&&x.debtor&&a>0.004){if(!m[x.debtor.id]){m[x.debtor.id]={id:x.debtor.id,name:x.debtor.name,a:0};q.push(m[x.debtor.id])}m[x.debtor.id].a+=a}});return q}
 function otpCur(){var c=otpS.q[otpS.i];return{c:c,d:DU.find(function(x){return x.id==c.id})||{}}}
 /* লিংকের পাতায় কোড (কোনো সময়সীমা নেই) */
 function pubOtp(){var o=otpS,c=otpCur().c;if(!c.pc||!CU||!window.FB||!FB.setPub)return;
- w(FB.setPub(c.pc,{type:'otp',uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,name:c.name,a:+c.a.toFixed(2),code:o.code,t:Date.now()}))}
+ w(FB.setPub(c.pc,{type:'otp',uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,name:c.name,a:+c.a.toFixed(2),code:o.code,items:otpItems(),tot:+calc().t.toFixed(2),t:Date.now()}))}
 function otpFresh(){otpS.code=otpGen();otpS.exp=Date.now()+600000;otpS.tries=0;pubOtp()}
 function otpStart(q){otpS={q:q,i:0,code:'',exp:0,tries:0,done:{}};otpFresh();otpView()}
 function otpMsg(){var c=otpCur().c,bn=S.lang!='en';
- return S.shop+'\n'+(bn?'আপনি '+$$(c.a)+' বাকি নিচ্ছেন। কনফার্ম করতে এই কোডটি আমাদের বলুন (১০ মিনিট চলবে):':'You are taking '+$$(c.a)+' on credit. To confirm, tell us this code (valid 10 minutes):')+'\n*'+otpS.code+'*'}
+ return S.shop+'\n'+otpItemsTxt()+(bn?'আপনি '+$$(c.a)+' বাকি নিচ্ছেন। কনফার্ম করতে এই কোডটি আমাদের বলুন (১০ মিনিট চলবে):':'You are taking '+$$(c.a)+' on credit. To confirm, tell us this code (valid 10 minutes):')+'\n*'+otpS.code+'*'}
 function otpLink(){var c=otpCur().c;if(!CU||!window.FB||!FB.setPub){toast(L('লিংকের জন্য লগইন ও ইন্টারনেট লাগবে','Link needs login and internet'));return ''}
  if(!c.pc){c.pc=randCode()}pubOtp();return pubLink(c.pc)}
 function otpLinkMsg(lk){var c=otpCur().c,bn=S.lang!='en';
- return S.shop+'\n'+(bn?'আপনি '+$$(c.a)+' বাকি নিচ্ছেন। কনফার্ম করতে নিচের লিংক খুলে কোডটি আমাদের বলুন:':'You are taking '+$$(c.a)+' on credit. To confirm, open the link and tell us the code:')+'\n'+lk}
+ return S.shop+'\n'+otpItemsTxt()+(bn?'আপনি '+$$(c.a)+' বাকি নিচ্ছেন। কনফার্ম করতে নিচের লিংক খুলে কোডটি আমাদের বলুন:':'You are taking '+$$(c.a)+' on credit. To confirm, open the link and tell us the code:')+'\n'+lk}
 function otpView(){var o=otpS,x=otpCur(),c=x.c,d=x.d;
  var h='<div class="hd">'+I('phone')+'<b>'+L('বাকির কনফার্মেশন কোড','Due confirmation code')+'</b>'+(o.q.length>1?'<span class="mute" style="margin-left:auto">'+(o.i+1)+'/'+o.q.length+'</span>':'')+'</div>';
  h+='<div class="box"><div style="display:flex;align-items:center;gap:10px">'+kAv({photo:d.photo,name:c.name},44)+'<div><b>'+esc(c.name)+'</b><div class="mute" style="font-size:12px">'+L('বাকি নিচ্ছে','Taking on credit')+'</div></div></div><div class="big">'+$$(c.a)+'</div>';
  h+='<label>'+t('debtorPhone')+'</label><input id="otph" inputmode="tel" value="'+esc(d.phone||'')+'" placeholder="+8801XXXXXXXXX">';
- h+='<div class="mute" style="font-size:12px;margin-top:14px">'+L('১) লিংক পাঠান — কোড আপনার চোখে পড়বে না, শুধু কাস্টমার দেখবে','1) Send a link — you will not see the code, only the customer does')+'</div>';
+ h+='<div class="mute" style="font-size:12px;margin-top:14px">'+L('১) QR দেখান — নেট ছাড়াই চলে, কাস্টমার ক্যামেরা দিয়ে স্ক্যান করবে','1) Show QR - works without internet, the customer scans it with the camera')+'</div>';
+ if(o.qr){h+='<div style="background:#fff;border-radius:16px;padding:8px;margin:8px auto 0;max-width:280px">'+qrSvg(otpQrText()).replace('class="qr"','class="qr" style="width:100%;height:auto;display:block"')+'</div><div class="mute" style="font-size:12px;text-align:center;margin-top:6px">'+L('কোডটি কাস্টমারের ফোনে দেখা যাবে। কাস্টমার যা বলে, নিচে লিখুন।','The code shows on the customer phone. Enter what the customer tells you below.')+'</div>'}
+ h+='<button style="width:100%;margin-top:6px" onclick="otpQr()">'+(o.qr?L('QR লুকান','Hide QR'):L('QR দেখান','Show QR'))+'</button>';
+ h+='<div class="mute" style="font-size:12px;margin-top:14px">'+L('২) লিংক পাঠান (কাস্টমারের নেট লাগবে) — কোড আপনার চোখে পড়বে না','2) Send a link (customer needs internet) - you will not see the code')+'</div>';
  h+='<button class="wa" style="width:100%;margin-top:6px" onclick="otpLinkSend()">'+L('WhatsApp-এ লিংক পাঠান','Send link on WhatsApp')+'</button>';
  h+='<div style="display:flex;gap:8px;margin-top:8px"><button style="flex:1" onclick="otpLinkShare()">'+L('লিংক শেয়ার','Share link')+'</button><button style="flex:1" onclick="otpLinkCopy()">'+I('copy')+' '+L('লিংক কপি','Copy link')+'</button></div>';
- h+='<div class="mute" style="font-size:12px;margin-top:14px">'+L('২) কোডসহ মেসেজ পাঠান (১০ মিনিট চলবে)','2) Send a message with the code (valid 10 minutes)')+'</div>';
+ h+='<div class="mute" style="font-size:12px;margin-top:14px">'+L('৩) কোডসহ মেসেজ পাঠান (১০ মিনিট চলবে)','3) Send a message with the code (valid 10 minutes)')+'</div>';
  h+='<button style="width:100%;margin-top:6px" onclick="otpSend()">'+L('WhatsApp-এ কোড পাঠান','Send code on WhatsApp')+'</button>';
- h+='<div style="display:flex;gap:8px;margin-top:8px"><button style="flex:1" onclick="otpShare()">'+L('শেয়ার (IMO ইত্যাদি)','Share (IMO etc.)')+'</button><button style="flex:1" onclick="otpCopy()">'+I('copy')+' '+L('মেসেজ কপি','Copy message')+'</button></div></div>';
+ h+='<div style="display:flex;gap:8px;margin-top:8px"><button style="flex:1" onclick="otpShare()">'+L('শেয়ার (IMO ইত্যাদি)','Share (IMO etc.)')+'</button><button style="flex:1" onclick="otpCopy()">'+I('copy')+' '+L('মেসেজ কপি','Copy message')+'</button><button style="flex:1" onclick="otpSms()">SMS</button></div></div>';
  h+='<div class="box"><label style="margin-top:0">'+L('কাস্টমার যে কোড বলল, এখানে লিখুন','Enter the code the customer tells you')+'</label><input id="otpin" inputmode="numeric" maxlength="5" autocomplete="one-time-code" placeholder="_ _ _ _ _" style="text-align:center;font-size:24px;letter-spacing:8px" onkeydown="if(event.key==\'Enter\')otpOk()">'
   +'<button class="pri" style="width:100%;margin-top:10px" onclick="otpOk()">'+t('done')+'</button><button style="width:100%;margin-top:8px" onclick="otpNew()">'+L('নতুন কোড বানান','New code')+'</button></div>';
  h+='<button style="width:100%;margin-top:6px" onclick="otpCancel()">'+t('back')+'</button>';
@@ -946,6 +952,9 @@ function otpAlive(){var c=otpCur().c;if(!c.pc&&Date.now()>otpS.exp){otpFresh();t
 function otpSend(){var p=otpPhone();if(!p)return;otpAlive();otpOpen(p,otpMsg())}
 function otpShare(){var p=otpPhone();if(!p)return;otpAlive();var m=otpMsg();try{if(navigator.share){navigator.share({text:m});return}}catch(e){}otpCopy()}
 function otpCopy(){otpAlive();try{navigator.clipboard.writeText(otpMsg());toast(L('মেসেজ কপি হয়েছে','Message copied'))}catch(e){toast(t('csvno'))}}
+function otpQrText(){var c=otpCur().c,ok=function(x){return /^[\x20-\x7e]+$/.test(x||'')},cu=ok(S.cur)?S.cur:'Tk',sh=ok(S.shop)?S.shop:'Shop';var a=otpItems(),nmx=a.map(function(i){return i.name+' x'+i.qty}).join(', '),it=a.length?(ok(nmx)&&nmx.length<=90?nmx:a.length+' items'):'';return sh+' | Credit '+cu+' '+(+c.a).toFixed(2)+(it?' | '+it:'')+' | CODE: '+otpS.code+' | Tell this code to the shop (valid 10 min)'}
+function otpQr(){otpAlive();otpS.qr=!otpS.qr;otpView()}
+function otpSms(){var p=otpPhone();if(!p)return;otpAlive();window.location.href='sms:'+String(p).replace(/[^\d+]/g,'')+'?body='+encodeURIComponent(otpMsg())}
 function otpLinkSend(){var p=otpPhone();if(!p)return;var lk=otpLink();if(!lk)return;otpOpen(p,otpLinkMsg(lk))}
 function otpLinkShare(){var p=otpPhone();if(!p)return;var lk=otpLink();if(!lk)return;var m=otpLinkMsg(lk);try{if(navigator.share){navigator.share({text:m});return}}catch(e){}try{navigator.clipboard.writeText(m);toast(L('মেসেজ কপি হয়েছে','Message copied'))}catch(e){toast(t('csvno'))}}
 function otpLinkCopy(){var lk=otpLink();if(!lk)return;try{navigator.clipboard.writeText(lk);toast(L('লিংক কপি হয়েছে','Link copied'))}catch(e){toast(t('csvno'))}}
@@ -955,7 +964,7 @@ function otpOk(){var o=otpS,c=otpCur().c,v=($('#otpin').value||'').trim();
  if(!c.pc&&Date.now()>o.exp){otpFresh();toast(L('কোডের মেয়াদ শেষ, নতুন কোড পাঠান','Code expired, send a new one'));otpView();return}
  if(v!==o.code){o.tries++;if(o.tries>=5){otpFresh();toast(c.pc?L('পাঁচবার ভুল, লিংকে নতুন কোড বসেছে','Five wrong tries, the link now shows a new code'):L('পাঁচবার ভুল, নতুন কোড বানানো হয়েছে','Five wrong tries, new code made'));otpView()}else{toast(L('কোড মেলেনি, আবার দিন','Code does not match'));$('#otpin').value=''}return}
  o.done[c.id]=v;o.i++;
- if(o.i<o.q.length){otpFresh();otpView();return}
+ if(o.i<o.q.length){o.qr=false;otpFresh();otpView();return}
  otpDone=o.done;otpPass=true;otpS=null;closeDs();window.charge()}
 
 function navHtml(){var tabs=[['sell',L('বিক্রি','Sell'),'sell'],['due',t('dueTab'),'cash'],['dash',L('ড্যাশবোর্ড','Dashboard'),'dash'],['prod',L('পণ্য','Items'),'items'],['set',L('সেটিংস','Settings'),'set'],['kh',L('খাতা','Khata'),'book']];return '<nav id="nav">'+tabs.map(function(x){return '<button class="'+(view==x[0]?'on':'')+'" onclick="go(\''+x[0]+'\')">'+I(x[2])+'<span>'+x[1]+'</span></button>'}).join('')+'</nav>'}
@@ -1066,11 +1075,14 @@ function pvHtml(d){var bn=d.lang!='en',T2=function(k){return(D[d.lang]||D.en)[k]
  var tt='';if(d.disc||d.tax)tt+='<div class="pvt"><span>'+T2('sub')+'</span><span>'+m(d.sub)+'</span></div>';if(d.disc)tt+='<div class="pvt"><span>'+T2('disc')+'</span><span>−'+m(d.disc)+'</span></div>';if(d.tax)tt+='<div class="pvt"><span>'+T2('tax')+'</span><span>'+m(d.tax)+'</span></div>';
  tt+='<div class="pvt g"><span>'+T2('total')+'</span><span>'+m(d.total)+'</span></div>'+(d.pays||[]).map(function(x){return '<div class="pvt"><span>'+T2(x.m)+'</span><span>'+m(x.a)+'</span></div>'}).join('');
  return '<div class="pvh">'+LOGO.replace('width="40" height="40"','width="60" height="60"')+'<h1>'+esc(d.shop)+'</h1><p>'+(bn?'ইনভয়েস':'Invoice')+' #'+d.sn+' · '+d.day+' · '+new Date(d.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</p></div><div class="pvc">'+it+tt+'<p class="pvm">'+esc(d.msg||'')+'</p></div>'}
+function otpItemsHtml(d,bn,m){var a=d.items||[];if(!a.length)return '';return '<div class="pvt"><span><b>'+(bn?'পণ্যসমূহ':'Items')+'</b></span><span></span></div>'+a.map(function(i){var n=bn&&i.bn?i.bn:i.name;return '<div class="pvi"><div class="dot" style="background:hsl('+hue(i.name)+',45%,40%)">'+esc((n||'?').charAt(0).toUpperCase())+'</div><div class="pvn"><b>'+esc(n)+'</b><span>'+i.qty+' × '+m(i.price)+'</span></div><b>'+m(i.qty*i.price)+'</b></div>'}).join('')+(d.tot&&d.tot>d.a+0.004?'<div class="pvt"><span>'+(bn?'বিলের মোট':'Bill total')+'</span><span>'+m(d.tot)+'</span></div>':'')}
 function pvOtpHtml(d,own){var bn=d.lang!='en',cu=d.cur||'',m=function(n){return cu+' '+(+n).toFixed(2)};
- return '<div class="pvh">'+LOGO.replace('width="40" height="40"','width="60" height="60"')+'<h1>'+esc(d.shop)+'</h1><p>'+(bn?'বাকির কনফার্মেশন':'Credit confirmation')+' · '+new Date(d.t).toLocaleDateString()+'</p></div><div class="pvc"><div class="pvt"><span>'+(bn?'নাম':'Name')+'</span><span>'+esc(d.name)+'</span></div><div class="pvt g"><span>'+(bn?'বাকি নিচ্ছেন':'Taking on credit')+'</span><span>'+m(d.a)+'</span></div><p class="pvm">'+(bn?'বাকি নিতে রাজি থাকলে এই কোডটি দোকানকে বলুন।':'If you agree, tell this code to the shop.')+'</p><div style="text-align:center;font-size:46px;font-weight:800;letter-spacing:10px;padding:18px 0;margin-top:6px;border-radius:16px;background:var(--soft);color:var(--ink)">'+(own?'******':esc(d.code))+'</div></div>'}
+ return '<div class="pvh">'+LOGO.replace('width="40" height="40"','width="60" height="60"')+'<h1>'+esc(d.shop)+'</h1><p>'+(bn?'বাকির কনফার্মেশন':'Credit confirmation')+' · '+new Date(d.t).toLocaleDateString()+'</p></div><div class="pvc"><div class="pvt"><span>'+(bn?'নাম':'Name')+'</span><span>'+esc(d.name)+'</span></div><div class="pvt g"><span>'+(bn?'বাকি নিচ্ছেন':'Taking on credit')+'</span><span>'+m(d.a)+'</span></div>'+otpItemsHtml(d,bn,m)+'<p class="pvm">'+(bn?'বাকি নিতে রাজি থাকলে এই কোডটি দোকানকে বলুন।':'If you agree, tell this code to the shop.')+'</p><div style="text-align:center;font-size:46px;font-weight:800;letter-spacing:10px;padding:18px 0;margin-top:6px;border-radius:16px;background:var(--soft);color:var(--ink)">'+(own?'******':esc(d.code))+'</div></div>'}
+function dueEntryHtml(e,bn,m){var rows=e.l.map(function(l){var n=bn&&l.bn?l.bn:l.name;return '<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 0 3px 10px;font-size:14px"><span>'+esc(n)+' <span class="mute">'+l.qty+' × '+m(l.price)+'</span></span><span>'+m(l.qty*l.price)+'</span></div>'}).join('');
+ return '<div class="pvi" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+new Date(e.t).toLocaleDateString()+(e.no?' · #'+e.no:'')+'</b><b>'+m(e.a)+'</b></div>'+rows+(e.tot&&e.tot>e.a+0.004?'<div class="mute" style="text-align:right;font-size:12px;margin-top:2px">'+(bn?'বিলের মোট ':'Bill total ')+m(e.tot)+' · '+(bn?'বাকি ':'Due ')+m(e.a)+'</div>':'')+'</div>'}
 function pvDueHtml(d){var bn=d.lang!='en',cu=d.cur||'',m=function(n){return cu+' '+(+n).toFixed(2)};
- var ev=(d.entries||[]).map(function(e){return{t:e.t,x:e.items||'',a:e.a}}).concat((d.pays||[]).map(function(p){return{t:p.t,x:bn?'জমা':'Paid',a:-p.a}})).sort(function(a,b){return a.t-b.t});
- var it=ev.map(function(e){return '<div class="pvi"><div class="pvn"><b>'+new Date(e.t).toLocaleDateString()+'</b><span>'+esc(e.x)+'</span></div><b'+(e.a<0?' style="color:#5cb82e"':'')+'>'+(e.a<0?'−':'')+m(Math.abs(e.a))+'</b></div>'}).join('');
+ var ev=(d.entries||[]).map(function(e){return{t:e.t,x:e.items||'',a:e.a,l:e.lines,tot:e.tot,no:e.no}}).concat((d.pays||[]).map(function(p){return{t:p.t,x:bn?'জমা':'Paid',a:-p.a}})).sort(function(a,b){return a.t-b.t});
+ var it=ev.map(function(e){if(e.l&&e.l.length)return dueEntryHtml(e,bn,m);return '<div class="pvi"><div class="pvn"><b>'+new Date(e.t).toLocaleDateString()+'</b><span>'+esc(e.x)+'</span></div><b'+(e.a<0?' style="color:#5cb82e"':'')+'>'+(e.a<0?'−':'')+m(Math.abs(e.a))+'</b></div>'}).join('');
  return '<div class="pvh">'+LOGO.replace('width="40" height="40"','width="60" height="60"')+'<p style="font-weight:800;color:var(--ink);font-size:20px">'+esc(d.shop)+'</p></div><div class="pvc"><div style="display:flex;align-items:center;gap:12px;padding:8px 0 12px;border-bottom:2px dashed var(--line)">'+(d.photo?'<img src="'+d.photo+'" alt="" style="width:64px;height:64px;border-radius:16px;object-fit:cover;flex:none">':'')+'<div style="text-align:left;min-width:0"><b style="font-size:22px;line-height:1.2">'+esc(d.name)+'</b><div class="mute" style="font-size:14px">'+(d.phone?esc(d.phone):'')+(d.phone&&d.nid?' · ':'')+(d.nid?'NID '+esc(d.nid):'')+'</div></div></div>'+it+'<div class="pvt g"><span>'+(bn?'মোট বাকি':'Total due')+'</span><span>'+m(d.total)+'</span></div></div>'}
 
 setInterval(function(){var k=tdy();if(k!=curDay){curDay=k;dd=k;dm=k.slice(0,7);render()}},20000);
