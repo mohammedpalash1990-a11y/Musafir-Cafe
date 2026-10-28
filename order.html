@@ -35,6 +35,7 @@ input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px
 .vh .bgi{position:absolute;inset:-25%;background-size:cover;background-position:center;filter:blur(36px) saturate(1.3);opacity:.6}
 .vh .fr{--a:1;position:relative;width:min(80vw,calc(40dvh*var(--a)));aspect-ratio:var(--a);border-radius:28px;overflow:hidden;background:#0006;box-shadow:0 16px 44px #000a,0 0 0 4px #f5b52ee6;animation:flt 3.2s ease-in-out infinite alternate}
 .vh video{width:100%;height:100%;object-fit:contain;display:block}
+.bch{white-space:nowrap;padding:8px 14px;border-radius:99px;background:var(--card);border:1px solid var(--ac,#2aa68f);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
 .hero{font-size:calc(64px*var(--z));text-align:center;margin:14px 0 4px}
 .bdg{display:inline-block;padding:4px 14px;border-radius:99px;background:#f5b52e;color:#3b2a00;font-weight:800;font-size:calc(14px*var(--z))}
 @keyframes flt{to{transform:translateY(-6px) rotate(.4deg)}}
@@ -108,10 +109,13 @@ function splash(){sessionStorage.setItem('sp',1);const d=document.createElement(
 function hdr(){$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><b>${esc(C.name||(lang==='en'?'Menu':'মেনু'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
  <div class="hb"><button data-lang="bn" class="${lang==='bn'?'on':''}">বাং</button><button data-lang="en" class="${lang==='en'?'on':''}">EN</button></div>
  <div class="hb"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div></header><div class="w" id="bd"></div>`}
+function bestHTML(){let h='';const dl=lang==='en'?(Q.dte||Q.dt):(Q.dt||Q.dte);if(dl)h+=`<div class="cd" style="margin-bottom:10px;animation:none;text-align:center;font-weight:800">🔥 ${esc(dl)}</div>`;
+ const L=(C.best||[]).map(id=>items.find(x=>x.id==id)).filter(i=>i&&!soldOut(i));
+ if(L.length){const ti=lang==='en'?(Q.bte||"Today's best sellers"):(Q.bt||'আজকের সেরা বিক্রি');h+=`<div style="margin-bottom:10px"><b>⭐ ${esc(ti)}</b><div class="ch" style="padding-top:6px">${L.map(i=>`<button class="bch" data-a="1" data-i="${i.id}">${esc(nmOf(i))} · ${m(i.p)} +</button>`).join('')}</div></div>`}return h}
 function list(){
  const cs=[...new Set(items.map(i=>i.c||t('other')))];
  let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
- homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
+ bestHTML()+homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
  $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar();showInst()}
 const stand=matchMedia('(display-mode: standalone)').matches||navigator.standalone,isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();DI=e;showInst()});
