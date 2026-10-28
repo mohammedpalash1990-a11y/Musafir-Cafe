@@ -40,12 +40,16 @@ input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px
 @keyframes up{from{opacity:0;transform:translateY(16px)}}@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
 </style></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
 <script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,doc,getDoc,setDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-const fbApp=initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});
-/* অফলাইন ক্যাশ: মেনু, ছবি ও পাঠানো অর্ডার ফোনে জমা থাকবে */
-let db;try{db=initializeFirestore(fbApp,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){db=getFirestore(fbApp)}
-const SHOP='';const P=new URLSearchParams(location.search),uid=P.get('s')||SHOP,oid=P.get('o');let tbl=(P.get('t')||'').slice(0,10);
+const LOCAL=location.protocol==='http:'&&location.port==='8080';
+let db=null,doc=null,getDoc=null,setDoc=null,onSnapshot=null;
+if(!LOCAL){
+ const {initializeApp}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+ const m=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+ const fbApp=initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});
+ try{db=m.initializeFirestore(fbApp,{localCache:m.persistentLocalCache({tabManager:m.persistentMultipleTabManager()})})}catch(e){db=m.getFirestore(fbApp)}
+ doc=m.doc;getDoc=m.getDoc;setDoc=m.setDoc;onSnapshot=m.onSnapshot;
+}
+const SHOP='';const P=new URLSearchParams(location.search);let uid=P.get('s')||SHOP;const oid=P.get('o');let tbl=(P.get('t')||'').slice(0,10);
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}return null};
 /* ---------- ভাষা (ডিফল্ট বাংলা) ও সাইজ ---------- */
@@ -73,11 +77,17 @@ function applySz(){const r=document.documentElement.style;r.setProperty('--z',SZ
 function rerender(){document.documentElement.lang=lang;document.title=C.name||(lang==='en'?'Menu':'মেনু');hdr();oid?paint():list();bar();if($('#sh'))sheet()}
 async function init(){
  applySz();document.documentElement.lang=lang;
- if(!uid){$('#app').innerHTML='<p class="w">'+t('bad')+'</p>';return}
- let sd=null,fromSaved=false;const SK='qo_shop_'+uid;
- if(navigator.onLine!==false){try{const s=await Promise.race([getDoc(doc(db,'shops',uid)),new Promise((_,j)=>setTimeout(()=>j('to'),7000))]);
-  if(s.exists()){sd=s.data();ls(SK,JSON.stringify(sd))}else{ls(SK,null);$('#app').innerHTML='<p class="w">'+t('nopub')+'</p>';return}}catch(e){sd=null}}
- if(!sd){try{sd=JSON.parse(ls(SK)||'null')}catch(e){sd=null}fromSaved=!!sd}
+ let sd=null,fromSaved=false;
+ if(LOCAL){
+  try{const r=await fetch('/api/shop',{cache:'no-store'});if(r.ok)sd=await r.json();if(sd&&sd.uid)uid=sd.uid;if(sd)ls('qo_shop_'+uid,JSON.stringify(sd))}catch(e){}
+  if(!sd){try{sd=JSON.parse(ls('qo_shop_'+uid)||'null')}catch(e){sd=null}fromSaved=!!sd}
+ }else{
+  if(!uid){$('#app').innerHTML='<p class="w">'+t('bad')+'</p>';return}
+  const SK='qo_shop_'+uid;
+  if(navigator.onLine!==false){try{const s=await Promise.race([getDoc(doc(db,'shops',uid)),new Promise((_,j)=>setTimeout(()=>j('to'),7000))]);
+   if(s.exists()){sd=s.data();ls(SK,JSON.stringify(sd))}else{ls(SK,null);$('#app').innerHTML='<p class="w">'+t('nopub')+'</p>';return}}catch(e){sd=null}}
+  if(!sd){try{sd=JSON.parse(ls(SK)||'null')}catch(e){sd=null}fromSaved=!!sd}
+ }
  if(!sd){$('#app').innerHTML='<p class="w">'+t('off')+'</p>';return}
  C=sd;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(C.color)document.documentElement.style.setProperty('--hd',C.color);
  if(!oid)restoreCart();
@@ -96,8 +106,11 @@ const soldOut=i=>i.s!==''&&i.s!=null&&i.s<=0;
 const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)?`<span class="mu">${t('out')}</span>`:n?`<button data-a="-1" data-i="${i.id}">−</button><b>${n}</b><button data-a="1" data-i="${i.id}">+</button>`:`<button class="ad" data-a="1" data-i="${i.id}">${t('add')}</button>`};
 function grid(){const qq=q.toLowerCase(),L=items.filter(i=>(!cat||(i.c||t('other'))==cat)&&((i.n+'').toLowerCase().includes(qq)||((i.e||'')+'').toLowerCase().includes(qq)));
  $('#gr').innerHTML=L.map((i,k)=>`<div class="cd ${soldOut(i)?'off':''}" style="animation-delay:${Math.min(k,12)*40}ms"><div class="av" id="im${i.id}" style="background:hsl(${hue(i.id)} 42% 34%)">${esc((nmOf(i)||'?')[0])}</div><div class="nm">${esc(nmOf(i))}</div><div class="pr">${m(i.p)}</div><div class="ct" id="q${i.id}">${ctl(i)}</div></div>`).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
-const imc={};async function img(i){try{if(imc[i.id]===undefined){const d=await getDoc(doc(db,'shops',uid,'img',String(i.id)));imc[i.id]=d.exists()?d.data().d:''}
- if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}}catch(e){}}
+const imc={};async function img(i){try{
+ if(LOCAL){imc[i.id]=(C.imgs&&C.imgs[String(i.id)])||''}
+ else if(imc[i.id]===undefined){const d=await getDoc(doc(db,'shops',uid,'img',String(i.id)));imc[i.id]=d.exists()?d.data().d:''}
+ if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}
+ }catch(e){}}
 /* ---------- ভাসমান কার্ট বাটন (ধরে সরানো যায়) ---------- */
 function bar(){const b=$('#bar');if(!cnt()||oid||$('#sh')){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>${t('cartN')(cnt())}</span><span>${m(sub())} · ${t('view')}</span><small>↔ ${t('tapDrag')}</small></div>`}
 (function(){const b=$('#bar');let dn=false,mv=false,sx=0,sy=0,ox=0,oy=0;
@@ -130,10 +143,12 @@ async function send(){
  const tn=tbl||($('#tn')?$('#tn').value.trim():'');if(Q.needTable!==false&&!tn){alert(t('needT'));return}
  try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<20000){alert(t('wait'));return}}catch(e){}
  $('#sd').disabled=true;const id=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
- try{const pw=setDoc(doc(db,'orders',id),{uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),table:tn||'-',note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),total:sub()});
-  /* নেট না থাকলে অপেক্ষা না করে ফোনে জমিয়ে রাখা হয়, নেট আসলে নিজে যাবে */
-  await Promise.race([pw,new Promise(r=>setTimeout(r,navigator.onLine===false?500:9000))]);pw.catch(()=>{});
-  try{localStorage.setItem('qo_t',Date.now())}catch(e){}cart={};saveCart();F.nt='';saveF();location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+'&o='+id}catch(e){alert(t('fail'));$('#sd').disabled=false}}
+ const payload={uid:uid||'local-shop',shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),table:tn||'-',note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),total:sub()};
+ try{
+  if(LOCAL){const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({id:id},payload))});if(!r.ok)throw new Error('local server')}
+  else {const pw=setDoc(doc(db,'orders',id),payload);await Promise.race([pw,new Promise(r=>setTimeout(r,navigator.onLine===false?500:9000))]);pw.catch(()=>{})}
+  try{localStorage.setItem('qo_t',Date.now())}catch(e){}cart={};saveCart();F.nt='';saveF();location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+'&o='+id
+ }catch(e){alert(t('fail'));$('#sd').disabled=false}}
 /* ---------- অর্ডার ট্র্যাকিং + সার্ভিস রেটিং ---------- */
 const nmId=x=>{if(lang!=='en')return x.n;const it=items.find(i=>i.id==x.id);return (it&&it.e)||x.n};
 function ratingHTML(){const done=ls('rt_'+oid);
@@ -141,7 +156,11 @@ function ratingHTML(){const done=ls('rt_'+oid);
  return `<div class="cd rt" style="animation:none"><b>${t('rate')}</b><div class="stars">${[1,2,3,4,5].map(k=>`<button class="${k<=R.s?'on':''}" data-star="${k}" aria-label="${k}">★</button>`).join('')}</div><div class="mu">${R.s?t('rl')[R.s]:t('rpick')}</div>
  <input id="rc" maxlength="300" placeholder="${t('rcm')}" value="${esc(R.c)}" style="margin-top:10px"><button class="big" id="rs" ${R.s?'':'disabled style="opacity:.5"'} onclick="window.__rate()">${t('rsend')}</button></div>`}
 window.__rate=async()=>{if(!R.s||!lastO)return;const b=$('#rs');if(b)b.disabled=true;
- try{await setDoc(doc(db,'ratings',oid),{uid,oid,table:lastO.table||'-',name:lastO.name||'',stars:R.s,comment:R.c.trim().slice(0,300),t:Date.now()});ls('rt_'+oid,R.s);paint()}catch(e){alert(t('rfail'));if(b)b.disabled=false}};
+ try{const payload={id:oid,uid,oid,table:lastO.table||'-',name:lastO.name||'',stars:R.s,comment:R.c.trim().slice(0,300),t:Date.now()};
+  if(LOCAL){const r=await fetch('/api/ratings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw new Error('local')}
+  else await setDoc(doc(db,'ratings',oid),payload);
+  ls('rt_'+oid,R.s);paint()
+ }catch(e){alert(t('rfail'));if(b)b.disabled=false}};
 function paint(){const o=lastO;if(!o)return;if(document.activeElement&&document.activeElement.id==='rc'){dirty=true;return}
  const can=o.status=='cancelled',st=o.status=='new'?0:o.status=='accepted'?1:o.status=='ready'?2:3;
  const vs=o.status=='ready'?1:(o.status=='served'||o.status=='billed')?2:0,VF=['wait','ready','served'],VA=[1,1.304,1.837];
@@ -170,11 +189,13 @@ function draw(){cx.clearRect(0,0,cv.width,cv.height);
   else{p.r+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.scale(1,Math.cos(p.f));cx.fillStyle=p.c;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore()}
   return p.y<cv.height+150*D});
  if(ps.length)requestAnimationFrame(draw);else{run=0;cx.clearRect(0,0,cv.width,cv.height)}}
-let lastPend=false;function track(){onSnapshot(doc(db,'orders',oid),{includeMetadataChanges:true},s=>{if(!s.exists()){if(!lastO)$('#bd').textContent=t('nf');return}lastO=s.data();lastPend=s.metadata.hasPendingWrites;paint()})}
+let lastPend=false;function track(){
+ if(LOCAL){const poll=async()=>{try{const r=await fetch('/api/orders/'+encodeURIComponent(oid),{cache:'no-store'});if(r.ok){lastO=await r.json();lastPend=false;paint()}else if(!lastO)$('#bd').textContent=t('nf')}catch(e){}};poll();setInterval(poll,1200);return}
+ onSnapshot(doc(db,'orders',oid),{includeMetadataChanges:true},s=>{if(!s.exists()){if(!lastO)$('#bd').textContent=t('nf');return}lastO=s.data();lastPend=s.metadata.hasPendingWrites;paint()})}
 addEventListener('online',()=>{if(oid&&lastO)paint()});addEventListener('offline',()=>{if(oid&&lastO)paint()});
 init();
-/* অফলাইন প্রস্তুতি: সার্ভিস ওয়ার্কার চালু করে Firebase ফাইল ও ভিডিও ক্যাশে রাখা */
-if('serviceWorker' in navigator)addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
+/* Offline cache remains useful on the hosted Firebase version. Local server already serves local files. */
+if(!LOCAL&&'serviceWorker' in navigator)addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
  const B='https://www.gstatic.com/firebasejs/10.12.2/';['firebase-app.js','firebase-firestore.js','firebase-component.js','firebase-logger.js','firebase-util.js'].forEach(f=>fetch(B+f,{mode:'no-cors'}).catch(()=>{}));
  ['wait.mp4','ready.mp4','served.mp4','wait.jpg','ready.jpg','served.jpg','logo-192.png'].forEach(f=>fetch(f).catch(()=>{}))}).catch(()=>{})});
 </script></body></html>
