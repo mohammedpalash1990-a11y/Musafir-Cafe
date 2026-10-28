@@ -1,0 +1,20 @@
+Musafir Cafe — আপডেট নোট
+
+যা পরীক্ষা করা হয়েছে
+- ready.mp4, served.mp4, wait.mp4 এবং তিনটি JPG poster ফাইল ZIP-এর মধ্যে আছে। ফাইল মিসিং থাকার কারণে নয়; আগের order.html-এ pickup/delivery অর্ডার হলে ভিডিও সেকশন ইচ্ছাকৃতভাবে লুকানো ছিল।
+
+যা ঠিক/উন্নত করা হয়েছে
+- Pickup ও delivery অর্ডারের status screen-এ এখন chef/ready/served ভিডিও ও poster দেখাবে।
+- শুরুতেই loading screen দেখায়, যাতে Firebase/CDN লোড হওয়ার সময় blank page মনে না হয়।
+- মেনু fetch-এর fallback অপেক্ষা ৭ সেকেন্ড থেকে ২.৮ সেকেন্ড করা হয়েছে; আগে ফোনে সেভ করা মেনু থাকলে নেট ধীর হলে দ্রুত সেটি দেখাবে।
+- ভিডিও metadata preload করা হয়েছে, যাতে পেজ খোলার সময় অপ্রয়োজনীয় ভিডিও ডাউনলোড কম হয়। Service worker cache version বাড়ানো হয়েছে।
+- QR মেনুর রঙ, কার্ড, বাটন, ডেস্কটপ/মোবাইল grid এবং reduced-motion আচরণ উন্নত করা হয়েছে।
+- টেবিল QR এবং pickup/delivery QR উভয় পেজেই উপযুক্ত ব্রাউজারে Add to Home Screen/Install prompt দেখানোর ব্যবস্থা করা হয়েছে।
+- অর্ডার কনফার্ম করার সময় অনলাইনে Firestore write নিশ্চিত না হলে আর সঙ্গে সঙ্গে success screen-এ পাঠায় না; timeout/error হলে আবার চেষ্টা করার সুযোগ থাকে। অফলাইনে আগের queued-write আচরণ রাখা হয়েছে।
+- QR order checkout-এ payment method পছন্দ করার অপশন যোগ করা হয়েছে (Cash, Card, bKash, Nagad, Rocket, Bangla QR, Pay later)। এটি payment preference হিসেবে অর্ডারে সংরক্ষিত হয়; এটি নিজে থেকে online payment charge করে না।
+- দোকানের Deal text-এ দুই বা তার বেশি পণ্যের নাম ও মোট ডিলের দাম শনাক্ত হলে customer menu-তে combo card ও discounted price দেখায়। POS-এ অর্ডার বিল করার সময় ওই combo discount discount field-এ যোগ হয়।
+
+গুরুত্বপূর্ণ
+- QR customer menu এবং POS-এর লাইভ অর্ডার sync/অর্ডার নিশ্চিতকরণ Firebase project ও Firestore Security Rules-এর ওপর নির্ভরশীল। এই পরিবেশ থেকে আপনার Firebase project-এ live test করা সম্ভব নয়।
+- Deal auto-detection-এর জন্য Deal text-এ পণ্যের নাম এবং মোট দাম লিখুন, যেমন: “Coffee + Sandwich 15”. পণ্যের নাম POS menu-র নামের সঙ্গে মেলাতে হবে।
+- PWA install এবং service worker cache সাধারণত HTTPS hosting বা localhost-এ কাজ করে; সাধারণ file:// URL থেকে নয়।
