@@ -185,7 +185,7 @@ async function send(){
  try{const pw=orderPut(id,{uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),...o});
   /* নেট না থাকলে অপেক্ষা না করে ফোনে জমিয়ে রাখা হয়, নেট আসলে নিজে যাবে */
   await Promise.race([pw,new Promise(r=>setTimeout(r,navigator.onLine===false?500:9000))]);pw.catch(()=>{})
-  try{localStorage.setItem('qo_t',Date.now())}catch(e){}cart={};saveCart();F.nt='';saveF();location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+(HM?'&h=1':'')+'&o='+id}catch(e){alert(t('fail'));$('#sd').disabled=false}}
+  try{localStorage.setItem('qo_t',Date.now())}catch(e){}cart={};saveCart();F.nt='';saveF();location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+(HM?'&h=1':'')+'&o='+id}catch(e){alert(t('fail')+(e&&e.code?' ('+e.code+')':''));$('#sd').disabled=false}}
 /* ---------- অর্ডার ট্র্যাকিং + সার্ভিস রেটিং ---------- */
 const nmId=x=>{if(lang!=='en')return x.n;const it=items.find(i=>i.id==x.id);return (it&&it.e)||x.n};
 function ratingHTML(){const done=ls('rt_'+oid);
