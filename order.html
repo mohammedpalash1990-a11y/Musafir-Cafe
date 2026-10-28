@@ -38,33 +38,47 @@ input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px
 .bdg{display:inline-block;padding:4px 14px;border-radius:99px;background:#f5b52e;color:#3b2a00;font-weight:800;font-size:calc(14px*var(--z))}
 @keyframes flt{to{transform:translateY(-6px) rotate(.4deg)}}
 @keyframes up{from{opacity:0;transform:translateY(16px)}}@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
-</style></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
+.tg{display:flex;gap:8px;margin:10px 0}.tg button{flex:1;padding:12px 6px;border-radius:12px;background:var(--ln);color:var(--ink);font-weight:700}.tg .on{background:var(--ac);color:var(--acink)}
+.lk{display:inline-block;margin:6px 8px 0 0;padding:8px 14px;border-radius:10px;background:var(--ln);color:var(--ink);text-decoration:none;font-weight:700;font-size:calc(14px*var(--z))}
+</style><link rel="apple-touch-icon" href="logo-192.png"></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
 <script type="module">
-const LOCAL=location.protocol==='http:'&&location.port==='8080';
-let db=null,doc=null,getDoc=null,setDoc=null,onSnapshot=null;
-if(!LOCAL){
- const {initializeApp}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
- const m=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
- const fbApp=initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});
- try{db=m.initializeFirestore(fbApp,{localCache:m.persistentLocalCache({tabManager:m.persistentMultipleTabManager()})})}catch(e){db=m.getFirestore(fbApp)}
- doc=m.doc;getDoc=m.getDoc;setDoc=m.setDoc;onSnapshot=m.onSnapshot;
-}
-const SHOP='';const P=new URLSearchParams(location.search);let uid=P.get('s')||SHOP;const oid=P.get('o');let tbl=(P.get('t')||'').slice(0,10);
+let FS=null,db=null;
+try{
+ const A=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");FS=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+ const fbApp=A.initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});
+ /* অফলাইন ক্যাশ: মেনু, ছবি ও পাঠানো অর্ডার ফোনে জমা থাকবে */
+ try{db=FS.initializeFirestore(fbApp,{localCache:FS.persistentLocalCache({tabManager:FS.persistentMultipleTabManager()})})}catch(e){db=FS.getFirestore(fbApp)}
+}catch(e){FS=null}
+const shopGet=async()=>{if(!FS)throw new Error('nofb');const s=await FS.getDoc(FS.doc(db,'shops',uid));return s.exists()?s.data():null};
+const imgGet=async id=>{if(!FS)return '';const d=await FS.getDoc(FS.doc(db,'shops',uid,'img',String(id)));return d.exists()?d.data().d:''};
+const orderPut=(id,data)=>FS.setDoc(FS.doc(db,'orders',id),data);
+const ratePut=(oid,data)=>FS.setDoc(FS.doc(db,'ratings',oid),data);
+function orderWatch(oid,cb){if(!FS)return()=>{};return FS.onSnapshot(FS.doc(db,'orders',oid),{includeMetadataChanges:true},s=>cb(s.exists()?s.data():null,s.metadata.hasPendingWrites))}
+const SHOP='';const P=new URLSearchParams(location.search),uid=P.get('s')||SHOP,oid=P.get('o');let tbl=(P.get('t')||'').slice(0,10);
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}return null};
 /* ---------- ভাষা (ডিফল্ট বাংলা) ও সাইজ ---------- */
 const SZ=[{z:.82,cw:104},{z:1,cw:150},{z:1.18,cw:180},{z:1.35,cw:230}];
 let lang=ls('qo_lang')==='en'?'en':'bn',si=+ls('qo_sz');if(!(si>=0&&si<SZ.length)||ls('qo_sz')===null)si=1;
 const TX={
-bn:{bad:'QR বা লিংকটি ঠিক নয়',off:'ইন্টারনেট নেই। একবার নেট দিয়ে এই পাতা খুললে পরে অফলাইনেও মেনু দেখা যাবে।',offb:'📴 অফলাইন · ফোনে জমানো মেনু দেখাচ্ছে',pend:'📴 ইন্টারনেট নেই। অর্ডারটি আপনার ফোনে জমা আছে, নেট আসলেই নিজে থেকে দোকানে চলে যাবে। তাড়া থাকলে এই স্ক্রিনটা কাউন্টারে দেখান।',nopub:'মেনু এখনো প্রকাশ হয়নি',closed:'এখন অর্ডার নেওয়া বন্ধ আছে, মেনু দেখতে পারেন।',search:'পণ্য খুঁজুন',all:'সব',other:'অন্যান্য',add:'+ যোগ করুন',out:'স্টক শেষ',none:'কিছু পাওয়া যায়নি',cartN:n=>'🛒 '+n+'টি',view:'দেখুন ›',tapDrag:'ধরে সরানো যাবে',yours:'আপনার অর্ডার',total:'মোট',tno:'টেবিল নম্বর',tph:'যেমন: 5',yname:'আপনার নাম (ঐচ্ছিক)',note:'নোট (ঐচ্ছিক, যেমন: চিনি কম)',confirm:'✔ অর্ডার কনফার্ম করুন',closedBtn:'এখন অর্ডার নেওয়া বন্ধ',back:'← মেনুতে ফিরুন',needT:'টেবিল নম্বর দিন',wait:'একটু অপেক্ষা করে আবার চেষ্টা করুন',fail:'পাঠানো যায়নি, আবার চেষ্টা করুন',table:'টেবিল ',nf:'অর্ডার পাওয়া যায়নি',sorry:'দুঃখিত, অর্ডারটি নেওয়া যায়নি',sent:'অর্ডার পাঠানো হয়েছে!',steps:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','খাবার প্রস্তুত','পরিবেশন'],
+bn:{pk:'🏪 পিকআপ',dl:'🛵 ডেলিভারি',ph:'মোবাইল নম্বর',ad:'পূর্ণ ঠিকানা (বাড়ি, রোড, এলাকা)',mylc:'📍 আমার লোকেশন দিন',locing:'লোকেশন নেওয়া হচ্ছে…',lcok:'✔ লোকেশন পাওয়া গেছে',inz:'✔ আপনার এলাকায় ডেলিভারি দেওয়া হয়',outz:'😔 আপনার লোকেশন আমাদের ডেলিভারি এলাকার বাইরে',km:' কিমি',needlc:'ডেলিভারির জন্য আপনার লোকেশন দিন',nogeo:'এই ফোনে লোকেশন পাওয়া যাচ্ছে না',locfail:'লোকেশন পাওয়া যায়নি। ফোনের লোকেশন ও ব্রাউজারের অনুমতি চালু করুন।',fee:'ডেলিভারি চার্জ',free:'ফ্রি',gtot:'সর্বমোট',minmsg:n=>'ডেলিভারির জন্য ন্যূনতম অর্ডার '+n,needPh:'সঠিক মোবাইল নম্বর দিন',needAd:'ঠিকানা লিখুন',shopat:'দোকানের ঠিকানা',callus:'📞 কল করুন',maps:'📍 ম্যাপে দেখুন',wa:'💬 WhatsApp এ পাঠান',inst:'📲 হোম স্ক্রিনে যোগ করুন (অ্যাপের মতো)',iosTip:'Safari-তে নিচের Share বাটন চেপে "Add to Home Screen" বেছে নিন',pkGo:'আপনার অর্ডার প্রস্তুত, দোকান থেকে নিয়ে যান',dlGo:'আপনার অর্ডার প্রস্তুত, শীঘ্রই রওনা হবে',nohome:'এখন বাড়ি থেকে অর্ডার নেওয়া বন্ধ আছে',bad:'QR বা লিংকটি ঠিক নয়',off:'ইন্টারনেট নেই। একবার নেট দিয়ে এই পাতা খুললে পরে অফলাইনেও মেনু দেখা যাবে।',offb:'📴 অফলাইন · ফোনে জমানো মেনু দেখাচ্ছে',pend:'📴 ইন্টারনেট নেই। অর্ডারটি আপনার ফোনে জমা আছে, নেট আসলেই নিজে থেকে দোকানে চলে যাবে। তাড়া থাকলে এই স্ক্রিনটা কাউন্টারে দেখান।',nopub:'মেনু এখনো প্রকাশ হয়নি',closed:'এখন অর্ডার নেওয়া বন্ধ আছে, মেনু দেখতে পারেন।',search:'পণ্য খুঁজুন',all:'সব',other:'অন্যান্য',add:'+ যোগ করুন',out:'স্টক শেষ',none:'কিছু পাওয়া যায়নি',cartN:n=>'🛒 '+n+'টি',view:'দেখুন ›',tapDrag:'ধরে সরানো যাবে',yours:'আপনার অর্ডার',total:'মোট',tno:'টেবিল নম্বর',tph:'যেমন: 5',yname:'আপনার নাম (ঐচ্ছিক)',note:'নোট (ঐচ্ছিক, যেমন: চিনি কম)',confirm:'✔ অর্ডার কনফার্ম করুন',closedBtn:'এখন অর্ডার নেওয়া বন্ধ',back:'← মেনুতে ফিরুন',needT:'টেবিল নম্বর দিন',wait:'একটু অপেক্ষা করে আবার চেষ্টা করুন',fail:'পাঠানো যায়নি, আবার চেষ্টা করুন',table:'টেবিল ',nf:'অর্ডার পাওয়া যায়নি',sorry:'দুঃখিত, অর্ডারটি নেওয়া যায়নি',sent:'অর্ডার পাঠানো হয়েছে!',steps:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','খাবার প্রস্তুত','পরিবেশন'],
 vw:['⏳ অপেক্ষা করুন','🍽 খাবার প্রস্তুত!','😋 মজা করে খান'],vt:['খাবার তৈরি হচ্ছে… একটু অপেক্ষা করুন','আপনার খাবার তৈরি হয়ে গেছে','ধন্যবাদ, আবার আসবেন ❤'],foot:'আপনার আসাই আমাদের আনন্দ ☕ এই পাতা খোলা রাখলে অবস্থা নিজে থেকেই বদলাবে।',more:'আরও অর্ডার করুন',welcome:'স্বাগতম',tag:'মেনু দেখে অর্ডার দিন',g:['শুভ রাত্রি','সুপ্রভাত','শুভ দুপুর','শুভ বিকাল','শুভ সন্ধ্যা'],
 rate:'আমাদের সার্ভিস কেমন লাগলো?',rcm:'মন্তব্য (ঐচ্ছিক)',rsend:'রেটিং পাঠান',rpick:'তারা দিয়ে রেটিং দিন',rthx:'ধন্যবাদ! আপনার রেটিং পেয়েছি',rfail:'রেটিং পাঠানো যায়নি, আবার চেষ্টা করুন',rl:['','খুব খারাপ','খারাপ','মোটামুটি','ভালো','চমৎকার'],sizeS:'ছোট',sizeL:'বড়'},
-en:{bad:'Invalid QR or link',off:'No internet. Open this page once online and the menu will also work offline.',offb:'📴 Offline · showing the saved menu',pend:'📴 No internet. Your order is saved on this phone and will reach the shop automatically when the net returns. If you are in a hurry, show this screen at the counter.',nopub:'The menu is not published yet',closed:'Orders are closed right now. You can still browse the menu.',search:'Search items',all:'All',other:'Other',add:'+ Add',out:'Out of stock',none:'Nothing found',cartN:n=>'🛒 '+n+(n==1?' item':' items'),view:'View ›',tapDrag:'drag to move',yours:'Your order',total:'Total',tno:'Table number',tph:'e.g. 5',yname:'Your name (optional)',note:'Note (optional, e.g. less sugar)',confirm:'✔ Confirm order',closedBtn:'Orders are closed',back:'← Back to menu',needT:'Enter table number',wait:'Please wait a moment and try again',fail:'Could not send, please try again',table:'Table ',nf:'Order not found',sorry:'Sorry, the order could not be accepted',sent:'Order sent!',steps:['Sent','Accepted by shop','Food ready','Served'],
+en:{pk:'🏪 Pickup',dl:'🛵 Delivery',ph:'Mobile number',ad:'Full address (house, road, area)',mylc:'📍 Share my location',locing:'Getting location…',lcok:'✔ Location received',inz:'✔ We deliver to your area',outz:'😔 Your location is outside our delivery area',km:' km',needlc:'Please share your location for delivery',nogeo:'Location is not available on this phone',locfail:'Could not get location. Turn on phone location and browser permission.',fee:'Delivery charge',free:'Free',gtot:'Grand total',minmsg:n=>'Minimum order for delivery is '+n,needPh:'Enter a valid mobile number',needAd:'Enter your address',shopat:'Shop address',callus:'📞 Call us',maps:'📍 View on map',wa:'💬 Send on WhatsApp',inst:'📲 Add to home screen (like an app)',iosTip:'In Safari tap the Share button, then "Add to Home Screen"',pkGo:'Your order is ready, please collect it from the shop',dlGo:'Your order is ready and will leave soon',nohome:'Home orders are currently closed',bad:'Invalid QR or link',off:'No internet. Open this page once online and the menu will also work offline.',offb:'📴 Offline · showing the saved menu',pend:'📴 No internet. Your order is saved on this phone and will reach the shop automatically when the net returns. If you are in a hurry, show this screen at the counter.',nopub:'The menu is not published yet',closed:'Orders are closed right now. You can still browse the menu.',search:'Search items',all:'All',other:'Other',add:'+ Add',out:'Out of stock',none:'Nothing found',cartN:n=>'🛒 '+n+(n==1?' item':' items'),view:'View ›',tapDrag:'drag to move',yours:'Your order',total:'Total',tno:'Table number',tph:'e.g. 5',yname:'Your name (optional)',note:'Note (optional, e.g. less sugar)',confirm:'✔ Confirm order',closedBtn:'Orders are closed',back:'← Back to menu',needT:'Enter table number',wait:'Please wait a moment and try again',fail:'Could not send, please try again',table:'Table ',nf:'Order not found',sorry:'Sorry, the order could not be accepted',sent:'Order sent!',steps:['Sent','Accepted by shop','Food ready','Served'],
 vw:['⏳ Please wait','🍽 Food is ready!','😋 Enjoy your meal'],vt:['Your food is being prepared… please wait a little','Your food is ready','Thank you, see you again ❤'],foot:'Thank you for visiting ☕ Keep this page open and the status will update by itself.',more:'Order more',welcome:'Welcome',tag:'Browse the menu and order',g:['Good night','Good morning','Good afternoon','Good evening','Good evening'],
 rate:'How was our service?',rcm:'Comment (optional)',rsend:'Send rating',rpick:'Tap the stars to rate',rthx:'Thank you! We got your rating',rfail:'Could not send rating, please try again',rl:['','Very bad','Bad','Okay','Good','Excellent'],sizeS:'Smaller',sizeL:'Bigger'}};
 const t=k=>{const v=TX[lang][k];return v===undefined?TX.bn[k]:v};
 const nmOf=i=>lang==='en'?(i.e||i.n):i.n;
 let C={},Q={},items=[],cart={},cat='',q='',lastO=null,F={tn:'',nm:'',nt:''},R={s:0,c:''},dirty=false;
+/* বাড়ি থেকে অর্ডার (পিকআপ/ডেলিভারি): লিংকে &h=1 থাকলে চালু */
+const HM=P.get('h')==='1'&&!tbl;let H={ty:'',ph:'',ad:'',loc:null},DI=null;
+try{const x=JSON.parse(ls('qo_h')||'{}');H.ty=x.ty||'';H.ph=x.ph||'';H.ad=x.ad||''}catch(e){}
+const saveH=()=>ls('qo_h',JSON.stringify({ty:H.ty,ph:H.ph,ad:H.ad}));
+const opts=()=>[Q.pk!==false?'pickup':null,Q.dl?'delivery':null].filter(Boolean);
+const hasLoc=()=>Q.lat!==''&&Q.lat!=null&&Q.lng!==''&&Q.lng!=null&&isFinite(+Q.lat)&&isFinite(+Q.lng);
+const dist=(a,b,c,d)=>{const r=x=>x*Math.PI/180,u=r(c-a),v=r(d-b),x=Math.sin(u/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(v/2)**2;return 12742*Math.asin(Math.sqrt(x))};
+function zoneInfo(){const r=+Q.rad||0;if(!(r>0&&hasLoc()))return{need:false,out:false,msg:''};if(!H.loc)return{need:true,out:false,msg:t('needlc')};const d=dist(+Q.lat,+Q.lng,H.loc.lat,H.loc.lng);H.loc.d=Math.round(d*10)/10;return d<=r?{need:true,out:false,msg:t('inz')}:{need:true,out:true,msg:t('outz')+' ('+r+t('km')+')'}}
+const feeNow=()=>{if(!(HM&&H.ty==='delivery'))return 0;const f=+Q.fee||0;return(+Q.free>0&&sub()>=+Q.free)?0:f};
 try{F=Object.assign(F,JSON.parse(ls('qo_f')||'{}'))}catch(e){}
 const saveF=()=>ls('qo_f',JSON.stringify(F));
 const cartKey=()=>'qo_cart_'+uid;
@@ -77,20 +91,15 @@ function applySz(){const r=document.documentElement.style;r.setProperty('--z',SZ
 function rerender(){document.documentElement.lang=lang;document.title=C.name||(lang==='en'?'Menu':'মেনু');hdr();oid?paint():list();bar();if($('#sh'))sheet()}
 async function init(){
  applySz();document.documentElement.lang=lang;
- let sd=null,fromSaved=false;
- if(LOCAL){
-  try{const r=await fetch('/api/shop',{cache:'no-store'});if(r.ok)sd=await r.json();if(sd&&sd.uid)uid=sd.uid;if(sd)ls('qo_shop_'+uid,JSON.stringify(sd))}catch(e){}
-  if(!sd){try{sd=JSON.parse(ls('qo_shop_'+uid)||'null')}catch(e){sd=null}fromSaved=!!sd}
- }else{
-  if(!uid){$('#app').innerHTML='<p class="w">'+t('bad')+'</p>';return}
-  const SK='qo_shop_'+uid;
-  if(navigator.onLine!==false){try{const s=await Promise.race([getDoc(doc(db,'shops',uid)),new Promise((_,j)=>setTimeout(()=>j('to'),7000))]);
-   if(s.exists()){sd=s.data();ls(SK,JSON.stringify(sd))}else{ls(SK,null);$('#app').innerHTML='<p class="w">'+t('nopub')+'</p>';return}}catch(e){sd=null}}
-  if(!sd){try{sd=JSON.parse(ls(SK)||'null')}catch(e){sd=null}fromSaved=!!sd}
- }
+ if(!uid){$('#app').innerHTML='<p class="w">'+t('bad')+'</p>';return}
+ let sd=null,fromSaved=false;const SK='qo_shop_'+uid;
+ if(navigator.onLine!==false){try{const s=await Promise.race([shopGet(),new Promise((_,j)=>setTimeout(()=>j('to'),7000))]);
+  if(s){sd=s;ls(SK,JSON.stringify(sd))}else{ls(SK,null);$('#app').innerHTML='<p class="w">'+t('nopub')+'</p>';return}}catch(e){sd=null}}
+ if(!sd){try{sd=JSON.parse(ls(SK)||'null')}catch(e){sd=null}fromSaved=!!sd}
  if(!sd){$('#app').innerHTML='<p class="w">'+t('off')+'</p>';return}
  C=sd;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(C.color)document.documentElement.style.setProperty('--hd',C.color);
  if(!oid)restoreCart();
+ if(HM)mkManifest();
  hdr();if(!oid&&!sessionStorage.getItem('sp'))splash();oid?track():list();bar()}
 function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(lang==='en'?t('welcome'):(Q.welcome||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(lang==='en'?t('tag'):(Q.tag||t('tag')))}</p>`;document.body.appendChild(d);
  const x=()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)};d.onclick=x;setTimeout(x,2200)}
@@ -100,17 +109,26 @@ function hdr(){$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><b>${
 function list(){
  const cs=[...new Set(items.map(i=>i.c||t('other')))];
  let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
- `<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
- $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar()}
+ homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
+ $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar();showInst()}
+const stand=matchMedia('(display-mode: standalone)').matches||navigator.standalone,isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();DI=e;showInst()});
+function showInst(){const w=$('#instw');if(!w||stand||!(DI||isIos))return;w.innerHTML=`<button class="big" id="inst" style="margin:0 0 10px">${t('inst')}</button>`}
+function homeBar(){if(!HM)return '';const lk=(h,x)=>`<a class="lk" href="${h}" target="_blank" rel="noopener">${x}</a>`;let x='';
+ if(Q.addr)x+=`<div class="mu" style="margin-bottom:4px">📍 ${esc(Q.addr)}</div>`;
+ if(Q.ph)x+=lk('tel:'+esc(String(Q.ph).replace(/[^\d+]/g,'')),t('callus'));
+ if(hasLoc())x+=lk('https://www.google.com/maps/search/?api=1&query='+(+Q.lat)+','+(+Q.lng),t('maps'));
+ if(Q.dl&&(+Q.fee>0||+Q.rad>0||+Q.min>0))x+=`<div class="mu" style="margin-top:8px;font-size:.85em">${t('dl')}${+Q.rad>0?' · ≤'+(+Q.rad)+t('km'):''}${+Q.fee>0?' · '+t('fee')+' '+m(+Q.fee):''}${+Q.free>0?' · '+m(+Q.free)+'+ '+t('free'):''}${+Q.min>0?' · min '+m(+Q.min):''}</div>`;
+ return `<div id="instw"></div>`+(x?`<div class="cd" style="margin-bottom:10px;animation:none">${x}</div>`:'')}
+function mkManifest(){try{const u=new URL(location.href),sc=u.origin+u.pathname.replace(/[^/]*$/,''),nm=C.name||'Menu';
+ const mf={name:nm,short_name:nm.slice(0,12),start_url:u.origin+u.pathname+'?s='+encodeURIComponent(uid)+'&h=1',scope:sc,display:'standalone',background_color:'#0b2a2e',theme_color:C.color||'#0b2a2e',icons:[{src:sc+'logo-192.png',sizes:'192x192',type:'image/png'},{src:sc+'logo-512.png',sizes:'512x512',type:'image/png'}]};
+ const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}}
 const soldOut=i=>i.s!==''&&i.s!=null&&i.s<=0;
 const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)?`<span class="mu">${t('out')}</span>`:n?`<button data-a="-1" data-i="${i.id}">−</button><b>${n}</b><button data-a="1" data-i="${i.id}">+</button>`:`<button class="ad" data-a="1" data-i="${i.id}">${t('add')}</button>`};
 function grid(){const qq=q.toLowerCase(),L=items.filter(i=>(!cat||(i.c||t('other'))==cat)&&((i.n+'').toLowerCase().includes(qq)||((i.e||'')+'').toLowerCase().includes(qq)));
  $('#gr').innerHTML=L.map((i,k)=>`<div class="cd ${soldOut(i)?'off':''}" style="animation-delay:${Math.min(k,12)*40}ms"><div class="av" id="im${i.id}" style="background:hsl(${hue(i.id)} 42% 34%)">${esc((nmOf(i)||'?')[0])}</div><div class="nm">${esc(nmOf(i))}</div><div class="pr">${m(i.p)}</div><div class="ct" id="q${i.id}">${ctl(i)}</div></div>`).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
-const imc={};async function img(i){try{
- if(LOCAL){imc[i.id]=(C.imgs&&C.imgs[String(i.id)])||''}
- else if(imc[i.id]===undefined){const d=await getDoc(doc(db,'shops',uid,'img',String(i.id)));imc[i.id]=d.exists()?d.data().d:''}
- if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}
- }catch(e){}}
+const imc={};async function img(i){try{if(imc[i.id]===undefined){imc[i.id]=await imgGet(i.id)}
+ if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}}catch(e){}}
 /* ---------- ভাসমান কার্ট বাটন (ধরে সরানো যায়) ---------- */
 function bar(){const b=$('#bar');if(!cnt()||oid||$('#sh')){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>${t('cartN')(cnt())}</span><span>${m(sub())} · ${t('view')}</span><small>↔ ${t('tapDrag')}</small></div>`}
 (function(){const b=$('#bar');let dn=false,mv=false,sx=0,sy=0,ox=0,oy=0;
@@ -129,26 +147,45 @@ document.addEventListener('click',e=>{const t0=e.target;if(!t0.dataset)return;
  else if(t0.dataset.lang){if(lang!==t0.dataset.lang){lang=t0.dataset.lang;ls('qo_lang',lang);rerender()}}
  else if(t0.dataset.sz){si=Math.max(0,Math.min(SZ.length-1,si+(+t0.dataset.sz)));applySz();rerender()}
  else if(t0.dataset.star){R.s=+t0.dataset.star;paint()}
+ else if(t0.dataset.ty){H.ty=t0.dataset.ty;saveH();sheet()}
+ else if(t0.id==='lc')getLoc();
+ else if(t0.id==='inst'){if(DI){DI.prompt();DI=null;t0.remove()}else alert(t('iosTip'))}
+ else if(t0.id==='wab'){const o=collect();if(o)open('https://wa.me/'+Q.wa+'?text='+encodeURIComponent(waText(o)),'_blank')}
  else if(t0.dataset.c!==undefined&&t0.closest('.ch')){cat=t0.dataset.c;list()}});
-document.addEventListener('input',e=>{const i=e.target.id;if(i==='tn'){F.tn=e.target.value;saveF()}else if(i==='nm'){F.nm=e.target.value;saveF()}else if(i==='nt'){F.nt=e.target.value;saveF()}else if(i==='rc')R.c=e.target.value});
+document.addEventListener('input',e=>{const i=e.target.id;if(i==='tn'){F.tn=e.target.value;saveF()}else if(i==='nm'){F.nm=e.target.value;saveF()}else if(i==='nt'){F.nt=e.target.value;saveF()}else if(i==='ph'){H.ph=e.target.value;saveH()}else if(i==='ad'){H.ad=e.target.value;saveH()}else if(i==='rc')R.c=e.target.value});
 document.addEventListener('focusout',e=>{if(e.target.id==='rc'&&dirty){dirty=false;setTimeout(paint,150)}});
 const closeSh=()=>{$('#ovl').innerHTML='';bar()};
-function sheet(){if(!cnt()){closeSh();return}const need=Q.needTable!==false&&!tbl,closed=Q.open===false;
+function getLoc(){const b=$('#lc');if(!navigator.geolocation){alert(t('nogeo'));return}if(b){b.disabled=true;b.textContent=t('locing')}
+ navigator.geolocation.getCurrentPosition(p=>{H.loc={lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),acc:Math.round(p.coords.accuracy)};zoneInfo();sheet()},()=>{alert(t('locfail'));sheet()},{enableHighAccuracy:true,timeout:15000,maximumAge:0})}
+function collect(){const tn=tbl||($('#tn')?$('#tn').value.trim():''),o={type:'dine',table:tn||'-',fee:0};
+ if(HM){if(!opts().length){alert(t('nohome'));return null}o.type=H.ty;o.table='-';
+  if(!/^\+?[0-9][0-9\s-]{6,15}$/.test((H.ph||'').trim())){alert(t('needPh'));return null}o.phone=H.ph.trim();
+  if(H.ty==='delivery'){if(!(H.ad||'').trim()){alert(t('needAd'));return null}const z=zoneInfo();if(z.need&&!H.loc){alert(t('needlc'));return null}if(z.out){alert(z.msg);return null}
+   if(+Q.min>0&&sub()<+Q.min){alert(t('minmsg')(m(+Q.min)));return null}o.addr=H.ad.trim();if(H.loc)o.loc=H.loc;o.fee=feeNow()}}
+ else if(Q.needTable!==false&&!tn){alert(t('needT'));return null}
+ o.total=Math.round((sub()+o.fee)*100)/100;return o}
+function waText(o){const L=['🛒 '+(C.name||'')+' — '+(o.type==='delivery'?'ডেলিভারি অর্ডার':o.type==='pickup'?'পিকআপ অর্ডার':'অর্ডার')];
+ Object.values(cart).forEach(x=>L.push(x.q+' × '+x.n+' = '+m(x.p*x.q)));L.push('সাবটোটাল: '+m(sub()));if(o.fee)L.push('ডেলিভারি চার্জ: '+m(o.fee));L.push('সর্বমোট: '+m(o.total));
+ const nm=$('#nm').value.trim(),nt=$('#nt').value.trim();if(nm)L.push('নাম: '+nm);if(o.phone)L.push('ফোন: '+o.phone);if(o.addr)L.push('ঠিকানা: '+o.addr);if(o.loc)L.push('লোকেশন: https://www.google.com/maps/search/?api=1&query='+o.loc.lat+','+o.loc.lng);if(o.table&&o.table!=='-')L.push('টেবিল: '+o.table);if(nt)L.push('নোট: '+nt);return L.join('\n')}
+function sheet(){if(!cnt()){closeSh();return}const need=!HM&&Q.needTable!==false&&!tbl,closed=Q.open===false||(HM&&!opts().length);
+ if(HM&&opts().length&&opts().indexOf(H.ty)<0)H.ty=opts()[0];
+ const dlv=HM&&H.ty==='delivery',fe=feeNow(),z=dlv?zoneInfo():null;
+ const homeHTML=HM?`<div class="tg">${opts().map(o=>`<button data-ty="${o}" class="${H.ty===o?'on':''}">${t(o==='pickup'?'pk':'dl')}</button>`).join('')}</div><label class="mu">${t('ph')}</label><input id="ph" type="tel" inputmode="tel" maxlength="16" placeholder="01XXXXXXXXX" value="${esc(H.ph)}">
+  ${dlv?`<label class="mu">${t('ad')}</label><input id="ad" maxlength="200" value="${esc(H.ad)}"><button class="big" id="lc" style="background:var(--ln);color:var(--ink)">${t('mylc')}</button><div class="mu" style="margin:6px 0">${H.loc?t('lcok')+(H.loc.d!=null?' · '+H.loc.d+t('km'):'')+'<br>':''}${z.msg?esc(z.msg):''}</div>${+Q.min>0&&sub()<+Q.min?`<div style="color:#ffb4a8;margin:4px 0">${t('minmsg')(m(+Q.min))}</div>`:''}`:(Q.addr?`<div class="mu" style="margin:8px 0">${t('shopat')}: ${esc(Q.addr)}</div>`:'')}`:'';
  $('#ovl').innerHTML=`<div class="ov" id="sh"><div class="sh"><b style="font-size:18px">${t('yours')}</b>${Object.values(cart).map(x=>`<div class="row"><span>${esc(nmOf(x))}<br><span class="mu">${m(x.p)}</span></span><button class="qb" data-a="-1" data-i="${x.id}">−</button><b>${x.q}</b><button class="qb" data-a="1" data-i="${x.id}">+</button></div>`).join('')}
  <div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span><b>${t('total')}</b></span><b style="font-size:19px">${m(sub())}</b></div>
- ${need?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" placeholder="${t('tph')}" value="${esc(F.tn)}">`:''}<label class="mu">${t('yname')}</label><input id="nm" maxlength="60" value="${esc(F.nm)}"><label class="mu">${t('note')}</label><input id="nt" maxlength="150" value="${esc(F.nt)}">
- <button class="big" id="sd" ${closed?'disabled style="opacity:.5"':''}>${closed?t('closedBtn'):t('confirm')}</button><button class="big" id="cl" style="background:var(--ln);color:var(--ink)">${t('back')}</button></div></div>`;
+ ${dlv?`<div class="row"><span>${t('fee')}</span><b>${fe?m(fe):t('free')}</b></div><div class="row"><span><b>${t('gtot')}</b></span><b style="font-size:19px">${m(sub()+fe)}</b></div>`:''}
+ ${homeHTML}${need?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" placeholder="${t('tph')}" value="${esc(F.tn)}">`:''}<label class="mu">${t('yname')}</label><input id="nm" maxlength="60" value="${esc(F.nm)}"><label class="mu">${t('note')}</label><input id="nt" maxlength="150" value="${esc(F.nt)}">
+ <button class="big" id="sd" ${closed?'disabled style="opacity:.5"':''}>${closed?t('closedBtn'):t('confirm')}</button>${Q.wa?`<button class="big" id="wab" style="background:#25d366;color:#05301a">${t('wa')}</button>`:''}<button class="big" id="cl" style="background:var(--ln);color:var(--ink)">${t('back')}</button></div></div>`;
  $('#cl').onclick=closeSh;$('#sd').onclick=send;$('#sh').onclick=e=>{if(e.target.id=='sh')closeSh()};bar()}
 async function send(){
- const tn=tbl||($('#tn')?$('#tn').value.trim():'');if(Q.needTable!==false&&!tn){alert(t('needT'));return}
+ const o=collect();if(!o)return;const tn=o.table;
  try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<20000){alert(t('wait'));return}}catch(e){}
  $('#sd').disabled=true;const id=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
- const payload={uid:uid||'local-shop',shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),table:tn||'-',note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),total:sub()};
- try{
-  if(LOCAL){const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({id:id},payload))});if(!r.ok)throw new Error('local server')}
-  else {const pw=setDoc(doc(db,'orders',id),payload);await Promise.race([pw,new Promise(r=>setTimeout(r,navigator.onLine===false?500:9000))]);pw.catch(()=>{})}
-  try{localStorage.setItem('qo_t',Date.now())}catch(e){}cart={};saveCart();F.nt='';saveF();location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+'&o='+id
- }catch(e){alert(t('fail'));$('#sd').disabled=false}}
+ try{const pw=orderPut(id,{uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),...o});
+  /* নেট না থাকলে অপেক্ষা না করে ফোনে জমিয়ে রাখা হয়, নেট আসলে নিজে যাবে */
+  await Promise.race([pw,new Promise(r=>setTimeout(r,navigator.onLine===false?500:9000))]);pw.catch(()=>{})
+  try{localStorage.setItem('qo_t',Date.now())}catch(e){}cart={};saveCart();F.nt='';saveF();location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+(HM?'&h=1':'')+'&o='+id}catch(e){alert(t('fail'));$('#sd').disabled=false}}
 /* ---------- অর্ডার ট্র্যাকিং + সার্ভিস রেটিং ---------- */
 const nmId=x=>{if(lang!=='en')return x.n;const it=items.find(i=>i.id==x.id);return (it&&it.e)||x.n};
 function ratingHTML(){const done=ls('rt_'+oid);
@@ -156,19 +193,15 @@ function ratingHTML(){const done=ls('rt_'+oid);
  return `<div class="cd rt" style="animation:none"><b>${t('rate')}</b><div class="stars">${[1,2,3,4,5].map(k=>`<button class="${k<=R.s?'on':''}" data-star="${k}" aria-label="${k}">★</button>`).join('')}</div><div class="mu">${R.s?t('rl')[R.s]:t('rpick')}</div>
  <input id="rc" maxlength="300" placeholder="${t('rcm')}" value="${esc(R.c)}" style="margin-top:10px"><button class="big" id="rs" ${R.s?'':'disabled style="opacity:.5"'} onclick="window.__rate()">${t('rsend')}</button></div>`}
 window.__rate=async()=>{if(!R.s||!lastO)return;const b=$('#rs');if(b)b.disabled=true;
- try{const payload={id:oid,uid,oid,table:lastO.table||'-',name:lastO.name||'',stars:R.s,comment:R.c.trim().slice(0,300),t:Date.now()};
-  if(LOCAL){const r=await fetch('/api/ratings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw new Error('local')}
-  else await setDoc(doc(db,'ratings',oid),payload);
-  ls('rt_'+oid,R.s);paint()
- }catch(e){alert(t('rfail'));if(b)b.disabled=false}};
+ try{await ratePut(oid,{uid,oid,table:lastO.table||'-',name:lastO.name||'',stars:R.s,comment:R.c.trim().slice(0,300),t:Date.now()});ls('rt_'+oid,R.s);paint()}catch(e){alert(t('rfail'));if(b)b.disabled=false}};
 function paint(){const o=lastO;if(!o)return;if(document.activeElement&&document.activeElement.id==='rc'){dirty=true;return}
  const can=o.status=='cancelled',st=o.status=='new'?0:o.status=='accepted'?1:o.status=='ready'?2:3;
  const vs=o.status=='ready'?1:(o.status=='served'||o.status=='billed')?2:0,VF=['wait','ready','served'],VA=[1,1.304,1.837];
- $('#bd').innerHTML=(lastPend&&o.status=='new'&&navigator.onLine===false?`<div class="cd" style="margin-bottom:10px;background:#5a3b12;animation:none">${t('pend')}</div>`:'')+(can?'':`<div class="vh"><i class="bgi" style="background-image:url(${VF[vs]}.jpg)"></i><div class="fr" style="--a:${VA[vs]}"><video id="vv" src="${VF[vs]}.mp4" poster="${VF[vs]}.jpg" muted loop autoplay playsinline preload="auto"></video></div></div>`)+`<div style="text-align:center">${can?'<div class="ok">✕</div>':`<span class="bdg">${t('vw')[vs]}</span>`}<h2 style="margin:6px 0">${can?t('sorry'):(vs==0?t('sent'):vs==1?t('vt')[1]:'❤')}</h2><div class="mu">${can?'':(vs==0?t('vt')[0]+'<br>':vs==2?t('vt')[2]+'<br>':'')}${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
+ $('#bd').innerHTML=(lastPend&&o.status=='new'&&navigator.onLine===false?`<div class="cd" style="margin-bottom:10px;background:#5a3b12;animation:none">${t('pend')}</div>`:'')+(can?'':`<div class="vh"><i class="bgi" style="background-image:url(${VF[vs]}.jpg)"></i><div class="fr" style="--a:${VA[vs]}"><video id="vv" src="${VF[vs]}.mp4" poster="${VF[vs]}.jpg" muted loop autoplay playsinline preload="auto"></video></div></div>`)+`<div style="text-align:center">${can?'<div class="ok">✕</div>':`<span class="bdg">${t('vw')[vs]}</span>`}<h2 style="margin:6px 0">${can?t('sorry'):(vs==0?t('sent'):vs==1?t('vt')[1]:'❤')}</h2><div class="mu">${can?'':(vs==0?t('vt')[0]+'<br>':vs==2?t('vt')[2]+'<br>':(o.type==='pickup'?t('pkGo')+'<br>':o.type==='delivery'?t('dlGo')+'<br>':''))}${o.type==='delivery'?t('dl')+' · ':o.type==='pickup'?t('pk')+' · ':''}${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
  ${can?'':`<div class="stp">${t('steps').map((s,k)=>`<div class="${k<=st?'d':''}"><i>${k<=st?'✓':k+1}</i>${s}</div>`).join('')}</div>`}
- <div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(nmId(x))} × ${x.q}</span><b>${m(x.p*x.q)}</b></div>`).join('')}<div class="row" style="border-top:1px solid var(--ln)"><span><b>${t('total')}</b></span><b>${m(o.total)}</b></div></div>
+ <div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(nmId(x))} × ${x.q}</span><b>${m(x.p*x.q)}</b></div>`).join('')}${o.fee?`<div class="row"><span>${t('fee')}</span><b>${m(o.fee)}</b></div>`:''}<div class="row" style="border-top:1px solid var(--ln)"><span><b>${t('total')}</b></span><b>${m(o.total)}</b></div></div>
  ${can||st<1?'':ratingHTML()}
- <p class="mu" style="text-align:center">${t('foot')}</p><button class="big" onclick="location.href='?s=${uid}${tbl?'&t='+encodeURIComponent(tbl):''}'">${t('more')}</button>`;
+ <p class="mu" style="text-align:center">${t('foot')}</p><button class="big" onclick="location.href='?s=${uid}${tbl?'&t='+encodeURIComponent(tbl):''}${HM?'&h=1':''}'">${t('more')}</button>`;
  const v=$('#vv');if(v){v.muted=true;const p=v.play();if(p&&p.catch)p.catch(()=>{})}
  if(!can&&vs<2)lock();else unlock();
  if(!sessionStorage.getItem('cf'+oid)&&!can){sessionStorage.setItem('cf'+oid,1);pop()}}
@@ -189,13 +222,12 @@ function draw(){cx.clearRect(0,0,cv.width,cv.height);
   else{p.r+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.scale(1,Math.cos(p.f));cx.fillStyle=p.c;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore()}
   return p.y<cv.height+150*D});
  if(ps.length)requestAnimationFrame(draw);else{run=0;cx.clearRect(0,0,cv.width,cv.height)}}
-let lastPend=false;function track(){
- if(LOCAL){const poll=async()=>{try{const r=await fetch('/api/orders/'+encodeURIComponent(oid),{cache:'no-store'});if(r.ok){lastO=await r.json();lastPend=false;paint()}else if(!lastO)$('#bd').textContent=t('nf')}catch(e){}};poll();setInterval(poll,1200);return}
- onSnapshot(doc(db,'orders',oid),{includeMetadataChanges:true},s=>{if(!s.exists()){if(!lastO)$('#bd').textContent=t('nf');return}lastO=s.data();lastPend=s.metadata.hasPendingWrites;paint()})}
+let lastPend=false,lastSig='';function track(){orderWatch(oid,(d,pend)=>{if(!d){if(!lastO)$('#bd').textContent=t('nf');return}const sg=JSON.stringify(d)+pend;if(sg===lastSig)return;lastSig=sg;lastO=d;lastPend=pend;paint()})}
 addEventListener('online',()=>{if(oid&&lastO)paint()});addEventListener('offline',()=>{if(oid&&lastO)paint()});
 init();
-/* Offline cache remains useful on the hosted Firebase version. Local server already serves local files. */
-if(!LOCAL&&'serviceWorker' in navigator)addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
+/* অফলাইন প্রস্তুতি: সার্ভিস ওয়ার্কার চালু করে Firebase ফাইল ও ভিডিও ক্যাশে রাখা */
+const regSW=()=>{navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
  const B='https://www.gstatic.com/firebasejs/10.12.2/';['firebase-app.js','firebase-firestore.js','firebase-component.js','firebase-logger.js','firebase-util.js'].forEach(f=>fetch(B+f,{mode:'no-cors'}).catch(()=>{}));
- ['wait.mp4','ready.mp4','served.mp4','wait.jpg','ready.jpg','served.jpg','logo-192.png'].forEach(f=>fetch(f).catch(()=>{}))}).catch(()=>{})});
+ ['wait.mp4','ready.mp4','served.mp4','wait.jpg','ready.jpg','served.jpg','logo-192.png'].forEach(f=>fetch(f).catch(()=>{}))}).catch(()=>{})};
+if('serviceWorker' in navigator){document.readyState==='complete'?regSW():addEventListener('load',regSW)}
 </script></body></html>
