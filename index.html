@@ -15,7 +15,7 @@
 :root[data-theme="light"]{--bg:#e9edf3;--card:#fff;--ink:#1b2733;--mute:#657386;--line:#d3dae5;--ac:#3f9a22;--acink:#fff;--soft:#e3f1dc;--warn:#c4311f;--blue:#3446b8;--head:#14454b;--hink:#fff}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45;font-family:"Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:140px;font-weight:500}
-html{--fz:1;--dz:1;zoom:calc(var(--fz) * var(--dz))}
+html{--fz:1;--dz:1;--zm:calc(var(--fz) * var(--dz));zoom:calc(var(--fz) * var(--dz))}
 html[data-fsz="sm"]{--fz:.88}
 html[data-fsz="lg"]{--fz:1.15}
 html[data-fsz="xl"]{--fz:1.3}
@@ -136,7 +136,7 @@ button.pay:disabled{opacity:.5}
 @media (min-width:860px){
  .wide-only{display:inline-block}
  .split{display:grid;grid-template-columns:minmax(330px,410px) 1fr;gap:16px;align-items:start}
- .side{position:sticky;top:140px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;max-height:calc(100vh - 160px);overflow:auto}
+ .side{position:sticky;top:140px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;max-height:calc(100vh / var(--zm) - 160px);max-height:calc(100dvh / var(--zm) - 160px);overflow:auto}
  .grid{grid-template-columns:repeat(auto-fill,minmax(165px,1fr))}
  #bar{display:none!important}
 }
@@ -179,10 +179,12 @@ button.pay:disabled{opacity:.5}
  @page{margin:0}
  .ract,.noprint,#vb{display:none!important}
 }
-.cw{display:flex;flex-direction:column;max-height:calc(100vh - 200px);max-height:calc(100dvh - 200px)}
-@media (max-width:859px){.cw{max-height:calc(92dvh - 40px)}}
-.cl{overflow:auto;flex:1 1 auto;min-height:64px}.cl .row{padding:6px 0}
+.cw{display:flex;flex-direction:column;max-height:calc(100vh / var(--zm) - 194px);max-height:calc(100dvh / var(--zm) - 194px);overflow-y:auto;overscroll-behavior:contain}
+@media (max-width:859px){.cw{max-height:calc(92dvh / var(--zm) - 40px)}}
+.cl{overflow:auto;flex:1 1 auto;min-height:130px}.cl .row{padding:8px 0}.cl .row .nl{font-size:16px}
+@media (min-width:600px) and (max-width:859px){.cl .row{padding:10px 0}.cl .row .nl{font-size:18px}}
 .cp{flex:none;border-top:1px solid var(--line);padding-top:6px}
+@media (max-height:700px){.cl{min-height:100px}.cp .tbar{padding:5px 12px}.cp .tbar b{font-size:19px}.dl{margin:3px 0}.dl input{padding:5px 10px}.pm{margin:3px 0}.pm button{padding:6px 4px}.qc{margin:3px 0}.qc button{padding:5px 10px}.sm1{margin:3px 0}}
 .cp .tbar{margin-top:0;padding:8px 12px}.cp .tbar b{font-size:22px}
 .dl{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0}.dl input{width:130px;padding:8px 10px;text-align:right}
 .pm{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}.pm button{padding:9px 4px;font-size:13px;border-radius:10px;line-height:1.15}
@@ -1133,16 +1135,17 @@ if(__ui&&Date.now()-__ui.t<43200000){if(['sell','due','dash','prod','set','kh'].
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')saveUI()});
 window.addEventListener('pagehide',saveUI);
 document.addEventListener('click',function(){setTimeout(function(){saveDraft();saveUI()},300)},true);
-/* ===== movable cart button ===== */
+/* ===== movable cart button (zoom-safe) ===== */
 (function(){var b=document.getElementById('bar');if(!b)return;b.removeAttribute('onclick');var dn=false,mv=false,sx=0,sy=0,ox=0,oy=0;
-function put(x,y){var w=b.offsetWidth||200,h=b.offsetHeight||70;x=Math.max(4,Math.min(innerWidth-w-4,x));y=Math.max(4,Math.min(innerHeight-h-4,y));b.style.left=x+'px';b.style.top=y+'px';b.style.right='auto';b.style.bottom='auto'}
-try{var sp=JSON.parse(localStorage.getItem('pos_barpos')||'null');if(sp)put(sp.x,sp.y)}catch(e){}
-window.addEventListener('resize',function(){if(b.style.left)put(parseFloat(b.style.left),parseFloat(b.style.top))});
+function zf(){var z=parseFloat(getComputedStyle(document.documentElement).zoom);return z>0?z:1}
+function put(x,y){var r=b.getBoundingClientRect(),w=r.width||200,h=r.height||70,z=zf();x=Math.max(4,Math.min(innerWidth-w-4,x));y=Math.max(4,Math.min(innerHeight-h-4,y));b.style.left=(x/z)+'px';b.style.top=(y/z)+'px';b.style.right='auto';b.style.bottom='auto'}
+try{var sp=JSON.parse(localStorage.getItem('pos_barpos2')||'null');if(sp)put(sp.x,sp.y)}catch(e){}
+window.addEventListener('resize',function(){if(b.style.left){var r=b.getBoundingClientRect();put(r.left,r.top)}});
 b.addEventListener('pointerdown',function(e){dn=true;mv=false;var r=b.getBoundingClientRect();sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;try{b.setPointerCapture(e.pointerId)}catch(_){}});
-b.addEventListener('pointermove',function(e){if(!dn)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!mv&&Math.abs(dx)+Math.abs(dy)<8)return;mv=true;b.classList.add('drag');put(ox+dx,oy+dy)});
-function end(){if(!dn)return;dn=false;b.classList.remove('drag');if(mv){try{localStorage.setItem('pos_barpos',JSON.stringify({x:parseFloat(b.style.left),y:parseFloat(b.style.top)}))}catch(e){}}}
+b.addEventListener('pointermove',function(e){if(!dn)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!mv&&Math.abs(dx)+Math.abs(dy)<12)return;mv=true;b.classList.add('drag');put(ox+dx,oy+dy)});
+function end(){if(!dn)return;dn=false;b.classList.remove('drag');if(mv){try{var r=b.getBoundingClientRect();localStorage.setItem('pos_barpos2',JSON.stringify({x:r.left,y:r.top}))}catch(e){}}setTimeout(function(){mv=false},50)}
 b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
-b.addEventListener('click',function(){if(mv){mv=false;return}openCart()})})();
+b.addEventListener('click',function(){if(mv){return}openCart()})})();
 applyPal();render();boot();if(__restoreCs&&typeof openCart=='function'&&Object.keys(cart).length&&!PUBR)setTimeout(function(){try{openCart()}catch(e){}},300);
 document.addEventListener('keydown',function(ev){var tg=(ev.target&&ev.target.tagName)||'';if(ev.key=='/'&&!/INPUT|TEXTAREA|SELECT/.test(tg)){var q0=$('#sq');if(q0){ev.preventDefault();q0.focus();q0.select()}}if(ev.key=='Escape'){var o=document.querySelector('.ov.show:not(#lgn)');if(o)o.classList.remove('show')}});
 </script>
@@ -1390,57 +1393,170 @@ window.voidSale=function(no){var s=origOf(no);if(s&&!s.refund&&H.some(function(h
 
 <!-- ===== MUSAFIR QR ORDERS START ===== -->
 <script type="module">
-import {getApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,updateDoc,collection,query,where,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const LOCAL=location.protocol==='http:'&&location.port==='8080';
+if(LOCAL){
+/* ---------- Local Wi-Fi QR orders, with delayed Firebase sync ---------- */
+const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let lop=[], lseen=null, lopOpen=false, ltab='o', linfo=null, localOwnerUid='local-shop';
+let cloudApi=null, cloudUser=null, cloudStart=false, cloudBusy=false, cloudMenuSig='';
+let localMenuSig='';
+const lstyle=document.createElement('style');
+lstyle.textContent='#qb{display:none;width:calc(100% - 32px);margin:6px 16px 10px;padding:16px 18px;border:0;border-radius:16px;font:inherit;font-size:18px;font-weight:800;background:linear-gradient(90deg,var(--ac),#2f9d7a);color:var(--acink);box-shadow:0 4px 16px #0005;justify-content:space-between;align-items:center;cursor:pointer}#qb i{font-style:normal;background:#e0301e;color:#fff;border-radius:99px;padding:2px 12px;font-size:17px}.lqo{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}.lqo button{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:6px 6px 0 0;background:var(--card);color:var(--ink);cursor:pointer}.lqo .g{background:var(--ac);color:var(--acink);border:0;font-weight:700}.lqt{display:flex;gap:6px;margin:10px 0}.lqt button{flex:1;margin:0;font-weight:700}.lqt .on{background:var(--ac);color:var(--acink);border:0}.lqo .bad{color:#e0301e}.lqstatus{font-size:12px;opacity:.7;margin:5px 0 10px}';
+document.head.appendChild(lstyle);
+const lb=document.createElement('button');lb.id='qb';const mn=document.getElementById('m');if(mn&&mn.parentNode)mn.parentNode.insertBefore(lb,mn);
+const lp=document.createElement('div');lp.id='lqp';lp.style.cssText='position:fixed;inset:0;background:#0008;z-index:35;display:none;align-items:flex-end;justify-content:center';
+lp.innerHTML='<div style="background:var(--card);color:var(--ink);width:100%;max-width:600px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:14px"></div>';document.body.appendChild(lp);
+lb.onclick=()=>{lopOpen=true;ltab='o';ldraw()};
+function lsettings(){try{return Object.assign({open:true,needTable:true,welcome:'স্বাগতম!',tag:'মেনু দেখে অর্ডার দিন',note:''},JSON.parse(localStorage.getItem('qr_set')||'{}'))}catch(e){return {open:true,needTable:true,welcome:'স্বাগতম!',tag:'মেনু দেখে অর্ডার দিন',note:''}}}
+function ldata(){return {S:window.S||{},P:Array.isArray(window.P)?window.P:[],IMG:window.IMG||{}}}
+function lstatus(){return !navigator.onLine?'📴 Cloud sync বন্ধ — Internet নেই':cloudUser?'☁️ Cloud sync চালু': '☁️ Cloud sync-এর জন্য POS-এ online account-এ লগইন করুন'}
+async function lget(path){const r=await fetch(path,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+async function lpost(path,data){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+async function lpub(force=false){
+ const x=ldata();
+ // On a brand-new localhost profile, wait until the POS has actual local menu data.
+ if(!x.P.length&&!localStorage.getItem('pos_p'))return;
+ const qs=lsettings();
+ const payload={uid:cloudUser?.uid||localOwnerUid||'local-shop',name:x.S.shop||'Musafir Cafe',cur:x.S.cur||'৳',color:getComputedStyle(document.documentElement).getPropertyValue('--head').trim()||'#14454b',items:x.P.map(p=>({id:p.id,n:p.bn||p.name,e:p.name||p.bn||'',p:p.price,c:p.cat||'',s:p.stock===''?'':p.stock})),imgs:x.IMG||{},qs,updated:Date.now()};
+ const sig=JSON.stringify(Object.assign({},payload,{updated:0}));
+ if(!force&&sig===localMenuSig)return;
+ try{await lpost('/api/shop',payload);localOwnerUid=payload.uid;localMenuSig=sig}catch(e){}
+ if(cloudUser&&cloudApi){try{await lpublishCloud(payload)}catch(e){}}
+}
+async function lpublishCloud(payload){
+ if(!cloudUser||!cloudApi||!navigator.onLine)return;
+ const uid=cloudUser.uid,items=payload.items||[],qs=payload.qs||{};
+ const sig=JSON.stringify([uid,payload.name,payload.cur,payload.color,items,qs]);
+ if(sig!==cloudMenuSig){
+  await cloudApi.setDoc(cloudApi.doc(cloudApi.db,'shops',uid),{name:payload.name||'',cur:payload.cur||'৳',color:payload.color||'#14454b',items,qs,updated:Date.now()});
+  cloudMenuSig=sig;
+ }
+ const cacheKey='qr_img_cloud_'+uid;let cache={};try{cache=JSON.parse(localStorage.getItem(cacheKey)||'{}')}catch(e){}
+ for(const k in (payload.imgs||{})){
+  const val=payload.imgs[k];if(!val)continue;const key=k+':'+String(val).length;
+  if(cache[k]!==key){await cloudApi.setDoc(cloudApi.doc(cloudApi.db,'shops',uid,'img',String(k)),{d:val});cache[k]=key;try{localStorage.setItem(cacheKey,JSON.stringify(cache))}catch(e){}}
+ }
+}
+async function lstartCloud(){
+ if(cloudStart||!navigator.onLine)return;cloudStart=true;
+ try{
+  const [am,au,fs]=await Promise.all([
+   import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
+   import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js'),
+   import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
+  ]);
+  let app;try{app=am.getApp()}catch(e){app=am.initializeApp(window.FIREBASE_CONFIG)}
+  const auth=au.getAuth(app),db=fs.getFirestore(app);
+  cloudApi={doc:fs.doc,setDoc:fs.setDoc,getDoc:fs.getDoc,db,auth,onAuthStateChanged:au.onAuthStateChanged};
+  au.onAuthStateChanged(auth,async u=>{
+   cloudUser=u||null;
+   if(u){localOwnerUid=u.uid;await lpub(true);await lsync();}
+   else {try{const s=await lget('/api/shop');if(s.uid)localOwnerUid=s.uid}catch(e){}}
+   if(lopOpen)ldraw();
+  });
+ }catch(e){cloudApi=null;cloudUser=null;cloudStart=false}
+}
+async function lsync(){
+ if(!cloudUser||!cloudApi||!navigator.onLine||cloudBusy)return;
+ cloudBusy=true;
+ try{
+  const uid=cloudUser.uid;
+  const orders=await lget('/api/orders');
+  for(const o of orders){
+   const rev=Number(o.localRev||1),synced=Number(o.cloudRev||0);if(rev<=synced)continue;
+   const d=Object.assign({},o,{uid});delete d.localRev;delete d.cloudRev;
+   await cloudApi.setDoc(cloudApi.doc(cloudApi.db,'orders',o.id),d);
+   await lpost('/api/orders/'+encodeURIComponent(o.id),{cloudRev:rev});
+  }
+  const ratings=await lget('/api/ratings');
+  for(const r of ratings){
+   const rev=Number(r.localRev||1),synced=Number(r.cloudRev||0);if(rev<=synced)continue;
+   const d=Object.assign({},r,{uid});delete d.localRev;delete d.cloudRev;
+   await cloudApi.setDoc(cloudApi.doc(cloudApi.db,'ratings',r.id),d);
+   await lpost('/api/ratings',{id:r.id,cloudRev:rev});
+  }
+  const sh=await lget('/api/shop');if(sh&&sh.items)await lpublishCloud(sh);
+ }catch(e){/* Stay local and retry on the next interval. */}
+ finally{cloudBusy=false}
+}
+async function lload(){
+ try{lop=await lget('/api/orders')}catch(e){lop=[]}
+ const a=lop.filter(o=>['new','accepted','ready','served'].includes(o.status));const nw=a.filter(o=>o.status==='new');
+ lb.style.display='flex';lb.innerHTML='<span>📲 QR অর্ডার</span>'+(a.length?'<i>'+a.length+'</i>':'<span style="font-weight:500;font-size:14px">কোনো অর্ডার নেই</span>');
+ const ids=new Set(nw.map(o=>o.id));
+ if(lseen!==null){const fresh=nw.filter(o=>!lseen.has(o.id));if(fresh.length){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.4)}catch(e){}try{navigator.vibrate&&navigator.vibrate([250,100,250])}catch(e){}try{if('Notification'in window&&Notification.permission==='granted')new Notification('📲 নতুন QR অর্ডার',{body:fresh.map(o=>'টেবিল '+o.table).join(', '),requireInteraction:true})}catch(e){}try{toast('📲 নতুন QR অর্ডার এসেছে ('+fresh.length+'টি)')}catch(e){}}}
+ lseen=ids;if(lopOpen)ldraw();
+}
+function lbill(id){const o=lop.find(x=>x.id===id);if(!o)return;const go=()=>{let miss=0;(o.items||[]).forEach(i=>{const q=typeof gp==='function'?gp(i.id):null;if(!q){miss++;return}let n=((window.cart||{})[i.id]||0)+i.q;if(q.stock!==''&&n>q.stock)n=q.stock;if(n>0)window.cart[i.id]=n});lpost('/api/orders/'+encodeURIComponent(id),{status:'billed'}).catch(()=>{});lopOpen=false;ldraw();if(typeof window.go==='function')window.go('sell');if(typeof openCart==='function')openCart();if(miss)try{toast(miss+'টি পণ্য POS-এ নেই, বাদ গেছে')}catch(e){}};if(Object.keys(window.cart||{}).length&&typeof ask==='function')ask('এখন একটা অর্ডার চলছে। এই QR অর্ডার (টেবিল '+o.table+') তাতে যোগ হবে। চালাবেন?',go,'হ্যাঁ, যোগ করুন');else go()}
+function ldraw(){
+ const a=lop.filter(o=>['new','accepted','ready','served'].includes(o.status));
+ lp.style.display=lopOpen?'flex':'none';if(!lopOpen)return;
+ const btn=(k,t)=>'<button data-lx="tab" data-v="'+k+'" class="'+(ltab===k?'on':'')+'">'+t+'</button>';
+ let h='<div><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:19px">📲 QR অর্ডার · Local Wi-Fi</b><button data-lx="x" style="font-size:22px;border:0;background:none;color:var(--ink)">✕</button></div><div class="lqstatus">'+E(lstatus())+' · '+lop.filter(o=>Number(o.localRev||1)>Number(o.cloudRev||0)).length+'টি sync বাকি থাকলে নেট ফিরলে পাঠাবে</div><div class="lqt">'+btn('o','অর্ডার'+(a.length?' ('+a.length+')':''))+btn('q','QR কোড')+btn('r','রেটিং')+btn('s','সেটিংস')+'</div>';
+ if(ltab==='o')h+=a.length?a.map(o=>'<div class="lqo"><b style="font-size:17px">টেবিল '+E(o.table)+'</b>'+(o.name?' · '+E(o.name):'')+' <span style="opacity:.6">'+new Date(o.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span>'+(o.status==='new'?' <b style="color:#e0301e">নতুন</b>':o.status==='accepted'?' <b style="color:var(--ac)">✔ গ্রহণ করা</b>':o.status==='ready'?' <b style="color:#d98a00">🍽 প্রস্তুত</b>':' <b style="color:var(--ac)">✔ পরিবেশিত</b>')+'<div style="margin:6px 0">'+(o.items||[]).map(i=>E(i.n)+' × <b>'+i.q+'</b>').join('<br>')+'</div>'+(o.note?'<div style="opacity:.7">নোট: '+E(o.note)+'</div>':'')+'<div>মোট: <b>'+(o.total||0)+'</b></div>'+(o.status==='new'?'<button class="g" data-lx="st" data-id="'+o.id+'" data-s="accepted">✔ গ্রহণ করুন</button>':'')+(o.status==='accepted'?'<button class="g" data-lx="st" data-id="'+o.id+'" data-s="ready">👨‍🍳 খাবার প্রস্তুত</button>':'')+(o.status==='ready'?'<button class="g" data-lx="st" data-id="'+o.id+'" data-s="served">🍽 পরিবেশন হয়েছে</button>':'')+(o.status==='new'?'<button style="color:#e0301e" data-lx="st" data-id="'+o.id+'" data-s="cancelled">বাতিল</button>':'')+'<button data-lx="bill" data-id="'+o.id+'">বিলে নিন</button></div>').join(''):'<p style="opacity:.7;text-align:center;padding:24px">এখন কোনো অপেক্ষমাণ অর্ডার নেই</p>';
+ if(ltab==='q')h+='<div style="text-align:center"><p>কাস্টমারকে একই দোকানের Wi-Fi-তে থাকতে হবে।</p><div id="lqrbox" style="width:260px;max-width:80%;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden"></div><p id="lurl" style="opacity:.7;word-break:break-all;font-size:12px"></p><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:12px" data-lx="print">🖨 QR ছাপুন</button></div>';
+ if(ltab==='r')h+='<div id="lratings" style="text-align:center;padding:18px">রেটিং লোড হচ্ছে…</div>';
+ if(ltab==='s'){const q=lsettings();h+='<label><input type="checkbox" id="l_open" '+(q.open?'checked':'')+'> অর্ডার নেওয়া চালু</label><label><input type="checkbox" id="l_nt" '+(q.needTable?'checked':'')+'> টেবিল নম্বর বাধ্যতামূলক</label><br><label>স্বাগতম লেখা</label><input type="text" id="l_w" value="'+E(q.welcome)+'" style="width:100%;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><label>ছোট লেখা</label><input type="text" id="l_t" value="'+E(q.tag)+'" style="width:100%;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><label>নোটিশ</label><input type="text" id="l_n" value="'+E(q.note)+'" style="width:100%;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:12px;margin-top:8px" data-lx="save">সেভ ও প্রকাশ করুন</button>'}
+ lp.querySelector('div').innerHTML=h;
+ if(ltab==='q')lget('/api/info').then(info=>{linfo=info;const url=info.orderUrl;const box=document.getElementById('lqrbox');if(box&&typeof qrSvg==='function')box.innerHTML=qrSvg(url).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"');const u=document.getElementById('lurl');if(u)u.textContent=url}).catch(()=>{});
+ if(ltab==='r')lget('/api/ratings').then(rs=>{const el=document.getElementById('lratings');if(!el)return;const avg=rs.length?(rs.reduce((a,r)=>a+(+r.stars||0),0)/rs.length).toFixed(1):'-';el.innerHTML='<b style="font-size:32px">⭐ '+avg+'</b><p>'+rs.length+'টি রেটিং</p>'+rs.slice().sort((a,b)=>b.t-a.t).slice(0,60).map(r=>'<div class="lqo" style="text-align:left"><b style="color:#e8ab00">'+'★'.repeat(+r.stars||0)+'</b> '+E(r.name||'')+' · '+E(r.table||'')+(r.comment?'<p>'+E(r.comment)+'</p>':'')+'</div>').join('')||'এখনো রেটিং নেই'}).catch(()=>{});
+}
+lp.onclick=async e=>{
+ if(e.target===lp){lopOpen=false;ldraw();return}
+ const t=e.target.closest('[data-lx]');if(!t)return;const x=t.dataset.lx;
+ if(x==='x'){lopOpen=false;ldraw()}
+ else if(x==='tab'){ltab=t.dataset.v;ldraw()}
+ else if(x==='st'){try{await lpost('/api/orders/'+encodeURIComponent(t.dataset.id),{status:t.dataset.s});await lload()}catch(e){try{toast('আপডেট হয়নি')}catch(_){}}}
+ else if(x==='bill')lbill(t.dataset.id)
+ else if(x==='save'){const q={open:document.getElementById('l_open').checked,needTable:document.getElementById('l_nt').checked,welcome:document.getElementById('l_w').value.trim(),tag:document.getElementById('l_t').value.trim(),note:document.getElementById('l_n').value.trim()};try{localStorage.setItem('qr_set',JSON.stringify(q))}catch(e){}localMenuSig='';await lpub(true);ldraw()}
+ else if(x==='print'){const info=linfo||await lget('/api/info');const url=info.orderUrl;const w=window.open('','_blank');if(!w)return;w.document.write('<title>QR</title><body style="font-family:sans-serif;text-align:center;padding:30px"><h1>'+E((window.S||{}).shop||'Musafir Cafe')+'</h1><p>স্ক্যান করুন, অর্ডার দিন</p><div style="width:420px;max-width:90vw;margin:0 auto">'+qrSvg(url).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"')+'</div><p>'+E(url)+'</p><p>Local server IP: '+E(info.host)+'</p></body>');w.document.close();setTimeout(()=>w.print(),700)}
+};
+document.addEventListener('click',()=>{try{if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}},{once:true});
+(async()=>{try{const s=await lget('/api/shop');if(s.uid)localOwnerUid=s.uid}catch(e){};await lpub(true);await lload();lstartCloud()})();
+setInterval(()=>lpub(false),5000);setInterval(()=>{lload();lsync();lstartCloud()},1500);window.addEventListener('online',()=>{cloudStart=false;lstartCloud();lsync();lpub(true)});
+
+}else{
+
+const {getApp}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+const {getAuth,onAuthStateChanged}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+const {getFirestore,doc,getDoc,setDoc,updateDoc,collection,query,where,onSnapshot}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 try{
 if(new URLSearchParams(location.search).get('r'))throw 'pub';
-const app=getApp(),auth=getAuth(app),db=getFirestore(app);let uid=null,un=null,un2=null,rts=[],rc0=null,ords=[],seen=null,op=false,tab='o',lastSig='',pi={},QS={open:true,needTable:true,welcome:'স্বাগতম!',tag:'মেনু দেখে অর্ডার দিন',note:'',pk:true,dl:false,lat:'',lng:'',rad:0,fee:0,free:0,min:0,wa:'',ph:'',addr:''};
+const app=getApp(),auth=getAuth(app),db=getFirestore(app);let uid=null,un=null,un2=null,rts=[],rc0=null,ords=[],seen=null,op=false,tab='o',lastSig='',pi={},QS={open:true,needTable:true,welcome:'স্বাগতম!',tag:'মেনু দেখে অর্ডার দিন',note:''};
 try{pi=JSON.parse(localStorage.getItem('qr_img')||'{}');Object.assign(QS,JSON.parse(localStorage.getItem('qr_set')||'{}'))}catch(e){}
-const st=document.createElement('style');st.textContent='#qb{display:none;width:calc(100% - 32px);margin:6px 16px 10px;padding:16px 18px;border:0;border-radius:16px;font:inherit;font-size:18px;font-weight:800;background:linear-gradient(90deg,var(--ac),#2f9d7a);color:var(--acink);box-shadow:0 4px 16px #0005;justify-content:space-between;align-items:center;cursor:pointer}#qb i{font-style:normal;background:#e0301e;color:#fff;border-radius:99px;padding:2px 12px;font-size:17px}#qb.nw{animation:qbp 1s infinite}@keyframes qbp{50%{transform:scale(1.03);box-shadow:0 0 0 6px #e0301e55}}#qp{position:fixed;inset:0;background:#0008;z-index:35;display:none;align-items:flex-end;justify-content:center}#qp>div{background:var(--card);color:var(--ink);width:100%;max-width:600px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:14px}.qo{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}.qo button,.qt button{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:6px 6px 0 0;background:var(--card);color:var(--ink);cursor:pointer}.qo .g{background:var(--ac);color:var(--acink);border:0;font-weight:700}.qt{display:flex;gap:6px;margin:10px 0}.qt button{flex:1;margin:0;font-weight:700}.qt .on{background:var(--ac);color:var(--acink);border:0}#qp input[type=text]{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;margin:4px 0 10px}#qp label{display:block}';document.head.appendChild(st);
+const st=document.createElement('style');st.textContent='#qb{display:none;width:calc(100% - 32px);margin:6px 16px 10px;padding:16px 18px;border:0;border-radius:16px;font:inherit;font-size:18px;font-weight:800;background:linear-gradient(90deg,var(--ac),#2f9d7a);color:var(--acink);box-shadow:0 4px 16px #0005;justify-content:space-between;align-items:center;cursor:pointer}#qb i{font-style:normal;background:#e0301e;color:#fff;border-radius:99px;padding:2px 12px;font-size:17px}#qb.nw{animation:qbp 1s infinite}@keyframes qbp{50%{transform:scale(1.03);box-shadow:0 0 0 6px #e0301e55}}#qp{position:fixed;inset:0;background:#0008;z-index:35;display:none;align-items:flex-end;justify-content:center}#qp>div{background:var(--card);color:var(--ink);width:100%;max-width:640px;min-height:calc(44dvh / var(--zm));max-height:calc(88dvh / var(--zm));overflow:auto;border-radius:20px 20px 0 0;padding:16px}.qo{border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;font-size:17px}.qo button,.qt button{font:inherit;font-size:17px;border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:8px 8px 0 0;background:var(--card);color:var(--ink);cursor:pointer}.qo .g{background:var(--ac);color:var(--acink);border:0;font-weight:700}.qt{display:flex;gap:8px;margin:12px 0}.qt button{flex:1;margin:0;font-weight:700;font-size:19px;padding:18px 4px}.qt .on{background:var(--ac);color:var(--acink);border:0}#qp input[type=text]{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;margin:4px 0 10px}#qp label{display:block}@media (min-width:600px){#qp{align-items:center}#qp>div{max-width:720px;min-height:calc(46dvh / var(--zm));max-height:calc(88dvh / var(--zm));border-radius:22px;padding:22px}.qt button{font-size:21px;padding:20px 6px}.qo{font-size:19px}.qo button,.qt button{font-size:19px}.qo button{padding:16px 22px}.qt button{font-size:21px}}@media (min-width:1100px){#qp>div{max-width:800px;min-height:calc(40dvh / var(--zm));max-height:calc(86dvh / var(--zm))}.qt button{font-size:19px;padding:15px 6px}.qo{font-size:17px}.qo button{font-size:17px;padding:13px 20px}}';document.head.appendChild(st);
 const b=document.createElement('button');b.id='qb';const mn=document.getElementById('m');mn.parentNode.insertBefore(b,mn);const p=document.createElement('div');p.id='qp';document.body.appendChild(p);
 b.onclick=()=>{op=true;tab='o';draw()};
 const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pend=()=>ords.filter(o=>o.status=='new'||o.status=='accepted'||o.status=='ready'||o.status=='served'),link=()=>location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'')+'order.html?s='+uid;
-const hlink=()=>link()+'&h=1',lbl=o=>o.type=='delivery'?'🛵 ডেলিভারি':o.type=='pickup'?'🏪 পিকআপ':'টেবিল '+o.table;
 function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.4)}catch(e){}try{navigator.vibrate&&navigator.vibrate([250,100,250])}catch(e){}}
-function notifyOrder(list){try{if(!('Notification' in window)||Notification.permission!=='granted')return;const body=(list.length?list.map(o=>lbl(o)+(o.name?' · '+o.name:'')+': '+o.items.map(i=>i.n+'×'+i.q).join(', ')).join('\n'):'নতুন অর্ডার এসেছে').slice(0,300),title='📲 নতুন QR অর্ডার'+(list.length>1?' ('+list.length+'টি)':''),opt={body:body,tag:'qr-order',renotify:true,vibrate:[300,120,300,120,300],icon:'logo-192.png',badge:'logo-192.png',requireInteraction:true};
+function notifyOrder(list){try{if(!('Notification' in window)||Notification.permission!=='granted')return;const body=(list.length?list.map(o=>'টেবিল '+o.table+(o.name?' · '+o.name:'')+': '+o.items.map(i=>i.n+'×'+i.q).join(', ')).join('\n'):'নতুন অর্ডার এসেছে').slice(0,300),title='📲 নতুন QR অর্ডার'+(list.length>1?' ('+list.length+'টি)':''),opt={body:body,tag:'qr-order',renotify:true,vibrate:[300,120,300,120,300],icon:'logo-192.png',badge:'logo-192.png',requireInteraction:true};
  if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(r=>r.showNotification(title,opt)).catch(()=>{try{new Notification(title,opt)}catch(e){}});else new Notification(title,opt)}catch(e){}}
 function askNotif(){try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{draw()})}catch(e){}}
 document.addEventListener('click',askNotif,{once:true});
 function draw(){const a=pend(),nw=a.filter(o=>o.status=='new').length;b.style.display=uid?'flex':'none';b.className=nw?'nw':'';b.innerHTML='<span>📲 QR অর্ডার'+(QS.open?'':' (বন্ধ)')+'</span>'+(a.length?'<i>'+a.length+'</i>':'<span style="font-weight:500;font-size:14px">কোনো অর্ডার নেই</span>');
  p.style.display=op?'flex':'none';if(!op)return;
- if(tab=='s'&&p.querySelector('#s_open'))return;
  const T=(k,t)=>'<button data-x="tab" data-v="'+k+'" class="'+(tab==k?'on':'')+'">'+t+'</button>';
  let h='<div><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:19px">📲 QR অর্ডার</b><button data-x="x" style="font-size:22px;border:0;background:none;color:var(--ink)">✕</button></div><div class="qt">'+T('o','অর্ডার'+(a.length?' ('+a.length+')':''))+T('q','QR কোড')+T('r','⭐ রেটিং')+T('s','সেটিংস')+'</div>';
  if(tab=='o'&&'Notification' in window&&Notification.permission!=='granted')h+=(Notification.permission=='default'?'<button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:11px;margin:0 0 6px;font-weight:700" data-x="notif">🔔 নোটিফিকেশন চালু করুন</button>':'<p style="opacity:.7;font-size:12px;margin:4px 0">🔕 নোটিফিকেশন বন্ধ আছে। ব্রাউজার/অ্যাপ সেটিংস থেকে অনুমতি দিন।</p>');
-  if(tab=='o')h+=a.length?a.map(o=>'<div class="qo"><b style="font-size:17px">'+(o.type=='delivery'||o.type=='pickup'?lbl(o):'টেবিল '+E(o.table))+'</b>'+(o.name?' · '+E(o.name):'')+' <span style="opacity:.6">'+new Date(o.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span>'+(o.status=='accepted'?' <b style="color:var(--ac)">✔ গ্রহণ করা</b>':o.status=='ready'?' <b style="color:#d98a00">🍽 প্রস্তুত</b>':o.status=='served'?' <b style="color:var(--ac)">✔ পরিবেশিত</b>':' <b style="color:#e0301e">নতুন</b>')+
-  '<div style="margin:6px 0">'+o.items.map(i=>E(i.n)+' × <b>'+i.q+'</b>').join('<br>')+'</div>'+(o.phone?'<div>📞 <a href="tel:'+E(o.phone)+'" style="color:var(--ac)">'+E(o.phone)+'</a></div>':'')+(o.addr?'<div>🏠 '+E(o.addr)+(o.loc?' <a target="_blank" rel="noopener" style="color:var(--ac)" href="https://www.google.com/maps/search/?api=1&query='+o.loc.lat+','+o.loc.lng+'">📍 ম্যাপ'+(o.loc.d!=null?' ('+o.loc.d+' কিমি)':'')+'</a>':'')+'</div>':'')+(o.note?'<div style="opacity:.7">নোট: '+E(o.note)+'</div>':'')+'<div>'+(o.fee?'ডেলিভারি চার্জ: <b>'+o.fee+'</b> · ':'')+'মোট (কাস্টমারের হিসাবে): <b>'+o.total+'</b></div>'+
-  (o.status=='new'?'<button class="g" data-x="acc" data-id="'+o.id+'">✔ গ্রহণ করুন</button>':'')+(o.status=='accepted'?'<button class="g" data-x="rdy" data-id="'+o.id+'">👨‍🍳 খাবার প্রস্তুত</button>':'')+(o.status=='ready'?'<button class="g" data-x="srv" data-id="'+o.id+'">'+(o.type=='delivery'?'✅ ডেলিভারি হয়েছে':o.type=='pickup'?'✅ হস্তান্তর হয়েছে':'🍽 পরিবেশন হয়েছে')+'</button>':'')+'<button data-x="bill" data-id="'+o.id+'">বিলে নিন</button><button style="color:#e0301e" data-x="can" data-id="'+o.id+'">বাতিল</button></div>').join(''):'<p style="opacity:.7;text-align:center;padding:24px">এখন কোনো অপেক্ষমাণ অর্ডার নেই</p>';
- if(tab=='q')h+='<div style="text-align:center"><div style="width:260px;max-width:80%;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden">'+qrSvg(link()).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"')+'</div><p style="opacity:.7;word-break:break-all;font-size:12px">'+E(link())+'</p><div style="display:flex"><button class="g" style="flex:1;font:inherit;border:0;border-radius:10px;padding:12px;margin:3px" data-x="print">🖨 QR ছাপুন</button><button style="flex:1;font:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;margin:3px;background:var(--card);color:var(--ink)" data-x="copy">লিংক কপি</button></div><p style="opacity:.7;font-size:13px">একটাই QR সব টেবিলের জন্য। কাস্টমার নিজে টেবিল নম্বর দেবে।</p><div class="qo" style="text-align:center"><b>🏠 বাড়ি থেকে অর্ডার (পিকআপ/ডেলিভারি)</b><p style="opacity:.7;font-size:13px;margin:6px 0">এই লিংক WhatsApp, Facebook পেজ, Instagram বায়ো বা পোস্টারে দিন। কাস্টমার নিজের ফোনে খুলে অর্ডার করবে।</p><div style="width:170px;margin:6px auto;background:#fff;border-radius:12px;overflow:hidden">'+qrSvg(hlink()).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"')+'</div><div style="opacity:.7;word-break:break-all;font-size:12px">'+E(hlink())+'</div><button class="g" data-x="copyh">লিংক কপি</button><button data-x="wash">WhatsApp এ শেয়ার</button><button data-x="printh">🖨 ছাপুন</button></div><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:12px" data-x="pub">মেনু এখনই আপডেট করুন</button></div>';
+  if(tab=='o')h+=a.length?a.map(o=>'<div class="qo"><b style="font-size:17px">টেবিল '+E(o.table)+'</b>'+(o.name?' · '+E(o.name):'')+' <span style="opacity:.6">'+new Date(o.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span>'+(o.status=='accepted'?' <b style="color:var(--ac)">✔ গ্রহণ করা</b>':o.status=='ready'?' <b style="color:#d98a00">🍽 প্রস্তুত</b>':o.status=='served'?' <b style="color:var(--ac)">✔ পরিবেশিত</b>':' <b style="color:#e0301e">নতুন</b>')+
+  '<div style="margin:6px 0">'+o.items.map(i=>E(i.n)+' × <b>'+i.q+'</b>').join('<br>')+'</div>'+(o.note?'<div style="opacity:.7">নোট: '+E(o.note)+'</div>':'')+'<div>মোট (কাস্টমারের হিসাবে): <b>'+o.total+'</b></div>'+
+  (o.status=='new'?'<button class="g" data-x="acc" data-id="'+o.id+'">✔ গ্রহণ করুন</button>':'')+(o.status=='accepted'?'<button class="g" data-x="rdy" data-id="'+o.id+'">👨‍🍳 খাবার প্রস্তুত</button>':'')+(o.status=='ready'?'<button class="g" data-x="srv" data-id="'+o.id+'">🍽 পরিবেশন হয়েছে</button>':'')+'<button data-x="bill" data-id="'+o.id+'">বিলে নিন</button><button style="color:#e0301e" data-x="can" data-id="'+o.id+'">বাতিল</button></div>').join(''):'<p style="opacity:.7;text-align:center;padding:24px">এখন কোনো অপেক্ষমাণ অর্ডার নেই</p>';
+ if(tab=='q')h+='<div style="text-align:center"><div style="width:min(340px,calc(40dvh / var(--zm)));max-width:88%;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden">'+qrSvg(link()).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"')+'</div><p style="opacity:.7;word-break:break-all;font-size:12px">'+E(link())+'</p><div style="display:flex"><button class="g" style="flex:1;font:inherit;border:0;border-radius:10px;padding:12px;margin:3px" data-x="print">🖨 QR ছাপুন</button><button style="flex:1;font:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;margin:3px;background:var(--card);color:var(--ink)" data-x="copy">লিংক কপি</button></div><p style="opacity:.7;font-size:13px">একটাই QR সব টেবিলের জন্য। কাস্টমার নিজে টেবিল নম্বর দেবে।</p><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:12px" data-x="pub">মেনু এখনই আপডেট করুন</button></div>';
  if(tab=='r'){const av=rts.length?(rts.reduce((x,y)=>x+(+y.stars||0),0)/rts.length).toFixed(1):'-';h+='<div style="text-align:center;margin:8px 0"><b style="font-size:34px">⭐ '+av+'</b><div style="opacity:.7">'+rts.length+'টি রেটিং</div></div>'+(rts.length?rts.slice(0,60).map(x=>'<div class="qo"><b style="color:#f5b301">'+'★'.repeat(+x.stars||0)+'</b><span style="opacity:.3">'+'★'.repeat(5-(+x.stars||0))+'</span> <span style="opacity:.65">টেবিল '+E(x.table)+(x.name?' · '+E(x.name):'')+' · '+new Date(x.t).toLocaleDateString([],{day:'2-digit',month:'short'})+'</span>'+(x.comment?'<div style="margin-top:6px">'+E(x.comment)+'</div>':'')+'</div>').join(''):'<p style="opacity:.7;text-align:center;padding:24px">এখনো কোনো রেটিং আসেনি</p>')}
-  if(tab=='s')h+='<label><input type="checkbox" id="s_open" '+(QS.open?'checked':'')+'> অর্ডার নেওয়া চালু</label><label><input type="checkbox" id="s_nt" '+(QS.needTable?'checked':'')+'> টেবিল নম্বর বাধ্যতামূলক</label><br><label>স্বাগতম লেখা</label><input type="text" id="s_w" value="'+E(QS.welcome)+'"><label>ছোট লেখা (স্বাগতম পর্দায়)</label><input type="text" id="s_t" value="'+E(QS.tag)+'"><label>মেনুর ওপরে নোটিশ (ঐচ্ছিক, যেমন: আজ কেক শেষ)</label><input type="text" id="s_n" value="'+E(QS.note)+'"><hr style="border:0;border-top:1px solid var(--line);margin:12px 0"><b>🏠 বাড়ি থেকে অর্ডার</b><br><label><input type="checkbox" id="s_pk" '+(QS.pk!==false?'checked':'')+'> 🏪 পিকআপ চালু</label><label><input type="checkbox" id="s_dl" '+(QS.dl?'checked':'')+'> 🛵 ডেলিভারি চালু</label><label>দোকানের ঠিকানা (কাস্টমারকে দেখাবে)</label><input type="text" id="s_ad" value="'+E(QS.addr)+'"><label>দোকানের লোকেশন (ডেলিভারি এলাকা মাপার জন্য)</label><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:11px;margin:4px 0 8px" data-x="loc">📍 আমি এখন দোকানে আছি, এই লোকেশন বসান</button><input type="text" id="s_ml" placeholder="অথবা Google Maps পুরো লিংক / অক্ষাংশ,দ্রাঘিমাংশ পেস্ট করুন" value=""><div style="display:flex;gap:8px"><div style="flex:1"><label>Latitude</label><input type="text" id="s_la" inputmode="decimal" value="'+E(QS.lat)+'"></div><div style="flex:1"><label>Longitude</label><input type="text" id="s_lo" inputmode="decimal" value="'+E(QS.lng)+'"></div></div><div style="display:flex;gap:8px"><div style="flex:1"><label>ডেলিভারি সীমা (কিমি, 0 = সীমা নেই)</label><input type="text" id="s_ra" inputmode="decimal" value="'+E(QS.rad)+'"></div><div style="flex:1"><label>ডেলিভারি চার্জ</label><input type="text" id="s_fe" inputmode="decimal" value="'+E(QS.fee)+'"></div></div><div style="display:flex;gap:8px"><div style="flex:1"><label>এত টাকার ওপরে ফ্রি (0 = নেই)</label><input type="text" id="s_fr" inputmode="decimal" value="'+E(QS.free)+'"></div><div style="flex:1"><label>ডেলিভারিতে ন্যূনতম অর্ডার</label><input type="text" id="s_mi" inputmode="decimal" value="'+E(QS.min)+'"></div></div><label>WhatsApp নম্বর (দেশের কোডসহ, যেমন 8801XXXXXXXXX)</label><input type="text" id="s_wa" inputmode="tel" value="'+E(QS.wa)+'"><label>কল নম্বর</label><input type="text" id="s_ph" inputmode="tel" value="'+E(QS.ph)+'"><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:13px;font-weight:700" data-x="save">সেভ ও প্রকাশ করুন</button>';
+  if(tab=='s')h+='<label><input type="checkbox" id="s_open" '+(QS.open?'checked':'')+'> অর্ডার নেওয়া চালু</label><label><input type="checkbox" id="s_nt" '+(QS.needTable?'checked':'')+'> টেবিল নম্বর বাধ্যতামূলক</label><br><label>স্বাগতম লেখা</label><input type="text" id="s_w" value="'+E(QS.welcome)+'"><label>ছোট লেখা (স্বাগতম পর্দায়)</label><input type="text" id="s_t" value="'+E(QS.tag)+'"><label>মেনুর ওপরে নোটিশ (ঐচ্ছিক, যেমন: আজ কেক শেষ)</label><input type="text" id="s_n" value="'+E(QS.note)+'"><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:13px;font-weight:700" data-x="save">সেভ ও প্রকাশ করুন</button>';
  p.innerHTML=h+'</div>'}
-p.addEventListener('input',e=>{if(e.target.id!=='s_ml')return;const v=e.target.value,m=v.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)||v.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/)||v.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);if(m){document.getElementById('s_la').value=m[1];document.getElementById('s_lo').value=m[2];toast('লোকেশন বসেছে, এবার সেভ করুন')}});
 p.onclick=e=>{if(e.target==p){op=false;draw();return}const t=e.target.closest('[data-x]');if(!t)return;const x=t.dataset.x,id=t.dataset.id;
  if(x=='x'){op=false;draw()}else if(x=='tab'){tab=t.dataset.v;draw()}
  else if(x=='acc'||x=='can'||x=='rdy'||x=='srv')updateDoc(doc(db,'orders',id),{status:{acc:'accepted',can:'cancelled',rdy:'ready',srv:'served'}[x]}).catch(()=>toast('হয়নি, নেট দেখুন'));
  else if(x=='notif')askNotif();else if(x=='bill')bill(id);else if(x=='pub')qrPub(1);
  else if(x=='copy'){try{navigator.clipboard.writeText(link());toast('লিংক কপি হয়েছে')}catch(e){}}
  else if(x=='print'){const w=window.open('','_blank');if(!w)return;w.document.write('<title>QR</title><body style="font-family:sans-serif;text-align:center;padding:30px"><h1 style="font-size:40px;margin:0">'+E(S.shop)+'</h1><p style="font-size:22px">'+E(QS.tag)+'</p><div style="width:420px;max-width:90vw;margin:0 auto">'+qrSvg(link()).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"')+'</div><h2>স্ক্যান করুন, অর্ডার দিন</h2></body>');w.document.close();setTimeout(()=>w.print(),1200)}
- else if(x=='copyh'){try{navigator.clipboard.writeText(hlink());toast('লিংক কপি হয়েছে')}catch(e){}}
- else if(x=='wash'){window.open('https://wa.me/?text='+encodeURIComponent((S.shop||'')+' — বাড়ি থেকে অর্ডার করুন: '+hlink()),'_blank')}
- else if(x=='printh'){const w=window.open('','_blank');if(!w)return;w.document.write('<title>QR</title><body style="font-family:sans-serif;text-align:center;padding:30px"><h1 style="font-size:40px;margin:0">'+E(S.shop)+'</h1><p style="font-size:22px">বাড়ি থেকে অর্ডার করুন</p><div style="width:420px;max-width:90vw;margin:0 auto">'+qrSvg(hlink()).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"')+'</div><h2>স্ক্যান করুন, পিকআপ বা ডেলিভারিতে অর্ডার দিন</h2></body>');w.document.close();setTimeout(()=>w.print(),1200)}
- else if(x=='loc'){navigator.geolocation?navigator.geolocation.getCurrentPosition(g=>{document.getElementById('s_la').value=g.coords.latitude.toFixed(6);document.getElementById('s_lo').value=g.coords.longitude.toFixed(6);toast('লোকেশন বসেছে, এবার সেভ করুন')},()=>toast('লোকেশন পাওয়া যায়নি, অনুমতি দিন'),{enableHighAccuracy:true,timeout:15000}):toast('এই ডিভাইসে লোকেশন নেই')}
- else if(x=='save'){QS.open=document.getElementById('s_open').checked;QS.needTable=document.getElementById('s_nt').checked;QS.welcome=document.getElementById('s_w').value.trim();QS.tag=document.getElementById('s_t').value.trim();QS.note=document.getElementById('s_n').value.trim();
-  const g=i=>document.getElementById(i).value,nz=i=>{const v=parseFloat(g(i));return isFinite(v)&&v>0?v:0},ll=i=>{const v=parseFloat(g(i));return isFinite(v)?v:''};
-  QS.pk=document.getElementById('s_pk').checked;QS.dl=document.getElementById('s_dl').checked;QS.addr=g('s_ad').trim();QS.lat=ll('s_la');QS.lng=ll('s_lo');QS.rad=nz('s_ra');QS.fee=nz('s_fe');QS.free=nz('s_fr');QS.min=nz('s_mi');QS.wa=g('s_wa').replace(/\D/g,'');QS.ph=g('s_ph').trim();
-  if(QS.dl&&QS.rad>0&&(QS.lat===''||QS.lng==='')){toast('ডেলিভারি সীমার জন্য দোকানের লোকেশন দিন');return}
-  try{localStorage.setItem('qr_set',JSON.stringify(QS))}catch(e){}qrPub(1);draw()}};
+ else if(x=='save'){QS.open=document.getElementById('s_open').checked;QS.needTable=document.getElementById('s_nt').checked;QS.welcome=document.getElementById('s_w').value.trim();QS.tag=document.getElementById('s_t').value.trim();QS.note=document.getElementById('s_n').value.trim();try{localStorage.setItem('qr_set',JSON.stringify(QS))}catch(e){}qrPub(1);draw()}};
 function bill(id){const o=ords.find(x=>x.id==id);if(!o)return;
  const go=()=>{let miss=0;o.items.forEach(i=>{const q=gp(i.id);if(!q){miss++;return}let n=(cart[i.id]||0)+i.q;if(q.stock!==''&&n>q.stock)n=q.stock;if(n>0)cart[i.id]=n});
-  updateDoc(doc(db,'orders',id),{status:'billed'}).catch(()=>{});op=false;draw();window.go('sell');openCart();if(miss)toast(miss+'টি পণ্য POS-এ নেই, বাদ গেছে');else if(o.fee)toast('ডেলিভারি চার্জ '+o.fee+' আলাদা যোগ করুন')};
- Object.keys(cart).length?ask('এখন একটা অর্ডার চলছে। এই QR অর্ডার ('+lbl(o)+') তাতে যোগ হবে। চালাবেন?',go,'হ্যাঁ, যোগ করুন'):go()}
+  updateDoc(doc(db,'orders',id),{status:'billed'}).catch(()=>{});op=false;draw();window.go('sell');openCart();if(miss)toast(miss+'টি পণ্য POS-এ নেই, বাদ গেছে')};
+ Object.keys(cart).length?ask('এখন একটা অর্ডার চলছে। এই QR অর্ডার (টেবিল '+o.table+') তাতে যোগ হবে। চালাবেন?',go,'হ্যাঁ, যোগ করুন'):go()}
 window.qrPub=async f=>{if(!uid||!CU)return;const it=P.map(x=>({id:x.id,n:x.bn||x.name,e:x.name||x.bn||'',p:x.price,c:x.cat||'',s:x.stock===''?'':x.stock})),sig=JSON.stringify([it,S.shop,S.cur,QS]);
  if(!f&&sig==lastSig)return;try{await setDoc(doc(db,'shops',uid),{name:S.shop||'',cur:S.cur||'৳',color:getComputedStyle(document.documentElement).getPropertyValue('--head').trim()||'#0b2a2e',items:it,qs:QS,updated:Date.now()});lastSig=sig;
   for(const k in IMG){const key=k+':'+IMG[k].length;if(pi[k]!==key){await setDoc(doc(db,'shops',uid,'img',String(k)),{d:IMG[k]});pi[k]=key;try{localStorage.setItem('qr_img',JSON.stringify(pi))}catch(e){}}}
@@ -1453,6 +1569,9 @@ onAuthStateChanged(auth,async u=>{if(un){un();un=null}if(un2){un2();un2=null}uid
  setTimeout(()=>qrPub(0),3000)});
 setInterval(()=>{if(uid)qrPub(0)},20000);
 }catch(err){if(err!=='pub')console.error('QR orders patch error',err)}
+
+}
 </script>
 <!-- ===== MUSAFIR QR ORDERS END ===== -->
+
 </body></html>
