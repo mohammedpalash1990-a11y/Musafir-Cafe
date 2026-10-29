@@ -102,6 +102,17 @@ const fbWait=ms=>Promise.race([fbReady,new Promise(r=>setTimeout(()=>r(FS),ms))]
 const shopGet=async()=>{const F=await fbWait(8000);if(!F)throw new Error('nofb');const s=await F.getDoc(F.doc(db,'shops',uid));return s.exists()?s.data():null};
 const imgGet=async id=>{if(!FS)return '';const d=await FS.getDoc(FS.doc(db,'shops',uid,'img',String(id)));return d.exists()?d.data().d:''};
 const ratePut=async(oid,data)=>{const F=await fbWait(8000);if(!F)throw new Error('nofb');const p=F.setDoc(F.doc(db,'ratings',oid),data);p.catch(()=>{});await Promise.race([p,new Promise((_,j)=>setTimeout(()=>j(new Error('to')),10000))])};
+/* ---------- অর্ডার পাঠানো/আনা: Firestore REST (একটা সাধারণ HTTPS রিকোয়েস্ট, long-polling চ্যানেলের ঝামেলা নেই) ---------- */
+const RB='https://firestore.googleapis.com/v1/projects/index-9d688/databases/(default)/documents',RK='AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4';
+const toFS=v=>{if(v===null||v===undefined)return{nullValue:null};const t=typeof v;if(t==='string')return{stringValue:v};if(t==='boolean')return{booleanValue:v};if(t==='number')return Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v};if(Array.isArray(v))return{arrayValue:{values:v.map(toFS)}};const f={};Object.keys(v).forEach(k=>{f[k]=toFS(v[k])});return{mapValue:{fields:f}}};
+const fromFS=v=>{if(!v)return null;if('stringValue'in v)return v.stringValue;if('integerValue'in v)return +v.integerValue;if('doubleValue'in v)return v.doubleValue;if('booleanValue'in v)return v.booleanValue;if('arrayValue'in v)return(v.arrayValue.values||[]).map(fromFS);if('mapValue'in v){const o={},f=v.mapValue.fields||{};Object.keys(f).forEach(k=>{o[k]=fromFS(f[k])});return o}return null};
+async function restPut(id,data,ms){const c=new AbortController(),tm=setTimeout(()=>c.abort(),ms||15000);
+ try{const r=await fetch(RB+'/orders?documentId='+encodeURIComponent(id)+'&key='+RK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:toFS(data).mapValue.fields}),signal:c.signal});
+  if(r.ok)return{ok:true};let j=null;try{j=await r.json()}catch(e){}
+  const st=(j&&j.error&&j.error.status)||('http-'+r.status);
+  if(r.status===409||st==='ALREADY_EXISTS')return{ok:true,dup:true};
+  return{ok:false,code:st,perm:st==='PERMISSION_DENIED'}}
+ catch(e){return{ok:false,code:e&&e.name==='AbortError'?'timeout':'network'}}finally{clearTimeout(tm)}}
 const SHOP='';const P=new URLSearchParams(location.search),uid=P.get('s')||SHOP,oid=P.get('o');let tbl=(P.get('t')||'').slice(0,10);
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}return null};
@@ -174,15 +185,15 @@ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#th
 setInterval(clk,20000);addEventListener('online',clk);addEventListener('offline',clk);
 function hdr(){const cur=bi?'bi':lang;$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><b>${esc(C.name||T2('মেনু','Menu'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
  <div class="hb">${[['bn','বাং'],['en','EN'],['bi','বাং+EN']].map(x=>`<button data-lang="${x[0]}" class="${cur===x[0]?'on':''}">${x[1]}</button>`).join('')}</div></header>
- <div id="ib"><div class="zp"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div><button class="sun" id="th" aria-label="theme">${SUN}</button><div class="clk"><b id="ck"></b><span id="cdt"></span></div></div><div class="syn" id="sy"></div><div class="w" id="bd"></div>`;clk()}
+ <div id="ib"><div class="zp"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div><button class="sun" id="th" aria-label="theme">${SUN}</button><div class="clk"><b id="ck"></b><span id="cdt"></span></div></div><div class="w" id="bd"></div>`;clk()}
 const qrBanner=()=>`<div class="qrb"><span>📲 ${T2('QR অর্ডার','QR Orders')}</span><span class="qs">${tbl?esc(t('table')+tbl):HM?T2('পিকআপ / ডেলিভারি','Pickup / Delivery'):Q.open===false?T2('বন্ধ','Closed'):T2('অর্ডার দিন','Order here')}</span></div>`;
 function bestHTML(){let h='';const dl=lang==='en'?(Q.dte||Q.dt):(Q.dt||Q.dte);if(dl)h+=`<div class="cd" style="margin-bottom:10px;animation:none;text-align:center;font-weight:800">🔥 ${esc(dl)}</div>`;
  const L=(C.best||[]).map(id=>items.find(x=>x.id==id)).filter(i=>i&&!soldOut(i));
  if(L.length){const ti=lang==='en'?(Q.bte||"Today's best sellers"):(Q.bt||'আজকের সেরা বিক্রি');h+=`<div style="margin-bottom:10px"><b>⭐ ${esc(ti)}</b><div class="ch" style="padding-top:6px">${L.map(i=>`<button class="bch" data-a="1" data-i="${i.id}">${esc(nmOf(i))} · ${m(i.p)} +</button>`).join('')}</div></div>`}return h}
 function list(){
- const cs=[...new Set(items.map(i=>i.c||t('other')))];
- let h=qrBanner()+((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
- bestHTML()+homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
+ const cs=[...new Set(items.map(i=>i.c).filter(Boolean))],CB={Drinks:'পানীয়',Food:'খাবার'},cL=c=>lang==='en'?c:(CB[c]||c);
+ let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
+ bestHTML()+homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(cL(c))}</span>`).join('')}</div><div class="g" id="gr"></div>`;
  $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar();showInst()}
 const stand=matchMedia('(display-mode: standalone)').matches||navigator.standalone,isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();DI=e;showInst()});
@@ -199,7 +210,7 @@ function mkManifest(){try{const u=new URL(location.href),sc=u.origin+u.pathname.
 const soldOut=i=>i.s!==''&&i.s!=null&&i.s<=0;
 const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)||!n?'':`<span class="qty">${n}</span><span class="mn" data-a="-1" data-i="${i.id}">−</span>`};
 function grid(){const qq=q.toLowerCase(),L=items.filter(i=>(!cat||(i.c||t('other'))==cat)&&((i.n+'').toLowerCase().includes(qq)||((i.e||'')+'').toLowerCase().includes(qq)));
- $('#gr').innerHTML=L.map(i=>{const so=soldOut(i),low=!so&&i.s!==''&&i.s!=null&&i.s<=5;return `<button class="p ${so?'off':''}" ${so?'disabled':''} data-a="1" data-i="${i.id}"><span id="q${i.id}" style="display:contents">${ctl(i)}</span><div class="av" id="im${i.id}" style="background:hsl(${hue(i.id)} 45% 40%)">${esc((nmOf(i)||'?')[0])}</div><b>${esc(nmOf(i))}</b><span class="pr">${m(i.p)}</span>${so?`<small>${t('out')}</small>`:low?`<small style="color:var(--wr)">${i.s}${lang==='en'?' left':' টি আছে'}</small>`:''}</button>`}).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
+ $('#gr').innerHTML=L.map(i=>{const so=soldOut(i),low=!so&&i.s!==''&&i.s!=null&&i.s<=5;return `<button class="p ${so?'off':''}" ${so?'disabled':''} data-a="1" data-i="${i.id}"><span id="q${i.id}" style="display:contents">${ctl(i)}</span><div class="av" id="im${i.id}" style="background:hsl(${hue(i.e||i.n)} 45% 40%)">${esc((nmOf(i)||'?')[0])}</div><b>${esc(nmOf(i))}</b><span class="pr">${(C.cur||'৳')+(+i.p).toFixed(2)}</span>${so?`<small>${t('out')}</small>`:low?`<small style="color:var(--wr)">${i.s}${lang==='en'?' left':' টি আছে'}</small>`:''}</button>`}).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
 const imc={},imw=[];let imq=0;async function img(i){try{if(imc[i.id]===undefined){await new Promise(r=>{if(imq<4){imq++;r()}else imw.push(r)});try{if(imc[i.id]===undefined){const v=await Promise.race([imgGet(i.id),new Promise(r=>setTimeout(()=>r(undefined),12000))]);if(v!==undefined)imc[i.id]=v}}finally{const n=imw.shift();if(n)n();else imq--}}
  if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}}catch(e){}}
 /* ---------- POS-এর মতো নিচের "অর্ডার দেখুন" বার ---------- */
@@ -251,12 +262,10 @@ async function send(){
  const data=JSON.parse(JSON.stringify({uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),...o}));
  /* আগে ফোনে সেভ: নেট/ফায়ারবেস যা-ই হোক অর্ডার হারাবে না, ট্র্যাকিং পাতা নিজে পাঠিয়ে দেবে */
  ls('qo_o_'+id,JSON.stringify({d:data,ack:false}));
- let ok=false,perr=null;
- try{const FF=await fbWait(6000);
-  if(FF){const pw=FF.setDoc(FF.doc(db,'orders',id),data);
-   await Promise.race([pw.then(()=>{ok=true},e=>{perr=e}),new Promise(r=>setTimeout(r,navigator.onLine===false?400:12000))])}}catch(e){perr=perr||e}
- ls('qo_dbg',ok?null:(perr?(perr.code||'write-error'):'timeout'));
- if(perr&&perr.code==='permission-denied'){ls('qo_o_'+id,null);alert(t('fail')+' (permission-denied)');sb.disabled=false;return}
+ let ok=false,perr=null;sb.textContent=T2('পাঠানো হচ্ছে…','Sending…');
+ if(navigator.onLine!==false){for(let k=0;k<2&&!ok;k++){const r=await restPut(id,data,k?12000:10000);if(r.ok)ok=true;else{perr=r;if(r.perm)break;await new Promise(z=>setTimeout(z,700))}}}
+ ls('qo_dbg',ok?null:(perr?perr.code:'offline'));
+ if(perr&&perr.perm){ls('qo_o_'+id,null);alert(t('fail')+' (permission-denied)');sb.disabled=false;sb.textContent=t('confirm');return}
  if(ok)ls('qo_o_'+id,JSON.stringify({d:data,ack:true}));
  try{localStorage.setItem('qo_t',Date.now())}catch(e){}
  cart={};saveCart();F.nt='';saveF();
@@ -276,9 +285,9 @@ function homeExtra(o,home,vs,can){if(!home||can||vs>=2)return '';let x='';
  return x+(b?`<div class="cd" style="animation:none;text-align:center">${b}</div>`:'')}
 function paint(){try{if(!lastO){connecting();return}paint0()}catch(e){$('#bd').innerHTML='<div class="cd" style="animation:none;text-align:center;margin-top:20px"><b>'+t('conn')+'</b><div class="mu" style="margin:8px 0 12px">'+esc(e&&e.message||'')+'</div><button class="big" onclick="location.reload()">'+t('retry')+'</button></div>'}}
 function paint0(){const o=lastO;if(!o)return;if(document.activeElement&&document.activeElement.id==='rc'){dirty=true;return}
- const home=o.type==='pickup'||o.type==='delivery',can=o.status=='cancelled',st=o.status=='new'?0:o.status=='accepted'?1:o.status=='ready'?2:3;
+ const home=o.type==='pickup'||o.type==='delivery',can=o.status=='cancelled',st=o.status=='new'?(lastPend?-1:0):o.status=='accepted'?1:o.status=='ready'?2:3;
  const vs=o.status=='ready'?1:(o.status=='served'||o.status=='billed')?2:0,VF=['wait','ready','served'],VA=[1,1.304,1.837];
- $('#bd').innerHTML=(lastPend&&o.status=='new'?`<div class="cd" style="margin-bottom:10px;background:#5a3b12;animation:none">${t(navigator.onLine===false?'pend':'pend2')}${dbg?`<br><small>⚙ ${esc(dbg)}</small>`:''}</div>`:(dbg&&o.status=='new'?`<div class="mu" style="text-align:center;font-size:.8em;margin-bottom:6px">⚙ ${esc(dbg)}</div>`:''))+''+`<div style="text-align:center">${can?'<div class="ok">✕</div>':`<div class="hero">${vs==0?'👨‍🍳':vs==1?(o.type==='pickup'?'🛍️':o.type==='delivery'?'🛵':'🍽️'):'✅'}</div>`+`<span class="bdg">${t(home?'hvw':'vw')[vs]}</span>`}<h2 style="margin:6px 0">${can?t('sorry'):(vs==0?t('sent'):vs==1?t('vt')[1]:'❤')}</h2><div class="mu">${can?'':(vs==0?t('vt')[0]+'<br>':vs==2?t('vt')[2]+'<br>':(o.type==='pickup'?t('pkGo')+'<br>':o.type==='delivery'?t('dlGo')+'<br>':''))}${o.type==='delivery'?t('dl')+' · ':o.type==='pickup'?t('pk')+' · ':''}${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
+ $('#bd').innerHTML=(lastPend&&o.status=='new'?`<div class="cd" style="margin-bottom:10px;background:#5a3b12;animation:none">${t(navigator.onLine===false?'pend':'pend2')}${dbg&&P.get('debug')?`<br><small>⚙ ${esc(dbg)}</small>`:''}</div>`:(dbg&&P.get('debug')&&o.status=='new'?`<div class="mu" style="text-align:center;font-size:.8em;margin-bottom:6px">⚙ ${esc(dbg)}</div>`:''))+''+`<div style="text-align:center">${can?'<div class="ok">✕</div>':`<div class="hero">${vs==0?'👨‍🍳':vs==1?(o.type==='pickup'?'🛍️':o.type==='delivery'?'🛵':'🍽️'):'✅'}</div>`+`<span class="bdg">${t(home?'hvw':'vw')[vs]}</span>`}<h2 style="margin:6px 0">${can?t('sorry'):(vs==0?(lastPend&&o.status=='new'?T2('অর্ডার পাঠানো হচ্ছে…','Sending your order…'):t('sent')):vs==1?t('vt')[1]:'❤')}</h2><div class="mu">${can?'':(vs==0?t('vt')[0]+'<br>':vs==2?t('vt')[2]+'<br>':(o.type==='pickup'?t('pkGo')+'<br>':o.type==='delivery'?t('dlGo')+'<br>':''))}${o.type==='delivery'?t('dl')+' · ':o.type==='pickup'?t('pk')+' · ':''}${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
  ${can?'':`<div class="stp">${(home?t(o.type==='pickup'?'hpk':'hdl'):t('steps')).map((s,k)=>`<div class="${k<=st?'d':''}"><i>${k<=st?'✓':k+1}</i>${s}</div>`).join('')}</div>`}
  ${homeExtra(o,home,vs,can)}<div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(nmId(x))} × ${x.q}</span><b>${m(x.p*x.q)}</b></div>`).join('')}${o.fee?`<div class="row"><span>${t('fee')}</span><b>${m(o.fee)}</b></div>`:''}<div class="row" style="border-top:1px solid var(--ln)"><span><b>${t('total')}</b></span><b>${m(o.total)}</b></div></div>
  ${can||st<1?'':ratingHTML()}
@@ -307,7 +316,12 @@ let dbg=ls('qo_dbg')||'',lastPend=false,lastSig='',unsub=null,srvOk=false,wtry=0
 const loGet=()=>{try{return JSON.parse(ls('qo_o_'+oid)||'null')}catch(e){return null}};
 const loSet=(d,ack)=>ls('qo_o_'+oid,JSON.stringify({d,ack:!!ack}));
 function connecting(){const b=$('#bd');if(!b)return;b.innerHTML=`<div class="cd" style="animation:none;text-align:center;margin-top:20px"><div class="hero">⏳</div><b>${t('conn')}</b><div class="mu" style="margin:6px 0 12px">${t('connh')}</div><button class="big" onclick="location.reload()">${t('retry')}</button></div>`}
-function trackStart(){const lo=loGet();if(lo&&lo.d){lastO=lo.d;lastPend=!lo.ack;paint()}else connecting();watch()}
+let dlv=false;async function deliver(){if(dlv)return;const l0=loGet();if(!l0||!l0.d||l0.ack)return;dlv=true;
+ try{for(let k=0;k<60;k++){const l=loGet();if(!l||l.ack)break;if(navigator.onLine!==false){const r=await restPut(oid,l.d,15000);if(r.ok){loSet(l.d,true);ls('qo_dbg',null);dbg='';lastPend=false;if(lastO)paint();break}dbg=r.code;ls('qo_dbg',dbg);if(r.perm)break}
+  await new Promise(z=>setTimeout(z,Math.min(15000,3000+k*1500)))}}finally{dlv=false}}
+let pt=null;function pollStart(){if(pt||!oid)return;pt=setInterval(async()=>{if(document.hidden||srvOk||navigator.onLine===false)return;const l=loGet();if(l&&!l.ack)return;
+ try{const r=await fetch(RB+'/orders/'+encodeURIComponent(oid)+'?key='+RK);if(!r.ok)return;const j=await r.json(),d={};Object.keys(j.fields||{}).forEach(k=>{d[k]=fromFS(j.fields[k])});const sg=JSON.stringify(d);if(sg===lastSig)return;lastSig=sg;lastO=d;lastPend=false;paint()}catch(e){}},6000)}
+function trackStart(){const lo=loGet();if(lo&&lo.d){lastO=lo.d;lastPend=!lo.ack;paint()}else connecting();watch();deliver();pollStart()}
 async function watch(){
  if(!oid)return;if(unsub){try{unsub()}catch(e){}unsub=null}
  const F=await fbWait(8000);
@@ -326,7 +340,7 @@ async function watch(){
    else if(!lastO){if(lo&&lo.d){lastO=lo.d;lastPend=true;paint()}else connecting()}
   },err=>{srvOk=false;dbg=(err&&err.code)||'listen-error';ls('qo_dbg',dbg);if(!lastO)connecting();else paint();again()})}catch(e){again()}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&oid)watch()});
-addEventListener('online',()=>{if(!oid)return;if(!FS&&!sessionStorage.getItem('fbr2')){sessionStorage.setItem('fbr2',1);location.reload();return}srvOk=false;wtry=0;watch();if(lastO)paint()});addEventListener('offline',()=>{if(oid&&lastO)paint()});
+addEventListener('online',()=>{if(!oid)return;deliver();if(!FS&&!sessionStorage.getItem('fbr2')){sessionStorage.setItem('fbr2',1);location.reload();return}srvOk=false;wtry=0;watch();if(lastO)paint()});addEventListener('offline',()=>{if(oid&&lastO)paint()});
 init();
 setInterval(()=>{if(oid&&lastO&&lastO.eta&&lastO.type!=='dine'&&lastO.status!=='served'&&lastO.status!=='billed')paint()},30000);
 /* অফলাইন প্রস্তুতি: সার্ভিস ওয়ার্কার চালু করে Firebase ফাইল ও ভিডিও ক্যাশে রাখা */
