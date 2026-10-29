@@ -1,4 +1,4 @@
-var V='musafir-pos-v23';
+var V='musafir-pos-v24';
 var CORE=['./','./index.html','./order.html','./manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png','./wait.jpg','./ready.jpg','./served.jpg'];
 var VID=['./wait.mp4','./ready.mp4','./served.mp4'];
 var FB='https://www.gstatic.com/firebasejs/10.12.2/';
@@ -34,7 +34,13 @@ self.addEventListener('fetch',function(e){
   var net=fetch(req,{cache:'reload'}).then(function(n){if(n&&n.ok){var cp=n.clone();caches.open(V).then(function(c){c.put(key,cp)})}return n}).catch(function(){return null});
   if(hit){e.waitUntil(net);return hit}
   return net.then(function(n){return n||Response.error()})})}
- if(r.mode==='navigate'){e.respondWith(swr(NAV,r.url));return}
+ function nf(key,url){return new Promise(function(res){var done=false;
+  var fb=function(){return caches.match(key,{ignoreSearch:true})};
+  var to=setTimeout(function(){fb().then(function(h){if(h&&!done){done=true;res(h)}})},4000);
+  fetch(url,{cache:'no-store'}).then(function(n){if(n&&n.ok){var cp=n.clone();caches.open(V).then(function(c){c.put(key,cp)})}
+   if(!done){done=true;clearTimeout(to);res(n)}}).catch(function(){clearTimeout(to);if(done)return;fb().then(function(h){done=true;res(h||Response.error())})})})}
+ /* পেজ: আগে নেট (৪ সেকেন্ড), না পেলে ফোনে জমানো কপি। এতে নতুন ফাইল সাথে সাথে আসে, অফলাইনেও চলে */
+ if(r.mode==='navigate'){e.respondWith(nf(NAV,r.url));return}
  if(u.origin===location.origin&&/\.(html|js|json)$/.test(u.pathname)){e.respondWith(swr(r,r.url));return}
  e.respondWith(caches.match(r,{ignoreSearch:true}).then(function(hit){
   var net=fetch(r).then(function(n){if(n&&(n.ok||n.type==='opaque')){var cp=n.clone();caches.open(V).then(function(c){c.put(r,cp)})}return n}).catch(function(){return hit});

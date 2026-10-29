@@ -296,7 +296,7 @@ function rpSet(k,v){S.rp=S.rp||{};S.rp[k]=v;save();render();rqFlush()}
 function rpTest(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}rqAdd({k:'test',t:Date.now(),shop:S.shop});toast(L('টেস্ট পাঠানো হয়েছে, ইমেইল দেখুন','Test sent, check your email'))}
 function rpNow(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var d=tdy();H.filter(function(h){return day(h.t)==d}).forEach(function(h){rqAdd(rqSale(h))});rqAdd({k:'report',day:d,shop:S.shop});toast(L('আজকের রিপোর্ট পাঠানো হচ্ছে','Sending today\'s report'))}
 function rpHist(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}H.forEach(function(h){rqAdd(rqSale(h))});toast(L('সব পুরনো বিক্রি পাঠানো হচ্ছে','Sending all past sales'))}
-var APP_V='v7 · 2026-10-27';
+var APP_V='v8 · 2026-10-29';
 function updApp(){if(!navigator.onLine){toast(L('আপডেটের জন্য নেট লাগবে','Internet needed to update'));return}toast(L('আপডেট হচ্ছে…','Updating…'));var p=[];try{if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}))}catch(e){}Promise.all(p).catch(function(){}).then(function(){location.reload()})}
 function verBox(){return '<div class="box"><div class="hd">'+I('set')+'<b>'+L('অ্যাপ ভার্সন','App version')+'</b></div><div class="dl"><span>'+APP_V+'</span><button class="pri" onclick="updApp()">'+L('এখনই আপডেট করুন','Update now')+'</button></div><div class="mute" style="font-size:12px">'+L('আপনার বিক্রি ও ডেটা মুছবে না। নতুন ফাইল GitHub-এ দেওয়ার পর এটা চাপলে নতুন ভার্সন চলে আসবে।','Your sales and data are kept. Press this after uploading new files to GitHub.')+'</div></div>'}
 function rpBox(){var r=S.rp||{};return '<div class="box"><div class="hd">'+I('cash')+'<b>'+L('দৈনিক রিপোর্ট (ইমেইল ও ড্রাইভ)','Daily report (email & Drive)')+'</b></div>'
@@ -1047,7 +1047,7 @@ function onSales(snap){var l=snap.docs.map(function(x){return x.data()});
  lsave();render()
 }
 
-function onErr(){sy('err')}
+var _rl=null;function onErr(){sy('err');if(_rl)return;_rl=setTimeout(function(){_rl=null;if(!CU||!window.FB)return;try{FB.stop();FB.listen('pos',onPos,onErr);FB.listen('sales',onSales,onErr)}catch(e){}},6000)}
 
 function startAuth(){FB.watch(function(u){FB.stop();
  if(!u){CU=null;ready=false;upl=false;showLogin();return}
@@ -1061,7 +1061,7 @@ function hasLocal(){try{return !!localStorage.getItem('pos_uid')}catch(e){return
 function enterLocal(){$('#lgn').classList.remove('show');CU=null;sy('off');render();toast(L('অফলাইন মোড: বিক্রি ফোনে জমা হবে','Offline mode: sales kept on device'))}
 
 function boot(){if(PUBR){startPub();return}if(!cfgOK){sy('cfg');$('#lgn').classList.add('show');$('#lb').innerHTML='<h2>Firebase setup</h2><p>index.html এর শুরুতে <b>FIREBASE_CONFIG</b> বসান।</p>';return}
- if(window.FB)startAuth();else{window.onFB=startAuth;setTimeout(function(){if(!window.FB&&hasLocal()){enterLocal();return}if(!window.FB){$('#lgn').classList.add('show');$('#lb').innerHTML='<h2>Firebase</h2><p style="color:var(--warn);font-weight:700">'+L('Firebase লোড হয়নি। নেট চেক করে পেজ রিফ্রেশ করুন।','Firebase failed to load. Refresh page.')+'</p>'}},6000)}}
+ if(window.FB)startAuth();else{window.onFB=startAuth;setTimeout(function(){if(!window.FB&&hasLocal()){enterLocal();return}if(!window.FB){$('#lgn').classList.add('show');$('#lb').innerHTML='<h2>Firebase</h2><p style="color:var(--warn);font-weight:700">'+L('Firebase লোড হয়নি। নেট চেক করে পেজ রিফ্রেশ করুন।','Firebase failed to load. Refresh page.')+'</p>'}},navigator.onLine===false?500:4000)}}
 
 function greet(h){return h>=5&&h<11?L('সুপ্রভাত','Good morning'):h>=11&&h<16?L('শুভ দুপুর','Good afternoon'):h>=16&&h<19?L('শুভ সন্ধ্যা','Good evening'):L('শুভ রাত্রি','Good night')}
 function welcome(){var r=RD();if(!r.welcome)return;try{if(sessionStorage.getItem('pos_wel'))return;sessionStorage.setItem('pos_wel','1')}catch(e){}
@@ -1158,7 +1158,7 @@ import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmai
 import {getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,doc,setDoc,deleteDoc,collection,onSnapshot,getDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 if(!/PASTE/.test(window.FIREBASE_CONFIG.apiKey)){
- const app=initializeApp(window.FIREBASE_CONFIG),auth=getAuth(app),db=(function(){try{return initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){return getFirestore(app)}})();let un=[];
+ const app=initializeApp(window.FIREBASE_CONFIG),auth=getAuth(app),db=(function(){try{return initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()}),experimentalForceLongPolling:true})}catch(e){return getFirestore(app)}})();let un=[];
  const ref=(c,i)=>doc(db,'users',auth.currentUser.uid,c,i);
  window.FB={
   watch:cb=>onAuthStateChanged(auth,cb),
@@ -1586,8 +1586,8 @@ window.qrPub=async f=>{if(!uid||!CU)return;const it=P.map(x=>({id:x.id,n:x.bn||x
 setInterval(()=>{try{qrPub(0)}catch(e){}},120000);
 onAuthStateChanged(auth,async u=>{if(un){un();un=null}if(un2){un2();un2=null}uid=u?u.uid:null;try{u?localStorage.setItem('qr_uid',u.uid):localStorage.removeItem('qr_uid')}catch(e){}ords=[];rts=[];rc0=null;seen=null;draw();if(!u)return;
  try{const s=await getDoc(doc(db,'shops',u.uid));if(s.exists()&&s.data().qs){Object.assign(QS,s.data().qs);localStorage.setItem('qr_set',JSON.stringify(QS));draw()}}catch(e){}
- un=onSnapshot(query(collection(db,'orders'),where('uid','==',u.uid)),sn=>{ords=sn.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>y.t-x.t);const ids=new Set(pend().filter(o=>o.status=='new').map(o=>o.id));
-  if(seen){let n=0;const nl=[];ids.forEach(i=>{if(!seen.has(i)){n++;const oo=ords.find(z=>z.id==i);if(oo)nl.push(oo)}});if(n){beep();toast('📲 নতুন QR অর্ডার এসেছে ('+n+'টি)');notifyOrder(nl)}}seen=ids;draw()},()=>{});
+ const subO=()=>{if(un){try{un()}catch(e){}}un=onSnapshot(query(collection(db,'orders'),where('uid','==',u.uid)),sn=>{ords=sn.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>y.t-x.t);const ids=new Set(pend().filter(o=>o.status=='new').map(o=>o.id));
+  if(seen){let n=0;const nl=[];ids.forEach(i=>{if(!seen.has(i)){n++;const oo=ords.find(z=>z.id==i);if(oo)nl.push(oo)}});if(n){beep();toast('📲 নতুন QR অর্ডার এসেছে ('+n+'টি)');notifyOrder(nl)}}seen=ids;draw()},()=>{setTimeout(()=>{if(uid===u.uid)subO()},6000)})};subO();
  un2=onSnapshot(query(collection(db,'ratings'),where('uid','==',u.uid)),sn=>{rts=sn.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>y.t-x.t);if(rc0!==null&&sn.size>rc0)toast('⭐ নতুন সার্ভিস রেটিং এসেছে');rc0=sn.size;if(op&&tab=='r')draw()},()=>{});
  setTimeout(()=>qrPub(0),3000)});
 setInterval(()=>{if(uid)qrPub(0)},20000);
