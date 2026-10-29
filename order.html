@@ -43,31 +43,29 @@ input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px
 .tg{display:flex;gap:8px;margin:10px 0}.tg button{flex:1;padding:12px 6px;border-radius:12px;background:var(--ln);color:var(--ink);font-weight:700}.tg .on{background:var(--ac);color:var(--acink)}
 .lk{display:inline-block;margin:6px 8px 0 0;padding:8px 14px;border-radius:10px;background:var(--ln);color:var(--ink);text-decoration:none;font-weight:700;font-size:calc(14px*var(--z))}
 
-/* ===== Musafir নতুন লুক ===== */
-:root{--bg:#081a1d;--card:#10272b;--ln:#21444b;--gd:#f5b52e}
-body{background:radial-gradient(900px 500px at 85% -5%,#14606a55,transparent 60%),radial-gradient(700px 500px at -10% 40%,#f5b52e12,transparent 60%),var(--bg)}
-header{background:linear-gradient(135deg,#0d3a40,#0b2a2e);border-bottom:2px solid var(--gd);border-radius:0 0 22px 22px;box-shadow:0 8px 26px #0007}
-header b{letter-spacing:.3px}
-.ch{position:sticky;top:calc(54px + env(safe-area-inset-top));z-index:4;background:linear-gradient(var(--bg) 78%,transparent);padding:8px 0 12px;margin-top:-4px}
-.ch span{background:#ffffff0a;border:1px solid var(--ln);backdrop-filter:blur(6px)}.ch .on{background:var(--gd);color:#2b1d00;border-color:var(--gd);box-shadow:0 4px 16px #f5b52e44}
-#sq{border-radius:99px;padding-left:18px;background:#ffffff0a}
-#gr{grid-template-columns:repeat(auto-fill,minmax(max(300px,calc(var(--cw)*2)),1fr))}
-#gr .cd{display:grid;grid-template-columns:calc(92px*var(--z)) 1fr;grid-template-areas:"av nm" "av pr" "av ct";column-gap:12px;row-gap:2px;align-items:center;padding:10px;border-radius:22px;background:linear-gradient(145deg,#ffffff0d,#ffffff04);border:1px solid #ffffff14;box-shadow:0 6px 18px #0004;position:relative;overflow:hidden}
-#gr .cd::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--gd)}
-#gr .av{grid-area:av;aspect-ratio:1;border-radius:18px;font-size:calc(32px*var(--z))}
-#gr .nm{grid-area:nm;font-size:1.05em;font-weight:800;align-self:end}
-#gr .pr{grid-area:pr;color:var(--gd);font-weight:800;align-self:start}
-#gr .ct{grid-area:ct;margin-top:4px}
-#gr .ad{background:linear-gradient(135deg,#7bd43c,#4fa82a);border-radius:99px;box-shadow:0 4px 14px #5cb82e55;letter-spacing:.2px}
-#gr .ct button:not(.ad){border-radius:99px;background:#ffffff14}
-.bar{background:linear-gradient(135deg,#f5c242,#e89b1d);color:#2b1d00;border-radius:99px;box-shadow:0 10px 30px #f5b52e55,0 4px 14px #000a}
-.big{background:linear-gradient(135deg,#7bd43c,#4fa82a);border-radius:99px}
-.sh{border-radius:28px 28px 0 0;border-top:2px solid var(--gd)}
+/* ===== POS-এর মতো মেনু ===== */
+:root{--blue:#93a6ff;--wr:#ff8a7a}
+header{background:var(--hd);padding:calc(12px + env(safe-area-inset-top)) 16px 12px;min-height:64px;gap:10px;border:0;border-radius:0;box-shadow:none}
+header b{font-size:19px;font-weight:800;color:#fff;letter-spacing:0}
+.chip{background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:20px;padding:6px 12px;font-weight:700;font-size:13px}
+.hb{gap:0;border:1px solid rgba(255,255,255,.35);border-radius:20px;overflow:hidden}
+.hb button{height:auto;min-width:0;padding:6px 10px;border:0;border-radius:0;background:transparent;color:#fff;font-size:13px;font-weight:700}
+.hb button.on{background:#fff;color:var(--hd)}
+.ch{position:static;background:none;backdrop-filter:none;padding:10px 0;margin:0;gap:8px}
+.ch span{border-radius:20px;padding:7px 15px;background:var(--card);border:1px solid var(--ln);font-weight:600;box-shadow:none;backdrop-filter:none}
+.ch .on{background:var(--hd);border-color:var(--hd);color:#fff;box-shadow:none;font-weight:600}
+#sq{border-radius:12px;padding:12px;background:var(--card)}
+#gr{grid-template-columns:repeat(auto-fill,minmax(var(--cw),1fr));gap:10px}
+.p{color:var(--ink);text-align:left;padding:12px;min-height:calc(132px*var(--z));display:flex;flex-direction:column;align-items:flex-start;gap:6px;position:relative;border-radius:18px;background:var(--card);border:1px solid var(--ln);box-shadow:0 1px 2px rgba(0,0,0,.25);animation:up .35s both;min-width:0}
+.p:active{transform:scale(.97)}.p *{pointer-events:none}.p .mn{pointer-events:auto}
+.p .av{width:calc(66px*var(--z));height:calc(66px*var(--z));aspect-ratio:auto;border-radius:14px;object-fit:cover;font-size:calc(21px*var(--z));flex:none}
+.p b{font-size:calc(15px*var(--z));line-height:1.25;overflow-wrap:anywhere}
+.p .pr{color:var(--blue);font-weight:800}.p small{color:var(--mu)}
+.qty{position:absolute;top:8px;right:8px;background:var(--blue);color:#0d1a1d;border-radius:20px;min-width:26px;text-align:center;font-weight:800;padding:2px 8px;font-size:13px}
+.mn{position:absolute;right:8px;bottom:8px;width:32px;height:32px;border-radius:50%;background:var(--ln);color:var(--ink);display:grid;place-items:center;font-size:20px;font-weight:800;line-height:1}
 .hero{font-size:calc(104px*var(--z));line-height:1.1;filter:drop-shadow(0 12px 18px #000a);animation:flt 2.2s ease-in-out infinite alternate}
-.bdg{background:var(--gd);box-shadow:0 4px 16px #f5b52e55}
 .stp div{position:relative}.stp div:not(:last-child)::after{content:"";position:absolute;top:15px;left:calc(50% + 19px);right:calc(-50% + 19px);height:2px;background:var(--ln)}.stp .d:not(:last-child)::after{background:var(--ac)}
 .stp i{width:32px;height:32px;line-height:32px}.stp .d i{box-shadow:0 0 0 5px #5cb82e30}
-.cd{border-radius:20px}
 </style><link rel="apple-touch-icon" href="logo-192.png"></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
 <script type="module">
 let FS=null,db=null;
@@ -76,9 +74,10 @@ const FBV='https://www.gstatic.com/firebasejs/10.12.2/';
 const fbReady=(async()=>{try{
  const A=await import(FBV+"firebase-app.js"),F=await import(FBV+"firebase-firestore.js");
  const fbApp=A.initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});
- try{db=F.initializeFirestore(fbApp,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()}),experimentalForceLongPolling:true})}
+ try{db=F.initializeFirestore(fbApp,{localCache:F.memoryLocalCache(),experimentalForceLongPolling:true})}
  catch(e){try{db=F.initializeFirestore(fbApp,{experimentalForceLongPolling:true})}catch(e2){db=F.getFirestore(fbApp)}}
  FS=F}catch(e){FS=null}return FS})();
+addEventListener('pagehide',e=>{if(!e.persisted&&FS&&db){try{FS.terminate(db)}catch(x){}}});
 const fbWait=ms=>Promise.race([fbReady,new Promise(r=>setTimeout(()=>r(FS),ms))]);
 const shopGet=async()=>{const F=await fbWait(8000);if(!F)throw new Error('nofb');const s=await F.getDoc(F.doc(db,'shops',uid));return s.exists()?s.data():null};
 const imgGet=async id=>{if(!FS)return '';const d=await FS.getDoc(FS.doc(db,'shops',uid,'img',String(id)));return d.exists()?d.data().d:''};
@@ -167,9 +166,9 @@ function mkManifest(){try{const u=new URL(location.href),sc=u.origin+u.pathname.
  const mf={name:nm,short_name:nm.slice(0,12),start_url:u.origin+u.pathname+'?s='+encodeURIComponent(uid)+'&h=1',scope:sc,display:'standalone',background_color:'#0b2a2e',theme_color:C.color||'#0b2a2e',icons:[{src:sc+'logo-192.png',sizes:'192x192',type:'image/png'},{src:sc+'logo-512.png',sizes:'512x512',type:'image/png'}]};
  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}}
 const soldOut=i=>i.s!==''&&i.s!=null&&i.s<=0;
-const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)?`<span class="mu">${t('out')}</span>`:n?`<button data-a="-1" data-i="${i.id}">−</button><b>${n}</b><button data-a="1" data-i="${i.id}">+</button>`:`<button class="ad" data-a="1" data-i="${i.id}">${t('add')}</button>`};
+const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)||!n?'':`<span class="qty">${n}</span><span class="mn" data-a="-1" data-i="${i.id}">−</span>`};
 function grid(){const qq=q.toLowerCase(),L=items.filter(i=>(!cat||(i.c||t('other'))==cat)&&((i.n+'').toLowerCase().includes(qq)||((i.e||'')+'').toLowerCase().includes(qq)));
- $('#gr').innerHTML=L.map((i,k)=>`<div class="cd ${soldOut(i)?'off':''}" style="animation-delay:${Math.min(k,12)*40}ms"><div class="av" id="im${i.id}" style="background:hsl(${hue(i.id)} 42% 34%)">${esc((nmOf(i)||'?')[0])}</div><div class="nm">${esc(nmOf(i))}</div><div class="pr">${m(i.p)}</div><div class="ct" id="q${i.id}">${ctl(i)}</div></div>`).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
+ $('#gr').innerHTML=L.map(i=>{const so=soldOut(i),low=!so&&i.s!==''&&i.s!=null&&i.s<=5;return `<button class="p ${so?'off':''}" ${so?'disabled':''} data-a="1" data-i="${i.id}"><span id="q${i.id}" style="display:contents">${ctl(i)}</span><div class="av" id="im${i.id}" style="background:hsl(${hue(i.id)} 45% 40%)">${esc((nmOf(i)||'?')[0])}</div><b>${esc(nmOf(i))}</b><span class="pr">${m(i.p)}</span>${so?`<small>${t('out')}</small>`:low?`<small style="color:var(--wr)">${i.s}${lang==='en'?' left':' টি আছে'}</small>`:''}</button>`}).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
 const imc={},imw=[];let imq=0;async function img(i){try{if(imc[i.id]===undefined){await new Promise(r=>{if(imq<4){imq++;r()}else imw.push(r)});try{if(imc[i.id]===undefined){const v=await Promise.race([imgGet(i.id),new Promise(r=>setTimeout(()=>r(undefined),12000))]);if(v!==undefined)imc[i.id]=v}}finally{const n=imw.shift();if(n)n();else imq--}}
  if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}}catch(e){}}
 /* ---------- ভাসমান কার্ট বাটন (ধরে সরানো যায়) ---------- */
@@ -232,7 +231,7 @@ async function send(){
  let ok=false,perr=null;
  try{const FF=await fbWait(6000);
   if(FF){const pw=FF.setDoc(FF.doc(db,'orders',id),data);
-   await Promise.race([pw.then(()=>{ok=true},e=>{perr=e}),new Promise(r=>setTimeout(r,navigator.onLine===false?400:8000))])}}catch(e){perr=perr||e}
+   await Promise.race([pw.then(()=>{ok=true},e=>{perr=e}),new Promise(r=>setTimeout(r,navigator.onLine===false?400:12000))])}}catch(e){perr=perr||e}
  ls('qo_dbg',ok?null:(perr?(perr.code||'write-error'):'timeout'));
  if(perr&&perr.code==='permission-denied'){ls('qo_o_'+id,null);alert(t('fail')+' (permission-denied)');sb.disabled=false;return}
  if(ok)ls('qo_o_'+id,JSON.stringify({d:data,ack:true}));
