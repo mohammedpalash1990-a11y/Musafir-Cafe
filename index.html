@@ -309,7 +309,7 @@ setInterval(function(){rqFlush()},60000);window.addEventListener('online',functi
 function cDel(no){if(CU)w(FB.del('sales','s'+no))}
 
 window.addEventListener('offline',function(){if(typeof sy=='function')sy()});window.addEventListener('online',function(){if(typeof sy=='function')sy()});
-function sy(k){if(k)ss=k;var m={on:['☁ সিঙ্ক চালু · '+CE,'☁ Synced · '+CE],off:[navigator.onLine===false?'📴 অফলাইন · POS চালু আছে':'⏳ সংযোগ হচ্ছে…',navigator.onLine===false?'📴 Offline · POS works normally':'⏳ Connecting…'],err:['⚠ সিঙ্ক হয়নি, ইন্টারনেট দেখুন','⚠ Sync failed, check internet'],cfg:['⚠ Firebase সেটআপ বাকি','⚠ Firebase not set up yet']};var e=$('#sync');if(e){e.textContent=S.lang=='bi'?m[ss][0]+' / '+m[ss][1]:m[ss][S.lang=='en'?1:0];if(!navigator.onLine){e.textContent=L('⚠ অফলাইন: বিক্রি ফোনে জমা হচ্ছে, নেট এলে সিঙ্ক হবে','⚠ Offline: sales kept on device, auto syncs online');e.style.color='var(--warn)';e.style.fontWeight='700'}else{e.style.color=ss=='on'?'':'var(--warn)';e.style.fontWeight=ss=='on'?'':'700'}}}
+function sy(k){if(k)ss=k;var _sl=Date.now()-(window._sy0=window._sy0||Date.now())>15000;if(ss=='off'&&!_sl&&!window._syT){window._syT=setTimeout(function(){window._syT=0;sy()},15500)}var m={on:['☁ সিঙ্ক চালু · '+CE,'☁ Synced · '+CE],off:[(navigator.onLine===false||_sl)?'📴 অফলাইন · POS চালু আছে':'⏳ সংযোগ হচ্ছে…',(navigator.onLine===false||_sl)?'📴 Offline · POS works normally':'⏳ Connecting…'],err:['⚠ সিঙ্ক হয়নি, ইন্টারনেট দেখুন','⚠ Sync failed, check internet'],cfg:['⚠ Firebase সেটআপ বাকি','⚠ Firebase not set up yet']};var e=$('#sync');if(e){e.textContent=S.lang=='bi'?m[ss][0]+' / '+m[ss][1]:m[ss][S.lang=='en'?1:0];if(!navigator.onLine){e.textContent=L('⚠ অফলাইন: বিক্রি ফোনে জমা হচ্ছে, নেট এলে সিঙ্ক হবে','⚠ Offline: sales kept on device, auto syncs online');e.style.color='var(--warn)';e.style.fontWeight='700'}else{e.style.color=ss=='on'?'':'var(--warn)';e.style.fontWeight=ss=='on'?'':'700'}}}
 function w(p){p.then(function(){sy('on')}).catch(function(){sy('err')})}
 
 function day(t){var d=new Date(t-(+RD().dayStart||0)*3600000);return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
@@ -1395,129 +1395,7 @@ window.voidSale=function(no){var s=origOf(no);if(s&&!s.refund&&H.some(function(h
 
 <!-- ===== MUSAFIR QR ORDERS START ===== -->
 <script type="module">
-const LOCAL=location.protocol==='http:'&&location.port==='8080';
-if(LOCAL){
-/* ---------- Local Wi-Fi QR orders, with delayed Firebase sync ---------- */
-const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let lop=[], lseen=null, lopOpen=false, ltab='o', linfo=null, localOwnerUid='local-shop';
-let cloudApi=null, cloudUser=null, cloudStart=false, cloudBusy=false, cloudMenuSig='';
-let localMenuSig='';
-const lstyle=document.createElement('style');
-lstyle.textContent='#qb{display:none;width:calc(100% - 32px);margin:6px 16px 10px;padding:16px 18px;border:0;border-radius:16px;font:inherit;font-size:18px;font-weight:800;background:linear-gradient(90deg,var(--ac),#2f9d7a);color:var(--acink);box-shadow:0 4px 16px #0005;justify-content:space-between;align-items:center;cursor:pointer}#qb i{font-style:normal;background:#e0301e;color:#fff;border-radius:99px;padding:2px 12px;font-size:17px}.lqo{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}.lqo button{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:6px 6px 0 0;background:var(--card);color:var(--ink);cursor:pointer}.lqo .g{background:var(--ac);color:var(--acink);border:0;font-weight:700}.lqt{display:flex;gap:6px;margin:10px 0}.lqt button{flex:1;margin:0;font-weight:700}.lqt .on{background:var(--ac);color:var(--acink);border:0}.lqo .bad{color:#e0301e}.lqstatus{font-size:12px;opacity:.7;margin:5px 0 10px}';
-document.head.appendChild(lstyle);
-const lb=document.createElement('button');lb.id='qb';const mn=document.getElementById('m');if(mn&&mn.parentNode)mn.parentNode.insertBefore(lb,mn);
-const lp=document.createElement('div');lp.id='lqp';lp.style.cssText='position:fixed;inset:0;background:#0008;z-index:35;display:none;align-items:flex-end;justify-content:center';
-lp.innerHTML='<div style="background:var(--card);color:var(--ink);width:100%;max-width:600px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:14px"></div>';document.body.appendChild(lp);
-lb.onclick=()=>{lopOpen=true;ltab='o';ldraw()};
-function lsettings(){try{return Object.assign({open:true,needTable:true,welcome:'স্বাগতম!',tag:'মেনু দেখে অর্ডার দিন',note:''},JSON.parse(localStorage.getItem('qr_set')||'{}'))}catch(e){return {open:true,needTable:true,welcome:'স্বাগতম!',tag:'মেনু দেখে অর্ডার দিন',note:''}}}
-function ldata(){return {S:window.S||{},P:Array.isArray(window.P)?window.P:[],IMG:window.IMG||{}}}
-function lstatus(){return !navigator.onLine?'📴 Cloud sync বন্ধ — Internet নেই':cloudUser?'☁️ Cloud sync চালু': '☁️ Cloud sync-এর জন্য POS-এ online account-এ লগইন করুন'}
-async function lget(path){const r=await fetch(path,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
-async function lpost(path,data){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
-async function lpub(force=false){
- const x=ldata();
- // On a brand-new localhost profile, wait until the POS has actual local menu data.
- if(!x.P.length&&!localStorage.getItem('pos_p'))return;
- const qs=lsettings();
- const payload={uid:cloudUser?.uid||localOwnerUid||'local-shop',name:x.S.shop||'Musafir Cafe',cur:x.S.cur||'৳',color:getComputedStyle(document.documentElement).getPropertyValue('--head').trim()||'#14454b',items:x.P.map(p=>({id:p.id,n:p.bn||p.name,e:p.name||p.bn||'',p:p.price,c:p.cat||'',s:p.stock===''?'':p.stock})),imgs:x.IMG||{},qs,updated:Date.now()};
- const sig=JSON.stringify(Object.assign({},payload,{updated:0}));
- if(!force&&sig===localMenuSig)return;
- try{await lpost('/api/shop',payload);localOwnerUid=payload.uid;localMenuSig=sig}catch(e){}
- if(cloudUser&&cloudApi){try{await lpublishCloud(payload)}catch(e){}}
-}
-async function lpublishCloud(payload){
- if(!cloudUser||!cloudApi||!navigator.onLine)return;
- const uid=cloudUser.uid,items=payload.items||[],qs=payload.qs||{};
- const sig=JSON.stringify([uid,payload.name,payload.cur,payload.color,items,qs]);
- if(sig!==cloudMenuSig){
-  await cloudApi.setDoc(cloudApi.doc(cloudApi.db,'shops',uid),{name:payload.name||'',cur:payload.cur||'৳',color:payload.color||'#14454b',items,qs,updated:Date.now()});
-  cloudMenuSig=sig;
- }
- const cacheKey='qr_img_cloud_'+uid;let cache={};try{cache=JSON.parse(localStorage.getItem(cacheKey)||'{}')}catch(e){}
- for(const k in (payload.imgs||{})){
-  const val=payload.imgs[k];if(!val)continue;const key=k+':'+String(val).length;
-  if(cache[k]!==key){await cloudApi.setDoc(cloudApi.doc(cloudApi.db,'shops',uid,'img',String(k)),{d:val});cache[k]=key;try{localStorage.setItem(cacheKey,JSON.stringify(cache))}catch(e){}}
- }
-}
-async function lstartCloud(){
- if(cloudStart||!navigator.onLine)return;cloudStart=true;
- try{
-  const [am,au,fs]=await Promise.all([
-   import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
-   import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js'),
-   import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
-  ]);
-  let app;try{app=am.getApp()}catch(e){app=am.initializeApp(window.FIREBASE_CONFIG)}
-  const auth=au.getAuth(app),db=fs.getFirestore(app);
-  cloudApi={doc:fs.doc,setDoc:fs.setDoc,getDoc:fs.getDoc,db,auth,onAuthStateChanged:au.onAuthStateChanged};
-  au.onAuthStateChanged(auth,async u=>{
-   cloudUser=u||null;
-   if(u){localOwnerUid=u.uid;await lpub(true);await lsync();}
-   else {try{const s=await lget('/api/shop');if(s.uid)localOwnerUid=s.uid}catch(e){}}
-   if(lopOpen)ldraw();
-  });
- }catch(e){cloudApi=null;cloudUser=null;cloudStart=false}
-}
-async function lsync(){
- if(!cloudUser||!cloudApi||!navigator.onLine||cloudBusy)return;
- cloudBusy=true;
- try{
-  const uid=cloudUser.uid;
-  const orders=await lget('/api/orders');
-  for(const o of orders){
-   const rev=Number(o.localRev||1),synced=Number(o.cloudRev||0);if(rev<=synced)continue;
-   const d=Object.assign({},o,{uid});delete d.localRev;delete d.cloudRev;
-   await cloudApi.setDoc(cloudApi.doc(cloudApi.db,'orders',o.id),d);
-   await lpost('/api/orders/'+encodeURIComponent(o.id),{cloudRev:rev});
-  }
-  const ratings=await lget('/api/ratings');
-  for(const r of ratings){
-   const rev=Number(r.localRev||1),synced=Number(r.cloudRev||0);if(rev<=synced)continue;
-   const d=Object.assign({},r,{uid});delete d.localRev;delete d.cloudRev;
-   await cloudApi.setDoc(cloudApi.doc(cloudApi.db,'ratings',r.id),d);
-   await lpost('/api/ratings',{id:r.id,cloudRev:rev});
-  }
-  const sh=await lget('/api/shop');if(sh&&sh.items)await lpublishCloud(sh);
- }catch(e){/* Stay local and retry on the next interval. */}
- finally{cloudBusy=false}
-}
-async function lload(){
- try{lop=await lget('/api/orders')}catch(e){lop=[]}
- const a=lop.filter(o=>['new','accepted','ready','served'].includes(o.status));const nw=a.filter(o=>o.status==='new');
- lb.style.display='flex';lb.innerHTML='<span>📲 QR অর্ডার</span>'+(a.length?'<i>'+a.length+'</i>':'<span style="font-weight:500;font-size:14px">কোনো অর্ডার নেই</span>');
- const ids=new Set(nw.map(o=>o.id));
- if(lseen!==null){const fresh=nw.filter(o=>!lseen.has(o.id));if(fresh.length){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.4)}catch(e){}try{navigator.vibrate&&navigator.vibrate([250,100,250])}catch(e){}try{if('Notification'in window&&Notification.permission==='granted')new Notification('📲 নতুন QR অর্ডার',{body:fresh.map(o=>'টেবিল '+o.table).join(', '),requireInteraction:true})}catch(e){}try{toast('📲 নতুন QR অর্ডার এসেছে ('+fresh.length+'টি)')}catch(e){}}}
- lseen=ids;if(lopOpen)ldraw();
-}
-function lbill(id){const o=lop.find(x=>x.id===id);if(!o)return;const go=()=>{let miss=0;(o.items||[]).forEach(i=>{const q=typeof gp==='function'?gp(i.id):null;if(!q){miss++;return}let n=((window.cart||{})[i.id]||0)+i.q;if(q.stock!==''&&n>q.stock)n=q.stock;if(n>0)window.cart[i.id]=n});lpost('/api/orders/'+encodeURIComponent(id),{status:'billed'}).catch(()=>{});lopOpen=false;ldraw();if(typeof window.go==='function')window.go('sell');if(typeof openCart==='function')openCart();if(miss)try{toast(miss+'টি পণ্য POS-এ নেই, বাদ গেছে')}catch(e){}};if(Object.keys(window.cart||{}).length&&typeof ask==='function')ask('এখন একটা অর্ডার চলছে। এই QR অর্ডার (টেবিল '+o.table+') তাতে যোগ হবে। চালাবেন?',go,'হ্যাঁ, যোগ করুন');else go()}
-function ldraw(){
- const a=lop.filter(o=>['new','accepted','ready','served'].includes(o.status));
- lp.style.display=lopOpen?'flex':'none';if(!lopOpen)return;
- const btn=(k,t)=>'<button data-lx="tab" data-v="'+k+'" class="'+(ltab===k?'on':'')+'">'+t+'</button>';
- let h='<div><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:19px">📲 QR অর্ডার · Local Wi-Fi</b><button data-lx="x" style="font-size:22px;border:0;background:none;color:var(--ink)">✕</button></div><div class="lqstatus">'+E(lstatus())+' · '+lop.filter(o=>Number(o.localRev||1)>Number(o.cloudRev||0)).length+'টি sync বাকি থাকলে নেট ফিরলে পাঠাবে</div><div class="lqt">'+btn('o','অর্ডার'+(a.length?' ('+a.length+')':''))+btn('q','QR কোড')+btn('r','রেটিং')+btn('s','সেটিংস')+'</div>';
- if(ltab==='o')h+=a.length?a.map(o=>'<div class="lqo"><b style="font-size:17px">টেবিল '+E(o.table)+'</b>'+(o.name?' · '+E(o.name):'')+' <span style="opacity:.6">'+new Date(o.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span>'+(o.status==='new'?' <b style="color:#e0301e">নতুন</b>':o.status==='accepted'?' <b style="color:var(--ac)">✔ গ্রহণ করা</b>':o.status==='ready'?' <b style="color:#d98a00">🍽 প্রস্তুত</b>':' <b style="color:var(--ac)">✔ পরিবেশিত</b>')+'<div style="margin:6px 0">'+(o.items||[]).map(i=>E(i.n)+' × <b>'+i.q+'</b>').join('<br>')+'</div>'+(o.note?'<div style="opacity:.7">নোট: '+E(o.note)+'</div>':'')+'<div>মোট: <b>'+(o.total||0)+'</b></div>'+(o.status==='new'?'<button class="g" data-lx="st" data-id="'+o.id+'" data-s="accepted">✔ গ্রহণ করুন</button>':'')+(o.status==='accepted'?'<button class="g" data-lx="st" data-id="'+o.id+'" data-s="ready">👨‍🍳 খাবার প্রস্তুত</button>':'')+(o.status==='ready'?'<button class="g" data-lx="st" data-id="'+o.id+'" data-s="served">🍽 পরিবেশন হয়েছে</button>':'')+(o.status==='new'?'<button style="color:#e0301e" data-lx="st" data-id="'+o.id+'" data-s="cancelled">বাতিল</button>':'')+'<button data-lx="bill" data-id="'+o.id+'">বিলে নিন</button></div>').join(''):'<p style="opacity:.7;text-align:center;padding:24px">এখন কোনো অপেক্ষমাণ অর্ডার নেই</p>';
- if(ltab==='q')h+='<div style="text-align:center"><p>কাস্টমারকে একই দোকানের Wi-Fi-তে থাকতে হবে।</p><div id="lqrbox" style="width:260px;max-width:80%;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden"></div><p id="lurl" style="opacity:.7;word-break:break-all;font-size:12px"></p><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:12px" data-lx="print">🖨 QR ছাপুন</button></div>';
- if(ltab==='r')h+='<div id="lratings" style="text-align:center;padding:18px">রেটিং লোড হচ্ছে…</div>';
- if(ltab==='s'){const q=lsettings();h+='<label><input type="checkbox" id="l_open" '+(q.open?'checked':'')+'> অর্ডার নেওয়া চালু</label><label><input type="checkbox" id="l_nt" '+(q.needTable?'checked':'')+'> টেবিল নম্বর বাধ্যতামূলক</label><br><label>স্বাগতম লেখা</label><input type="text" id="l_w" value="'+E(q.welcome)+'" style="width:100%;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><label>ছোট লেখা</label><input type="text" id="l_t" value="'+E(q.tag)+'" style="width:100%;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><label>নোটিশ</label><input type="text" id="l_n" value="'+E(q.note)+'" style="width:100%;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><button class="g" style="width:100%;font:inherit;border:0;border-radius:10px;padding:12px;margin-top:8px" data-lx="save">সেভ ও প্রকাশ করুন</button>'}
- lp.querySelector('div').innerHTML=h;
- if(ltab==='q')lget('/api/info').then(info=>{linfo=info;const url=info.orderUrl;const box=document.getElementById('lqrbox');if(box&&typeof qrSvg==='function')box.innerHTML=qrSvg(url).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"');const u=document.getElementById('lurl');if(u)u.textContent=url}).catch(()=>{});
- if(ltab==='r')lget('/api/ratings').then(rs=>{const el=document.getElementById('lratings');if(!el)return;const avg=rs.length?(rs.reduce((a,r)=>a+(+r.stars||0),0)/rs.length).toFixed(1):'-';el.innerHTML='<b style="font-size:32px">⭐ '+avg+'</b><p>'+rs.length+'টি রেটিং</p>'+rs.slice().sort((a,b)=>b.t-a.t).slice(0,60).map(r=>'<div class="lqo" style="text-align:left"><b style="color:#e8ab00">'+'★'.repeat(+r.stars||0)+'</b> '+E(r.name||'')+' · '+E(r.table||'')+(r.comment?'<p>'+E(r.comment)+'</p>':'')+'</div>').join('')||'এখনো রেটিং নেই'}).catch(()=>{});
-}
-lp.onclick=async e=>{
- if(e.target===lp){lopOpen=false;ldraw();return}
- const t=e.target.closest('[data-lx]');if(!t)return;const x=t.dataset.lx;
- if(x==='x'){lopOpen=false;ldraw()}
- else if(x==='tab'){ltab=t.dataset.v;ldraw()}
- else if(x==='st'){try{await lpost('/api/orders/'+encodeURIComponent(t.dataset.id),{status:t.dataset.s});await lload()}catch(e){try{toast('আপডেট হয়নি')}catch(_){}}}
- else if(x==='bill')lbill(t.dataset.id)
- else if(x==='save'){const q={open:document.getElementById('l_open').checked,needTable:document.getElementById('l_nt').checked,welcome:document.getElementById('l_w').value.trim(),tag:document.getElementById('l_t').value.trim(),note:document.getElementById('l_n').value.trim()};try{localStorage.setItem('qr_set',JSON.stringify(q))}catch(e){}localMenuSig='';await lpub(true);ldraw()}
- else if(x==='print'){const info=linfo||await lget('/api/info');const url=info.orderUrl;const w=window.open('','_blank');if(!w)return;w.document.write('<title>QR</title><body style="font-family:sans-serif;text-align:center;padding:30px"><h1>'+E((window.S||{}).shop||'Musafir Cafe')+'</h1><p>স্ক্যান করুন, অর্ডার দিন</p><div style="width:420px;max-width:90vw;margin:0 auto">'+qrSvg(url).replace('<svg class="qr"','<svg class="qr" style="width:100%;height:auto;display:block"')+'</div><p>'+E(url)+'</p><p>Local server IP: '+E(info.host)+'</p></body>');w.document.close();setTimeout(()=>w.print(),700)}
-};
-document.addEventListener('click',()=>{try{if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}},{once:true});
-(async()=>{try{const s=await lget('/api/shop');if(s.uid)localOwnerUid=s.uid}catch(e){};await lpub(true);await lload();lstartCloud()})();
-setInterval(()=>lpub(false),5000);setInterval(()=>{lload();lsync();lstartCloud()},1500);window.addEventListener('online',()=>{cloudStart=false;lstartCloud();lsync();lpub(true)});
-
-}else{
+{
 
 const {getApp}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
 const {getAuth,onAuthStateChanged}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
