@@ -73,7 +73,7 @@ header b{font-size:19px;font-weight:800;color:#fff;letter-spacing:0}
 :root[data-theme="dark"]{--bg:#0b1b1e;--card:#12292d;--ink:#e6f0f1;--mu:#8fb0b3;--ln:#25474d;--ac:#2aa58f;--acink:#05201c;--soft:#14393b;--wr:#ff8a7a;--blue:#7fe0cc;--hd:#14454b;--qi:#05201c}
 body{background:var(--bg)}
 .qty{background:var(--blue);color:var(--qi)}
-.p b{white-space:pre-line}
+.p b{white-space:pre-line;font-size:calc(18px*var(--z));font-weight:800;line-height:1.25}
 .sh{background:var(--card)}.sh input{background:var(--bg)}.sh .row>span:first-child{white-space:pre-line}
 #ib{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto;padding:14px 16px 0}
 .zp{display:flex;border:1px solid var(--ln);border-radius:20px;overflow:hidden;background:var(--card);margin-right:auto}
@@ -196,7 +196,7 @@ function hdr(){const cur=bi?'bi':lang;$('#app').innerHTML=`<header><img src="log
  <div class="hb">${[['bn','বাং'],['en','EN'],['bi','বাং+EN']].map(x=>`<button data-lang="${x[0]}" class="${cur===x[0]?'on':''}">${x[1]}</button>`).join('')}</div></header>
  <div id="ib"><div class="zp"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div><button class="sun" id="th" aria-label="theme">${SUN}</button><div class="clk"><b id="ck"></b><span id="cdt"></span></div></div><div class="w" id="bd"></div>`;clk()}
 const qrBanner=()=>`<div class="qrb"><span>📲 ${T2('QR অর্ডার','QR Orders')}</span><span class="qs">${tbl?esc(t('table')+tbl):HM?T2('পিকআপ / ডেলিভারি','Pickup / Delivery'):Q.open===false?T2('বন্ধ','Closed'):T2('অর্ডার দিন','Order here')}</span></div>`;
-function bestHTML(){return ''}
+function bestHTML(){const dl=lang==='en'?(Q.dte||Q.dt):(Q.dt||Q.dte);return dl?`<div class="cd" style="margin-bottom:10px;animation:none;text-align:center;font-weight:800">🔥 ${esc(dl)}</div>`:''}
 function list(){
  const cs=[...new Set(items.map(i=>i.c).filter(Boolean))],CB={Drinks:'পানীয়',Food:'খাবার'},cL=c=>lang==='en'?c:(CB[c]||c);
  let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
@@ -215,7 +215,7 @@ function mkManifest(){try{const u=new URL(location.href),sc=u.origin+u.pathname.
  const mf={name:nm,short_name:nm.slice(0,12),start_url:u.origin+u.pathname+'?s='+encodeURIComponent(uid)+'&h=1',scope:sc,display:'standalone',background_color:'#0b2a2e',theme_color:C.color||'#0b2a2e',icons:[{src:sc+'logo-192.png',sizes:'192x192',type:'image/png'},{src:sc+'logo-512.png',sizes:'512x512',type:'image/png'}]};
  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}}
 const cbItems=()=>(C.combos||[]).map(c=>({id:'cb_'+c.id,n:c.n,e:c.e||c.n,p:+c.p,o:+c.o,c:'',s:c.s===undefined?'':c.s,cb:c.ids||[],combo:1})),allItems=()=>items.concat(cbItems());
-const tagOf=i=>{let tx='';if(i.combo)tx=Q.cl||T2('আজকের কম্বো অফার','Today\u2019s combo deal');else{const tg=(Q.tg||{})[i.id];if(tg)tx=tg;}
+const tagOf=i=>{let tx='';if(i.combo)tx=Q.cl||T2('আজকের কম্বো অফার','Today\u2019s combo deal');else{const tg=(Q.tg||{})[i.id];if(tg)tx=tg;else if((C.best||[]).some(b=>b==i.id))tx=lang==='en'?(Q.ble||'Today\u2019s best'):(Q.bl||'আজকের সেরা')}
  return tx?`<div class="dtag ${i.combo?'c':((hue(String(i.id))%2)?'y':'k')}">${esc(tx)}</div>`:''};
 const cbThumbs=i=>`<div class="av cbv" style="background:hsl(${hue(String(i.n))} 45% 32%)">${(i.cb||[]).slice(0,3).map(id=>`<img class="cbt" data-i="${esc(id)}" alt="" style="display:none">`).join('')}<span class="cbg">🎁</span></div>`;
 const cbPrice=i=>{const cu=C.cur||'৳',pc=i.o>i.p?Math.round((1-i.p/i.o)*100):0;return `<div class="prw"><span class="pr">${cu}${(+i.p).toFixed(2)}</span>${i.o>i.p?`<span class="old">${cu}${(+i.o).toFixed(2)}</span>${pc?`<span class="off">${pc}% OFF</span>`:''}`:''}</div>`};
