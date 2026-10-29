@@ -290,19 +290,14 @@ function lgOpen(){if($('#lgx'))return;const L=LG(),d=document.createElement('div
  let st='';for(let i=0;i<14;i++)st+=`<b style="left:${Math.round(Math.random()*96)}%;animation-duration:${(7+Math.random()*8).toFixed(1)}s;animation-delay:${(-Math.random()*12).toFixed(1)}s;transform:scale(${(.5+Math.random()).toFixed(2)})"></b>`;
  d.innerHTML=`<div class="lg-bg"><i class="lg-o1"></i><i class="lg-o2"></i><i class="lg-o3"></i></div><div class="lg-st">${st}</div><div class="lg-card"><div class="lg-logo">${LOGO}</div><h1>${esc((C&&C.name)||'Musafir')}</h1><p>${L.s}</p>
  <label class="lg-tc" id="lgtcw"><input type="checkbox" id="lgtc"><span>${L.tc}</span></label>
- <button class="lg-g" id="lgG">${GSVG}<span>${L.g}</span></button>
- <div class="lg-or"><span>${L.or}</span></div>
- <button class="lg-m" id="lgM">✉ ${L.em}</button>
- <div class="lg-f" id="lgE" hidden><input id="lgN" placeholder="${L.nm}" autocomplete="name"><input id="lgU" type="email" placeholder="${L.mail}" autocomplete="email"><input id="lgP" type="password" placeholder="${L.pw}" autocomplete="current-password"><button class="lg-go" id="lgGo">${L.up}</button><button class="lg-sw" id="lgSw">${L.have}</button></div>
+ <div class="lg-f" id="lgE"><input id="lgN" placeholder="${L.nm}" autocomplete="name"><input id="lgU" type="email" placeholder="${L.mail}" autocomplete="email"><input id="lgP" type="password" placeholder="${L.pw}" autocomplete="current-password"><button class="lg-go" id="lgGo">${L.up}</button><button class="lg-sw" id="lgSw">${L.have}</button></div>
  <div class="lg-r" id="lgR"></div><button class="lg-s" id="lgS">${L.skip}</button></div>`;
  document.body.appendChild(d);
  let mode='up';const q=s=>d.querySelector(s),err=m=>{q('#lgR').textContent=m||''},busy=b=>d.querySelectorAll('button').forEach(x=>x.disabled=b);
  const tcOk=()=>{if(q('#lgtc').checked)return true;const w=q('#lgtcw');w.classList.remove('bad');void w.offsetWidth;w.classList.add('bad');err(L.needtc);return false};
  const fail=e=>{const c=e&&e.code;if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'){err('');return}err(L.e[c]||L.e.x)};
  q('#lgS').onclick=()=>{try{sessionStorage.setItem('qo_skip','1')}catch(e){}lgClose()};
- q('#lgM').onclick=()=>{const f=q('#lgE');f.hidden=!f.hidden;if(!f.hidden)setTimeout(()=>q('#lgU').focus(),50)};
  q('#lgSw').onclick=()=>{mode=mode==='up'?'in':'up';q('#lgN').style.display=mode==='up'?'':'none';q('#lgGo').textContent=mode==='up'?L.up:L.inn;q('#lgSw').textContent=mode==='up'?L.have:L.nw;q('#lgP').autocomplete=mode==='up'?'new-password':'current-password'};
- q('#lgG').onclick=async()=>{if(!tcOk())return;err('');busy(true);try{await authLoad();const p=new AM.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});try{await AM.signInWithPopup(AU,p)}catch(e){if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment')){await AM.signInWithRedirect(AU,p);return}throw e}}catch(e){fail(e)}busy(false)};
  q('#lgGo').onclick=async()=>{if(!tcOk())return;const em=q('#lgU').value.trim(),pw=q('#lgP').value;if(!em||pw.length<6){err(L.need);return}err('');busy(true);try{await authLoad();if(mode==='up'){const r=await AM.createUserWithEmailAndPassword(AU,em,pw),n=q('#lgN').value.trim();if(n){await AM.updateProfile(r.user,{displayName:n});setAcc(r.user)}}else await AM.signInWithEmailAndPassword(AU,em,pw)}catch(e){fail(e)}busy(false)}}
 /* ---------- অর্ডার ইতিহাস (এই ফোনে) ---------- */
 const hist=()=>{try{return JSON.parse(ls('qo_h')||'[]')}catch(e){return[]}};
