@@ -1,8 +1,8 @@
 <!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
+<title>মেনু</title><meta name="theme-color" content="#06301f"><link rel="icon" href="logo-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
 <style>
-:root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#0b2a2e;--z:1;--cw:150px}
+:root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#06301f;--z:1;--cw:150px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:500 calc(15px*var(--z))/1.45 "Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:140px;overflow-x:hidden}
 header{background:var(--hd);padding:calc(8px + env(safe-area-inset-top)) 10px 8px;display:flex;align-items:center;gap:6px;position:sticky;top:0;z-index:5}
@@ -25,7 +25,7 @@ input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px
 .ov{position:fixed;inset:0;background:#000a;z-index:20;display:flex;align-items:flex-end;justify-content:center}
 .sh{background:var(--hd);width:100%;max-width:640px;max-height:92vh;max-height:92dvh;overflow:auto;border-radius:22px 22px 0 0;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));animation:up .3s both}
 .big{width:100%;padding:15px;border-radius:14px;background:var(--ac);color:var(--acink);font-weight:800;font-size:17px;margin-top:6px}.mu{color:var(--mu)}.row{display:flex;align-items:center;gap:8px;padding:6px 0}.row span:first-child{flex:1}
-#sp{position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 35%,#14606a,#0b2a2e 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity .6s;padding:20px}
+#sp{position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 35%,#14606a,#06301f 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity .6s;padding:20px}
 #sp img{width:110px;height:110px;border-radius:28px;animation:pop .9s both;box-shadow:0 10px 40px #0008}#sp h1{margin:18px 0 4px;font-size:28px;animation:up .7s .3s both}#sp p{margin:0;color:#bcd;animation:up .7s .5s both}
 .ok{width:96px;height:96px;border-radius:50%;background:var(--ac);color:var(--acink);font-size:54px;display:flex;align-items:center;justify-content:center;margin:20px auto 8px;animation:pop .7s both}
 .stp{display:flex;margin:18px 0}.stp div{flex:1 1 0;min-width:0;padding:0 3px;overflow-wrap:break-word;line-height:1.25;text-align:center;font-size:12px;color:var(--mu)}.stp i{display:block;width:30px;height:30px;line-height:30px;margin:0 auto 5px;border-radius:50%;background:var(--ln);font-style:normal}.stp .d{color:var(--ink)}.stp .d i{background:var(--ac);color:var(--acink);font-weight:800}
@@ -42,7 +42,87 @@ input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px
 @keyframes up{from{opacity:0;transform:translateY(16px)}}@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
 .tg{display:flex;gap:8px;margin:10px 0}.tg button{flex:1;padding:12px 6px;border-radius:12px;background:var(--ln);color:var(--ink);font-weight:700}.tg .on{background:var(--ac);color:var(--acink)}
 .lk{display:inline-block;margin:6px 8px 0 0;padding:8px 14px;border-radius:10px;background:var(--ln);color:var(--ink);text-decoration:none;font-weight:700;font-size:calc(14px*var(--z))}
-</style><link rel="apple-touch-icon" href="logo-192.png"></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
+</style><link rel="apple-touch-icon" href="logo-192.png"><link rel="stylesheet" href="theme.css"><style>/* ===== Musafir customer app (qo) ===== */
+header .hb{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;overflow:visible!important;border-radius:0!important;text-shadow:none!important;color:inherit!important;min-width:0!important}
+header .hb::after{display:none!important}
+header .hb button{background:rgba(11,42,29,.9);border:1px solid rgba(227,180,90,.4);color:var(--ink);box-shadow:none}
+header .hb button.on{background:linear-gradient(135deg,var(--gold1),var(--gold3));color:#2a1a00;border-color:var(--gold1)}
+header{gap:5px!important}header b{flex:1;min-width:0;font-size:20px!important}header .hb button{min-width:30px!important;height:30px!important;padding:0 6px!important;font-size:12px!important}header>img{width:36px!important;height:36px!important}.cartb{width:38px!important;height:38px!important}
+.cartb{position:relative;width:42px;height:42px;border-radius:14px;flex:none;font-size:19px;background:linear-gradient(135deg,var(--gold1),var(--gold3))!important;color:#2a1a00!important;border:1px solid var(--gold1)!important;box-shadow:0 0 18px rgba(227,180,90,.45)}
+.cartb *{pointer-events:none}
+.cartb .cn{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:10px;background:#d94a2b;color:#fff;font:800 11px/20px system-ui;font-style:normal;text-align:center;border:2px solid #06301f;padding:0 3px}
+.w{padding-bottom:110px}
+.hero2{position:relative;border-radius:26px;padding:22px 18px;min-height:156px;overflow:hidden;margin:4px 0 16px;border:1px solid rgba(227,180,90,.55);
+ background:radial-gradient(360px 220px at 100% 10%,rgba(227,180,90,.38),transparent 62%),radial-gradient(260px 200px at 0% 100%,rgba(60,170,110,.28),transparent 70%),linear-gradient(135deg,#10593a,#06301f 62%,#041f14);box-shadow:0 18px 40px rgba(0,0,0,.55),inset 0 1px 0 rgba(246,220,152,.25)}
+.hero2 .hx{position:relative;z-index:2;max-width:64%}
+.hero2 h2{margin:0 0 6px;font:italic 700 clamp(28px,8vw,40px)/1.02 "Cormorant Garamond","Hind Siliguri",serif;background:linear-gradient(180deg,#fbe7b0,#d9a64a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero2 p{margin:0 0 12px;color:#d8e6d2;font-size:.95em}
+.hbdg{display:inline-block;padding:5px 12px;border-radius:99px;font-size:12px;font-weight:700;color:#2a1a00;background:linear-gradient(135deg,var(--gold1),var(--gold3))}
+.hero2 .hm{position:absolute;right:-6px;bottom:-4px;width:44%;max-width:190px;filter:drop-shadow(0 0 26px rgba(227,180,90,.55));animation:flt 4s ease-in-out infinite alternate;z-index:1}
+.dealb{margin:0 0 12px;padding:11px 14px;border-radius:16px;font-weight:800;text-align:center;color:#2a1a00;background:linear-gradient(135deg,var(--gold1),var(--gold2),var(--gold3));box-shadow:0 8px 22px rgba(184,129,44,.35)}
+.srch input{margin:0 0 12px;padding:13px 16px 13px 16px;border-radius:16px}
+.catrow{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 14px;scrollbar-width:none}.catrow::-webkit-scrollbar{display:none}
+.cat{flex:none;width:68px;text-align:center;cursor:pointer;color:var(--mu);font-size:12px;line-height:1.2}
+.cat *{pointer-events:none}
+.cat .ci2{width:58px;height:58px;border-radius:20px;margin:0 auto 6px;display:grid;place-items:center;font-size:27px;background:var(--glass);border:1px solid rgba(227,180,90,.32);box-shadow:var(--shadow);transition:.2s}
+.cat.sel .ci2{background:linear-gradient(135deg,var(--gold1),var(--gold3));box-shadow:0 0 22px rgba(227,180,90,.55);transform:translateY(-2px)}
+.cat.sel{color:var(--gold1);font-weight:700}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:8px 2px 10px}
+.sec h3{margin:0;font:italic 700 24px "Cormorant Garamond","Hind Siliguri",serif;color:var(--gold1)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--cw),1fr));gap:12px}
+.pscroll{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 16px;scroll-snap-type:x mandatory;scrollbar-width:none}.pscroll::-webkit-scrollbar{display:none}
+.pscroll .pc{flex:0 0 calc(var(--cw)*1.08);scroll-snap-align:start}
+.pc{border-radius:20px;overflow:hidden;display:flex;flex-direction:column;background:var(--glass);border:1px solid rgba(227,180,90,.3);box-shadow:var(--shadow);animation:up .45s both}
+.pim{width:100%;aspect-ratio:1/.82;background:radial-gradient(circle at 30% 18%,#1b7a50,#0a3a26 60%,#05241a);background-size:cover;background-position:center;display:grid;place-items:center;font:italic 700 calc(40px*var(--z))/1 'Cormorant Garamond',serif;color:rgba(246,220,152,.8);text-shadow:0 2px 14px rgba(0,0,0,.5);cursor:pointer;position:relative}
+.pim.sm{width:64px;height:64px;aspect-ratio:auto;border-radius:16px;font-size:26px;flex:none}
+.pim.xl{aspect-ratio:16/11;border-radius:0;font-size:80px}
+.pb{padding:10px 11px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.pb .nm{font-size:calc(14.5px*var(--z));cursor:pointer;line-height:1.25}
+.pr2{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:auto}
+.pr2 .pr{font-size:calc(16px*var(--z))}
+.cq{display:flex;align-items:center;gap:6px}.cq b{min-width:1.1em;text-align:center}
+.plus{width:36px;height:36px;border-radius:50%;font-size:22px;line-height:1;background:linear-gradient(135deg,var(--gold1),var(--gold3))!important;color:#2a1a00!important;border:1px solid var(--gold1)!important;box-shadow:0 4px 14px rgba(227,180,90,.45);padding:0}
+.sb,.qb{width:32px;height:32px;border-radius:50%;font-size:18px;padding:0;background:rgba(227,180,90,.16)!important;color:var(--gold1)!important;border:1px solid rgba(227,180,90,.45)!important;flex:none}
+.qb{width:34px;height:34px}
+.spc{height:30px}
+.sh{max-width:560px;max-height:94vh;max-height:94dvh;padding:0!important}
+.sh .in{padding:6px 16px 18px}
+.topb{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(180deg,#0d3a27,#0a2f21);border-bottom:1px solid rgba(227,180,90,.35)}
+.topb b{font:italic 700 24px "Cormorant Garamond","Hind Siliguri",serif;color:var(--gold1)}
+.ib{width:38px;height:38px;border-radius:12px;font-size:19px;padding:0;background:rgba(227,180,90,.14)!important;color:var(--gold1)!important;border:1px solid rgba(227,180,90,.4)!important}
+.crow{display:flex;align-items:center;gap:12px;padding:12px;margin:10px 0;border-radius:18px;background:rgba(3,22,14,.55);border:1px solid rgba(227,180,90,.22)}
+.crow .ci{flex:1;min-width:0}.crow .qs{display:flex;align-items:center;gap:10px;margin-top:6px}
+.tr{width:38px;height:38px;border-radius:12px;font-size:17px;padding:0;background:rgba(217,74,43,.16)!important;color:#ff9b86!important;border:1px solid rgba(217,74,43,.4)!important;flex:none}
+.sm2{border-radius:16px;padding:6px 14px;margin-top:10px;background:rgba(3,22,14,.55);border:1px solid rgba(227,180,90,.22)}
+.sm2 .row.tt{border-top:1px solid rgba(227,180,90,.3);font-size:1.15em}.sm2 .row.tt b{color:var(--gold1);font-size:1.25em}
+.sh h4,.pyh{margin:18px 2px 6px;font:italic 700 21px "Cormorant Garamond","Hind Siliguri",serif;color:var(--gold1)}
+.pay{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:16px;margin:8px 0;cursor:pointer;background:rgba(3,22,14,.55);border:1px solid rgba(227,180,90,.22);transition:.15s}
+.pay *{pointer-events:none}
+.pay .lgo{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font:800 17px system-ui;color:#fff;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.pay .rd{width:22px;height:22px;border-radius:50%;border:2px solid #7d9a88;margin-left:auto;flex:none}
+.pay.sel{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2),0 0 22px rgba(227,180,90,.25);background:rgba(227,180,90,.08)}
+.pay.sel .rd{border-color:var(--gold1);background:radial-gradient(var(--gold1) 42%,transparent 48%)}
+.pnote{display:flex;gap:10px;padding:12px;border-radius:14px;margin:10px 0;background:rgba(227,180,90,.1);border:1px dashed rgba(227,180,90,.45);font-size:.9em}
+.big.alt{background:rgba(227,180,90,.14)!important;color:var(--gold1)!important;border:1px solid rgba(227,180,90,.4)!important;box-shadow:none;text-shadow:none}
+.big.alt::after,.big.wa::after{display:none}
+.big.wa{background:#25d366!important;color:#05301a!important;border-color:#25d366!important}
+.dt .pim.xl{position:relative}
+.dt .hd2{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;z-index:4}
+.dt .in{padding:16px}
+.dt h2{margin:0;font:italic 700 28px "Cormorant Garamond","Hind Siliguri",serif;color:var(--ink)}
+.dt .tp{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.dt .tp .pr{font-size:26px}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tags span{padding:6px 12px;border-radius:99px;font-size:13px;font-weight:700;background:rgba(227,180,90,.14);border:1px solid rgba(227,180,90,.4);color:var(--gold1)}
+.dact{display:flex;gap:12px;align-items:center;margin:14px 0}
+.dq{display:flex;align-items:center;gap:14px;padding:6px 10px;border-radius:14px;background:rgba(3,22,14,.6);border:1px solid rgba(227,180,90,.3)}.dq b{min-width:1.5em;text-align:center;font-size:18px}
+.dact .big{margin:0;flex:1}
+.inst{display:flex;align-items:center;gap:12px;padding:12px;margin:0 0 14px;border-radius:18px;background:var(--glass);border:1px solid rgba(227,180,90,.45);box-shadow:var(--shadow)}
+.inst img{width:46px;height:46px;border-radius:12px;background:#04201a;padding:3px;border:1px solid rgba(227,180,90,.5)}
+.inst div{flex:1;min-width:0}.inst small{display:block;color:var(--mu);line-height:1.3}
+.inst button{padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,var(--gold1),var(--gold3));color:#2a1a00;font-weight:800;border:0}
+#sp .tagline{letter-spacing:.12em;margin:8px 0 14px}
+#sp .big.gs{width:min(78vw,300px);margin-top:26px}
+#sp .sl{margin-top:14px;background:none;color:var(--gold1);font-weight:700;font-size:16px;text-decoration:underline;padding:8px}
+</style></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div><div id="ovd"></div>
 <script type="module">
 let FS=null,db=null;
 const FBV='https://www.gstatic.com/firebasejs/10.12.2/';
@@ -70,6 +150,14 @@ rate:'আমাদের সার্ভিস কেমন লাগলো?',rc
 en:{pk:'🏪 Pickup',dl:'🛵 Delivery',ph:'Mobile number',ad:'Full address (house, road, area)',mylc:'📍 Share my location',locing:'Getting location…',lcok:'✔ Location received',inz:'✔ We deliver to your area',outz:'😔 Your location is outside our delivery area',km:' km',needlc:'Please share your location for delivery',nogeo:'Location is not available on this phone',locfail:'Could not get location. Turn on phone location and browser permission.',fee:'Delivery charge',free:'Free',gtot:'Grand total',minmsg:n=>'Minimum order for delivery is '+n,needPh:'Enter a valid mobile number',needAd:'Enter your address',shopat:'Shop address',callus:'📞 Call us',maps:'📍 View on map',wa:'💬 Send on WhatsApp',inst:'📲 Add to home screen (like an app)',iosTip:'In Safari tap the Share button, then "Add to Home Screen"',pkGo:'Your order is ready, please collect it from the shop',dlGo:'Your order is ready and will leave soon',nohome:'Home orders are currently closed',bad:'Invalid QR or link',off:'No internet. Open this page once online and the menu will also work offline.',offb:'📴 Offline · showing the saved menu',pend:'📴 No internet. Your order is saved on this phone and will reach the shop automatically when the net returns. If you are in a hurry, show this screen at the counter.',nopub:'The menu is not published yet',closed:'Orders are closed right now. You can still browse the menu.',search:'Search items',all:'All',other:'Other',add:'+ Add',out:'Out of stock',none:'Nothing found',cartN:n=>'🛒 '+n+(n==1?' item':' items'),view:'View ›',tapDrag:'drag to move',yours:'Your order',total:'Total',tno:'Table number',tph:'e.g. 5',yname:'Your name (optional)',note:'Note (optional, e.g. less sugar)',confirm:'✔ Confirm order',closedBtn:'Orders are closed',back:'← Back to menu',needT:'Enter table number',wait:'Please wait a moment and try again',fail:'Could not send, please try again',table:'Table ',nf:'Order not found',sorry:'Sorry, the order could not be accepted',sent:'Order sent!',steps:['Sent','Accepted by shop','Food ready','Served'],
 vw:['⏳ Please wait','🍽 Food is ready!','😋 Enjoy your meal'],vt:['Your food is being prepared… please wait a little','Your food is ready','Thank you, see you again ❤'],foot:'Thank you for visiting ☕ Keep this page open and the status will update by itself.',more:'Order more',welcome:'Welcome',tag:'Browse the menu and order',g:['Good night','Good morning','Good afternoon','Good evening','Good evening'],
 rate:'How was our service?',rcm:'Comment (optional)',rsend:'Send rating',rpick:'Tap the stars to rate',rthx:'Thank you! We got your rating',rfail:'Could not send rating, please try again',rl:['','Very bad','Bad','Okay','Good','Excellent'],hpk:['Sent','Accepted by shop','Ready, please collect','Handed over'],hdl:['Sent','Accepted by shop','Ready, on the way','Delivered'],hvw:['⏳ Being prepared','🍽 Ready!','✅ Done'],eta:n=>'About '+n+' min left',etaSoon:'Almost ready',msgEta:'💬 How many minutes left?',callShop:'📞 Call shop',etaAsk:'Hello, how many more minutes until my order is ready?',sizeS:'Smaller',sizeL:'Bigger',conn:'Loading your order status…',connh:'It may take a moment on a slow network. Your order is not lost.',retry:'🔄 Try again',loading:'Loading menu…',pend2:'⏳ Your order is on its way to the shop. It may be slow on a weak network, keep this page open. If you are in a hurry, show this screen at the counter.'}};
+Object.assign(TX.bn,{gs:'শুরু করুন',sl:'English',pop:'জনপ্রিয় আইটেম',menuT:'মেনু',addc:'কার্টে যোগ করুন',like:'আপনার আরও ভালো লাগবে',ycart:'আপনার কার্ট',proc:'চেকআউটে যান',cko:'চেকআউট',paym:'পেমেন্ট পদ্ধতি',place:'অর্ডার দিন',cashT:'পিকআপ/ডেলিভারিতে ক্যাশ',cashS:'খাবার হাতে পেয়ে টাকা দিন',othS:'দোকানে বা ডেলিভারির সময় বেছে নেওয়া মাধ্যমে পেমেন্ট করবেন',subt:'সাবটোটাল',fresh:'টাটকা তৈরি',popb:'জনপ্রিয়',insT:'অ্যাপ ইনস্টল করুন',insS:'হোম স্ক্রিনে যোগ করে দ্রুত অর্ডার করুন',addNow:'যোগ করুন'});
+Object.assign(TX.en,{gs:'Get Started',sl:'বাংলায় দেখুন',pop:'Popular Items',menuT:'Menu',addc:'Add to Cart',like:'You May Also Like',ycart:'Your Cart',proc:'Proceed to Checkout',cko:'Checkout',paym:'Payment Method',place:'Place Order',cashT:'Cash on Pickup / Delivery',cashS:'You will pay when you receive your order',othS:'You will pay with the chosen method at the shop or on delivery',subt:'Subtotal',fresh:'Freshly Made',popb:'Popular',insT:'Install App',insS:'Add to Home Screen for faster ordering',addNow:'Add Now'});
+const PM=[{k:'cash',n:'Cash (নগদ)',c:'#2e9d5c',s:'💵'},{k:'bkash',n:'bKash (বিকাশ)',c:'#e2136e',s:'b'},{k:'nagad',n:'Nagad (নগদ)',c:'#f6921e',s:'N'},{k:'rocket',n:'Rocket (রকেট)',c:'#8c3494',s:'R'},{k:'card',n:'Card (কার্ড)',c:'#2b6cb0',s:'💳'},{k:'bqr',n:'Bangla QR (বাংলা QR)',c:'#0f8a8a',s:'▦'}];
+let PAY=(()=>{try{return localStorage.getItem('qo_pay')||'cash'}catch(e){return 'cash'}})();if(!PM.some(p=>p.k===PAY))PAY='cash';
+let SV='cart',DQ=1;
+const payName=()=>(PM.find(p=>p.k===PAY)||PM[0]).n;
+const noteOut=()=>{const n=($('#nt')?$('#nt').value.trim():'');return ((n?n+' | ':'')+'Pay: '+payName()).slice(0,200)};
+const cIc=c=>{const s=(c||'').toLowerCase();const M=[[/coffee|কফি|latte|espresso/,'☕'],[/tea|চা/,'🍵'],[/sandwich|স্যান্ডউইচ/,'🥪'],[/burger|বার্গার/,'🍔'],[/snack|fries|স্ন্যাক|নাস্তা|ফ্রাই/,'🍟'],[/pizza|পিৎজা|পিজা/,'🍕'],[/cake|dessert|sweet|মিষ্টি|কেক|ডেজার্ট/,'🍰'],[/drink|juice|shake|cold|পানীয়|জুস|শেক/,'🥤'],[/rice|biryani|ভাত|বিরিয়ানি|খিচুড়ি/,'🍛'],[/noodle|pasta|নুডুলস|পাস্তা/,'🍜'],[/chicken|মুরগি|চিকেন/,'🍗'],[/breakfast|সকাল|ডিম|egg/,'🍳'],[/combo|deal|কম্বো|অফার/,'🎁']];for(const [r,e] of M)if(r.test(s))return e;return '🍽'};
 const t=k=>{const v=TX[lang][k];return v===undefined?TX.bn[k]:v};
 const nmOf=i=>lang==='en'?(i.e||i.n):i.n;
 let C={},Q={},items=[],cart={},cat='',q='',lastO=null,F={tn:'',nm:'',nt:''},R={s:0,c:''},dirty=false;
@@ -115,22 +203,28 @@ async function init(){
  if(!s){$('#app').innerHTML='<div class="w" style="text-align:center;padding-top:30px"><p>'+t('off')+'</p><button class="big" onclick="location.reload()">'+t('retry')+'</button></div>';return}
  apply(s);show()}
 const wt=()=>HM?{b:Q.hw||Q.welcome,e:Q.hwe,tb:Q.ht||Q.tag,te:Q.hte}:{b:Q.welcome,e:Q.we,tb:Q.tag,te:Q.te};
-function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(lang==='en'?(wt().e||t('welcome')):(wt().b||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(lang==='en'?(wt().te||t('tag')):(wt().tb||t('tag')))}</p>`;document.body.appendChild(d);
- const x=()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)};d.onclick=x;setTimeout(x,2200)}
-function hdr(){$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><b>${esc(C.name||(lang==='en'?'Menu':'মেনু'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
- <div class="hb"><button data-lang="bn" class="${lang==='bn'?'on':''}">বাং</button><button data-lang="en" class="${lang==='en'?'on':''}">EN</button></div>
- <div class="hb"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div></header><div class="w" id="bd"></div>`}
-function bestHTML(){let h='';const dl=lang==='en'?(Q.dte||Q.dt):(Q.dt||Q.dte);if(dl)h+=`<div class="cd" style="margin-bottom:10px;animation:none;text-align:center;font-weight:800">🔥 ${esc(dl)}</div>`;
- const L=(C.best||[]).map(id=>items.find(x=>x.id==id)).filter(i=>i&&!soldOut(i));
- if(L.length){const ti=lang==='en'?(Q.bte||"Today's best sellers"):(Q.bt||'আজকের সেরা বিক্রি');h+=`<div style="margin-bottom:10px"><b>⭐ ${esc(ti)}</b><div class="ch" style="padding-top:6px">${L.map(i=>`<button class="bch" data-a="1" data-i="${i.id}">${esc(nmOf(i))} · ${m(i.p)} +</button>`).join('')}</div></div>`}return h}
+function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';
+ d.innerHTML=`<img class="lgf" src="logo-full.png" alt=""><div class="tagline">Good Food · Good Mood</div><p>${esc(C.name||'')}</p><p style="margin-top:4px;opacity:.85">${esc(lang==='en'?(wt().te||t('tag')):(wt().tb||t('tag')))}</p><button class="big gs" id="gs">${t('gs')}</button><button class="sl" id="sl">${t('sl')}</button>`;document.body.appendChild(d);
+ const x=()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)};$('#gs').onclick=x;
+ $('#sl').onclick=e=>{e.stopPropagation();lang=lang==='en'?'bn':'en';ls('qo_lang',lang);d.remove();rerender();splash()};setTimeout(x,12000)}
+function hdr(){$('#app').innerHTML=`<header><img src="logo-mark.png" alt=""><b>${esc(C.name||(lang==='en'?'Menu':'মেনু'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
+  <div class="hb"><button data-lang="bn" class="${lang==='bn'?'on':''}">বাং</button><button data-lang="en" class="${lang==='en'?'on':''}">EN</button></div>
+  <div class="hb"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div>${oid?'':`<button class="cartb" id="hc" aria-label="cart">🛒<i class="cn" id="hcn" style="display:${cnt()?'':'none'}">${cnt()}</i></button>`}</header><div class="w" id="bd"></div>`}
+const PL=()=>(C.best||[]).map(id=>items.find(x=>x.id==id)).filter(i=>i&&!soldOut(i));
+const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)?`<span class="mu">${t('out')}</span>`:n?`<button class="sb" data-a="-1" data-i="${i.id}">−</button><b>${n}</b><button class="sb" data-a="1" data-i="${i.id}">+</button>`:`<button class="plus" data-a="1" data-i="${i.id}" aria-label="+">+</button>`};
+const card=(i,k)=>`<div class="pc ${soldOut(i)?'off':''}" style="animation-delay:${Math.min(k,12)*40}ms"><div class="pim" data-i="${i.id}" data-open="${i.id}" style="--h:${hue(i.id)}">${esc((nmOf(i)||'?')[0])}</div><div class="pb"><div class="nm" data-open="${i.id}">${esc(nmOf(i))}</div><div class="pr2"><span class="pr">${m(i.p)}</span><span class="cq" data-q="${i.id}">${ctl(i)}</span></div></div></div>`;
+function applyImgs(){document.querySelectorAll('.pim[data-i]').forEach(e=>{const id=e.dataset.i,v=imc[id];if(v){e.style.backgroundImage='url("'+v+'")';e.textContent=''}else if(v===undefined&&!e.dataset.r){e.dataset.r=1;const it=items.find(x=>x.id==id);if(it)img(it)}})}
+function heroHTML(){const w=wt();return `<div class="hero2"><div class="hx"><h2>${esc(lang==='en'?(w.e||t('welcome')):(w.b||t('welcome')))}</h2><p>${esc(lang==='en'?(w.te||t('tag')):(w.tb||t('tag')))}</p><span class="hbdg">☕ ${greet()}</span></div><img class="hm" src="logo-mark.png" alt=""></div>`}
 function list(){
- const cs=[...new Set(items.map(i=>i.c||t('other')))];
- let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
- bestHTML()+homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
- $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar();showInst()}
+ const cs=[...new Set(items.map(i=>i.c||t('other')))],dl=lang==='en'?(Q.dte||Q.dt):(Q.dt||Q.dte),pl=PL(),browse=!cat&&!q;
+ let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+heroHTML()+homeBar()+(dl?`<div class="dealb">🔥 ${esc(dl)}</div>`:'')
+ +`<div class="srch"><input id="sq" placeholder="${t('search')}" value="${esc(q)}"></div><div class="catrow"><div class="cat ${cat?'':'sel'}" data-c=""><div class="ci2">🍽</div>${t('all')}</div>${cs.map(c=>`<div class="cat ${cat==c?'sel':''}" data-c="${esc(c)}"><div class="ci2">${cIc(c)}</div>${esc(c)}</div>`).join('')}</div>`
+ +(pl.length&&browse?`<div class="sec"><h3>${esc(lang==='en'?(Q.bte||t('pop')):(Q.bt||t('pop')))}</h3></div><div class="pscroll">${pl.map(card).join('')}</div>`:'')
+ +`<div class="sec"><h3>${cat?esc(cat):t('menuT')}</h3></div><div class="pgrid" id="gr"></div><div class="spc"></div>`;
+ $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar();showInst();applyImgs()}
 const stand=matchMedia('(display-mode: standalone)').matches||navigator.standalone,isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();DI=e;showInst()});
-function showInst(){const w=$('#instw');if(!w||stand||!(DI||isIos))return;w.innerHTML=`<button class="big" id="inst" style="margin:0 0 10px">${t('inst')}</button>`}
+function showInst(){const w=$('#instw');if(!w||stand||!(DI||isIos))return;w.innerHTML=`<div class="inst"><img src="logo-mark.png" alt=""><div><b>${t('insT')}</b><small>${t('insS')}</small></div><button id="inst">${t('addNow')}</button></div>`}
 function homeBar(){if(!HM)return '';const lk=(h,x)=>`<a class="lk" href="${h}" target="_blank" rel="noopener">${x}</a>`;let x='';
  if(Q.addr)x+=`<div class="mu" style="margin-bottom:4px">📍 ${esc(Q.addr)}</div>`;
  if(Q.ph)x+=lk('tel:'+esc(String(Q.ph).replace(/[^\d+]/g,'')),t('callus'));
@@ -138,16 +232,15 @@ function homeBar(){if(!HM)return '';const lk=(h,x)=>`<a class="lk" href="${h}" t
  if(Q.dl&&(+Q.fee>0||+Q.rad>0||+Q.min>0))x+=`<div class="mu" style="margin-top:8px;font-size:.85em">${t('dl')}${+Q.rad>0?' · ≤'+(+Q.rad)+t('km'):''}${+Q.fee>0?' · '+t('fee')+' '+m(+Q.fee):''}${+Q.free>0?' · '+m(+Q.free)+'+ '+t('free'):''}${+Q.min>0?' · min '+m(+Q.min):''}</div>`;
  return `<div id="instw"></div>`+(x?`<div class="cd" style="margin-bottom:10px;animation:none">${x}</div>`:'')}
 function mkManifest(){try{const u=new URL(location.href),sc=u.origin+u.pathname.replace(/[^/]*$/,''),nm=C.name||'Menu';
- const mf={name:nm,short_name:nm.slice(0,12),start_url:u.origin+u.pathname+'?s='+encodeURIComponent(uid)+'&h=1',scope:sc,display:'standalone',background_color:'#0b2a2e',theme_color:C.color||'#0b2a2e',icons:[{src:sc+'logo-192.png',sizes:'192x192',type:'image/png'},{src:sc+'logo-512.png',sizes:'512x512',type:'image/png'}]};
+ const mf={name:nm,short_name:nm.slice(0,12),start_url:u.origin+u.pathname+'?s='+encodeURIComponent(uid)+'&h=1',scope:sc,display:'standalone',background_color:'#06301f',theme_color:C.color||'#06301f',icons:[{src:sc+'logo-192.png',sizes:'192x192',type:'image/png'},{src:sc+'logo-512.png',sizes:'512x512',type:'image/png'}]};
  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}}
 const soldOut=i=>i.s!==''&&i.s!=null&&i.s<=0;
-const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)?`<span class="mu">${t('out')}</span>`:n?`<button data-a="-1" data-i="${i.id}">−</button><b>${n}</b><button data-a="1" data-i="${i.id}">+</button>`:`<button class="ad" data-a="1" data-i="${i.id}">${t('add')}</button>`};
 function grid(){const qq=q.toLowerCase(),L=items.filter(i=>(!cat||(i.c||t('other'))==cat)&&((i.n+'').toLowerCase().includes(qq)||((i.e||'')+'').toLowerCase().includes(qq)));
- $('#gr').innerHTML=L.map((i,k)=>`<div class="cd ${soldOut(i)?'off':''}" style="animation-delay:${Math.min(k,12)*40}ms"><div class="av" id="im${i.id}" style="background:hsl(${hue(i.id)} 42% 34%)">${esc((nmOf(i)||'?')[0])}</div><div class="nm">${esc(nmOf(i))}</div><div class="pr">${m(i.p)}</div><div class="ct" id="q${i.id}">${ctl(i)}</div></div>`).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
+ $('#gr').innerHTML=L.map(card).join('')||`<p class="mu">${t('none')}</p>`;applyImgs()}
 const imc={},imw=[];let imq=0;async function img(i){try{if(imc[i.id]===undefined){await new Promise(r=>{if(imq<4){imq++;r()}else imw.push(r)});try{if(imc[i.id]===undefined){const v=await Promise.race([imgGet(i.id),new Promise(r=>setTimeout(()=>r(undefined),12000))]);if(v!==undefined)imc[i.id]=v}}finally{const n=imw.shift();if(n)n();else imq--}}
- if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}}catch(e){}}
+ if(imc[i.id])applyImgs()}catch(e){}}
 /* ---------- ভাসমান কার্ট বাটন (ধরে সরানো যায়) ---------- */
-function bar(){const b=$('#bar');if(!cnt()||oid||$('#sh')){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>${t('cartN')(cnt())}</span><span>${m(sub())} · ${t('view')}</span><small>↔ ${t('tapDrag')}</small></div>`}
+function bar(){const hn=$('#hcn');if(hn){hn.textContent=cnt();hn.style.display=cnt()?'':'none'}const b=$('#bar');if(!cnt()||oid||$('#sh')||$('#det')){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>${t('cartN')(cnt())}</span><span>${m(sub())} · ${t('view')}</span><small>↔ ${t('tapDrag')}</small></div>`}
 (function(){const b=$('#bar');let dn=false,mv=false,sx=0,sy=0,ox=0,oy=0;
  const put=(x,y)=>{const w=b.offsetWidth,h=b.offsetHeight;x=Math.max(4,Math.min(innerWidth-w-4,x));y=Math.max(4,Math.min(innerHeight-h-4,y));b.style.left=x+'px';b.style.top=y+'px';b.style.right='auto';b.style.bottom='auto'};
  try{const p=JSON.parse(ls('qo_bpos')||'null');if(p)put(p.x,p.y)}catch(e){}
@@ -158,7 +251,7 @@ function bar(){const b=$('#bar');if(!cnt()||oid||$('#sh')){b.innerHTML='';return
  b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
  b.addEventListener('click',()=>{if(mv){mv=false;return}if(cnt())sheet()})})();
 function add(id,a){const it=items.find(x=>x.id==id),x=cart[id]||(cart[id]={id,n:it.n,e:it.e,p:it.p,q:0});x.q=Math.max(0,x.q+a);if(it.s!==''&&it.s!=null&&x.q>it.s)x.q=it.s;if(!x.q)delete cart[id];saveCart();
- const e=$('#q'+id);if(e)e.innerHTML=ctl(it);bar();if($('#sh'))sheet()}
+ document.querySelectorAll('[data-q="'+id+'"]').forEach(e=>e.innerHTML=ctl(it));bar();if($('#sh'))sheet()}
 document.addEventListener('click',e=>{const t0=e.target;if(!t0.dataset)return;
  if(t0.dataset.a)add(t0.dataset.i,+t0.dataset.a);
  else if(t0.dataset.lang){if(lang!==t0.dataset.lang){lang=t0.dataset.lang;ls('qo_lang',lang);rerender()}}
@@ -166,12 +259,20 @@ document.addEventListener('click',e=>{const t0=e.target;if(!t0.dataset)return;
  else if(t0.dataset.star){R.s=+t0.dataset.star;paint()}
  else if(t0.dataset.ty){H.ty=t0.dataset.ty;saveH();sheet()}
  else if(t0.id==='lc')getLoc();
- else if(t0.id==='inst'){if(DI){DI.prompt();DI=null;t0.remove()}else alert(t('iosTip'))}
+ else if(t0.id==='inst'){if(DI){DI.prompt();DI=null;(t0.closest('.inst')||t0).remove()}else alert(t('iosTip'))}
  else if(t0.id==='wab'){const o=collect();if(o)open('https://wa.me/'+Q.wa+'?text='+encodeURIComponent(waText(o)),'_blank')}
- else if(t0.dataset.c!==undefined&&t0.closest('.ch')){cat=t0.dataset.c;list()}});
+ else if(t0.dataset.open)openItem(t0.dataset.open)
+  else if(t0.dataset.pay){PAY=t0.dataset.pay;ls('qo_pay',PAY);sheet()}
+  else if(t0.id==='hc')openCart()
+  else if(t0.id==='dcl'||t0.id==='det')closeDet()
+  else if(t0.id==='dm'||t0.id==='dp'){DQ=Math.max(1,DQ+(t0.id==='dp'?1:-1));const e=$('#dqn');if(e)e.textContent=DQ}
+  else if(t0.id==='dadd'){const id=t0.dataset.i,cur=cart[id]?cart[id].q:0;add(id,DQ-cur);closeDet()}
+  else if(t0.id==='pc'){SV='co';sheet()}
+  else if(t0.id==='bk'){SV='cart';sheet()}
+  else if(t0.dataset.c!==undefined&&t0.closest('.catrow')){cat=t0.dataset.c;list()}});
 document.addEventListener('input',e=>{const i=e.target.id;if(i==='tn'){F.tn=e.target.value;saveF()}else if(i==='nm'){F.nm=e.target.value;saveF()}else if(i==='nt'){F.nt=e.target.value;saveF()}else if(i==='ph'){H.ph=e.target.value;saveH()}else if(i==='ad'){H.ad=e.target.value;saveH()}else if(i==='rc')R.c=e.target.value});
 document.addEventListener('focusout',e=>{if(e.target.id==='rc'&&dirty){dirty=false;setTimeout(paint,150)}});
-const closeSh=()=>{$('#ovl').innerHTML='';bar()};
+const closeSh=()=>{SV='cart';$('#ovl').innerHTML='';bar()};const closeDet=()=>{$('#ovd').innerHTML='';bar()};const openCart=()=>{if(!cnt())return;SV='cart';sheet()};
 function getLoc(){const b=$('#lc');if(!navigator.geolocation){alert(t('nogeo'));return}if(b){b.disabled=true;b.textContent=t('locing')}
  navigator.geolocation.getCurrentPosition(p=>{H.loc={lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),acc:Math.round(p.coords.accuracy)};zoneInfo();sheet()},()=>{alert(t('locfail'));sheet()},{enableHighAccuracy:true,timeout:15000,maximumAge:0})}
 function collect(){const tn=tbl||($('#tn')?$('#tn').value.trim():''),o={type:'dine',table:tn||'-',fee:0};
@@ -183,24 +284,39 @@ function collect(){const tn=tbl||($('#tn')?$('#tn').value.trim():''),o={type:'di
  o.total=Math.round((sub()+o.fee)*100)/100;return o}
 function waText(o){const L=['🛒 '+(C.name||'')+' — '+(o.type==='delivery'?'ডেলিভারি অর্ডার':o.type==='pickup'?'পিকআপ অর্ডার':'অর্ডার')];
  Object.values(cart).forEach(x=>L.push(x.q+' × '+x.n+' = '+m(x.p*x.q)));L.push('সাবটোটাল: '+m(sub()));if(o.fee)L.push('ডেলিভারি চার্জ: '+m(o.fee));L.push('সর্বমোট: '+m(o.total));
- const nm=$('#nm').value.trim(),nt=$('#nt').value.trim();if(nm)L.push('নাম: '+nm);if(o.phone)L.push('ফোন: '+o.phone);if(o.addr)L.push('ঠিকানা: '+o.addr);if(o.loc)L.push('লোকেশন: https://www.google.com/maps/search/?api=1&query='+o.loc.lat+','+o.loc.lng);if(o.table&&o.table!=='-')L.push('টেবিল: '+o.table);if(nt)L.push('নোট: '+nt);return L.join('\n')}
-function sheet(){if(!cnt()){closeSh();return}const need=!HM&&Q.needTable!==false&&!tbl,closed=Q.open===false||(HM&&!opts().length);
+ const nm=$('#nm').value.trim(),nt=$('#nt').value.trim();if(nm)L.push('নাম: '+nm);if(o.phone)L.push('ফোন: '+o.phone);if(o.addr)L.push('ঠিকানা: '+o.addr);if(o.loc)L.push('লোকেশন: https://www.google.com/maps/search/?api=1&query='+o.loc.lat+','+o.loc.lng);if(o.table&&o.table!=='-')L.push('টেবিল: '+o.table);if(nt)L.push('নোট: '+nt);L.push('Payment: '+payName());return L.join('\n')}
+function openItem(id){const it=items.find(x=>x.id==id);if(!it)return;DQ=(cart[id]&&cart[id].q)||1;detail(id)}
+function detail(id){const it=items.find(x=>x.id==id);if(!it)return;const bs=(C.best||[]).some(b=>b==id),so=soldOut(it);
+ let al=items.filter(x=>x.id!=id&&!soldOut(x)&&(x.c||'')==(it.c||'')).slice(0,8);if(al.length<3)al=items.filter(x=>x.id!=id&&!soldOut(x)).slice(0,8);
+ const ds=(lang==='en'?(it.ed||it.d):(it.d||it.ed))||'';
+ $('#ovd').innerHTML=`<div class="ov" id="det"><div class="sh dt"><div class="pim xl" data-i="${id}" style="--h:${hue(id)}">${esc((nmOf(it)||'?')[0])}<div class="hd2"><button class="ib" id="dcl" aria-label="close">←</button></div></div><div class="in"><div class="tp"><h2>${esc(nmOf(it))}</h2><span class="pr">${m(it.p)}</span></div>${ds?`<p class="mu" style="margin:6px 0">${esc(ds)}</p>`:''}<div class="tags">${bs?`<span>🔥 ${t('popb')}</span>`:''}<span>✨ ${t('fresh')}</span>${it.c?`<span>${esc(it.c)}</span>`:''}</div>
+ <div class="dact"><div class="dq"><button class="sb" id="dm">−</button><b id="dqn">${DQ}</b><button class="sb" id="dp">+</button></div><button class="big" id="dadd" data-i="${id}" ${so?'disabled style="opacity:.5"':''}>${so?t('out'):t('addc')}</button></div>
+ ${al.length?`<h4>${t('like')}</h4><div class="pscroll">${al.map(card).join('')}</div>`:''}</div></div></div>`;bar();applyImgs()}
+function sheet(){if(!cnt()){closeSh();return}const sc0=$('#sh .sh')?$('#sh .sh').scrollTop:0;
+ const need=!HM&&Q.needTable!==false&&!tbl,closed=Q.open===false||(HM&&!opts().length);
  if(HM&&opts().length&&opts().indexOf(H.ty)<0)H.ty=opts()[0];
- const dlv=HM&&H.ty==='delivery',fe=feeNow(),z=dlv?zoneInfo():null;
- const homeHTML=HM?`<div class="tg">${opts().map(o=>`<button data-ty="${o}" class="${H.ty===o?'on':''}">${t(o==='pickup'?'pk':'dl')}</button>`).join('')}</div><label class="mu">${t('ph')}</label><input id="ph" type="tel" inputmode="tel" maxlength="16" placeholder="01XXXXXXXXX" value="${esc(H.ph)}">
-  ${dlv?`<label class="mu">${t('ad')}</label><input id="ad" maxlength="200" value="${esc(H.ad)}"><button class="big" id="lc" style="background:var(--ln);color:var(--ink)">${t('mylc')}</button><div class="mu" style="margin:6px 0">${H.loc?t('lcok')+(H.loc.d!=null?' · '+H.loc.d+t('km'):'')+'<br>':''}${z.msg?esc(z.msg):''}</div>${+Q.min>0&&sub()<+Q.min?`<div style="color:#ffb4a8;margin:4px 0">${t('minmsg')(m(+Q.min))}</div>`:''}`:(Q.addr?`<div class="mu" style="margin:8px 0">${t('shopat')}: ${esc(Q.addr)}</div>`:'')}`:'';
- $('#ovl').innerHTML=`<div class="ov" id="sh"><div class="sh"><b style="font-size:18px">${t('yours')}</b>${Object.values(cart).map(x=>`<div class="row"><span>${esc(nmOf(x))}<br><span class="mu">${m(x.p)}</span></span><button class="qb" data-a="-1" data-i="${x.id}">−</button><b>${x.q}</b><button class="qb" data-a="1" data-i="${x.id}">+</button></div>`).join('')}
- <div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span><b>${t('total')}</b></span><b style="font-size:19px">${m(sub())}</b></div>
- ${dlv?`<div class="row"><span>${t('fee')}</span><b>${fe?m(fe):t('free')}</b></div><div class="row"><span><b>${t('gtot')}</b></span><b style="font-size:19px">${m(sub()+fe)}</b></div>`:''}
- ${homeHTML}${need?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" placeholder="${t('tph')}" value="${esc(F.tn)}">`:''}<label class="mu">${t('yname')}</label><input id="nm" maxlength="60" value="${esc(F.nm)}"><label class="mu">${t('note')}</label><input id="nt" maxlength="150" value="${esc(F.nt)}">
- <button class="big" id="sd" ${closed?'disabled style="opacity:.5"':''}>${closed?t('closedBtn'):t('confirm')}</button>${Q.wa?`<button class="big" id="wab" style="background:#25d366;color:#05301a">${t('wa')}</button>`:''}<button class="big" id="cl" style="background:var(--ln);color:var(--ink)">${t('back')}</button></div></div>`;
- $('#cl').onclick=closeSh;$('#sd').onclick=send;$('#sh').onclick=e=>{if(e.target.id=='sh')closeSh()};bar()}
+ const dlv=HM&&H.ty==='delivery',fe=feeNow(),z=dlv?zoneInfo():null,co=SV==='co';
+ const rows=Object.values(cart).map(x=>`<div class="crow"><div class="pim sm" data-i="${x.id}" style="--h:${hue(x.id)}">${esc((nmOf(x)||'?')[0])}</div><div class="ci"><div class="nm">${esc(nmOf(x))}</div><div class="pr">${m(x.p)}</div><div class="qs"><button class="qb" data-a="-1" data-i="${x.id}">−</button><b>${x.q}</b><button class="qb" data-a="1" data-i="${x.id}">+</button></div></div><button class="tr" data-a="-9999" data-i="${x.id}" aria-label="remove">🗑</button></div>`).join('');
+ const sum=`<div class="sm2"><div class="row"><span>${t('subt')}</span><b>${m(sub())}</b></div>${co&&dlv?`<div class="row"><span>${t('fee')}</span><b>${fe?m(fe):t('free')}</b></div>`:''}<div class="row tt"><span><b>${t('total')}</b></span><b>${m(sub()+(co?fe:0))}</b></div></div>`;
+ let body;
+ if(!co){body=`<div class="topb"><button class="ib" id="cl">←</button><b>${t('ycart')}</b></div><div class="in">${rows}${sum}<button class="big" id="pc" style="margin-top:14px">${t('proc')}</button></div>`}
+ else{
+  const homeHTML=HM?`<div class="tg">${opts().map(o=>`<button data-ty="${o}" class="${H.ty===o?'on':''}">${t(o==='pickup'?'pk':'dl')}</button>`).join('')}</div><label class="mu">${t('ph')}</label><input id="ph" type="tel" inputmode="tel" maxlength="16" placeholder="01XXXXXXXXX" value="${esc(H.ph)}">
+   ${dlv?`<label class="mu">${t('ad')}</label><input id="ad" maxlength="200" value="${esc(H.ad)}"><button class="big alt" id="lc">${t('mylc')}</button><div class="mu" style="margin:6px 0">${H.loc?t('lcok')+(H.loc.d!=null?' · '+H.loc.d+t('km'):'')+'<br>':''}${z.msg?esc(z.msg):''}</div>${+Q.min>0&&sub()<+Q.min?`<div style="color:#ffb4a8;margin:4px 0">${t('minmsg')(m(+Q.min))}</div>`:''}`:(Q.addr?`<div class="mu" style="margin:8px 0">${t('shopat')}: ${esc(Q.addr)}</div>`:'')}`:'';
+  const pays=PM.map(p=>`<div class="pay ${PAY===p.k?'sel':''}" data-pay="${p.k}"><div class="lgo" style="background:${p.c}">${p.s}</div><b>${p.n}</b><span class="rd"></span></div>`).join('');
+  const pn=PAY==='cash'?`<b>${t('cashT')}</b><br><span class="mu">${t('cashS')}</span>`:`<span>${t('othS')}</span>`;
+  body=`<div class="topb"><button class="ib" id="bk">←</button><b>${t('cko')}</b></div><div class="in">${homeHTML}${need?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" placeholder="${t('tph')}" value="${esc(F.tn)}">`:''}<label class="mu">${t('yname')}</label><input id="nm" maxlength="60" value="${esc(F.nm)}"><label class="mu">${t('note')}</label><input id="nt" maxlength="150" value="${esc(F.nt)}">
+  <div class="pyh">${t('paym')}</div>${pays}<div class="pnote"><span>💡</span><div>${pn}</div></div>${sum}
+  <button class="big" id="sd" style="margin-top:14px" ${closed?'disabled style="opacity:.5"':''}>${closed?t('closedBtn'):t('place')}</button>${Q.wa?`<button class="big wa" id="wab">${t('wa')}</button>`:''}</div>`}
+ $('#ovl').innerHTML=`<div class="ov" id="sh"><div class="sh">${body}</div></div>`;
+ const cl=$('#cl');if(cl)cl.onclick=closeSh;const sd=$('#sd');if(sd)sd.onclick=send;$('#sh').onclick=e=>{if(e.target.id=='sh')closeSh()};
+ const sx=$('#sh .sh');if(sx)sx.scrollTop=sc0;applyImgs();bar()}
 async function send(){
  const o=collect();if(!o)return;const tn=o.table;
  try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<8000){alert(t('wait'));return}}catch(e){}
  const sb=$('#sd');sb.disabled=true;
  const id=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
- const data=JSON.parse(JSON.stringify({uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),...o}));
+ const data=JSON.parse(JSON.stringify({uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),note:noteOut(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),...o}));
  /* আগে ফোনে সেভ: নেট/ফায়ারবেস যা-ই হোক অর্ডার হারাবে না, ট্র্যাকিং পাতা নিজে পাঠিয়ে দেবে */
  ls('qo_o_'+id,JSON.stringify({d:data,ack:false}));
  let ok=false,perr=null;
@@ -283,6 +399,6 @@ setInterval(()=>{if(oid&&lastO&&lastO.eta&&lastO.type!=='dine'&&lastO.status!=='
 /* অফলাইন প্রস্তুতি: সার্ভিস ওয়ার্কার চালু করে Firebase ফাইল ও ভিডিও ক্যাশে রাখা */
 const regSW=()=>{navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
  const B='https://www.gstatic.com/firebasejs/10.12.2/';['firebase-app.js','firebase-firestore.js','firebase-component.js','firebase-logger.js','firebase-util.js'].forEach(f=>fetch(B+f,{mode:'no-cors'}).catch(()=>{}));
- ['wait.mp4','ready.mp4','served.mp4','wait.jpg','ready.jpg','served.jpg','logo-192.png'].forEach(f=>fetch(f).catch(()=>{}))}).catch(()=>{})};
+ ['wait.mp4','ready.mp4','served.mp4','wait.jpg','ready.jpg','served.jpg','logo-192.png','logo-mark.png','logo-full.png','theme.css'].forEach(f=>fetch(f).catch(()=>{}))}).catch(()=>{})};
 if('serviceWorker' in navigator){document.readyState==='complete'?regSW():addEventListener('load',regSW)}
 </script></body></html>

@@ -1,0 +1,88 @@
+/* Musafir Café — Emerald & Gold premium theme (shared by POS + customer menu) */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600;1,700&family=Hind+Siliguri:wght@400;600;700&display=swap');
+:root,:root[data-theme="dark"],:root[data-theme="light"]{
+ --bg:#04170f;--card:#0b2a1d;--ink:#f7edd5;--mute:#a9bba6;--mu:#a9bba6;--line:#235139;--ln:#235139;
+ --ac:#e3b45a;--acink:#2a1a00;--soft:rgba(227,180,90,.14);--warn:#ff9b86;--blue:#9fd0ff;
+ --head:#06301f;--hd:#06301f;--hink:#f7edd5;--gold1:#f6dc98;--gold2:#e3b45a;--gold3:#b8812c;
+ --glass:linear-gradient(160deg,rgba(18,70,46,.78),rgba(7,34,22,.88));
+ --shadow:0 10px 30px rgba(0,0,0,.45),inset 0 1px 0 rgba(246,220,152,.18);
+ color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){color-scheme:dark}}
+:root[data-theme="light"]{--bg:#f6efdc;--card:#fffaf0;--ink:#12301f;--mute:#5f6f5e;--mu:#5f6f5e;--line:#dccfa8;--ln:#dccfa8;
+ --ac:#0f5a3a;--acink:#fff4d6;--soft:rgba(15,90,58,.1);--warn:#b3321f;--blue:#2a4aa8;--head:#06301f;--hd:#06301f;
+ --glass:linear-gradient(160deg,#fffdf6,#f7eed6);--shadow:0 8px 24px rgba(60,45,10,.15),inset 0 1px 0 #fff;color-scheme:light}
+html{background:var(--bg)}
+body{background:
+ radial-gradient(900px 520px at 85% -8%,rgba(227,180,90,.20),transparent 60%),
+ radial-gradient(700px 600px at -10% 20%,rgba(34,130,82,.28),transparent 65%),
+ radial-gradient(800px 500px at 50% 115%,rgba(227,180,90,.12),transparent 60%),var(--bg) fixed;
+ font-family:"Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif}
+:root[data-theme="light"] body{background:radial-gradient(800px 480px at 90% -10%,rgba(227,180,90,.35),transparent 60%),radial-gradient(700px 500px at -10% 30%,rgba(34,130,82,.14),transparent 65%),var(--bg) fixed}
+/* leaf pattern overlay */
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.07;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M20 90C20 50 50 25 90 22 92 62 62 90 20 90Z' fill='none' stroke='%23e3b45a' stroke-width='1.2'/%3E%3Cpath d='M20 90L72 40' stroke='%23e3b45a' stroke-width='1'/%3E%3Ccircle cx='100' cy='100' r='2' fill='%23e3b45a'/%3E%3C/svg%3E");background-size:120px}
+body>*{position:relative;z-index:1}
+body>#sp,body>#wel,body>.ov,body>#cfx,body>#toast,body>#bar{position:fixed}
+/* header */
+header{background:linear-gradient(180deg,#0a4a2f,#06301f 70%,#04251a)!important;border-bottom:1px solid rgba(227,180,90,.55);box-shadow:0 6px 24px rgba(0,0,0,.45),0 1px 0 rgba(246,220,152,.25) inset}
+header img,.brand img{width:40px;height:40px;object-fit:contain;border-radius:12px;background:radial-gradient(circle at 50% 30%,#14603f,#04201a);padding:3px;border:1px solid rgba(227,180,90,.6);box-shadow:0 0 14px rgba(227,180,90,.3)}
+header h1,header b,.brand h1{font-family:"Cormorant Garamond","Hind Siliguri",serif;font-style:italic;font-weight:700;font-size:23px;letter-spacing:.3px;background:linear-gradient(180deg,var(--gold1),var(--gold3));-webkit-background-clip:text;background-clip:text;color:transparent}
+/* surfaces */
+.p,.cd,.box,.sheet,.sh,.side,.sum,.pt,.tbar,.cp,.qc,.pm{background:var(--glass)!important;border:1px solid rgba(227,180,90,.28)!important;box-shadow:var(--shadow)}
+.p,.cd{border-radius:18px!important;transition:transform .2s,box-shadow .2s,border-color .2s}
+.p:hover:not(:disabled),.cd:hover{border-color:var(--gold2)!important;box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 0 1px rgba(227,180,90,.35),0 0 24px rgba(227,180,90,.18)}
+.sheet,.sh{border-radius:26px 26px 0 0!important;border-bottom:0!important;background:linear-gradient(180deg,#0d3a27,#06241a)!important}
+:root[data-theme="light"] .sheet{background:linear-gradient(180deg,#fffdf6,#f6edd2)!important}
+.ov,.ov.show{backdrop-filter:blur(6px);background:rgba(2,14,9,.72)}
+.pimg,.av{border-radius:14px;box-shadow:0 6px 16px rgba(0,0,0,.4);border:1px solid rgba(227,180,90,.25)}
+.p b,.nm{color:var(--ink)}.pr,.p span,.tbar b,.tot b,.payh{color:var(--gold2)}
+:root[data-theme="light"] .pr,:root[data-theme="light"] .p span,:root[data-theme="light"] .tbar b{color:var(--ac)}
+/* gold buttons */
+button.pri,button.pay,.big,.ad,.hb,#bar,.bar,.qadd button.pri,.cp button.pay,button.go{
+ background:linear-gradient(135deg,var(--gold1) 0%,var(--gold2) 45%,var(--gold3) 100%)!important;color:#2a1a00!important;border:1px solid #f6dc98!important;
+ font-weight:800;box-shadow:0 8px 22px rgba(184,129,44,.35),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden;text-shadow:0 1px 0 rgba(255,255,255,.25)}
+:root[data-theme="light"] button.pri,:root[data-theme="light"] button.pay,:root[data-theme="light"] .big,:root[data-theme="light"] .ad,:root[data-theme="light"] #bar,:root[data-theme="light"] .bar{background:linear-gradient(135deg,#17805a,#0f5a3a 60%,#0a432b)!important;color:#fff4d6!important;border-color:#0f5a3a!important;text-shadow:none}
+button.pri::after,button.pay::after,.big::after,#bar::after,.bar::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);animation:shine 4.5s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%,70%{left:-120%}100%{left:140%}}
+button{transition:transform .12s,filter .15s}button:active:not(:disabled){transform:scale(.97)}
+button:not(.pri):not(.pay):not(.big):not(.ad):not(.hb){}
+/* chips, categories, tabs */
+.chip,.ch span,.cats button,.lg,.bch{background:rgba(11,42,29,.85);border-color:rgba(227,180,90,.35)!important;color:var(--ink)}
+.ch .on,.cats button.on,.lg button.on,.tg .on,.on.chip{background:linear-gradient(135deg,var(--gold1),var(--gold2))!important;color:#2a1a00!important;border-color:var(--gold1)!important;box-shadow:0 4px 14px rgba(227,180,90,.35)}
+nav,#ib nav{background:linear-gradient(180deg,rgba(8,46,30,.96),rgba(4,26,17,.98))!important;border-top:1px solid rgba(227,180,90,.5);backdrop-filter:blur(10px);box-shadow:0 -8px 28px rgba(0,0,0,.5)}
+nav button,#ib nav button{color:#b9c8b2;background:none!important;border:0!important;box-shadow:none!important}
+nav button.on,#ib nav button.on{color:var(--gold1)!important;text-shadow:0 0 14px rgba(227,180,90,.7)}
+nav button.on .i,#ib nav button.on .i{filter:drop-shadow(0 0 6px rgba(227,180,90,.8))}
+input,select,textarea{background:rgba(3,22,14,.75)!important;border:1px solid rgba(227,180,90,.3)!important;color:var(--ink)!important;border-radius:12px}
+:root[data-theme="light"] input,:root[data-theme="light"] select{background:#fffdf5!important;border-color:#d9c88f!important}
+input:focus,select:focus{border-color:var(--gold2)!important;box-shadow:0 0 0 3px rgba(227,180,90,.2);outline:0}
+.ct button:not(.ad),.qb,.q button{background:rgba(227,180,90,.16)!important;color:var(--gold1)!important;border:1px solid rgba(227,180,90,.4)!important}
+::-webkit-scrollbar-thumb{background:rgba(227,180,90,.4);border-radius:9px}
+#toast{background:linear-gradient(135deg,var(--gold1),var(--gold2))!important;color:#2a1a00!important;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+/* splash / welcome */
+#sp,#wel{background:radial-gradient(circle at 50% 30%,#14603f 0%,#08331f 45%,#031209 100%)!important;overflow:hidden}
+#sp::before,#wel::before{content:"";position:absolute;inset:0;opacity:.14;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 120 120'%3E%3Cpath d='M20 90C20 50 50 25 90 22 92 62 62 90 20 90Z' fill='none' stroke='%23e3b45a' stroke-width='1.2'/%3E%3Cpath d='M20 90L72 40' stroke='%23e3b45a'/%3E%3C/svg%3E");background-size:160px;animation:drift 40s linear infinite}
+@keyframes drift{to{background-position:160px 320px}}
+#sp::after,#wel::after{content:"";position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(227,180,90,.28),transparent 65%);top:50%;left:50%;transform:translate(-50%,-62%);animation:glow 3.2s ease-in-out infinite alternate;pointer-events:none}
+@keyframes glow{from{opacity:.55;transform:translate(-50%,-62%) scale(.92)}to{opacity:1;transform:translate(-50%,-62%) scale(1.08)}}
+#sp>*,#wel>*{position:relative;z-index:2}
+#sp img.lgf,#wel img.lgf{width:min(62vw,280px);height:auto;border-radius:0;box-shadow:none;filter:drop-shadow(0 6px 22px rgba(227,180,90,.45));animation:pop .9s both}
+#sp h1,#wel h2{font-family:"Cormorant Garamond","Hind Siliguri",serif;font-style:italic;color:var(--gold1)!important}
+#sp p,#wel p{color:#e8f0e2!important}
+.tagline{letter-spacing:.35em;font-size:13px;color:#e8f0e2;opacity:.9;margin-top:6px}
+/* order progress + status */
+.stp i{background:rgba(227,180,90,.15);border:1px solid rgba(227,180,90,.4)}
+.stp .d i{background:linear-gradient(135deg,var(--gold1),var(--gold3))!important;color:#2a1a00;box-shadow:0 0 16px rgba(227,180,90,.6)}
+.ok{background:radial-gradient(circle at 35% 30%,#7be0a6,#1f9d62)!important;box-shadow:0 0 0 8px rgba(80,200,130,.18),0 0 40px rgba(80,200,130,.45);color:#fff!important}
+.vh .fr{box-shadow:0 16px 44px #000a,0 0 0 3px var(--gold2),0 0 34px rgba(227,180,90,.45)}
+.bdg{background:linear-gradient(135deg,var(--gold1),var(--gold3));color:#2a1a00;box-shadow:0 4px 14px rgba(227,180,90,.4)}
+/* Deals & Combo */
+.deal{position:relative;border-radius:22px;padding:16px;margin:6px 0 14px;overflow:hidden;border:1px solid rgba(227,180,90,.55);
+ background:radial-gradient(420px 220px at 100% 0%,rgba(227,180,90,.28),transparent 60%),linear-gradient(150deg,#0f4a31,#062a1b);box-shadow:0 14px 34px rgba(0,0,0,.5),0 0 28px rgba(227,180,90,.15)}
+.deal .tg2{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,var(--gold1),var(--gold3));color:#2a1a00;font-weight:800;font-size:12px;padding:4px 12px;border-radius:99px}
+.deal h3{margin:0 0 2px;font-family:"Cormorant Garamond","Hind Siliguri",serif;font-style:italic;font-size:24px;color:var(--gold1)}
+.deal .pz{font-size:28px;font-weight:800;color:var(--gold1)}.deal s{opacity:.6;margin-left:8px;font-size:15px}
+.deal .sv{display:inline-block;background:#d94a2b;color:#fff;border-radius:8px;padding:2px 10px;font-size:12px;font-weight:800;margin-left:8px}
+.deal ul{margin:8px 0 12px;padding-left:18px;color:#d6e4d0;font-size:.92em}
+.deal button{width:100%;padding:13px;border-radius:14px;font-weight:800}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
