@@ -55,7 +55,7 @@ header b{font-size:19px;font-weight:800;color:#fff;letter-spacing:0}
 .ch span{border-radius:20px;padding:7px 15px;background:var(--card);border:1px solid var(--ln);font-weight:600;box-shadow:none;backdrop-filter:none}
 .ch .on{background:var(--hd);border-color:var(--hd);color:#fff;box-shadow:none;font-weight:600}
 #sq{border-radius:12px;padding:12px;background:var(--card)}
-#gr{grid-template-columns:repeat(auto-fill,minmax(var(--cw),1fr));gap:10px}
+#gr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:1000px;margin:0 auto}@media (min-width:640px){#gr{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1024px){#gr{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .p{color:var(--ink);text-align:left;padding:12px;min-height:calc(132px*var(--z));display:flex;flex-direction:column;align-items:flex-start;gap:6px;position:relative;border-radius:18px;background:var(--card);border:1px solid var(--ln);box-shadow:0 1px 2px rgba(0,0,0,.25);animation:up .35s both;min-width:0}
 .p:active{transform:scale(.97)}.p *{pointer-events:none}.p .mn{pointer-events:auto}
 .p .av{width:calc(66px*var(--z));height:calc(66px*var(--z));aspect-ratio:auto;border-radius:14px;object-fit:cover;font-size:calc(21px*var(--z));flex:none}
@@ -83,13 +83,13 @@ body{background:var(--bg)}
 .syn{text-align:center;color:var(--mu);font-size:14px;padding:6px 16px 0}
 .qrb{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--ac);color:var(--acink);border-radius:20px;padding:18px 20px;margin:0 0 14px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 .qrb span:first-child{font-weight:800;font-size:20px}.qrb .qs{font-weight:500;font-size:15px;opacity:.85}
-#bar{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));touch-action:auto}
-.bar{min-width:0;flex-direction:row;justify-content:space-between;align-items:center;border-radius:16px;padding:16px 20px;font-size:17px;gap:10px}
+#bar{left:auto;right:12px;bottom:calc(18px + env(safe-area-inset-bottom,0px));touch-action:auto;max-width:calc(100vw - 24px)}body:has(#sh) #bar,body:has(.ov) #bar,body:has(#sp) #bar{display:none!important}
+.bar{min-width:0;flex-direction:row;justify-content:space-between;align-items:center;border-radius:14px;padding:10px 14px;font-size:14px;gap:12px;box-shadow:0 4px 14px #0008}
 #bar.drag .bar{transform:none;opacity:1}
 
 /* ===== কম্বো, ডিল লেখা, বড় ছবি ===== */
 .p{overflow:hidden}
-.p .av{width:min(100%,calc(var(--is,96px)*var(--z)));height:auto;aspect-ratio:1/1;font-size:calc(min(var(--is,96px),130px)*var(--z)*.3)}
+.p .av{width:100%;height:auto;aspect-ratio:4/3;border-radius:14px;font-size:calc(44px*var(--z))}
 .cbv{display:flex;gap:2px;overflow:hidden;align-items:center;justify-content:center}.cbt{flex:1 1 0;min-width:0;height:100%;object-fit:cover}.cbg{font-size:1.2em}
 .dtag{align-self:stretch;margin:2px -12px 0;padding:4px 12px;font-size:calc(12px*var(--z));font-weight:800;line-height:1.3}
 .dtag.k{background:#f6ccd5;color:#a10f3a}.dtag.y{background:#f8ef7a;color:#3b2a00}.dtag.c{background:#ffd9a8;color:#7a2d00}
@@ -196,9 +196,7 @@ function hdr(){const cur=bi?'bi':lang;$('#app').innerHTML=`<header><img src="log
  <div class="hb">${[['bn','বাং'],['en','EN'],['bi','বাং+EN']].map(x=>`<button data-lang="${x[0]}" class="${cur===x[0]?'on':''}">${x[1]}</button>`).join('')}</div></header>
  <div id="ib"><div class="zp"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div><button class="sun" id="th" aria-label="theme">${SUN}</button><div class="clk"><b id="ck"></b><span id="cdt"></span></div></div><div class="w" id="bd"></div>`;clk()}
 const qrBanner=()=>`<div class="qrb"><span>📲 ${T2('QR অর্ডার','QR Orders')}</span><span class="qs">${tbl?esc(t('table')+tbl):HM?T2('পিকআপ / ডেলিভারি','Pickup / Delivery'):Q.open===false?T2('বন্ধ','Closed'):T2('অর্ডার দিন','Order here')}</span></div>`;
-function bestHTML(){let h='';const dl=lang==='en'?(Q.dte||Q.dt):(Q.dt||Q.dte);if(dl)h+=`<div class="cd" style="margin-bottom:10px;animation:none;text-align:center;font-weight:800">🔥 ${esc(dl)}</div>`;
- const L=(C.best||[]).map(id=>items.find(x=>x.id==id)).filter(i=>i&&!soldOut(i));
- if(L.length){const ti=lang==='en'?(Q.bte||"Today's best sellers"):(Q.bt||'আজকের সেরা বিক্রি');h+=`<div style="margin-bottom:10px"><b>⭐ ${esc(ti)}</b><div class="ch" style="padding-top:6px">${L.map(i=>`<button class="bch" data-a="1" data-i="${i.id}">${esc(nmOf(i))} · ${m(i.p)} +</button>`).join('')}</div></div>`}return h}
+function bestHTML(){return ''}
 function list(){
  const cs=[...new Set(items.map(i=>i.c).filter(Boolean))],CB={Drinks:'পানীয়',Food:'খাবার'},cL=c=>lang==='en'?c:(CB[c]||c);
  let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
@@ -217,7 +215,7 @@ function mkManifest(){try{const u=new URL(location.href),sc=u.origin+u.pathname.
  const mf={name:nm,short_name:nm.slice(0,12),start_url:u.origin+u.pathname+'?s='+encodeURIComponent(uid)+'&h=1',scope:sc,display:'standalone',background_color:'#0b2a2e',theme_color:C.color||'#0b2a2e',icons:[{src:sc+'logo-192.png',sizes:'192x192',type:'image/png'},{src:sc+'logo-512.png',sizes:'512x512',type:'image/png'}]};
  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}}
 const cbItems=()=>(C.combos||[]).map(c=>({id:'cb_'+c.id,n:c.n,e:c.e||c.n,p:+c.p,o:+c.o,c:'',s:c.s===undefined?'':c.s,cb:c.ids||[],combo:1})),allItems=()=>items.concat(cbItems());
-const tagOf=i=>{let tx='';if(i.combo)tx=Q.cl||T2('আজকের কম্বো অফার','Today\u2019s combo deal');else{const tg=(Q.tg||{})[i.id];if(tg)tx=tg;else if((C.best||[]).some(b=>b==i.id))tx=lang==='en'?(Q.ble||'Today\u2019s best'):(Q.bl||'আজকের সেরা')}
+const tagOf=i=>{let tx='';if(i.combo)tx=Q.cl||T2('আজকের কম্বো অফার','Today\u2019s combo deal');else{const tg=(Q.tg||{})[i.id];if(tg)tx=tg;}
  return tx?`<div class="dtag ${i.combo?'c':((hue(String(i.id))%2)?'y':'k')}">${esc(tx)}</div>`:''};
 const cbThumbs=i=>`<div class="av cbv" style="background:hsl(${hue(String(i.n))} 45% 32%)">${(i.cb||[]).slice(0,3).map(id=>`<img class="cbt" data-i="${esc(id)}" alt="" style="display:none">`).join('')}<span class="cbg">🎁</span></div>`;
 const cbPrice=i=>{const cu=C.cur||'৳',pc=i.o>i.p?Math.round((1-i.p/i.o)*100):0;return `<div class="prw"><span class="pr">${cu}${(+i.p).toFixed(2)}</span>${i.o>i.p?`<span class="old">${cu}${(+i.o).toFixed(2)}</span>${pc?`<span class="off">${pc}% OFF</span>`:''}`:''}</div>`};
