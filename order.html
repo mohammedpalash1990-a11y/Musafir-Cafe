@@ -267,6 +267,7 @@ setInterval(clk,20000);addEventListener('online',clk);addEventListener('offline'
 /* ===== কাস্টমার লগইন (POS সেটিংসে চালু থাকলে) ===== */
 let AU=null,AM=null,ACC=null,AINIT=false;
 ACC=null; /* লগইন অবস্থা Firebase থেকে নেওয়া হবে, ফোনের ক্যাশ থেকে নয় */
+const GCID='385223961831-lknamtk8h6gk69ae9oulm4l1gtgtq2ca.apps.googleusercontent.com';
 const LGT={bn:{t:'স্বাগতম',s:'লগইন করে সহজে অর্ডার করুন ও অর্ডারের অবস্থা দেখুন',g:'Google দিয়ে চালিয়ে যান',or:'অথবা',em:'ইমেইল দিয়ে',tc:'আমি শর্ত ও গোপনীয়তা নীতিতে সম্মত',have:'আগে অ্যাকাউন্ট আছে? সাইন ইন',nw:'নতুন অ্যাকাউন্ট খুলুন',skip:'পরে করব',up:'অ্যাকাউন্ট খুলুন',inn:'সাইন ইন',nm:'আপনার নাম',mail:'ইমেইল',pw:'পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)',needtc:'শর্তে সম্মত হতে টিক দিন',need:'ইমেইল ও কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড দিন',login:'লগইন',my:'আমার অর্ডার',none:'এখনো কোনো অর্ডার নেই',out:'লগআউট',close:'বন্ধ করুন',wel:'স্বাগতম',
  e:{'auth/unauthorized-domain':'এই ডোমেইন অনুমোদিত নয়','auth/network-request-failed':'ইন্টারনেট সংযোগ দেখুন','auth/invalid-credential':'ইমেইল বা পাসওয়ার্ড ভুল','auth/wrong-password':'ইমেইল বা পাসওয়ার্ড ভুল','auth/user-not-found':'এই ইমেইলে অ্যাকাউন্ট নেই','auth/email-already-in-use':'এই ইমেইলে অ্যাকাউন্ট আছে, সাইন ইন করুন','auth/weak-password':'পাসওয়ার্ড কমপক্ষে ৬ অক্ষর','auth/invalid-email':'ইমেইল সঠিক নয়','auth/too-many-requests':'অনেকবার চেষ্টা হয়েছে, একটু পরে দেখুন','x':'লগইন হয়নি, আবার চেষ্টা করুন'},
  st:{u:'পাঠানো হয়নি',n:'পাঠানো হয়েছে',a:'গ্রহণ করা হয়েছে',r:'প্রস্তুত',d:'সম্পন্ন',c:'বাতিল'}},
@@ -306,7 +307,17 @@ function lgOpen(){if($('#lgx'))return;const L=LG(),d=document.createElement('div
  q('#lgS').onclick=()=>{try{sessionStorage.setItem('qo_skip','1')}catch(e){}lgClose()};
  q('#lgM').onclick=()=>{const f=q('#lgE');f.hidden=!f.hidden;if(!f.hidden)setTimeout(()=>q('#lgU').focus(),50)};
  q('#lgSw').onclick=()=>{mode=mode==='up'?'in':'up';q('#lgN').style.display=mode==='up'?'':'none';q('#lgGo').textContent=mode==='up'?L.up:L.inn;q('#lgSw').textContent=mode==='up'?L.have:L.nw;q('#lgP').autocomplete=mode==='up'?'new-password':'current-password'};
- q('#lgG').onclick=async()=>{if(!tcOk())return;err('');busy(true);try{await authLoad();const p=new AM.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){await AM.signInWithRedirect(AU,p);return}try{await AM.signInWithPopup(AU,p)}catch(e){if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'||e.code==='auth/missing-initial-state')){await AM.signInWithRedirect(AU,p);return}throw e}}catch(e){fail(e)}busy(false)};
+ /* Google লগইন: Google Identity Services (পাতার ভেতরেই, firebaseapp.com-এ redirect ছাড়া) */
+ let GT=null;
+ const gisLoad=()=>new Promise((res,rej)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return res();let s=document.querySelector('script[data-gis]');if(!s){s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;s.dataset.gis='1';document.head.appendChild(s)}s.addEventListener('load',()=>res());s.addEventListener('error',()=>rej(new Error('gis')));setTimeout(()=>rej(new Error('gis-timeout')),10000)});
+ gisLoad().then(()=>{GT=google.accounts.oauth2.initTokenClient({client_id:GCID,scope:'openid email profile',
+  callback:async r=>{if(!r||r.error||!r.access_token){busy(false);err(L.e.x+' [gis:'+((r&&r.error)||'none')+']');return}
+   try{await authLoad();await AM.signInWithCredential(AU,AM.GoogleAuthProvider.credential(null,r.access_token))}catch(e){fail(e)}busy(false)},
+  error_callback:e=>{busy(false);const ty=e&&e.type;err(ty==='popup_closed'?'':L.e.x+' [gis:'+(ty||'unknown')+']')}})}).catch(()=>{});
+ q('#lgG').onclick=async()=>{if(!tcOk())return;err('');busy(true);setTimeout(()=>busy(false),40000);
+  if(GT){try{GT.requestAccessToken({prompt:'select_account'})}catch(e){busy(false);err(L.e.x+' [gis-open]')}return}
+  /* Google স্ক্রিপ্ট লোড না হলে বিকল্প: Firebase popup (redirect নয়) */
+  try{await authLoad();const p=new AM.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});await AM.signInWithPopup(AU,p)}catch(e){fail(e)}busy(false)};
  q('#lgGo').onclick=async()=>{if(!tcOk())return;const em=q('#lgU').value.trim(),pw=q('#lgP').value;if(!em||pw.length<6){err(L.need);return}err('');busy(true);try{await authLoad();if(mode==='up'){const r=await AM.createUserWithEmailAndPassword(AU,em,pw),n=q('#lgN').value.trim();if(n){await AM.updateProfile(r.user,{displayName:n});setAcc(r.user)}}else await AM.signInWithEmailAndPassword(AU,em,pw)}catch(e){fail(e)}busy(false)}}
 /* ---------- অর্ডার ইতিহাস (এই ফোনে) ---------- */
 const hist=()=>{try{return JSON.parse(ls('qo_h')||'[]')}catch(e){return[]}};
