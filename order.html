@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
+<script>try{var _t=localStorage.getItem("qo_theme");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}</script><title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
 <style>
 :root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#0b2a2e;--z:1;--cw:150px}
@@ -66,6 +66,26 @@ header b{font-size:19px;font-weight:800;color:#fff;letter-spacing:0}
 .hero{font-size:calc(104px*var(--z));line-height:1.1;filter:drop-shadow(0 12px 18px #000a);animation:flt 2.2s ease-in-out infinite alternate}
 .stp div{position:relative}.stp div:not(:last-child)::after{content:"";position:absolute;top:15px;left:calc(50% + 19px);right:calc(-50% + 19px);height:2px;background:var(--ln)}.stp .d:not(:last-child)::after{background:var(--ac)}
 .stp i{width:32px;height:32px;line-height:32px}.stp .d i{box-shadow:0 0 0 5px #5cb82e30}
+
+/* ===== POS-এর হুবহু ডিজাইন (Musafir Teal) ===== */
+:root{--bg:#e9edf3;--card:#fff;--ink:#1b2733;--mu:#657386;--ln:#d3dae5;--ac:#3f9a22;--acink:#fff;--soft:#e3f1dc;--wr:#c4311f;--blue:#3446b8;--hd:#14454b;--qi:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1b1e;--card:#12292d;--ink:#e6f0f1;--mu:#8fb0b3;--ln:#25474d;--ac:#2aa58f;--acink:#05201c;--soft:#14393b;--wr:#ff8a7a;--blue:#7fe0cc;--hd:#14454b;--qi:#05201c}}
+:root[data-theme="dark"]{--bg:#0b1b1e;--card:#12292d;--ink:#e6f0f1;--mu:#8fb0b3;--ln:#25474d;--ac:#2aa58f;--acink:#05201c;--soft:#14393b;--wr:#ff8a7a;--blue:#7fe0cc;--hd:#14454b;--qi:#05201c}
+body{background:var(--bg)}
+.qty{background:var(--blue);color:var(--qi)}
+.p b{white-space:pre-line}
+.sh{background:var(--card)}.sh input{background:var(--bg)}.sh .row>span:first-child{white-space:pre-line}
+#ib{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto;padding:14px 16px 0}
+.zp{display:flex;border:1px solid var(--ln);border-radius:20px;overflow:hidden;background:var(--card);margin-right:auto}
+.zp button{background:transparent;color:var(--ink);padding:8px 14px;font-weight:700;font-size:14px;border:0}.zp button:disabled{opacity:.35}
+.sun{width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--ln);color:var(--ink);display:grid;place-items:center;padding:0;flex:none}
+.clk{text-align:right;line-height:1.2;flex:none}.clk b{display:block;font-size:19px;font-weight:800}.clk span{font-size:12px;color:var(--mu)}
+.syn{text-align:center;color:var(--mu);font-size:14px;padding:6px 16px 0}
+.qrb{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--ac);color:var(--acink);border-radius:20px;padding:18px 20px;margin:0 0 14px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.qrb span:first-child{font-weight:800;font-size:20px}.qrb .qs{font-weight:500;font-size:15px;opacity:.85}
+#bar{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));touch-action:auto}
+.bar{min-width:0;flex-direction:row;justify-content:space-between;align-items:center;border-radius:16px;padding:16px 20px;font-size:17px;gap:10px}
+#bar.drag .bar{transform:none;opacity:1}
 </style><link rel="apple-touch-icon" href="logo-192.png"></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
 <script type="module">
 let FS=null,db=null;
@@ -87,7 +107,7 @@ const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>(
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}return null};
 /* ---------- ভাষা (ডিফল্ট বাংলা) ও সাইজ ---------- */
 const SZ=[{z:.82,cw:104},{z:1,cw:150},{z:1.18,cw:180},{z:1.35,cw:230}];
-let lang=ls('qo_lang')==='en'?'en':'bn',si=+ls('qo_sz');if(!(si>=0&&si<SZ.length)||ls('qo_sz')===null)si=1;
+const LG0=ls('qo_lang');let lang=LG0==='en'?'en':'bn',bi=LG0==='bi',si=+ls('qo_sz');if(!(si>=0&&si<SZ.length)||ls('qo_sz')===null)si=0;
 const TX={
 bn:{pk:'🏪 পিকআপ',dl:'🛵 ডেলিভারি',ph:'মোবাইল নম্বর',ad:'পূর্ণ ঠিকানা (বাড়ি, রোড, এলাকা)',mylc:'📍 আমার লোকেশন দিন',locing:'লোকেশন নেওয়া হচ্ছে…',lcok:'✔ লোকেশন পাওয়া গেছে',inz:'✔ আপনার এলাকায় ডেলিভারি দেওয়া হয়',outz:'😔 আপনার লোকেশন আমাদের ডেলিভারি এলাকার বাইরে',km:' কিমি',needlc:'ডেলিভারির জন্য আপনার লোকেশন দিন',nogeo:'এই ফোনে লোকেশন পাওয়া যাচ্ছে না',locfail:'লোকেশন পাওয়া যায়নি। ফোনের লোকেশন ও ব্রাউজারের অনুমতি চালু করুন।',fee:'ডেলিভারি চার্জ',free:'ফ্রি',gtot:'সর্বমোট',minmsg:n=>'ডেলিভারির জন্য ন্যূনতম অর্ডার '+n,needPh:'সঠিক মোবাইল নম্বর দিন',needAd:'ঠিকানা লিখুন',shopat:'দোকানের ঠিকানা',callus:'📞 কল করুন',maps:'📍 ম্যাপে দেখুন',wa:'💬 WhatsApp এ পাঠান',inst:'📲 হোম স্ক্রিনে যোগ করুন (অ্যাপের মতো)',iosTip:'Safari-তে নিচের Share বাটন চেপে "Add to Home Screen" বেছে নিন',pkGo:'আপনার অর্ডার প্রস্তুত, দোকান থেকে নিয়ে যান',dlGo:'আপনার অর্ডার প্রস্তুত, শীঘ্রই রওনা হবে',nohome:'এখন বাড়ি থেকে অর্ডার নেওয়া বন্ধ আছে',bad:'QR বা লিংকটি ঠিক নয়',off:'ইন্টারনেট নেই। একবার নেট দিয়ে এই পাতা খুললে পরে অফলাইনেও মেনু দেখা যাবে।',offb:'📴 অফলাইন · ফোনে জমানো মেনু দেখাচ্ছে',pend:'📴 ইন্টারনেট নেই। অর্ডারটি আপনার ফোনে জমা আছে, নেট আসলেই নিজে থেকে দোকানে চলে যাবে। তাড়া থাকলে এই স্ক্রিনটা কাউন্টারে দেখান।',nopub:'মেনু এখনো প্রকাশ হয়নি',closed:'এখন অর্ডার নেওয়া বন্ধ আছে, মেনু দেখতে পারেন।',search:'পণ্য খুঁজুন',all:'সব',other:'অন্যান্য',add:'+ যোগ করুন',out:'স্টক শেষ',none:'কিছু পাওয়া যায়নি',cartN:n=>'🛒 '+n+'টি',view:'দেখুন ›',tapDrag:'ধরে সরানো যাবে',yours:'আপনার অর্ডার',total:'মোট',tno:'টেবিল নম্বর',tph:'যেমন: 5',yname:'আপনার নাম (ঐচ্ছিক)',note:'নোট (ঐচ্ছিক, যেমন: চিনি কম)',confirm:'✔ অর্ডার কনফার্ম করুন',closedBtn:'এখন অর্ডার নেওয়া বন্ধ',back:'← মেনুতে ফিরুন',needT:'টেবিল নম্বর দিন',wait:'একটু অপেক্ষা করে আবার চেষ্টা করুন',fail:'পাঠানো যায়নি, আবার চেষ্টা করুন',table:'টেবিল ',nf:'অর্ডার পাওয়া যায়নি',sorry:'দুঃখিত, অর্ডারটি নেওয়া যায়নি',sent:'অর্ডার পাঠানো হয়েছে!',steps:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','খাবার প্রস্তুত','পরিবেশন'],
 vw:['⏳ অপেক্ষা করুন','🍽 খাবার প্রস্তুত!','😋 মজা করে খান'],vt:['খাবার তৈরি হচ্ছে… একটু অপেক্ষা করুন','আপনার খাবার তৈরি হয়ে গেছে','ধন্যবাদ, আবার আসবেন ❤'],foot:'আপনার আসাই আমাদের আনন্দ ☕ এই পাতা খোলা রাখলে অবস্থা নিজে থেকেই বদলাবে।',more:'আরও অর্ডার করুন',welcome:'স্বাগতম',tag:'মেনু দেখে অর্ডার দিন',g:['শুভ রাত্রি','সুপ্রভাত','শুভ দুপুর','শুভ বিকাল','শুভ সন্ধ্যা'],
@@ -96,7 +116,8 @@ en:{pk:'🏪 Pickup',dl:'🛵 Delivery',ph:'Mobile number',ad:'Full address (hou
 vw:['⏳ Please wait','🍽 Food is ready!','😋 Enjoy your meal'],vt:['Your food is being prepared… please wait a little','Your food is ready','Thank you, see you again ❤'],foot:'Thank you for visiting ☕ Keep this page open and the status will update by itself.',more:'Order more',welcome:'Welcome',tag:'Browse the menu and order',g:['Good night','Good morning','Good afternoon','Good evening','Good evening'],
 rate:'How was our service?',rcm:'Comment (optional)',rsend:'Send rating',rpick:'Tap the stars to rate',rthx:'Thank you! We got your rating',rfail:'Could not send rating, please try again',rl:['','Very bad','Bad','Okay','Good','Excellent'],hpk:['Sent','Accepted by shop','Ready, please collect','Handed over'],hdl:['Sent','Accepted by shop','Ready, on the way','Delivered'],hvw:['⏳ Being prepared','🍽 Ready!','✅ Done'],eta:n=>'About '+n+' min left',etaSoon:'Almost ready',msgEta:'💬 How many minutes left?',callShop:'📞 Call shop',etaAsk:'Hello, how many more minutes until my order is ready?',sizeS:'Smaller',sizeL:'Bigger',conn:'Loading your order status…',connh:'It may take a moment on a slow network. Your order is not lost.',retry:'🔄 Try again',loading:'Loading menu…',pend2:'⏳ Your order is on its way to the shop. It may be slow on a weak network, keep this page open. If you are in a hurry, show this screen at the counter.'}};
 const t=k=>{const v=TX[lang][k];return v===undefined?TX.bn[k]:v};
-const nmOf=i=>lang==='en'?(i.e||i.n):i.n;
+const nmOf=i=>bi?(i.n+((i.e&&i.e!==i.n)?'\n'+i.e:'')):lang==='en'?(i.e||i.n):i.n;
+const T2=(b,e)=>lang==='en'?e:b;
 let C={},Q={},items=[],cart={},cat='',q='',lastO=null,F={tn:'',nm:'',nt:''},R={s:0,c:''},dirty=false;
 /* বাড়ি থেকে অর্ডার (পিকআপ/ডেলিভারি): লিংকে &h=1 থাকলে চালু */
 const HM=P.get('h')==='1'&&!tbl;let H={ty:'',ph:'',ad:'',loc:null},DI=null;
@@ -124,13 +145,14 @@ async function init(){
  try{sd=JSON.parse(ls(SK)||'null')}catch(e){sd=null}
  /* পুরনো সেভ করা অর্ডার (৩ দিনের বেশি) পরিষ্কার */
  try{Object.keys(localStorage).filter(k=>k.indexOf('qo_o_')===0).forEach(k=>{try{const v=JSON.parse(localStorage.getItem(k));if(!v||!v.d||Date.now()-(v.d.t||0)>3*864e5)localStorage.removeItem(k)}catch(e){localStorage.removeItem(k)}})}catch(e){}
- const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(C.color)document.documentElement.style.setProperty('--hd',C.color)};
+ const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(ls('qo_lang')===null&&s.lang){bi=s.lang==='bi';lang=s.lang==='en'?'en':'bn'}if(C.color)document.documentElement.style.setProperty('--hd',C.color)};
  const fetchShop=async()=>{if(navigator.onLine===false)return null;try{const s=await Promise.race([shopGet(),new Promise((_,j)=>setTimeout(()=>j('to'),10000))]);if(s){ls(SK,JSON.stringify(s));return s}ls(SK,null);return 'none'}catch(e){return null}};
  /* অর্ডার ট্র্যাকিং পাতা: মেনুর জন্য অপেক্ষা না করে সাথে সাথে দেখানো হয় */
  if(oid){apply(sd||{});if(HM)mkManifest();hdr();trackStart();
   fetchShop().then(s=>{if(s&&s!=='none'){apply(s);hdr();paint()}});return}
  /* মেনু পাতা: ফোনে জমানো মেনু আগে দেখানো, পেছনে নতুন মেনু আনা */
- const show=()=>{restoreCart();if(HM)mkManifest();hdr();if(!sessionStorage.getItem('sp'))splash();list();bar()};
+ let liveOn=false;const live=()=>{if(liveOn||oid)return;liveOn=true;fbWait(8000).then(F=>{if(!F){liveOn=false;return}try{F.onSnapshot(F.doc(db,'shops',uid),s=>{if(!s.exists())return;const d=s.data();if(JSON.stringify(d)===JSON.stringify(C))return;ls(SK,JSON.stringify(d));apply(d);sd=d;Object.keys(imc).forEach(k=>{if(!imc[k])delete imc[k]});if($('#sh')||document.activeElement===$('#sq'))return;hdr();list();bar()},()=>{liveOn=false})}catch(e){liveOn=false}})};
+  const show=()=>{restoreCart();if(HM)mkManifest();hdr();if(!sessionStorage.getItem('sp'))splash();list();bar();live()};
  if(sd){apply(sd);show();
   fetchShop().then(s=>{if(s==='none'){$('#bd').innerHTML='<p class="w">'+t('nopub')+'</p>';return}
    if(s&&JSON.stringify(s)!==JSON.stringify(sd)&&!$('#sh')&&document.activeElement!==$('#sq')){apply(s);sd=s;hdr();list();bar()}});return}
@@ -142,15 +164,24 @@ async function init(){
 const wt=()=>HM?{b:Q.hw||Q.welcome,e:Q.hwe,tb:Q.ht||Q.tag,te:Q.hte}:{b:Q.welcome,e:Q.we,tb:Q.tag,te:Q.te};
 function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(lang==='en'?(wt().e||t('welcome')):(wt().b||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(lang==='en'?(wt().te||t('tag')):(wt().tb||t('tag')))}</p>`;document.body.appendChild(d);
  const x=()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)};d.onclick=x;setTimeout(x,2200)}
-function hdr(){$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><b>${esc(C.name||(lang==='en'?'Menu':'মেনু'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
- <div class="hb"><button data-lang="bn" class="${lang==='bn'?'on':''}">বাং</button><button data-lang="en" class="${lang==='en'?'on':''}">EN</button></div>
- <div class="hb"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div></header><div class="w" id="bd"></div>`}
+const SUN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const p2=n=>String(n).padStart(2,'0');
+function clk(){const d=new Date(),a=$('#ck'),b=$('#cdt'),s=$('#sy');if(a)a.textContent=p2(d.getHours())+':'+p2(d.getMinutes());
+ if(b)b.textContent=d.toLocaleDateString(lang==='en'?'en-GB':'bn-BD',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+ if(s){const on=navigator.onLine!==false;let u='';if(C.updated){const x=new Date(C.updated);u=' · '+p2(x.getHours())+':'+p2(x.getMinutes())}s.textContent=on?'☁ '+T2('মেনু সিঙ্ক','Menu synced')+u:'📴 '+T2('অফলাইন','Offline')}}
+function toggleTheme(){const el=document.documentElement,cur=el.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'),nx=cur==='dark'?'light':'dark';el.setAttribute('data-theme',nx);ls('qo_theme',nx)}
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#th'))toggleTheme()});
+setInterval(clk,20000);addEventListener('online',clk);addEventListener('offline',clk);
+function hdr(){const cur=bi?'bi':lang;$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><b>${esc(C.name||T2('মেনু','Menu'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
+ <div class="hb">${[['bn','বাং'],['en','EN'],['bi','বাং+EN']].map(x=>`<button data-lang="${x[0]}" class="${cur===x[0]?'on':''}">${x[1]}</button>`).join('')}</div></header>
+ <div id="ib"><div class="zp"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div><button class="sun" id="th" aria-label="theme">${SUN}</button><div class="clk"><b id="ck"></b><span id="cdt"></span></div></div><div class="syn" id="sy"></div><div class="w" id="bd"></div>`;clk()}
+const qrBanner=()=>`<div class="qrb"><span>📲 ${T2('QR অর্ডার','QR Orders')}</span><span class="qs">${tbl?esc(t('table')+tbl):HM?T2('পিকআপ / ডেলিভারি','Pickup / Delivery'):Q.open===false?T2('বন্ধ','Closed'):T2('অর্ডার দিন','Order here')}</span></div>`;
 function bestHTML(){let h='';const dl=lang==='en'?(Q.dte||Q.dt):(Q.dt||Q.dte);if(dl)h+=`<div class="cd" style="margin-bottom:10px;animation:none;text-align:center;font-weight:800">🔥 ${esc(dl)}</div>`;
  const L=(C.best||[]).map(id=>items.find(x=>x.id==id)).filter(i=>i&&!soldOut(i));
  if(L.length){const ti=lang==='en'?(Q.bte||"Today's best sellers"):(Q.bt||'আজকের সেরা বিক্রি');h+=`<div style="margin-bottom:10px"><b>⭐ ${esc(ti)}</b><div class="ch" style="padding-top:6px">${L.map(i=>`<button class="bch" data-a="1" data-i="${i.id}">${esc(nmOf(i))} · ${m(i.p)} +</button>`).join('')}</div></div>`}return h}
 function list(){
  const cs=[...new Set(items.map(i=>i.c||t('other')))];
- let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
+ let h=qrBanner()+((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
  bestHTML()+homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
  $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar();showInst()}
 const stand=matchMedia('(display-mode: standalone)').matches||navigator.standalone,isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -171,22 +202,14 @@ function grid(){const qq=q.toLowerCase(),L=items.filter(i=>(!cat||(i.c||t('other
  $('#gr').innerHTML=L.map(i=>{const so=soldOut(i),low=!so&&i.s!==''&&i.s!=null&&i.s<=5;return `<button class="p ${so?'off':''}" ${so?'disabled':''} data-a="1" data-i="${i.id}"><span id="q${i.id}" style="display:contents">${ctl(i)}</span><div class="av" id="im${i.id}" style="background:hsl(${hue(i.id)} 45% 40%)">${esc((nmOf(i)||'?')[0])}</div><b>${esc(nmOf(i))}</b><span class="pr">${m(i.p)}</span>${so?`<small>${t('out')}</small>`:low?`<small style="color:var(--wr)">${i.s}${lang==='en'?' left':' টি আছে'}</small>`:''}</button>`}).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
 const imc={},imw=[];let imq=0;async function img(i){try{if(imc[i.id]===undefined){await new Promise(r=>{if(imq<4){imq++;r()}else imw.push(r)});try{if(imc[i.id]===undefined){const v=await Promise.race([imgGet(i.id),new Promise(r=>setTimeout(()=>r(undefined),12000))]);if(v!==undefined)imc[i.id]=v}}finally{const n=imw.shift();if(n)n();else imq--}}
  if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}}catch(e){}}
-/* ---------- ভাসমান কার্ট বাটন (ধরে সরানো যায়) ---------- */
-function bar(){const b=$('#bar');if(!cnt()||oid||$('#sh')){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>${t('cartN')(cnt())}</span><span>${m(sub())} · ${t('view')}</span><small>↔ ${t('tapDrag')}</small></div>`}
-(function(){const b=$('#bar');let dn=false,mv=false,sx=0,sy=0,ox=0,oy=0;
- const put=(x,y)=>{const w=b.offsetWidth,h=b.offsetHeight;x=Math.max(4,Math.min(innerWidth-w-4,x));y=Math.max(4,Math.min(innerHeight-h-4,y));b.style.left=x+'px';b.style.top=y+'px';b.style.right='auto';b.style.bottom='auto'};
- try{const p=JSON.parse(ls('qo_bpos')||'null');if(p)put(p.x,p.y)}catch(e){}
- addEventListener('resize',()=>{if(b.style.left)put(parseFloat(b.style.left),parseFloat(b.style.top))});
- b.addEventListener('pointerdown',e=>{dn=true;mv=false;const r=b.getBoundingClientRect();sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;try{b.setPointerCapture(e.pointerId)}catch(_){}});
- b.addEventListener('pointermove',e=>{if(!dn)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(!mv&&Math.abs(dx)+Math.abs(dy)<8)return;mv=true;b.classList.add('drag');put(ox+dx,oy+dy)});
- const end=()=>{if(!dn)return;dn=false;b.classList.remove('drag');if(mv)ls('qo_bpos',JSON.stringify({x:parseFloat(b.style.left),y:parseFloat(b.style.top)}))};
- b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
- b.addEventListener('click',()=>{if(mv){mv=false;return}if(cnt())sheet()})})();
+/* ---------- POS-এর মতো নিচের "অর্ডার দেখুন" বার ---------- */
+function bar(){const b=$('#bar');if(!cnt()||oid||$('#sh')){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>${cnt()} ${T2('আইটেম','items')} · ${T2('অর্ডার দেখুন','View order')}</span><span>${m(sub())}</span></div>`}
+$('#bar').addEventListener('click',()=>{if(cnt())sheet()});
 function add(id,a){const it=items.find(x=>x.id==id),x=cart[id]||(cart[id]={id,n:it.n,e:it.e,p:it.p,q:0});x.q=Math.max(0,x.q+a);if(it.s!==''&&it.s!=null&&x.q>it.s)x.q=it.s;if(!x.q)delete cart[id];saveCart();
  const e=$('#q'+id);if(e)e.innerHTML=ctl(it);bar();if($('#sh'))sheet()}
 document.addEventListener('click',e=>{const t0=e.target;if(!t0.dataset)return;
  if(t0.dataset.a)add(t0.dataset.i,+t0.dataset.a);
- else if(t0.dataset.lang){if(lang!==t0.dataset.lang){lang=t0.dataset.lang;ls('qo_lang',lang);rerender()}}
+ else if(t0.dataset.lang){const v=t0.dataset.lang;if(v!==(bi?'bi':lang)){bi=v==='bi';lang=v==='en'?'en':'bn';ls('qo_lang',v);rerender()}}
  else if(t0.dataset.sz){si=Math.max(0,Math.min(SZ.length-1,si+(+t0.dataset.sz)));applySz();rerender()}
  else if(t0.dataset.star){R.s=+t0.dataset.star;paint()}
  else if(t0.dataset.ty){H.ty=t0.dataset.ty;saveH();sheet()}
