@@ -86,6 +86,15 @@ body{background:var(--bg)}
 #bar{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));touch-action:auto}
 .bar{min-width:0;flex-direction:row;justify-content:space-between;align-items:center;border-radius:16px;padding:16px 20px;font-size:17px;gap:10px}
 #bar.drag .bar{transform:none;opacity:1}
+
+/* ===== কম্বো, ডিল লেখা, বড় ছবি ===== */
+.p{overflow:hidden}
+.p .av{width:min(100%,calc(var(--is,96px)*var(--z)));height:auto;aspect-ratio:1/1;font-size:calc(min(var(--is,96px),130px)*var(--z)*.3)}
+.cbv{display:flex;gap:2px;overflow:hidden;align-items:center;justify-content:center}.cbt{flex:1 1 0;min-width:0;height:100%;object-fit:cover}.cbg{font-size:1.2em}
+.dtag{align-self:stretch;margin:2px -12px 0;padding:4px 12px;font-size:calc(12px*var(--z));font-weight:800;line-height:1.3}
+.dtag.k{background:#f6ccd5;color:#a10f3a}.dtag.y{background:#f8ef7a;color:#3b2a00}.dtag.c{background:#ffd9a8;color:#7a2d00}
+.prw{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px}.prw .old{color:var(--mu);text-decoration:line-through;font-size:calc(12px*var(--z));font-weight:600}.prw .off{color:#3fcf6b;font-size:calc(12px*var(--z));font-weight:800}
+.sv{color:#3fcf6b;font-weight:800;font-size:.85em}.of{color:var(--blue)}.of2{color:#3fcf6b}
 </style><link rel="apple-touch-icon" href="logo-192.png"></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
 <script type="module">
 let FS=null,db=null;
@@ -143,7 +152,7 @@ try{F=Object.assign(F,JSON.parse(ls('qo_f')||'{}'))}catch(e){}
 const saveF=()=>ls('qo_f',JSON.stringify(F));
 const cartKey=()=>'qo_cart_'+uid;
 const saveCart=()=>{Object.keys(cart).length?ls(cartKey(),JSON.stringify({t:Date.now(),c:cart})):ls(cartKey(),null)};
-function restoreCart(){try{const d=JSON.parse(ls(cartKey())||'null');if(!d||Date.now()-d.t>6*3600*1000)return;Object.keys(d.c||{}).forEach(id=>{const it=items.find(x=>x.id==id);if(!it||(it.s!==''&&it.s!=null&&it.s<=0))return;let n=+d.c[id].q||0;if(it.s!==''&&it.s!=null&&n>it.s)n=it.s;if(n>0)cart[id]={id:it.id,n:it.n,e:it.e,p:it.p,q:n}})}catch(e){}}
+function restoreCart(){try{const d=JSON.parse(ls(cartKey())||'null');if(!d||Date.now()-d.t>6*3600*1000)return;Object.keys(d.c||{}).forEach(id=>{const it=allItems().find(x=>x.id==id);if(!it||(it.s!==''&&it.s!=null&&it.s<=0))return;let n=+d.c[id].q||0;if(it.s!==''&&it.s!=null&&n>it.s)n=it.s;if(n>0)cart[id]={id:it.id,n:it.n,e:it.e,p:it.p,q:n,...(it.cb?{cb:it.cb,o:it.o}:{})}})}catch(e){}}
 const m=n=>(C.cur||'৳')+Math.round(n*100)/100,sub=()=>Object.values(cart).reduce((a,x)=>a+x.p*x.q,0),cnt=()=>Object.values(cart).reduce((a,x)=>a+x.q,0);
 const hue=id=>{let h=0;String(id).split('').forEach(c=>h=(h*31+c.charCodeAt(0))%360);return h};
 const greet=()=>{const h=new Date().getHours(),g=t('g');return h<5?g[0]:h<12?g[1]:h<16?g[2]:h<19?g[3]:g[4]};
@@ -156,7 +165,7 @@ async function init(){
  try{sd=JSON.parse(ls(SK)||'null')}catch(e){sd=null}
  /* পুরনো সেভ করা অর্ডার (৩ দিনের বেশি) পরিষ্কার */
  try{Object.keys(localStorage).filter(k=>k.indexOf('qo_o_')===0).forEach(k=>{try{const v=JSON.parse(localStorage.getItem(k));if(!v||!v.d||Date.now()-(v.d.t||0)>3*864e5)localStorage.removeItem(k)}catch(e){localStorage.removeItem(k)}})}catch(e){}
- const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(ls('qo_lang')===null&&s.lang){bi=s.lang==='bi';lang=s.lang==='en'?'en':'bn'}if(C.color)document.documentElement.style.setProperty('--hd',C.color)};
+ const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(ls('qo_lang')===null&&s.lang){bi=s.lang==='bi';lang=s.lang==='en'?'en':'bn'}if(C.color)document.documentElement.style.setProperty('--hd',C.color);document.documentElement.style.setProperty('--is',({s:'66px',m:'96px',l:'124px',x:'999px'})[Q.is||'m']||'96px')};
  const fetchShop=async()=>{if(navigator.onLine===false)return null;try{const s=await Promise.race([shopGet(),new Promise((_,j)=>setTimeout(()=>j('to'),10000))]);if(s){ls(SK,JSON.stringify(s));return s}ls(SK,null);return 'none'}catch(e){return null}};
  /* অর্ডার ট্র্যাকিং পাতা: মেনুর জন্য অপেক্ষা না করে সাথে সাথে দেখানো হয় */
  if(oid){apply(sd||{});if(HM)mkManifest();hdr();trackStart();
@@ -207,16 +216,23 @@ function homeBar(){if(!HM)return '';const lk=(h,x)=>`<a class="lk" href="${h}" t
 function mkManifest(){try{const u=new URL(location.href),sc=u.origin+u.pathname.replace(/[^/]*$/,''),nm=C.name||'Menu';
  const mf={name:nm,short_name:nm.slice(0,12),start_url:u.origin+u.pathname+'?s='+encodeURIComponent(uid)+'&h=1',scope:sc,display:'standalone',background_color:'#0b2a2e',theme_color:C.color||'#0b2a2e',icons:[{src:sc+'logo-192.png',sizes:'192x192',type:'image/png'},{src:sc+'logo-512.png',sizes:'512x512',type:'image/png'}]};
  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}}
+const cbItems=()=>(C.combos||[]).map(c=>({id:'cb_'+c.id,n:c.n,e:c.e||c.n,p:+c.p,o:+c.o,c:'',s:c.s===undefined?'':c.s,cb:c.ids||[],combo:1})),allItems=()=>items.concat(cbItems());
+const tagOf=i=>{let tx='';if(i.combo)tx=Q.cl||T2('আজকের কম্বো অফার','Today\u2019s combo deal');else{const tg=(Q.tg||{})[i.id];if(tg)tx=tg;else if((C.best||[]).some(b=>b==i.id))tx=lang==='en'?(Q.ble||'Today\u2019s best'):(Q.bl||'আজকের সেরা')}
+ return tx?`<div class="dtag ${i.combo?'c':((hue(String(i.id))%2)?'y':'k')}">${esc(tx)}</div>`:''};
+const cbThumbs=i=>`<div class="av cbv" style="background:hsl(${hue(String(i.n))} 45% 32%)">${(i.cb||[]).slice(0,3).map(id=>`<img class="cbt" data-i="${esc(id)}" alt="" style="display:none">`).join('')}<span class="cbg">🎁</span></div>`;
+const cbPrice=i=>{const cu=C.cur||'৳',pc=i.o>i.p?Math.round((1-i.p/i.o)*100):0;return `<div class="prw"><span class="pr">${cu}${(+i.p).toFixed(2)}</span>${i.o>i.p?`<span class="old">${cu}${(+i.o).toFixed(2)}</span>${pc?`<span class="off">${pc}% OFF</span>`:''}`:''}</div>`};
+function cbImgs(L){L.filter(i=>i.combo).forEach(c=>(c.cb||[]).slice(0,3).forEach(id=>{img({id}).then(()=>{document.querySelectorAll('.cbt[data-i="'+id+'"]').forEach(e=>{if(imc[id]){e.src=imc[id];e.style.display='block';const g=e.parentNode&&e.parentNode.querySelector('.cbg');if(g)g.style.display='none'}})})}))}
+const savN=()=>Object.values(cart).reduce((a,x)=>a+(x.cb&&x.o>x.p?(x.o-x.p)*x.q:0),0);
 const soldOut=i=>i.s!==''&&i.s!=null&&i.s<=0;
 const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)||!n?'':`<span class="qty">${n}</span><span class="mn" data-a="-1" data-i="${i.id}">−</span>`};
-function grid(){const qq=q.toLowerCase(),L=items.filter(i=>(!cat||(i.c||t('other'))==cat)&&((i.n+'').toLowerCase().includes(qq)||((i.e||'')+'').toLowerCase().includes(qq)));
- $('#gr').innerHTML=L.map(i=>{const so=soldOut(i),low=!so&&i.s!==''&&i.s!=null&&i.s<=5;return `<button class="p ${so?'off':''}" ${so?'disabled':''} data-a="1" data-i="${i.id}"><span id="q${i.id}" style="display:contents">${ctl(i)}</span><div class="av" id="im${i.id}" style="background:hsl(${hue(i.e||i.n)} 45% 40%)">${esc((nmOf(i)||'?')[0])}</div><b>${esc(nmOf(i))}</b><span class="pr">${(C.cur||'৳')+(+i.p).toFixed(2)}</span>${so?`<small>${t('out')}</small>`:low?`<small style="color:var(--wr)">${i.s}${lang==='en'?' left':' টি আছে'}</small>`:''}</button>`}).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
+function grid(){const qq=q.toLowerCase(),L=(cat?items:allItems().sort((a,b)=>(b.combo?1:0)-(a.combo?1:0))).filter(i=>(!cat||(i.c||t('other'))==cat)&&((i.n+'').toLowerCase().includes(qq)||((i.e||'')+'').toLowerCase().includes(qq)));
+ $('#gr').innerHTML=L.map(i=>{const so=soldOut(i),low=!so&&i.s!==''&&i.s!=null&&i.s<=5;return `<button class="p ${so?'off':''}" ${so?'disabled':''} data-a="1" data-i="${i.id}"><span id="q${i.id}" style="display:contents">${ctl(i)}</span>${i.combo?cbThumbs(i):`<div class="av" id="im${i.id}" style="background:hsl(${hue(i.e||i.n)} 45% 40%)">${esc((nmOf(i)||'?')[0])}</div>`}${tagOf(i)}<b>${esc(nmOf(i))}</b>${i.combo?cbPrice(i):`<span class="pr">${(C.cur||'৳')+(+i.p).toFixed(2)}</span>`}${so?`<small>${t('out')}</small>`:low?`<small style="color:var(--wr)">${i.s}${lang==='en'?' left':' টি আছে'}</small>`:''}</button>`}).join('')||`<p class="mu">${t('none')}</p>`;L.filter(i=>!i.combo).forEach(img);cbImgs(L)}
 const imc={},imw=[];let imq=0;async function img(i){try{if(imc[i.id]===undefined){await new Promise(r=>{if(imq<4){imq++;r()}else imw.push(r)});try{if(imc[i.id]===undefined){const v=await Promise.race([imgGet(i.id),new Promise(r=>setTimeout(()=>r(undefined),12000))]);if(v!==undefined)imc[i.id]=v}}finally{const n=imw.shift();if(n)n();else imq--}}
  if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}}catch(e){}}
 /* ---------- POS-এর মতো নিচের "অর্ডার দেখুন" বার ---------- */
 function bar(){const b=$('#bar');if(!cnt()||oid||$('#sh')){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>${cnt()} ${T2('আইটেম','items')} · ${T2('অর্ডার দেখুন','View order')}</span><span>${m(sub())}</span></div>`}
 $('#bar').addEventListener('click',()=>{if(cnt())sheet()});
-function add(id,a){const it=items.find(x=>x.id==id),x=cart[id]||(cart[id]={id,n:it.n,e:it.e,p:it.p,q:0});x.q=Math.max(0,x.q+a);if(it.s!==''&&it.s!=null&&x.q>it.s)x.q=it.s;if(!x.q)delete cart[id];saveCart();
+function add(id,a){const it=allItems().find(x=>x.id==id),x=cart[id]||(cart[id]={id,n:it.n,e:it.e,p:it.p,q:0,...(it.cb?{cb:it.cb,o:it.o}:{})});x.q=Math.max(0,x.q+a);if(it.s!==''&&it.s!=null&&x.q>it.s)x.q=it.s;if(!x.q)delete cart[id];saveCart();
  const e=$('#q'+id);if(e)e.innerHTML=ctl(it);bar();if($('#sh'))sheet()}
 document.addEventListener('click',e=>{const t0=e.target;if(!t0.dataset)return;
  if(t0.dataset.a)add(t0.dataset.i,+t0.dataset.a);
@@ -243,13 +259,13 @@ function collect(){const tn=tbl||($('#tn')?$('#tn').value.trim():''),o={type:'di
 function waText(o){const L=['🛒 '+(C.name||'')+' — '+(o.type==='delivery'?'ডেলিভারি অর্ডার':o.type==='pickup'?'পিকআপ অর্ডার':'অর্ডার')];
  Object.values(cart).forEach(x=>L.push(x.q+' × '+x.n+' = '+m(x.p*x.q)));L.push('সাবটোটাল: '+m(sub()));if(o.fee)L.push('ডেলিভারি চার্জ: '+m(o.fee));L.push('সর্বমোট: '+m(o.total));
  const nm=$('#nm').value.trim(),nt=$('#nt').value.trim();if(nm)L.push('নাম: '+nm);if(o.phone)L.push('ফোন: '+o.phone);if(o.addr)L.push('ঠিকানা: '+o.addr);if(o.loc)L.push('লোকেশন: https://www.google.com/maps/search/?api=1&query='+o.loc.lat+','+o.loc.lng);if(o.table&&o.table!=='-')L.push('টেবিল: '+o.table);if(nt)L.push('নোট: '+nt);return L.join('\n')}
-function sheet(){if(!cnt()){closeSh();return}const need=!HM&&Q.needTable!==false&&!tbl,closed=Q.open===false||(HM&&!opts().length);
+function sheet(){if(!cnt()){closeSh();return}const sv=savN();const need=!HM&&Q.needTable!==false&&!tbl,closed=Q.open===false||(HM&&!opts().length);
  if(HM&&opts().length&&opts().indexOf(H.ty)<0)H.ty=opts()[0];
  const dlv=HM&&H.ty==='delivery',fe=feeNow(),z=dlv?zoneInfo():null;
  const homeHTML=HM?`<div class="tg">${opts().map(o=>`<button data-ty="${o}" class="${H.ty===o?'on':''}">${t(o==='pickup'?'pk':'dl')}</button>`).join('')}</div><label class="mu">${t('ph')}</label><input id="ph" type="tel" inputmode="tel" maxlength="16" placeholder="01XXXXXXXXX" value="${esc(H.ph)}">
   ${dlv?`<label class="mu">${t('ad')}</label><input id="ad" maxlength="200" value="${esc(H.ad)}"><button class="big" id="lc" style="background:var(--ln);color:var(--ink)">${t('mylc')}</button><div class="mu" style="margin:6px 0">${H.loc?t('lcok')+(H.loc.d!=null?' · '+H.loc.d+t('km'):'')+'<br>':''}${z.msg?esc(z.msg):''}</div>${+Q.min>0&&sub()<+Q.min?`<div style="color:#ffb4a8;margin:4px 0">${t('minmsg')(m(+Q.min))}</div>`:''}`:(Q.addr?`<div class="mu" style="margin:8px 0">${t('shopat')}: ${esc(Q.addr)}</div>`:'')}`:'';
- $('#ovl').innerHTML=`<div class="ov" id="sh"><div class="sh"><b style="font-size:18px">${t('yours')}</b>${Object.values(cart).map(x=>`<div class="row"><span>${esc(nmOf(x))}<br><span class="mu">${m(x.p)}</span></span><button class="qb" data-a="-1" data-i="${x.id}">−</button><b>${x.q}</b><button class="qb" data-a="1" data-i="${x.id}">+</button></div>`).join('')}
- <div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span><b>${t('total')}</b></span><b style="font-size:19px">${m(sub())}</b></div>
+ $('#ovl').innerHTML=`<div class="ov" id="sh"><div class="sh"><b style="font-size:18px">${t('yours')}</b>${Object.values(cart).map(x=>`<div class="row"><span>${esc(nmOf(x))}<br>${x.cb&&x.o>x.p?`<s class="mu">${m(x.o)}</s> <b class="of">${m(x.p)}</b> <span class="sv">${T2('সাশ্রয়','Save')} ${m(x.o-x.p)}</span>`:`<span class="mu">${m(x.p)}</span>`}</span><button class="qb" data-a="-1" data-i="${x.id}">−</button><b>${x.q}</b><button class="qb" data-a="1" data-i="${x.id}">+</button></div>`).join('')}
+ ${sv>0?`<div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span>${T2('আসল দাম','Original price')}</span><s class="mu">${m(sub()+sv)}</s></div><div class="row"><span class="of2"><b>🎉 ${T2('অফার ছাড়','Offer discount')}</b></span><b class="of2">−${m(sv)}</b></div>`:''}<div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span><b>${t('total')}</b></span><b style="font-size:19px">${m(sub())}</b></div>
  ${dlv?`<div class="row"><span>${t('fee')}</span><b>${fe?m(fe):t('free')}</b></div><div class="row"><span><b>${t('gtot')}</b></span><b style="font-size:19px">${m(sub()+fe)}</b></div>`:''}
  ${homeHTML}${need?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" placeholder="${t('tph')}" value="${esc(F.tn)}">`:''}<label class="mu">${t('yname')}</label><input id="nm" maxlength="60" value="${esc(F.nm)}"><label class="mu">${t('note')}</label><input id="nt" maxlength="150" value="${esc(F.nt)}">
  <button class="big" id="sd" ${closed?'disabled style="opacity:.5"':''}>${closed?t('closedBtn'):t('confirm')}</button>${Q.wa?`<button class="big" id="wab" style="background:#25d366;color:#05301a">${t('wa')}</button>`:''}<button class="big" id="cl" style="background:var(--ln);color:var(--ink)">${t('back')}</button></div></div>`;
@@ -259,7 +275,7 @@ async function send(){
  try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<8000){alert(t('wait'));return}}catch(e){}
  const sb=$('#sd');sb.disabled=true;
  const id=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
- const data=JSON.parse(JSON.stringify({uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),...o}));
+ const data=JSON.parse(JSON.stringify({uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q,...(x.cb?{cb:x.cb.map(String),o:x.o}:{})})),...o}));
  /* আগে ফোনে সেভ: নেট/ফায়ারবেস যা-ই হোক অর্ডার হারাবে না, ট্র্যাকিং পাতা নিজে পাঠিয়ে দেবে */
  ls('qo_o_'+id,JSON.stringify({d:data,ack:false}));
  let ok=false,perr=null;sb.textContent=T2('পাঠানো হচ্ছে…','Sending…');
@@ -289,7 +305,7 @@ function paint0(){const o=lastO;if(!o)return;if(document.activeElement&&document
  const vs=o.status=='ready'?1:(o.status=='served'||o.status=='billed')?2:0,VF=['wait','ready','served'],VA=[1,1.304,1.837];
  $('#bd').innerHTML=(lastPend&&o.status=='new'?`<div class="cd" style="margin-bottom:10px;background:#5a3b12;animation:none">${t(navigator.onLine===false?'pend':'pend2')}${dbg&&P.get('debug')?`<br><small>⚙ ${esc(dbg)}</small>`:''}</div>`:(dbg&&P.get('debug')&&o.status=='new'?`<div class="mu" style="text-align:center;font-size:.8em;margin-bottom:6px">⚙ ${esc(dbg)}</div>`:''))+''+`<div style="text-align:center">${can?'<div class="ok">✕</div>':`<div class="hero">${vs==0?'👨‍🍳':vs==1?(o.type==='pickup'?'🛍️':o.type==='delivery'?'🛵':'🍽️'):'✅'}</div>`+`<span class="bdg">${t(home?'hvw':'vw')[vs]}</span>`}<h2 style="margin:6px 0">${can?t('sorry'):(vs==0?(lastPend&&o.status=='new'?T2('অর্ডার পাঠানো হচ্ছে…','Sending your order…'):t('sent')):vs==1?t('vt')[1]:'❤')}</h2><div class="mu">${can?'':(vs==0?t('vt')[0]+'<br>':vs==2?t('vt')[2]+'<br>':(o.type==='pickup'?t('pkGo')+'<br>':o.type==='delivery'?t('dlGo')+'<br>':''))}${o.type==='delivery'?t('dl')+' · ':o.type==='pickup'?t('pk')+' · ':''}${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
  ${can?'':`<div class="stp">${(home?t(o.type==='pickup'?'hpk':'hdl'):t('steps')).map((s,k)=>`<div class="${k<=st?'d':''}"><i>${k<=st?'✓':k+1}</i>${s}</div>`).join('')}</div>`}
- ${homeExtra(o,home,vs,can)}<div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(nmId(x))} × ${x.q}</span><b>${m(x.p*x.q)}</b></div>`).join('')}${o.fee?`<div class="row"><span>${t('fee')}</span><b>${m(o.fee)}</b></div>`:''}<div class="row" style="border-top:1px solid var(--ln)"><span><b>${t('total')}</b></span><b>${m(o.total)}</b></div></div>
+ ${homeExtra(o,home,vs,can)}<div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(nmId(x))} × ${x.q}</span><b>${x.o>x.p?`<s class="mu" style="font-weight:500">${m(x.o*x.q)}</s> `:''}${m(x.p*x.q)}</b></div>`).join('')}${o.fee?`<div class="row"><span>${t('fee')}</span><b>${m(o.fee)}</b></div>`:''}<div class="row" style="border-top:1px solid var(--ln)"><span><b>${t('total')}</b></span><b>${m(o.total)}</b></div></div>
  ${can||st<1?'':ratingHTML()}
  <p class="mu" style="text-align:center">${t('foot')}</p><button class="big" onclick="location.href='?s=${uid}${tbl?'&t='+encodeURIComponent(tbl):''}${HM?'&h=1':''}'">${t('more')}</button>`;
  const v=$('#vv');if(v){v.muted=true;const p=v.play();if(p&&p.catch)p.catch(()=>{})}
