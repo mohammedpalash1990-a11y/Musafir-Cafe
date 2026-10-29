@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>try{var _t=localStorage.getItem("qo_theme");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}</script><title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
+<script>try{var _t=localStorage.getItem("qo_theme");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}</script><script>if(/[?&]h=1(&|$)/.test(location.search)&&!/[?&]t=/.test(location.search)){var _mf=document.createElement('link');_mf.rel='manifest';_mf.href='menu-manifest.json';document.head.appendChild(_mf)}</script><title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
 <style>
 :root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#0b2a2e;--z:1;--cw:150px}
@@ -266,7 +266,7 @@ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#th
 setInterval(clk,20000);addEventListener('online',clk);addEventListener('offline',clk);
 /* ===== কাস্টমার লগইন (POS সেটিংসে চালু থাকলে) ===== */
 let AU=null,AM=null,ACC=null,AINIT=false;
-try{ACC=JSON.parse(ls('qo_u')||'null')}catch(e){}
+ACC=null; /* লগইন অবস্থা Firebase থেকে নেওয়া হবে, ফোনের ক্যাশ থেকে নয় */
 const LGT={bn:{t:'স্বাগতম',s:'লগইন করে সহজে অর্ডার করুন ও অর্ডারের অবস্থা দেখুন',g:'Google দিয়ে চালিয়ে যান',or:'অথবা',em:'ইমেইল দিয়ে',tc:'আমি শর্ত ও গোপনীয়তা নীতিতে সম্মত',have:'আগে অ্যাকাউন্ট আছে? সাইন ইন',nw:'নতুন অ্যাকাউন্ট খুলুন',skip:'পরে করব',up:'অ্যাকাউন্ট খুলুন',inn:'সাইন ইন',nm:'আপনার নাম',mail:'ইমেইল',pw:'পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)',needtc:'শর্তে সম্মত হতে টিক দিন',need:'ইমেইল ও কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড দিন',login:'লগইন',my:'আমার অর্ডার',none:'এখনো কোনো অর্ডার নেই',out:'লগআউট',close:'বন্ধ করুন',wel:'স্বাগতম',
  e:{'auth/unauthorized-domain':'এই ডোমেইন অনুমোদিত নয়','auth/network-request-failed':'ইন্টারনেট সংযোগ দেখুন','auth/invalid-credential':'ইমেইল বা পাসওয়ার্ড ভুল','auth/wrong-password':'ইমেইল বা পাসওয়ার্ড ভুল','auth/user-not-found':'এই ইমেইলে অ্যাকাউন্ট নেই','auth/email-already-in-use':'এই ইমেইলে অ্যাকাউন্ট আছে, সাইন ইন করুন','auth/weak-password':'পাসওয়ার্ড কমপক্ষে ৬ অক্ষর','auth/invalid-email':'ইমেইল সঠিক নয়','auth/too-many-requests':'অনেকবার চেষ্টা হয়েছে, একটু পরে দেখুন','x':'লগইন হয়নি, আবার চেষ্টা করুন'},
  st:{u:'পাঠানো হয়নি',n:'পাঠানো হয়েছে',a:'গ্রহণ করা হয়েছে',r:'প্রস্তুত',d:'সম্পন্ন',c:'বাতিল'}},
@@ -282,9 +282,12 @@ const accRender=()=>{const e=$('#acc');if(e)e.outerHTML=acctBtn()};
 function acctData(){return (Q&&Q.lg&&ACC)?{lg:1,cuid:ACC.id,cn:ACC.e||'',cname:ACC.n||''}:{}}
 const setAcc=u=>{ACC=u?{id:u.uid,n:u.displayName||'',e:u.email||'',p:u.photoURL||''}:null;ls('qo_u',ACC?JSON.stringify(ACC):null);try{if(ACC&&ACC.n&&!F.nm){F.nm=ACC.n;const i=$('#nm');if(i&&!i.value)i.value=ACC.n}}catch(e){}accRender()};
 const authLoad=async()=>{if(AU)return AU;AM=await import(FBV+'firebase-auth.js');await fbWait(8000);if(!window.__fbApp)throw new Error('nofb');AU=AM.getAuth(window.__fbApp);return AU};
-function authInit(){if(AINIT)return;AINIT=true;authLoad().then(()=>{AM.onAuthStateChanged(AU,u=>{try{if(u){const first=!ACC;setAcc(u);lgClose();if(first)toast((LG().wel)+(u.displayName?', '+u.displayName.split(' ')[0]:''))}else if(ACC)setAcc(null)}catch(e){}})}).catch(()=>{AINIT=false})}
+function authInit(){if(AINIT)return;AINIT=true;authLoad().then(()=>{
+ try{AM.getRedirectResult(AU).catch(e=>{try{sessionStorage.setItem('qo_lge',(e&&e.code)||'unknown')}catch(x){}})}catch(e){}
+ AM.onAuthStateChanged(AU,u=>{try{if(u){const first=!sessionStorage.getItem('qo_wel');if(first)sessionStorage.setItem('qo_wel','1');setAcc(u);lgClose();if(first)toast((LG().wel)+(u.displayName?', '+u.displayName.split(' ')[0]:''))}else{setAcc(null);if(!oid&&!sessionStorage.getItem('qo_skip')&&!$('#lgx'))lgOpen()}}catch(e){}})
+}).catch(()=>{AINIT=false;try{if(!oid&&!sessionStorage.getItem('qo_skip')&&!$('#lgx'))lgOpen()}catch(e){}})}
 function toast(m){const d=document.createElement('div');d.style.cssText='position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:9500;background:#F5B52E;color:#2a1b00;font-weight:800;padding:10px 18px;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:90vw';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
-function lgCheck(){if(!(Q&&Q.lg)||oid)return;authInit();try{if(!ACC&&!sessionStorage.getItem('qo_skip')&&!$('#lgx'))lgOpen()}catch(e){}}
+function lgCheck(){if(!(Q&&Q.lg)||oid)return;authInit()}
 function lgClose(){const d=$('#lgx');if(!d)return;d.classList.add('out');setTimeout(()=>{d.remove();setTimeout(instToast,500)},300)}
 function lgOpen(){if($('#lgx'))return;const L=LG(),d=document.createElement('div');d.id='lgx';d.className='lg-ov';
  let st='';for(let i=0;i<14;i++)st+=`<b style="left:${Math.round(Math.random()*96)}%;animation-duration:${(7+Math.random()*8).toFixed(1)}s;animation-delay:${(-Math.random()*12).toFixed(1)}s;transform:scale(${(.5+Math.random()).toFixed(2)})"></b>`;
@@ -296,13 +299,14 @@ function lgOpen(){if($('#lgx'))return;const L=LG(),d=document.createElement('div
  <div class="lg-f" id="lgE" hidden><input id="lgN" placeholder="${L.nm}" autocomplete="name"><input id="lgU" type="email" placeholder="${L.mail}" autocomplete="email"><input id="lgP" type="password" placeholder="${L.pw}" autocomplete="current-password"><button class="lg-go" id="lgGo">${L.up}</button><button class="lg-sw" id="lgSw">${L.have}</button></div>
  <div class="lg-r" id="lgR"></div><button class="lg-s" id="lgS">${L.skip}</button></div>`;
  document.body.appendChild(d);
+ try{const le=sessionStorage.getItem('qo_lge');if(le){sessionStorage.removeItem('qo_lge');d.querySelector('#lgR').textContent=(L.e[le]||L.e.x)+' ['+le+']'}}catch(e){}
  let mode='up';const q=s=>d.querySelector(s),err=m=>{q('#lgR').textContent=m||''},busy=b=>d.querySelectorAll('button').forEach(x=>x.disabled=b);
  const tcOk=()=>{if(q('#lgtc').checked)return true;const w=q('#lgtcw');w.classList.remove('bad');void w.offsetWidth;w.classList.add('bad');err(L.needtc);return false};
- const fail=e=>{const c=e&&e.code;if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'){err('');return}err(L.e[c]||L.e.x)};
+ const fail=e=>{const c=e&&e.code;if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'){err('');return}err((L.e[c]||L.e.x)+(c?' ['+c+']':''))};
  q('#lgS').onclick=()=>{try{sessionStorage.setItem('qo_skip','1')}catch(e){}lgClose()};
  q('#lgM').onclick=()=>{const f=q('#lgE');f.hidden=!f.hidden;if(!f.hidden)setTimeout(()=>q('#lgU').focus(),50)};
  q('#lgSw').onclick=()=>{mode=mode==='up'?'in':'up';q('#lgN').style.display=mode==='up'?'':'none';q('#lgGo').textContent=mode==='up'?L.up:L.inn;q('#lgSw').textContent=mode==='up'?L.have:L.nw;q('#lgP').autocomplete=mode==='up'?'new-password':'current-password'};
- q('#lgG').onclick=async()=>{if(!tcOk())return;err('');busy(true);try{await authLoad();const p=new AM.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});try{await AM.signInWithPopup(AU,p)}catch(e){if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment')){await AM.signInWithRedirect(AU,p);return}throw e}}catch(e){fail(e)}busy(false)};
+ q('#lgG').onclick=async()=>{if(!tcOk())return;err('');busy(true);try{await authLoad();const p=new AM.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){await AM.signInWithRedirect(AU,p);return}try{await AM.signInWithPopup(AU,p)}catch(e){if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'||e.code==='auth/missing-initial-state')){await AM.signInWithRedirect(AU,p);return}throw e}}catch(e){fail(e)}busy(false)};
  q('#lgGo').onclick=async()=>{if(!tcOk())return;const em=q('#lgU').value.trim(),pw=q('#lgP').value;if(!em||pw.length<6){err(L.need);return}err('');busy(true);try{await authLoad();if(mode==='up'){const r=await AM.createUserWithEmailAndPassword(AU,em,pw),n=q('#lgN').value.trim();if(n){await AM.updateProfile(r.user,{displayName:n});setAcc(r.user)}}else await AM.signInWithEmailAndPassword(AU,em,pw)}catch(e){fail(e)}busy(false)}}
 /* ---------- অর্ডার ইতিহাস (এই ফোনে) ---------- */
 const hist=()=>{try{return JSON.parse(ls('qo_h')||'[]')}catch(e){return[]}};
@@ -335,9 +339,7 @@ function homeBar(){if(!HM)return '';const lk=(h,x)=>`<a class="lk" href="${h}" t
  if(hasLoc())x+=lk('https://www.google.com/maps/search/?api=1&query='+(+Q.lat)+','+(+Q.lng),t('maps'));
  if(Q.dl&&(+Q.fee>0||+Q.rad>0||+Q.min>0))x+=`<div class="mu" style="margin-top:8px;font-size:.85em">${t('dl')}${+Q.rad>0?' · ≤'+(+Q.rad)+t('km'):''}${+Q.fee>0?' · '+t('fee')+' '+m(+Q.fee):''}${+Q.free>0?' · '+m(+Q.free)+'+ '+t('free'):''}${+Q.min>0?' · min '+m(+Q.min):''}</div>`;
  return `<div id="instw"></div>`+(x?`<div class="cd" style="margin-bottom:10px;animation:none">${x}</div>`:'')}
-function mkManifest(){try{const u=new URL(location.href),sc=u.origin+u.pathname.replace(/[^/]*$/,''),nm=C.name||'Menu';
- const mf={name:nm,short_name:nm.slice(0,12),start_url:u.origin+u.pathname+'?s='+encodeURIComponent(uid)+'&h=1',scope:sc,display:'standalone',background_color:'#0b2a2e',theme_color:C.color||'#0b2a2e',icons:[{src:sc+'logo-192.png',sizes:'192x192',type:'image/png'},{src:sc+'logo-512.png',sizes:'512x512',type:'image/png'}]};
- const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}}
+function mkManifest(){}
 const cbItems=()=>(C.combos||[]).map(c=>({id:'cb_'+c.id,n:c.n,e:c.e||c.n,p:+c.p,o:+c.o,c:'',s:c.s===undefined?'':c.s,cb:c.ids||[],combo:1})),allItems=()=>items.concat(cbItems());
 const tagOf=i=>{let tx='';if(i.combo)tx=Q.cl||T2('আজকের কম্বো অফার','Today\u2019s combo deal');else{if((C.best||[]).some(b=>b==i.id))tx=lang==='en'?(Q.ble||'Today\u2019s best'):(Q.bl||'আজকের সেরা')}
  return tx?`<div class="dtag ${i.combo?'c':((hue(String(i.id))%2)?'y':'k')}">${esc(tx)}</div>`:''};
