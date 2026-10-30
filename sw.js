@@ -1,4 +1,4 @@
-var V='musafir-pos-v29';
+var V='musafir-pos-v30';
 var CORE=['./','./index.html','./order.html','./manifest.json','./menu-manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png'];
 var VID=[];
 var FB='https://www.gstatic.com/firebasejs/10.12.2/';
@@ -36,10 +36,10 @@ self.addEventListener('fetch',function(e){
   return net.then(function(n){return n||Response.error()})})}
  function nf(key,url){return new Promise(function(res){var done=false;
   var fb=function(){return caches.match(key,{ignoreSearch:true})};
-  var to=setTimeout(function(){fb().then(function(h){if(h&&!done){done=true;res(h)}})},9000);
+  var to=setTimeout(function(){fb().then(function(h){if(h&&!done){done=true;res(h)}})},3000);
   fetch(url,{cache:'no-store'}).then(function(n){if(n&&n.ok){var cp=n.clone();caches.open(V).then(function(c){c.put(key,cp)})}
    if(!done){done=true;clearTimeout(to);res(n)}}).catch(function(){clearTimeout(to);if(done)return;fb().then(function(h){done=true;res(h||Response.error())})})})}
- /* পেজ: আগে নেট (৯ সেকেন্ড), না পেলে ফোনে জমানো কপি। এতে নতুন ফাইল সাথে সাথে আসে, অফলাইনেও চলে */
+ /* পেজ: আগে নেট (৩ সেকেন্ড), না পেলে ফোনে জমানো কপি। এতে নতুন ফাইল সাথে সাথে আসে, অফলাইনেও চলে */
  if(r.mode==='navigate'){e.respondWith(nf(NAV,r.url));return}
  if(u.origin===location.origin&&/\.(html|js|json)$/.test(u.pathname)){e.respondWith(swr(r,r.url));return}
  e.respondWith(caches.match(r,{ignoreSearch:true}).then(function(hit){
