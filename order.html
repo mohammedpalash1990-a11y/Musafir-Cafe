@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>try{var _t=localStorage.getItem("qo_theme");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}</script><title>মেনু</title><meta name="theme-color" content="#0b2a2e"><meta name="app-build" content="202610300536"><link rel="apple-touch-icon" href="logo-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><link rel="icon" href="logo-192.png">
+<script>try{var _t=localStorage.getItem("qo_theme");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}</script><title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
 <style>
 :root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#0b2a2e;--z:1;--cw:150px}
@@ -240,11 +240,11 @@ async function init(){
  const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(ls('qo_lang')===null&&s.lang){bi=false;lang=s.lang==='en'?'en':'bn'}if(C.color)document.documentElement.style.setProperty('--hd',C.color);document.documentElement.style.setProperty('--is',({s:'66px',m:'96px',l:'124px',x:'999px'})[Q.is||'m']||'96px')};
  const fetchShop=async()=>{if(navigator.onLine===false)return null;try{const s=await Promise.race([shopGet(),new Promise((_,j)=>setTimeout(()=>j('to'),10000))]);if(s){ls(SK,JSON.stringify(s));return s}ls(SK,null);return 'none'}catch(e){return null}};
  /* অর্ডার ট্র্যাকিং পাতা: মেনুর জন্য অপেক্ষা না করে সাথে সাথে দেখানো হয় */
- if(oid){apply(sd||{});mkManifest();hdr();trackStart();
+ if(oid){apply(sd||{});if(HM)mkManifest();hdr();trackStart();
   fetchShop().then(s=>{if(s&&s!=='none'){apply(s);hdr();paint()}});return}
  /* মেনু পাতা: ফোনে জমানো মেনু আগে দেখানো, পেছনে নতুন মেনু আনা */
  let liveOn=false;const live=()=>{if(liveOn||oid)return;liveOn=true;fbWait(8000).then(F=>{if(!F){liveOn=false;return}try{F.onSnapshot(F.doc(db,'shops',uid),s=>{if(!s.exists())return;const d=s.data();if(JSON.stringify(d)===JSON.stringify(C))return;ls(SK,JSON.stringify(d));apply(d);sd=d;Object.keys(imc).forEach(k=>{if(!imc[k])delete imc[k]});if($('#sh')||document.activeElement===$('#sq'))return;hdr();list();bar()},()=>{liveOn=false})}catch(e){liveOn=false}})};
-  const show=()=>{restoreCart();mkManifest();hdr();if(!sessionStorage.getItem('sp'))splash();list();bar();live()};
+  const show=()=>{restoreCart();if(HM)mkManifest();hdr();if(!sessionStorage.getItem('sp'))splash();list();bar();live()};
  if(sd){apply(sd);show();
   fetchShop().then(s=>{if(s==='none'){$('#bd').innerHTML='<p class="w">'+t('nopub')+'</p>';return}
    if(s&&JSON.stringify(s)!==JSON.stringify(sd)&&!$('#sh')&&document.activeElement!==$('#sq')){apply(s);sd=s;hdr();list();bar()}});return}
@@ -311,8 +311,7 @@ function accOpen(){if(!ACC){lgOpen();return}if($('#lgsb'))return;const L=LG(),cu
  fbWait(8000).then(async fb=>{if(!fb)return;for(const x of h.slice(0,8)){try{const s=await fb.getDoc(fb.doc(db,'orders',x.id));if(s.exists()){const e=b.querySelector('.lgo[data-id="'+x.id+'"] .st');if(e){const c=stCls(s.data().status,false);e.className='st '+c[0];e.textContent=c[1]}}}catch(e){}}})}
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('#acc');if(a){e.preventDefault();e.stopPropagation();ACC?accOpen():lgOpen()}},true);
 function instToast(){try{if(oid||$('#lgx')||sessionStorage.getItem('qo_it')||matchMedia('(display-mode:standalone)').matches||navigator.standalone||!(C&&C.name))return;sessionStorage.setItem('qo_it','1');const en=lang==='en',d=document.createElement('div');d.className='it-t';d.innerHTML=`<b>📲 ${en?'Add to Home Screen':'হোম স্ক্রিনে যোগ করুন'}</b><span>${esc(C.name)} ${en?'will open like an app: menu, orders and live order status':'অ্যাপের মতো খুলবে: মেনু, অর্ডার ও অর্ডারের অবস্থা'}</span><small>${en?'Browser ⋮ menu → Add to Home screen':'ব্রাউজারের ⋮ মেনু → Add to Home screen'}</small>`;document.body.appendChild(d);setTimeout(()=>d.classList.add('x'),2600);setTimeout(()=>d.remove(),3300)}catch(e){}}
-function homeUrl(){return '?s='+encodeURIComponent(uid)+(tbl?'&t='+encodeURIComponent(tbl):'')+(HM?'&h=1':'')}
-function hdr(){const cur=bi?'bi':lang;$('#app').innerHTML=`<header><a class="lh" href="${homeUrl()}" aria-label="Home" style="display:flex;flex:none"><img src="logo-192.png" alt=""></a><div class="hn"><b>${esc(C.name||T2('মেনু','Menu'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}</div>
+function hdr(){const cur=bi?'bi':lang;$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><div class="hn"><b>${esc(C.name||T2('মেনু','Menu'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}</div>
  <div class="hb">${[['bn','বাং'],['en','EN']].map(x=>`<button data-lang="${x[0]}" class="${cur===x[0]?'on':''}">${x[1]}</button>`).join('')}</div>${acctBtn()}</header>
  <div id="ib"><div class="zp"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div><button class="sun" id="th" aria-label="theme">${SUN}</button><div class="clk"><b id="ck"></b><span id="cdt"></span></div></div><div class="w" id="bd"></div>`;clk();try{lgCheck()}catch(e){}setTimeout(instToast,1600)}
 const qrBanner=()=>`<div class="qrb"><span>📲 ${T2('QR অর্ডার','QR Orders')}</span><span class="qs">${tbl?esc(t('table')+tbl):HM?T2('পিকআপ / ডেলিভারি','Pickup / Delivery'):Q.open===false?T2('বন্ধ','Closed'):T2('অর্ডার দিন','Order here')}</span></div>`;
@@ -478,23 +477,8 @@ addEventListener('online',()=>{if(!oid)return;deliver();if(!FS&&!sessionStorage.
 init();
 setInterval(()=>{if(oid&&lastO&&lastO.eta&&lastO.type!=='dine'&&lastO.status!=='served'&&lastO.status!=='billed')paint()},30000);
 /* অফলাইন প্রস্তুতি: সার্ভিস ওয়ার্কার চালু করে Firebase ফাইল ও ভিডিও ক্যাশে রাখা */
-const regSW=()=>{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{try{r.update()}catch(e){}addEventListener('visibilitychange',()=>{if(!document.hidden){try{r.update()}catch(e){}}});return navigator.serviceWorker.ready}).then(()=>{
+const regSW=()=>{navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
  const B='https://www.gstatic.com/firebasejs/10.12.2/';['firebase-app.js','firebase-firestore.js','firebase-component.js','firebase-logger.js','firebase-util.js'].forEach(f=>fetch(B+f,{mode:'no-cors'}).catch(()=>{}));
  ['logo-192.png'].forEach(f=>fetch(f).catch(()=>{}))}).catch(()=>{})};
 if('serviceWorker' in navigator){document.readyState==='complete'?regSW():addEventListener('load',regSW)}
-</script>
-<script>
-/* অটো আপডেট: নতুন ভার্সন পেলে নিজে থেকেই পুরনো ক্যাশ মুছে পেজ রিলোড হয় */
-(function(){var m0=document.querySelector('meta[name=app-build]'),B=m0&&m0.content;if(!B)return;var busy=false;
-function safe(){var a=document.activeElement;return !(document.querySelector('#sh,#lgx')||(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)))}
-function chk(){if(busy||document.hidden||!navigator.onLine)return;busy=true;
-fetch(location.pathname+'?_v='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
-var m=/<meta name="app-build" content="([^"]+)"/.exec(t||'');if(!m||m[1]===B){busy=false;return}
-if(!safe()){busy=false;return}
-var k='qo_rl',last='';try{last=sessionStorage.getItem(k)||''}catch(e){}if(last===m[1]){busy=false;return}try{sessionStorage.setItem(k,m[1])}catch(e){}
-var ps=[];try{if(navigator.serviceWorker)ps.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(x){return x.update().catch(function(){})}))}))}catch(e){}
-try{if(window.caches)ps.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(x){return caches.delete(x)}))}))}catch(e){}
-Promise.all(ps).catch(function(){}).then(function(){location.reload()})}).catch(function(){busy=false})}
-setTimeout(chk,1500);document.addEventListener('visibilitychange',function(){if(!document.hidden)chk()});setInterval(chk,300000);addEventListener('online',chk)})();
-</script>
-</body></html>
+</script></body></html>
