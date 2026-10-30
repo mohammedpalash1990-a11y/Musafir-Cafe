@@ -1,4 +1,4 @@
-var V='musafir-pos-v27';
+var V='musafir-pos-v29';
 var CORE=['./','./index.html','./order.html','./manifest.json','./menu-manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png'];
 var VID=[];
 var FB='https://www.gstatic.com/firebasejs/10.12.2/';
@@ -43,7 +43,10 @@ self.addEventListener('fetch',function(e){
  if(r.mode==='navigate'){e.respondWith(nf(NAV,r.url));return}
  if(u.origin===location.origin&&/\.(html|js|json)$/.test(u.pathname)){e.respondWith(swr(r,r.url));return}
  e.respondWith(caches.match(r,{ignoreSearch:true}).then(function(hit){
-  var net=fetch(r).then(function(n){if(n&&(n.ok||n.type==='opaque')){var cp=n.clone();caches.open(V).then(function(c){c.put(r,cp)})}return n}).catch(function(){return hit});
+  /* Firebase মডিউল (gstatic) কখনো opaque কপি হিসেবে জমানো/দেওয়া হবে না: opaque কপি দিলে import() ব্যর্থ হয় */
+  var fbjs=u.host==='www.gstatic.com';
+  if(hit&&hit.type==='opaque'&&(fbjs||r.mode!=='no-cors'))hit=null;
+  var net=fetch(r).then(function(n){if(n&&(n.ok||(n.type==='opaque'&&!fbjs))){var cp=n.clone();caches.open(V).then(function(c){c.put(r,cp)})}return n}).catch(function(){return hit||Response.error()});
   return hit||net}))});
 
 self.addEventListener('notificationclick',function(e){e.notification.close();e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(function(l){for(var i=0;i<l.length;i++){if('focus' in l[i])return l[i].focus()}return clients.openWindow('./')}))});
