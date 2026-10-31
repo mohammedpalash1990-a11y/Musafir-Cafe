@@ -362,7 +362,7 @@ function render(){
 }
 
 function go(v){view=v;edit=null;arm=0;render();scrollTo(0,0)}
-function flt(){var s=String(q||'').trim().toLowerCase();return P.filter(function(p){return(cat=='All'||p.cat==cat)&&(nm(p)+' '+(p.name||'')+' '+(p.bn||'')+' '+(p.ar||'')+' '+(p.code||'')+' '+(p.cat||'')).toLowerCase().indexOf(s)>-1})}
+function flt(){var s=String(q||'').trim().toLowerCase();return P.filter(function(p){return(nm(p)+' '+(p.name||'')+' '+(p.bn||'')+' '+(p.ar||'')+' '+(p.code||'')+' '+(p.cat||'')+' '+(p.id||'')).toLowerCase().indexOf(s)>-1})}
 
 function vSell0(){
  return '<div style="display:flex;gap:8px;align-items:stretch;margin:4px 0 8px"><input id="sq" style="flex:1;min-width:0" placeholder="'+L('পণ্যের নাম / বারকোড লিখে খুঁজুন','Search item name / barcode')+'" value="'+esc(q)+'" oninput="q=this.value;keep()" onkeydown="if(event.key===\'Enter\'){event.preventDefault();scanProduct(this.value)}"><button type="button" onclick="startCameraScan()" title="Camera barcode scan" style="white-space:nowrap">'+I('camera')+' '+L('স্ক্যান','Scan')+'</button></div><div class="mute" style="font-size:11px;margin:4px 0 8px">'+L('USB/Bluetooth স্ক্যানার দিয়েও বারকোড স্ক্যান করা যাবে। সব পণ্যের তালিকা দেখতে Stocks খুলুন।','Use a USB/Bluetooth scanner too. Open Stocks to view the full inventory.')+'</div>'
@@ -381,7 +381,7 @@ function startCameraScan(){
  var detector;try{detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','itf','qr_code']})}catch(e){stopCameraScan();toast(L('বারকোড ফরম্যাট সমর্থিত নয়','Barcode formats are not supported'));return}
  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}).then(function(stream){if(!$('#barcodeScanLayer')){stream.getTracks().forEach(function(t){t.stop()});return}scanStream=stream;var video=$('#barcodeScanVideo');video.srcObject=stream;video.play();scanTimer=setInterval(function(){if(!video||video.readyState<2)return;detector.detect(video).then(function(codes){if(codes&&codes.length){var val=codes[0].rawValue;stopCameraScan();var input=$('#sq');if(input)input.value=val;scanProduct(val)}}).catch(function(){})},250)}).catch(function(){stopCameraScan();toast(L('ক্যামেরা চালু হয়নি; অনুমতি দিন বা USB/Bluetooth স্ক্যানার ব্যবহার করুন','Camera could not start. Allow camera access or use a USB/Bluetooth scanner'))})
 }
-function add(id){var p=gp(id);if(!p)return;var n=(cart[id]||0)+1;if(p.stock!==''&&n>p.stock){toast(L('স্টকে পর্যাপ্ত পণ্য নেই','Not enough stock available'));return}cart[id]=n;render()}
+function add(id){var p=gp(id);if(!p)return;var n=(cart[id]||0)+1;if(p.stock!==''&&n>p.stock){toast(L('স্টকে পর্যাপ্ত পণ্য নেই','Not enough stock available'));return}cart[id]=n;render();openCart()}
 function chg(id,d){var p=gp(id),n=(cart[id]||0)+d;if(n<=0)delete cart[id];else if(p.stock===''||n<=p.stock)cart[id]=n;render();openCart()}
 function rm(id){delete cart[id];render();openCart()}
 
@@ -626,7 +626,7 @@ function stockRows(){var list=P.filter(function(p){return (nm(p)+' '+(p.name||''
  return '<div class="box" style="padding:4px 12px">'+list.map(function(p){var st=p.stock===''?L('স্টক দেওয়া নেই','Not set'):(+p.stock+' '+L('টি মজুত','in stock'));var low=p.stock!==''&&p.stock<=5;
  return '<div class="row" style="gap:10px;align-items:flex-start"><div style="display:flex;align-items:flex-start;gap:10px;min-width:0;flex:1">'+pphHtml(p,46,true)+'<div style="min-width:0"><b>'+esc(nm(p))+'</b><div class="mute" style="font-size:12px">'+esc(p.cat||L('ক্যাটাগরি নেই','No category'))+'</div><div class="mute" style="font-size:11px">'+L('বারকোড','Barcode')+': '+esc(p.code||'—')+'</div><div class="mute" style="font-size:11px">'+L('ক্রয়','Cost')+': '+$$(p.cost||0)+' · '+L('বিক্রয়','Price')+': '+$$(p.price)+'</div><b style="display:inline-block;margin-top:3px;color:'+(low?'var(--warn)':'var(--ac)')+'">'+st+'</b></div></div><button onclick="edit='+p.id+';pPhoto=undefined;prodReturn=\'stock\';view=\'prod\';render();scrollTo(0,0)">'+L('এডিট','Edit')+'</button></div>'}).join('')+'</div>';
 }
-function stockKeep(){var e=$('#stockRows');if(e)e.innerHTML=stockRows()}
+function stockKeep(){var e=document.getElementById('stockRows');if(e)e.innerHTML=stockRows()}
 function vProd(){
  var e=edit?gp(edit):null;
  var h='<div class="box"><div style="display:flex;align-items:center;justify-content:space-between"><b>'+(e?t('edit'):t('add'))+'</b><button type="button" onclick="edit=null;pPhoto=undefined;go(prodReturn||\'stock\')">'+L('ফিরে যান','Back')+'</button></div><label>'+t('nm')+'</label><input id="pn" value="'+esc(e?e.name:'')+'"><label>'+t('nb')+'</label><input id="pb" value="'+esc(e?e.bn||'':'')+'"><label>'+L('বারকোড / SKU','Barcode / SKU')+'</label><input id="pcode" inputmode="numeric" value="'+esc(e?e.code||'':'')+'" placeholder="Scan or enter barcode"><label>'+L('নাম (العربية)','Name (Arabic)')+'</label><input id="par" value="'+esc(e?e.ar||'':'')+'"><label>'+L('ক্রয়মূল্য','Purchase cost')+'</label><input id="pcost" type="number" inputmode="decimal" value="'+(e?e.cost||'':'')+'"><label>'+t('pr')+'</label><input id="pp" type="number" inputmode="decimal" value="'+(e?e.price:'')+'"><label>'+t('cat')+'</label><input id="pc" value="'+esc(e?e.cat:'')+'" placeholder="Drinks"><label>'+t('stock')+'</label><input id="ps" type="number" inputmode="numeric" value="'+(e?e.stock:'')+'">'
