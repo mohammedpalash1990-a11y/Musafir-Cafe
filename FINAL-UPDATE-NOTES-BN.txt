@@ -1,0 +1,12 @@
+Musafir Cafe — Final update notes
+
+- পুরনো logo-192.png, logo-512.png এবং favicon অপরিবর্তিত রাখা হয়েছে।
+- QR order page-এর theme demo-র dark green/gold style-এর সঙ্গে মিলানো হয়েছে।
+- বাংলা/English switch, Pickup এবং Home Delivery অপশন রাখা হয়েছে; customer checkout-এ আলাদা payment method যোগ করা হয়নি।
+- গুরুত্বপূর্ণ order bug fix: Firestore server write সফলভাবে acknowledge না করা পর্যন্ত order confirmation page-এ যাবে না। Rules/permission-denied হলে error code দেখাবে। Timeout-কে আর success হিসেবে দেখাবে না।
+- Service Worker cache version v25 করা হয়েছে, যাতে পুরনো cached QR page আটকে না থাকে।
+
+Firestore Rules নোট:
+অর্ডার না গেলে error-এ permission-denied দেখালে Firebase Console > Firestore Database > Rules-এ orders collection-এর create permission পরীক্ষা করতে হবে। পুরো database-এ allow read, write: if true; ব্যবহার করবেন না—এতে ডেটা অনিরাপদ হয়। এই ZIP-এ Firebase project-এর server-side Rules অন্তর্ভুক্ত ছিল না, তাই Rules নিজে থেকে বদলানো হয়নি।
+
+পরীক্ষা: HTML/JS syntax ও ZIP integrity যাচাই প্রয়োজন; live Firebase credentials, live rules এবং real order acceptance deployment-এর পরে পরীক্ষা করতে হবে।

@@ -1,10 +1,10 @@
 <!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>try{var _t=localStorage.getItem("qo_theme");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}</script><title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"></noscript>
+<title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
 <style>
-:root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#0b2a2e;--z:1;--cw:150px}
+:root{--bg:#10130f;--card:#1a2018;--ink:#f7f6ee;--mu:#b2b9a8;--ln:#343d30;--ac:#f4bc45;--acink:#251a04;--hd:#10130f;--z:1;--cw:150px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:500 calc(15px*var(--z))/1.45 "Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:140px;overflow-x:hidden}
+body{margin:0;background:radial-gradient(ellipse at top,#273323 0,var(--bg) 55%);color:var(--ink);font:500 calc(15px*var(--z))/1.45 "Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:140px;overflow-x:hidden}
 header{background:var(--hd);padding:calc(8px + env(safe-area-inset-top)) 10px 8px;display:flex;align-items:center;gap:6px;position:sticky;top:0;z-index:5}
 header img{width:36px;height:36px;border-radius:10px;flex:none}header b{font-size:17px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip{background:var(--card);border:1px solid var(--ln);border-radius:99px;padding:3px 10px;font-size:12px;white-space:nowrap;flex:none}
@@ -42,176 +42,35 @@ input{width:100%;padding:11px 12px;border:1px solid var(--ln);border-radius:12px
 @keyframes up{from{opacity:0;transform:translateY(16px)}}@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
 .tg{display:flex;gap:8px;margin:10px 0}.tg button{flex:1;padding:12px 6px;border-radius:12px;background:var(--ln);color:var(--ink);font-weight:700}.tg .on{background:var(--ac);color:var(--acink)}
 .lk{display:inline-block;margin:6px 8px 0 0;padding:8px 14px;border-radius:10px;background:var(--ln);color:var(--ink);text-decoration:none;font-weight:700;font-size:calc(14px*var(--z))}
-
-/* ===== POS-এর মতো মেনু ===== */
-:root{--blue:#93a6ff;--wr:#ff8a7a}
-header{background:var(--hd);padding:calc(12px + env(safe-area-inset-top)) 16px 12px;min-height:64px;gap:10px;border:0;border-radius:0;box-shadow:none}
-header b{font-size:19px;font-weight:800;color:#fff;letter-spacing:0}
-.chip{background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:20px;padding:6px 12px;font-weight:700;font-size:13px}
-.hb{gap:0;border:1px solid rgba(255,255,255,.35);border-radius:20px;overflow:hidden}
-.hb button{height:auto;min-width:0;padding:6px 10px;border:0;border-radius:0;background:transparent;color:#fff;font-size:13px;font-weight:700}
-.hb button.on{background:#fff;color:var(--hd)}
-.ch{position:static;background:none;backdrop-filter:none;padding:10px 0;margin:0;gap:8px}
-.ch span{border-radius:20px;padding:7px 15px;background:var(--card);border:1px solid var(--ln);font-weight:600;box-shadow:none;backdrop-filter:none}
-.ch .on{background:var(--hd);border-color:var(--hd);color:#fff;box-shadow:none;font-weight:600}
-#sq{border-radius:12px;padding:12px;background:var(--card)}
-#gr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:1000px;margin:0 auto}@media (min-width:640px){#gr{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1024px){#gr{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.p{color:var(--ink);text-align:left;padding:12px;min-height:calc(132px*var(--z));display:flex;flex-direction:column;align-items:flex-start;gap:6px;position:relative;border-radius:18px;background:var(--card);border:1px solid var(--ln);box-shadow:0 1px 2px rgba(0,0,0,.25);animation:up .35s both;min-width:0}
-.p:active{transform:scale(.97)}.p *{pointer-events:none}.p .mn{pointer-events:auto}
-.p .av{width:calc(66px*var(--z));height:calc(66px*var(--z));aspect-ratio:auto;border-radius:14px;object-fit:cover;font-size:calc(21px*var(--z));flex:none}
-.p b{font-size:calc(15px*var(--z));line-height:1.25;overflow-wrap:anywhere}
-.p .pr{color:var(--blue);font-weight:800}.p small{color:var(--mu)}
-.qty{z-index:5;position:absolute;top:8px;right:8px;background:var(--blue);color:#0d1a1d;border-radius:20px;min-width:26px;text-align:center;font-weight:800;padding:2px 8px;font-size:13px}
-.mn{z-index:5;position:absolute;right:8px;bottom:8px;width:32px;height:32px;border-radius:50%;background:var(--ln);color:var(--ink);display:grid;place-items:center;font-size:20px;font-weight:800;line-height:1}
-.hero{font-size:calc(104px*var(--z));line-height:1.1;filter:drop-shadow(0 12px 18px #000a);animation:flt 2.2s ease-in-out infinite alternate}
-.stp div{position:relative}.stp div:not(:last-child)::after{content:"";position:absolute;top:15px;left:calc(50% + 19px);right:calc(-50% + 19px);height:2px;background:var(--ln)}.stp .d:not(:last-child)::after{background:var(--ac)}
-.stp i{width:32px;height:32px;line-height:32px}.stp .d i{box-shadow:0 0 0 5px #5cb82e30}
-
-/* ===== POS-এর হুবহু ডিজাইন (Musafir Teal) ===== */
-:root{--bg:#e9edf3;--card:#fff;--ink:#1b2733;--mu:#657386;--ln:#d3dae5;--ac:#3f9a22;--acink:#fff;--soft:#e3f1dc;--wr:#c4311f;--blue:#3446b8;--hd:#14454b;--qi:#fff}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1b1e;--card:#12292d;--ink:#e6f0f1;--mu:#8fb0b3;--ln:#25474d;--ac:#2aa58f;--acink:#05201c;--soft:#14393b;--wr:#ff8a7a;--blue:#7fe0cc;--hd:#14454b;--qi:#05201c}}
-:root[data-theme="dark"]{--bg:#0b1b1e;--card:#12292d;--ink:#e6f0f1;--mu:#8fb0b3;--ln:#25474d;--ac:#2aa58f;--acink:#05201c;--soft:#14393b;--wr:#ff8a7a;--blue:#7fe0cc;--hd:#14454b;--qi:#05201c}
-body{background:var(--bg)}
-.qty{background:var(--blue);color:var(--qi)}
-.p b{white-space:pre-line;font-size:calc(18px*var(--z));font-weight:800;line-height:1.25}
-.sh{background:var(--card)}.sh input{background:var(--bg)}.sh .row>span:first-child{white-space:pre-line}
-#ib{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto;padding:14px 16px 0}
-.zp{display:flex;border:1px solid var(--ln);border-radius:20px;overflow:hidden;background:var(--card);margin-right:auto}
-.zp button{background:transparent;color:var(--ink);padding:8px 14px;font-weight:700;font-size:14px;border:0}.zp button:disabled{opacity:.35}
-.sun{width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--ln);color:var(--ink);display:grid;place-items:center;padding:0;flex:none}
-.clk{text-align:right;line-height:1.2;flex:none}.clk b{display:block;font-size:19px;font-weight:800}.clk span{font-size:12px;color:var(--mu)}
-.syn{text-align:center;color:var(--mu);font-size:14px;padding:6px 16px 0}
-.qrb{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--ac);color:var(--acink);border-radius:20px;padding:18px 20px;margin:0 0 14px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
-.qrb span:first-child{font-weight:800;font-size:20px}.qrb .qs{font-weight:500;font-size:15px;opacity:.85}
-#bar{left:auto;right:12px;bottom:calc(18px + env(safe-area-inset-bottom,0px));touch-action:auto;max-width:calc(100vw - 24px)}body:has(#sh) #bar,body:has(.ov) #bar,body:has(#sp) #bar{display:none!important}
-.bar{min-width:0;flex-direction:row;justify-content:space-between;align-items:center;border-radius:14px;padding:10px 14px;font-size:14px;gap:12px;box-shadow:0 4px 14px #0008}
-#bar.drag .bar{transform:none;opacity:1}
-
-/* ===== কম্বো, ডিল লেখা, বড় ছবি ===== */
-.p{overflow:hidden}
-.p .av{width:100%;height:auto;aspect-ratio:4/3;border-radius:14px;font-size:calc(44px*var(--z))}
-.p .av.cbv{display:block;position:relative;overflow:hidden}.cbk{position:absolute;aspect-ratio:1/1;border-radius:14px;border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.35);overflow:hidden}.cbk .cbt{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.cbk .cbg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:calc(30px*var(--z))}.cbp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;width:32px;height:32px;border-radius:50%;background:#fff;color:#d6401f;font-weight:900;font-size:24px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.dtag{align-self:stretch;margin:2px -12px 0;padding:7px 12px;font-size:calc(15px*var(--z));font-weight:800;line-height:1.3;letter-spacing:.2px}
-.dtag.k{background:#f6ccd5;color:#a10f3a}.dtag.y{background:#f8ef7a;color:#3b2a00}.dtag.c{background:#ffd9a8;color:#7a2d00}
-.prw{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}.prw .pr{flex:0 0 100%}.p:has(.mn) .prw{max-width:calc(100% - 40px)}.prw .old{color:var(--mu);text-decoration:line-through;font-size:calc(14px*var(--z));font-weight:700}.prw .off{background:#1f9d55;color:#fff;border-radius:8px;padding:2px 8px;font-size:calc(14px*var(--z));font-weight:800}
-.deal{margin:0 0 12px;padding:14px 16px;border-radius:18px;text-align:center;font-weight:800;font-size:calc(20px*var(--z));line-height:1.3;color:#fff;background:linear-gradient(135deg,#ff7a00,#e0301e);box-shadow:0 6px 18px rgba(224,48,30,.35);animation:dealp 2.4s ease-in-out infinite}@keyframes dealp{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}@media (prefers-reduced-motion:reduce){.deal{animation:none}}
-.sv{color:#3fcf6b;font-weight:800;font-size:.85em}.of{color:var(--blue)}.of2{color:#3fcf6b}
-/* ===== customer login ===== */
-.accb{display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;border-radius:99px;padding:3px 11px 3px 3px;font-weight:800;font-size:13px;flex:none;max-width:130px}
-.accb .av2{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#F5B52E,#e0891e);color:#2a1b00;display:grid;place-items:center;font-weight:900;overflow:hidden;flex:none}
-.accb .av2 img{width:100%;height:100%;object-fit:cover}
-.accb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.accb.in{padding-right:3px}.accb.in span{display:none}
-.lg-ov{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto;background:radial-gradient(120% 90% at 50% 0%,#14454b 0%,#0b2a2e 55%,#06191c 100%);animation:lgIn .45s ease both;font-family:inherit}
-.lg-ov.out{animation:lgOut .3s ease forwards}
-@keyframes lgIn{from{opacity:0}to{opacity:1}}@keyframes lgOut{to{opacity:0;transform:scale(1.03)}}
-.lg-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.lg-bg i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;animation:lgF 14s ease-in-out infinite}
-.lg-o1{width:320px;height:320px;background:#F5B52E;top:-90px;right:-80px;opacity:.28!important}
-.lg-o2{width:300px;height:300px;background:#2aa58f;bottom:-100px;left:-90px;animation-delay:-5s!important}
-.lg-o3{width:200px;height:200px;background:#e0891e;bottom:25%;right:-60px;opacity:.18!important;animation-delay:-9s!important}
-@keyframes lgF{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,40px) scale(1.15)}}
-.lg-st{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.lg-st b{position:absolute;bottom:-30px;width:10px;height:10px;border-radius:50%;background:rgba(245,181,46,.55);box-shadow:0 0 14px rgba(245,181,46,.7);animation:lgUp linear infinite}
-@keyframes lgUp{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:.9}100%{transform:translateY(-105vh) scale(1.3);opacity:0}}
-.lg-card{position:relative;width:100%;max-width:380px;border-radius:28px;padding:26px 22px 20px;text-align:center;color:#F5F7F3;background:linear-gradient(160deg,rgba(255,255,255,.13),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 30px 70px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.25);animation:lgUpC .7s cubic-bezier(.2,.9,.3,1) both .1s}
-@keyframes lgUpC{from{opacity:0;transform:translateY(36px) scale(.96)}to{opacity:1;transform:none}}
-.lg-logo{width:104px;height:104px;margin:0 auto 10px;position:relative;display:grid;place-items:center;animation:lgFl 4s ease-in-out infinite}
-.lg-logo:before{content:"";position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(from 0deg,#F5B52E,transparent 40%,#2aa58f,transparent 80%,#F5B52E);animation:lgSp 6s linear infinite;filter:blur(1px);opacity:.9}
-.lg-logo:after{content:"";position:absolute;inset:2px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#1b5a60,#0b2a2e)}
-.lg-logo svg{position:relative;z-index:1;width:72px;height:72px}
-@keyframes lgSp{to{transform:rotate(360deg)}}@keyframes lgFl{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.lg-card h1{margin:6px 0 2px;font-size:25px;font-weight:900;letter-spacing:.3px;background:linear-gradient(90deg,#fff,#F5B52E);-webkit-background-clip:text;background-clip:text;color:transparent}
-.lg-card p{margin:0 0 16px;font-size:14px;line-height:1.5;color:#a7c1b6}
-.lg-g,.lg-m,.lg-go{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:0;border-radius:16px;padding:15px 14px;font:inherit;font-size:16px;font-weight:800;position:relative;overflow:hidden;cursor:pointer;transition:transform .15s}
-.lg-g:active,.lg-m:active,.lg-go:active{transform:scale(.97)}
-.lg-g{background:#fff;color:#1d2b2d;box-shadow:0 10px 26px rgba(0,0,0,.35)}
-.lg-g:after,.lg-go:after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);animation:lgSh 3.2s ease-in-out infinite}
-@keyframes lgSh{0%,60%{left:-60%}100%{left:130%}}
-.lg-g svg{width:22px;height:22px;flex:none}
-.lg-m{background:rgba(255,255,255,.1);color:#F5F7F3;border:1px solid rgba(255,255,255,.22);margin-top:10px}
-.lg-go{background:linear-gradient(135deg,#F5B52E,#e0891e);color:#2a1b00;margin-top:12px;box-shadow:0 10px 24px rgba(245,181,46,.35)}
-.lg-or{display:flex;align-items:center;gap:10px;margin:14px 0 2px;font-size:12px;color:#7fa39a}.lg-or:before,.lg-or:after{content:"";flex:1;height:1px;background:rgba(255,255,255,.16)}
-.lg-f{display:grid;gap:9px;margin-top:12px;animation:lgIn .3s ease}.lg-f[hidden]{display:none}
-.lg-f input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.25);color:#fff;padding:14px;font:inherit;font-size:15px;outline:0}
-.lg-f input:focus{border-color:#F5B52E;box-shadow:0 0 0 3px rgba(245,181,46,.25)}
-.lg-sw{background:none;border:0;color:#F5B52E;font:inherit;font-size:14px;font-weight:700;padding:8px;cursor:pointer}
-.lg-tc{display:flex;align-items:flex-start;gap:9px;text-align:left;font-size:13px;line-height:1.45;color:#c9ddd5;margin:2px 0 14px;cursor:pointer}
-.lg-tc input{width:20px;height:20px;flex:none;accent-color:#F5B52E;margin:0}
-.lg-tc.bad{animation:lgSk .4s}.lg-tc.bad span{color:#ff9a8a}
-@keyframes lgSk{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
-.lg-r{min-height:18px;margin-top:10px;font-size:13px;color:#ff9a8a;font-weight:700}
-.lg-s{background:none;border:0;color:#a7c1b6;font:inherit;font-size:14px;text-decoration:underline;padding:10px;margin-top:2px;cursor:pointer}
-.lg-ov button[disabled]{opacity:.6;pointer-events:none}
-.lgs-bk{position:fixed;inset:0;z-index:8900;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;animation:lgIn .25s}
-.lgs{width:100%;max-width:520px;max-height:88vh;overflow:auto;background:var(--card,#12292d);color:var(--ink,#e6f0f1);border-radius:26px 26px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));animation:lgSl .35s cubic-bezier(.2,.9,.3,1)}
-@keyframes lgSl{from{transform:translateY(100%)}to{transform:none}}
-.lgs .pf{display:flex;align-items:center;gap:12px;margin-bottom:14px}.lgs .pf .av2{width:54px;height:54px;font-size:22px;border-radius:50%;background:linear-gradient(135deg,#F5B52E,#e0891e);color:#2a1b00;display:grid;place-items:center;font-weight:900;overflow:hidden}.lgs .pf .av2 img{width:100%;height:100%;object-fit:cover}
-.lgs .pf b{display:block;font-size:18px}.lgs .pf small{color:var(--mu,#8fb0b3);word-break:break-all}
-.lgs h3{margin:10px 0 8px;font-size:16px}
-.lgo{border:1px solid var(--ln,#25474d);border-radius:16px;padding:12px;margin-bottom:9px;background:var(--bg,#0b1b1e)}
-.lgo .t{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--mu,#8fb0b3)}
-.lgo .s{margin:5px 0;font-weight:700;overflow-wrap:anywhere}
-.lgo .b{display:flex;justify-content:space-between;align-items:center;font-weight:800}
-.lgo .st{font-size:12px;padding:3px 10px;border-radius:99px;background:#2a3f43;color:#cfe}
-.lgo .st.n{background:#e0301e;color:#fff}.lgo .st.a{background:#1f6fd0;color:#fff}.lgo .st.r{background:#d98a00;color:#fff}.lgo .st.d{background:#1f9d55;color:#fff}.lgo .st.c{background:#7a2d2d;color:#fff}.lgo .st.p{background:#5a3b12;color:#ffd9a8}
-.lgs .bt{width:100%;border:0;border-radius:14px;padding:13px;font:inherit;font-weight:800;margin-top:8px;cursor:pointer}
-.lgs .bt.o{background:transparent;border:1px solid var(--ln,#25474d);color:var(--ink,#e6f0f1)}.lgs .bt.x{background:#7a2d2d;color:#fff}
-@media (prefers-reduced-motion:reduce){.lg-ov *,.lgs *{animation:none!important}}
-.hn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px}.hn b{flex:none;max-width:100%}.hn .chip{font-size:12px;padding:2px 10px}
-.p.sel{outline:3px solid var(--blue);outline-offset:-3px;box-shadow:0 0 0 4px rgba(42,165,143,.28),0 10px 24px rgba(0,0,0,.3)}
-.p .qty{z-index:6;min-width:30px;height:30px;font-size:16px;font-weight:900;box-shadow:0 3px 10px rgba(0,0,0,.45);border:2px solid #fff}.p .mn{z-index:6;box-shadow:0 3px 10px rgba(0,0,0,.35)}
-.prw .pr{font-size:calc(21px*var(--z));font-weight:900}
-.prw .off{opacity:1;white-space:nowrap;font-size:calc(16px*var(--z));font-weight:900;padding:4px 11px;border-radius:10px;background:linear-gradient(135deg,#ff3d6e,#ff7a00);box-shadow:0 3px 10px rgba(255,61,110,.45);letter-spacing:.3px}
-.prw .old{font-size:calc(15px*var(--z));font-weight:800;opacity:.85}
-.it-t{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9600;max-width:440px;margin:0 auto;background:linear-gradient(135deg,#14454b,#0b2a2e);border:1px solid rgba(245,181,46,.5);color:#F5F7F3;border-radius:18px;padding:13px 16px;display:grid;gap:3px;box-shadow:0 14px 34px rgba(0,0,0,.5);animation:itIn .4s ease both;font-size:14px}
-.it-t b{font-size:16px;color:#F5B52E}.it-t small{color:#a7c1b6}.it-t.x{animation:itOut .6s ease forwards}
-@keyframes itIn{from{opacity:0;transform:translateY(20px)}}@keyframes itOut{to{opacity:0;transform:translateY(20px)}}
 </style><link rel="apple-touch-icon" href="logo-192.png"></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
 <script type="module">
 let FS=null,db=null;
-const FBV='https://www.gstatic.com/firebasejs/10.12.2/';
-/* Firebase ব্যাকগ্রাউন্ডে লোড হয়; পাতা আটকে থাকে না। long-polling = দুর্বল/ব্লক নেটেও কানেকশন টিকে */
-const fbReady=(async()=>{try{
- const A=await import(FBV+"firebase-app.js"),F=await import(FBV+"firebase-firestore.js");
- const fbApp=A.initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});window.__fbApp=fbApp;
- try{db=F.initializeFirestore(fbApp,{localCache:F.memoryLocalCache(),experimentalForceLongPolling:true})}
- catch(e){try{db=F.initializeFirestore(fbApp,{experimentalForceLongPolling:true})}catch(e2){db=F.getFirestore(fbApp)}}
- FS=F}catch(e){FS=null}return FS})();
-addEventListener('pagehide',e=>{if(!e.persisted&&FS&&db){try{FS.terminate(db)}catch(x){}}});
-const fbWait=ms=>Promise.race([fbReady,new Promise(r=>setTimeout(()=>r(FS),ms))]);
-const shopGet=async()=>{const rr=await restGet('/shops/'+encodeURIComponent(uid),7000);if(rr){if(rr.nf)return null;if(rr.d)return rr.d}const F=await fbWait(8000);if(!F)throw new Error('nofb');const s=await F.getDoc(F.doc(db,'shops',uid));return s.exists()?s.data():null};
-const imgGet=async id=>{for(let k=0;k<3;k++){try{const rr=await restGet('/shops/'+encodeURIComponent(uid)+'/img/'+encodeURIComponent(String(id)),9000);if(rr){if(rr.nf)return '';if(rr.d)return rr.d.d||''}const F2=await fbWait(8000);if(F2){const d=await F2.getDoc(F2.doc(db,'shops',uid,'img',String(id)));return d.exists()?d.data().d:''}}catch(e){}await new Promise(r=>setTimeout(r,1500))}return undefined};
-const ratePut=async(oid,data)=>{const rr=await restPatch('/ratings/'+encodeURIComponent(oid),data,15000);if(rr.ok)return;if(rr.perm)throw new Error('perm');const F=await fbWait(8000);if(!F)throw new Error('nofb');const p=F.setDoc(F.doc(db,'ratings',oid),data);p.catch(()=>{});await Promise.race([p,new Promise((_,j)=>setTimeout(()=>j(new Error('to')),10000))])};
-async function restGet(path,ms){const c=new AbortController(),tm=setTimeout(()=>c.abort(),ms||8000);try{const r=await fetch(RB+path+'?key='+RK,{signal:c.signal});if(r.status===404)return{nf:1};if(!r.ok)return null;const j=await r.json();return{d:fromFS({mapValue:{fields:j.fields||{}}})}}catch(e){return null}finally{clearTimeout(tm)}}
-async function restPatch(path,data,ms){const c=new AbortController(),tm=setTimeout(()=>c.abort(),ms||15000);try{const r=await fetch(RB+path+'?key='+RK,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:toFS(data).mapValue.fields}),signal:c.signal});if(r.ok)return{ok:true};let j=null;try{j=await r.json()}catch(e){}const st=(j&&j.error&&j.error.status)||('http-'+r.status);return{ok:false,code:st,perm:st==='PERMISSION_DENIED'}}catch(e){return{ok:false,code:'network'}}finally{clearTimeout(tm)}}
-/* ---------- অর্ডার পাঠানো/আনা: Firestore REST (একটা সাধারণ HTTPS রিকোয়েস্ট, long-polling চ্যানেলের ঝামেলা নেই) ---------- */
-const RB='https://firestore.googleapis.com/v1/projects/index-9d688/databases/(default)/documents',RK='AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4';
-const toFS=v=>{if(v===null||v===undefined)return{nullValue:null};const t=typeof v;if(t==='string')return{stringValue:v};if(t==='boolean')return{booleanValue:v};if(t==='number')return Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v};if(Array.isArray(v))return{arrayValue:{values:v.map(toFS)}};const f={};Object.keys(v).forEach(k=>{f[k]=toFS(v[k])});return{mapValue:{fields:f}}};
-const fromFS=v=>{if(!v)return null;if('stringValue'in v)return v.stringValue;if('integerValue'in v)return +v.integerValue;if('doubleValue'in v)return v.doubleValue;if('booleanValue'in v)return v.booleanValue;if('arrayValue'in v)return(v.arrayValue.values||[]).map(fromFS);if('mapValue'in v){const o={},f=v.mapValue.fields||{};Object.keys(f).forEach(k=>{o[k]=fromFS(f[k])});return o}if('timestampValue'in v)return v.timestampValue;return null};
-async function restPut(id,data,ms){const c=new AbortController(),tm=setTimeout(()=>c.abort(),ms||15000);
- try{const r=await fetch(RB+'/orders?documentId='+encodeURIComponent(id)+'&key='+RK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:toFS(data).mapValue.fields}),signal:c.signal});
-  if(r.ok)return{ok:true};let j=null;try{j=await r.json()}catch(e){}
-  const st=(j&&j.error&&j.error.status)||('http-'+r.status);
-  if(r.status===409||st==='ALREADY_EXISTS')return{ok:true,dup:true};
-  return{ok:false,code:st,perm:st==='PERMISSION_DENIED'}}
- catch(e){return{ok:false,code:e&&e.name==='AbortError'?'timeout':'network'}}finally{clearTimeout(tm)}}
+try{
+ const A=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");FS=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+ const fbApp=A.initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});
+ /* অফলাইন ক্যাশ: মেনু, ছবি ও পাঠানো অর্ডার ফোনে জমা থাকবে */
+ try{db=FS.initializeFirestore(fbApp,{localCache:FS.persistentLocalCache({tabManager:FS.persistentMultipleTabManager()})})}catch(e){db=FS.getFirestore(fbApp)}
+}catch(e){FS=null}
+const shopGet=async()=>{if(!FS)throw new Error('nofb');const s=await FS.getDoc(FS.doc(db,'shops',uid));return s.exists()?s.data():null};
+const imgGet=async id=>{if(!FS)return '';const d=await FS.getDoc(FS.doc(db,'shops',uid,'img',String(id)));return d.exists()?d.data().d:''};
+const orderPut=(id,data)=>FS.setDoc(FS.doc(db,'orders',id),data);
+const ratePut=(oid,data)=>FS.setDoc(FS.doc(db,'ratings',oid),data);
+function orderWatch(oid,cb){if(!FS)return()=>{};return FS.onSnapshot(FS.doc(db,'orders',oid),{includeMetadataChanges:true},s=>cb(s.exists()?s.data():null,s.metadata.hasPendingWrites))}
 const SHOP='';const P=new URLSearchParams(location.search),uid=P.get('s')||SHOP,oid=P.get('o');let tbl=(P.get('t')||'').slice(0,10);
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}return null};
 /* ---------- ভাষা (ডিফল্ট বাংলা) ও সাইজ ---------- */
 const SZ=[{z:.82,cw:104},{z:1,cw:150},{z:1.18,cw:180},{z:1.35,cw:230}];
-const LG0=ls('qo_lang');let lang=LG0==='en'?'en':'bn',bi=false,si=+ls('qo_sz');if(!(si>=0&&si<SZ.length)||ls('qo_sz')===null)si=0;
+let lang=ls('qo_lang')==='en'?'en':'bn',si=+ls('qo_sz');if(!(si>=0&&si<SZ.length)||ls('qo_sz')===null)si=1;
 const TX={
 bn:{pk:'🏪 পিকআপ',dl:'🛵 ডেলিভারি',ph:'মোবাইল নম্বর',ad:'পূর্ণ ঠিকানা (বাড়ি, রোড, এলাকা)',mylc:'📍 আমার লোকেশন দিন',locing:'লোকেশন নেওয়া হচ্ছে…',lcok:'✔ লোকেশন পাওয়া গেছে',inz:'✔ আপনার এলাকায় ডেলিভারি দেওয়া হয়',outz:'😔 আপনার লোকেশন আমাদের ডেলিভারি এলাকার বাইরে',km:' কিমি',needlc:'ডেলিভারির জন্য আপনার লোকেশন দিন',nogeo:'এই ফোনে লোকেশন পাওয়া যাচ্ছে না',locfail:'লোকেশন পাওয়া যায়নি। ফোনের লোকেশন ও ব্রাউজারের অনুমতি চালু করুন।',fee:'ডেলিভারি চার্জ',free:'ফ্রি',gtot:'সর্বমোট',minmsg:n=>'ডেলিভারির জন্য ন্যূনতম অর্ডার '+n,needPh:'সঠিক মোবাইল নম্বর দিন',needAd:'ঠিকানা লিখুন',shopat:'দোকানের ঠিকানা',callus:'📞 কল করুন',maps:'📍 ম্যাপে দেখুন',wa:'💬 WhatsApp এ পাঠান',inst:'📲 হোম স্ক্রিনে যোগ করুন (অ্যাপের মতো)',iosTip:'Safari-তে নিচের Share বাটন চেপে "Add to Home Screen" বেছে নিন',pkGo:'আপনার অর্ডার প্রস্তুত, দোকান থেকে নিয়ে যান',dlGo:'আপনার অর্ডার প্রস্তুত, শীঘ্রই রওনা হবে',nohome:'এখন বাড়ি থেকে অর্ডার নেওয়া বন্ধ আছে',bad:'QR বা লিংকটি ঠিক নয়',off:'ইন্টারনেট নেই। একবার নেট দিয়ে এই পাতা খুললে পরে অফলাইনেও মেনু দেখা যাবে।',offb:'📴 অফলাইন · ফোনে জমানো মেনু দেখাচ্ছে',pend:'📴 ইন্টারনেট নেই। অর্ডারটি আপনার ফোনে জমা আছে, নেট আসলেই নিজে থেকে দোকানে চলে যাবে। তাড়া থাকলে এই স্ক্রিনটা কাউন্টারে দেখান।',nopub:'মেনু এখনো প্রকাশ হয়নি',closed:'এখন অর্ডার নেওয়া বন্ধ আছে, মেনু দেখতে পারেন।',search:'পণ্য খুঁজুন',all:'সব',other:'অন্যান্য',add:'+ যোগ করুন',out:'স্টক শেষ',none:'কিছু পাওয়া যায়নি',cartN:n=>'🛒 '+n+'টি',view:'দেখুন ›',tapDrag:'ধরে সরানো যাবে',yours:'আপনার অর্ডার',total:'মোট',tno:'টেবিল নম্বর',tph:'যেমন: 5',yname:'আপনার নাম (ঐচ্ছিক)',note:'নোট (ঐচ্ছিক, যেমন: চিনি কম)',confirm:'✔ অর্ডার কনফার্ম করুন',closedBtn:'এখন অর্ডার নেওয়া বন্ধ',back:'← মেনুতে ফিরুন',needT:'টেবিল নম্বর দিন',wait:'একটু অপেক্ষা করে আবার চেষ্টা করুন',fail:'পাঠানো যায়নি, আবার চেষ্টা করুন',table:'টেবিল ',nf:'অর্ডার পাওয়া যায়নি',sorry:'দুঃখিত, অর্ডারটি নেওয়া যায়নি',sent:'অর্ডার পাঠানো হয়েছে!',steps:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','খাবার প্রস্তুত','পরিবেশন'],
 vw:['⏳ অপেক্ষা করুন','🍽 খাবার প্রস্তুত!','😋 মজা করে খান'],vt:['খাবার তৈরি হচ্ছে… একটু অপেক্ষা করুন','আপনার খাবার তৈরি হয়ে গেছে','ধন্যবাদ, আবার আসবেন ❤'],foot:'আপনার আসাই আমাদের আনন্দ ☕ এই পাতা খোলা রাখলে অবস্থা নিজে থেকেই বদলাবে।',more:'আরও অর্ডার করুন',welcome:'স্বাগতম',tag:'মেনু দেখে অর্ডার দিন',g:['শুভ রাত্রি','সুপ্রভাত','শুভ দুপুর','শুভ বিকাল','শুভ সন্ধ্যা'],
-rate:'আমাদের সার্ভিস কেমন লাগলো?',rcm:'মন্তব্য (ঐচ্ছিক)',rsend:'রেটিং পাঠান',rpick:'তারা দিয়ে রেটিং দিন',rthx:'ধন্যবাদ! আপনার রেটিং পেয়েছি',rfail:'রেটিং পাঠানো যায়নি, আবার চেষ্টা করুন',rl:['','খুব খারাপ','খারাপ','মোটামুটি','ভালো','চমৎকার'],hpk:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','প্রস্তুত, নিয়ে যান','হস্তান্তর হয়েছে'],hdl:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','প্রস্তুত, রওনা হচ্ছে','ডেলিভারি হয়েছে'],hvw:['⏳ প্রস্তুত করা হচ্ছে','🍽 প্রস্তুত!','✅ সম্পন্ন'],eta:n=>'আর প্রায় '+n+' মিনিট',etaSoon:'প্রায় হয়ে গেছে',msgEta:'💬 আর কত মিনিট?',callShop:'📞 কল করুন',etaAsk:'আসসালামু আলাইকুম, আমার অর্ডার প্রস্তুত হতে আর কত মিনিট লাগবে?',sizeS:'ছোট',sizeL:'বড়',conn:'অর্ডারের অবস্থা আনা হচ্ছে…',connh:'নেট ধীর হলে একটু সময় লাগতে পারে। অর্ডার হারাবে না।',retry:'🔄 আবার চেষ্টা করুন',loading:'মেনু লোড হচ্ছে…',pend2:'⏳ অর্ডার দোকানে পৌঁছানোর চেষ্টা চলছে। নেট ধীর হলে দেরি হতে পারে, পাতা খোলা রাখুন। তাড়া থাকলে এই স্ক্রিনটা কাউন্টারে দেখান।'},
+rate:'আমাদের সার্ভিস কেমন লাগলো?',rcm:'মন্তব্য (ঐচ্ছিক)',rsend:'রেটিং পাঠান',rpick:'তারা দিয়ে রেটিং দিন',rthx:'ধন্যবাদ! আপনার রেটিং পেয়েছি',rfail:'রেটিং পাঠানো যায়নি, আবার চেষ্টা করুন',rl:['','খুব খারাপ','খারাপ','মোটামুটি','ভালো','চমৎকার'],hpk:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','প্রস্তুত, নিয়ে যান','হস্তান্তর হয়েছে'],hdl:['পাঠানো হয়েছে','দোকান গ্রহণ করেছে','প্রস্তুত, রওনা হচ্ছে','ডেলিভারি হয়েছে'],hvw:['⏳ প্রস্তুত করা হচ্ছে','🍽 প্রস্তুত!','✅ সম্পন্ন'],eta:n=>'আর প্রায় '+n+' মিনিট',etaSoon:'প্রায় হয়ে গেছে',msgEta:'💬 আর কত মিনিট?',callShop:'📞 কল করুন',etaAsk:'আসসালামু আলাইকুম, আমার অর্ডার প্রস্তুত হতে আর কত মিনিট লাগবে?',sizeS:'ছোট',sizeL:'বড়'},
 en:{pk:'🏪 Pickup',dl:'🛵 Delivery',ph:'Mobile number',ad:'Full address (house, road, area)',mylc:'📍 Share my location',locing:'Getting location…',lcok:'✔ Location received',inz:'✔ We deliver to your area',outz:'😔 Your location is outside our delivery area',km:' km',needlc:'Please share your location for delivery',nogeo:'Location is not available on this phone',locfail:'Could not get location. Turn on phone location and browser permission.',fee:'Delivery charge',free:'Free',gtot:'Grand total',minmsg:n=>'Minimum order for delivery is '+n,needPh:'Enter a valid mobile number',needAd:'Enter your address',shopat:'Shop address',callus:'📞 Call us',maps:'📍 View on map',wa:'💬 Send on WhatsApp',inst:'📲 Add to home screen (like an app)',iosTip:'In Safari tap the Share button, then "Add to Home Screen"',pkGo:'Your order is ready, please collect it from the shop',dlGo:'Your order is ready and will leave soon',nohome:'Home orders are currently closed',bad:'Invalid QR or link',off:'No internet. Open this page once online and the menu will also work offline.',offb:'📴 Offline · showing the saved menu',pend:'📴 No internet. Your order is saved on this phone and will reach the shop automatically when the net returns. If you are in a hurry, show this screen at the counter.',nopub:'The menu is not published yet',closed:'Orders are closed right now. You can still browse the menu.',search:'Search items',all:'All',other:'Other',add:'+ Add',out:'Out of stock',none:'Nothing found',cartN:n=>'🛒 '+n+(n==1?' item':' items'),view:'View ›',tapDrag:'drag to move',yours:'Your order',total:'Total',tno:'Table number',tph:'e.g. 5',yname:'Your name (optional)',note:'Note (optional, e.g. less sugar)',confirm:'✔ Confirm order',closedBtn:'Orders are closed',back:'← Back to menu',needT:'Enter table number',wait:'Please wait a moment and try again',fail:'Could not send, please try again',table:'Table ',nf:'Order not found',sorry:'Sorry, the order could not be accepted',sent:'Order sent!',steps:['Sent','Accepted by shop','Food ready','Served'],
 vw:['⏳ Please wait','🍽 Food is ready!','😋 Enjoy your meal'],vt:['Your food is being prepared… please wait a little','Your food is ready','Thank you, see you again ❤'],foot:'Thank you for visiting ☕ Keep this page open and the status will update by itself.',more:'Order more',welcome:'Welcome',tag:'Browse the menu and order',g:['Good night','Good morning','Good afternoon','Good evening','Good evening'],
-rate:'How was our service?',rcm:'Comment (optional)',rsend:'Send rating',rpick:'Tap the stars to rate',rthx:'Thank you! We got your rating',rfail:'Could not send rating, please try again',rl:['','Very bad','Bad','Okay','Good','Excellent'],hpk:['Sent','Accepted by shop','Ready, please collect','Handed over'],hdl:['Sent','Accepted by shop','Ready, on the way','Delivered'],hvw:['⏳ Being prepared','🍽 Ready!','✅ Done'],eta:n=>'About '+n+' min left',etaSoon:'Almost ready',msgEta:'💬 How many minutes left?',callShop:'📞 Call shop',etaAsk:'Hello, how many more minutes until my order is ready?',sizeS:'Smaller',sizeL:'Bigger',conn:'Loading your order status…',connh:'It may take a moment on a slow network. Your order is not lost.',retry:'🔄 Try again',loading:'Loading menu…',pend2:'⏳ Your order is on its way to the shop. It may be slow on a weak network, keep this page open. If you are in a hurry, show this screen at the counter.'}};
+rate:'How was our service?',rcm:'Comment (optional)',rsend:'Send rating',rpick:'Tap the stars to rate',rthx:'Thank you! We got your rating',rfail:'Could not send rating, please try again',rl:['','Very bad','Bad','Okay','Good','Excellent'],hpk:['Sent','Accepted by shop','Ready, please collect','Handed over'],hdl:['Sent','Accepted by shop','Ready, on the way','Delivered'],hvw:['⏳ Being prepared','🍽 Ready!','✅ Done'],eta:n=>'About '+n+' min left',etaSoon:'Almost ready',msgEta:'💬 How many minutes left?',callShop:'📞 Call shop',etaAsk:'Hello, how many more minutes until my order is ready?',sizeS:'Smaller',sizeL:'Bigger'}};
 const t=k=>{const v=TX[lang][k];return v===undefined?TX.bn[k]:v};
-const nmOf=i=>bi?(i.n+((i.e&&i.e!==i.n)?'\n'+i.e:'')):lang==='en'?(i.e||i.n):i.n;
-const T2=(b,e)=>lang==='en'?e:b;
+const nmOf=i=>lang==='en'?(i.e||i.n):i.n;
 let C={},Q={},items=[],cart={},cat='',q='',lastO=null,F={tn:'',nm:'',nt:''},R={s:0,c:''},dirty=false;
 /* বাড়ি থেকে অর্ডার (পিকআপ/ডেলিভারি): লিংকে &h=1 থাকলে চালু */
 const HM=P.get('h')==='1'&&!tbl;let H={ty:'',ph:'',ad:'',loc:null},DI=null;
@@ -222,11 +81,11 @@ const hasLoc=()=>Q.lat!==''&&Q.lat!=null&&Q.lng!==''&&Q.lng!=null&&isFinite(+Q.l
 const dist=(a,b,c,d)=>{const r=x=>x*Math.PI/180,u=r(c-a),v=r(d-b),x=Math.sin(u/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(v/2)**2;return 12742*Math.asin(Math.sqrt(x))};
 function zoneInfo(){const r=+Q.rad||0;if(!(r>0&&hasLoc()))return{need:false,out:false,msg:''};if(!H.loc)return{need:true,out:false,msg:t('needlc')};const d=dist(+Q.lat,+Q.lng,H.loc.lat,H.loc.lng);H.loc.d=Math.round(d*10)/10;return d<=r?{need:true,out:false,msg:t('inz')}:{need:true,out:true,msg:t('outz')+' ('+r+t('km')+')'}}
 const feeNow=()=>{if(!(HM&&H.ty==='delivery'))return 0;const f=+Q.fee||0;return(+Q.free>0&&sub()>=+Q.free)?0:f};
-try{ls('qo_f',null);F.nm=ls('qo_nm')||''}catch(e){}
-const saveF=()=>{};
+try{F=Object.assign(F,JSON.parse(ls('qo_f')||'{}'))}catch(e){}
+const saveF=()=>ls('qo_f',JSON.stringify(F));
 const cartKey=()=>'qo_cart_'+uid;
 const saveCart=()=>{Object.keys(cart).length?ls(cartKey(),JSON.stringify({t:Date.now(),c:cart})):ls(cartKey(),null)};
-function restoreCart(){try{const d=JSON.parse(ls(cartKey())||'null');if(!d||Date.now()-d.t>6*3600*1000)return;Object.keys(d.c||{}).forEach(id=>{const it=allItems().find(x=>x.id==id);if(!it||(it.s!==''&&it.s!=null&&it.s<=0))return;let n=+d.c[id].q||0;if(it.s!==''&&it.s!=null&&n>it.s)n=it.s;if(n>0)cart[id]={id:it.id,n:it.n,e:it.e,p:it.p,q:n,...(it.cb?{cb:it.cb,o:it.o}:{})}})}catch(e){}}
+function restoreCart(){try{const d=JSON.parse(ls(cartKey())||'null');if(!d||Date.now()-d.t>6*3600*1000)return;Object.keys(d.c||{}).forEach(id=>{const it=items.find(x=>x.id==id);if(!it||(it.s!==''&&it.s!=null&&it.s<=0))return;let n=+d.c[id].q||0;if(it.s!==''&&it.s!=null&&n>it.s)n=it.s;if(n>0)cart[id]={id:it.id,n:it.n,e:it.e,p:it.p,q:n}})}catch(e){}}
 const m=n=>(C.cur||'৳')+Math.round(n*100)/100,sub=()=>Object.values(cart).reduce((a,x)=>a+x.p*x.q,0),cnt=()=>Object.values(cart).reduce((a,x)=>a+x.q,0);
 const hue=id=>{let h=0;String(id).split('').forEach(c=>h=(h*31+c.charCodeAt(0))%360);return h};
 const greet=()=>{const h=new Date().getHours(),g=t('g');return h<5?g[0]:h<12?g[1]:h<16?g[2]:h<19?g[3]:g[4]};
@@ -235,93 +94,28 @@ function rerender(){document.documentElement.lang=lang;document.title=C.name||(l
 async function init(){
  applySz();document.documentElement.lang=lang;
  if(!uid){$('#app').innerHTML='<p class="w">'+t('bad')+'</p>';return}
- const SK='qo_shop_'+uid;let sd=null;
- try{sd=JSON.parse(ls(SK)||'null')}catch(e){sd=null}
- /* পুরনো সেভ করা অর্ডার (৩ দিনের বেশি) পরিষ্কার */
- try{Object.keys(localStorage).filter(k=>k.indexOf('qo_o_')===0).forEach(k=>{try{const v=JSON.parse(localStorage.getItem(k));if(!v||!v.d||Date.now()-(v.d.t||0)>3*864e5)localStorage.removeItem(k)}catch(e){localStorage.removeItem(k)}})}catch(e){}
- const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(ls('qo_lang')===null&&s.lang){bi=false;lang=s.lang==='en'?'en':'bn'}if(C.color)document.documentElement.style.setProperty('--hd',C.color);document.documentElement.style.setProperty('--is',({s:'66px',m:'96px',l:'124px',x:'999px'})[Q.is||'m']||'96px')};
- const fetchShop=async()=>{if(navigator.onLine===false)return null;try{const s=await Promise.race([shopGet(),new Promise((_,j)=>setTimeout(()=>j('to'),10000))]);if(s){ls(SK,JSON.stringify(s));return s}ls(SK,null);return 'none'}catch(e){return null}};
- /* অর্ডার ট্র্যাকিং পাতা: মেনুর জন্য অপেক্ষা না করে সাথে সাথে দেখানো হয় */
- if(oid){apply(sd||{});if(HM)mkManifest();hdr();trackStart();
-  fetchShop().then(s=>{if(s&&s!=='none'){apply(s);hdr();paint()}});return}
- /* মেনু পাতা: ফোনে জমানো মেনু আগে দেখানো, পেছনে নতুন মেনু আনা */
- let liveOn=false;const live=()=>{if(liveOn||oid)return;liveOn=true;fbWait(8000).then(F=>{if(!F){liveOn=false;return}try{F.onSnapshot(F.doc(db,'shops',uid),s=>{if(!s.exists())return;const d=s.data();if(JSON.stringify(d)===JSON.stringify(C))return;ls(SK,JSON.stringify(d));apply(d);sd=d;Object.keys(imc).forEach(k=>{if(!imc[k])delete imc[k]});if($('#sh')||document.activeElement===$('#sq'))return;hdr();list();bar()},()=>{liveOn=false})}catch(e){liveOn=false}})};
-  const show=()=>{restoreCart();if(HM)mkManifest();hdr();if(!sessionStorage.getItem('sp'))splash();list();bar();live()};
- if(sd){apply(sd);show();
-  fetchShop().then(s=>{if(s==='none'){$('#bd').innerHTML='<p class="w">'+t('nopub')+'</p>';return}
-   if(s&&JSON.stringify(s)!==JSON.stringify(sd)&&!$('#sh')&&document.activeElement!==$('#sq')){apply(s);sd=s;hdr();list();bar()}});return}
- $('#app').innerHTML='<div class="w" style="text-align:center;padding-top:40px"><div class="hero">☕</div><b>'+t('loading')+'</b></div>';
- const s=await fetchShop();
- if(s==='none'){$('#app').innerHTML='<p class="w">'+t('nopub')+'</p>';return}
- if(!s){$('#app').innerHTML='<div class="w" style="text-align:center;padding-top:30px"><p>'+t('off')+'</p><button class="big" onclick="location.reload()">'+t('retry')+'</button></div>';return}
- apply(s);show()}
+ let sd=null,fromSaved=false;const SK='qo_shop_'+uid;
+ if(navigator.onLine!==false){try{const s=await Promise.race([shopGet(),new Promise((_,j)=>setTimeout(()=>j('to'),7000))]);
+  if(s){sd=s;ls(SK,JSON.stringify(sd))}else{ls(SK,null);$('#app').innerHTML='<p class="w">'+t('nopub')+'</p>';return}}catch(e){sd=null}}
+ if(!sd){try{sd=JSON.parse(ls(SK)||'null')}catch(e){sd=null}fromSaved=!!sd}
+ if(!sd){$('#app').innerHTML='<p class="w">'+t('off')+'</p>';return}
+ C=sd;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(C.color)document.documentElement.style.setProperty('--hd',C.color);
+ if(!oid)restoreCart();
+ if(HM)mkManifest();
+ hdr();if(!oid&&!sessionStorage.getItem('sp'))splash();oid?track():list();bar()}
 const wt=()=>HM?{b:Q.hw||Q.welcome,e:Q.hwe,tb:Q.ht||Q.tag,te:Q.hte}:{b:Q.welcome,e:Q.we,tb:Q.tag,te:Q.te};
 function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(lang==='en'?(wt().e||t('welcome')):(wt().b||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(lang==='en'?(wt().te||t('tag')):(wt().tb||t('tag')))}</p>`;document.body.appendChild(d);
  const x=()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)};d.onclick=x;setTimeout(x,2200)}
-const SUN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
-const p2=n=>String(n).padStart(2,'0');
-function clk(){const d=new Date(),a=$('#ck'),b=$('#cdt'),s=$('#sy');if(a)a.textContent=p2(d.getHours())+':'+p2(d.getMinutes());
- if(b)b.textContent=d.toLocaleDateString(lang==='en'?'en-GB':'bn-BD',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
- if(s){const on=navigator.onLine!==false;let u='';if(C.updated){const x=new Date(C.updated);u=' · '+p2(x.getHours())+':'+p2(x.getMinutes())}s.textContent=on?'☁ '+T2('মেনু সিঙ্ক','Menu synced')+u:'📴 '+T2('অফলাইন','Offline')}}
-function toggleTheme(){const el=document.documentElement,cur=el.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'),nx=cur==='dark'?'light':'dark';el.setAttribute('data-theme',nx);ls('qo_theme',nx)}
-document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#th'))toggleTheme()});
-setInterval(clk,20000);addEventListener('online',clk);addEventListener('offline',clk);
-/* ===== কাস্টমার লগইন (POS সেটিংসে চালু থাকলে) ===== */
-let AU=null,AM=null,ACC=null,AINIT=false;
-try{ACC=JSON.parse(ls('qo_u')||'null')}catch(e){}
-const LGT={bn:{t:'স্বাগতম',s:'লগইন করে সহজে অর্ডার করুন ও অর্ডারের অবস্থা দেখুন',g:'Google দিয়ে চালিয়ে যান',or:'অথবা',em:'ইমেইল দিয়ে',tc:'আমি শর্ত ও গোপনীয়তা নীতিতে সম্মত',have:'আগে অ্যাকাউন্ট আছে? সাইন ইন',nw:'নতুন অ্যাকাউন্ট খুলুন',skip:'পরে করব',up:'অ্যাকাউন্ট খুলুন',inn:'সাইন ইন',nm:'আপনার নাম',mail:'ইমেইল',pw:'পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)',needtc:'শর্তে সম্মত হতে টিক দিন',need:'ইমেইল ও কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড দিন',login:'লগইন',my:'আমার অর্ডার',none:'এখনো কোনো অর্ডার নেই',out:'লগআউট',close:'বন্ধ করুন',wel:'স্বাগতম',
- e:{'auth/unauthorized-domain':'এই ডোমেইন অনুমোদিত নয়','auth/network-request-failed':'ইন্টারনেট সংযোগ দেখুন','auth/invalid-credential':'ইমেইল বা পাসওয়ার্ড ভুল','auth/wrong-password':'ইমেইল বা পাসওয়ার্ড ভুল','auth/user-not-found':'এই ইমেইলে অ্যাকাউন্ট নেই','auth/email-already-in-use':'এই ইমেইলে অ্যাকাউন্ট আছে, সাইন ইন করুন','auth/weak-password':'পাসওয়ার্ড কমপক্ষে ৬ অক্ষর','auth/invalid-email':'ইমেইল সঠিক নয়','auth/too-many-requests':'অনেকবার চেষ্টা হয়েছে, একটু পরে দেখুন','x':'লগইন হয়নি, আবার চেষ্টা করুন'},
- st:{u:'পাঠানো হয়নি',n:'পাঠানো হয়েছে',a:'গ্রহণ করা হয়েছে',r:'প্রস্তুত',d:'সম্পন্ন',c:'বাতিল'}},
- en:{t:'Welcome',s:'Sign in to order faster and track your orders',g:'Continue with Google',or:'or',em:'Continue with email',tc:'I agree to the Terms & Privacy Policy',have:'Already have an account? Sign in',nw:'Create a new account',skip:'Maybe later',up:'Create account',inn:'Sign in',nm:'Your name',mail:'Email',pw:'Password (min 6 characters)',needtc:'Please tick to accept the terms',need:'Enter email and a password of 6+ characters',login:'Sign in',my:'My orders',none:'No orders yet',out:'Sign out',close:'Close',wel:'Welcome',
- e:{'auth/unauthorized-domain':'This domain is not authorised','auth/network-request-failed':'Check your internet connection','auth/invalid-credential':'Wrong email or password','auth/wrong-password':'Wrong email or password','auth/user-not-found':'No account with this email','auth/email-already-in-use':'Account exists, please sign in','auth/weak-password':'Password must be 6+ characters','auth/invalid-email':'Invalid email','auth/too-many-requests':'Too many attempts, try later','x':'Sign-in failed, try again'},
- st:{u:'Not sent',n:'Sent',a:'Accepted',r:'Ready',d:'Done',c:'Cancelled'}}};
-const LG=()=>LGT[lang==='en'?'en':'bn'];
-const GSVG='<svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.9-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>';
-const LOGO='<svg viewBox="0 0 64 64"><path d="M21 27l5-10 4.5 7 4-9 5 12" fill="none" stroke="#F5B52E" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 30h32v4a16 16 0 0 1-32 0z" fill="none" stroke="#F5F7F3" stroke-width="3.2" stroke-linejoin="round"/><path d="M48 33h2a5.5 5.5 0 0 1 0 11h-5" fill="none" stroke="#F5F7F3" stroke-width="3.2" stroke-linecap="round"/><path d="M13 54h38" stroke="#F5B52E" stroke-width="3.4" stroke-linecap="round"/></svg>';
-const avHTML=a=>a&&a.p?`<img src="${esc(a.p)}" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(document.createTextNode('${esc(((a.n||a.e||'?')[0]||'?').toUpperCase())}'))">`:esc(((a&&(a.n||a.e)||'?')[0]||'?').toUpperCase());
-function acctBtn(){if(!(Q&&Q.lg))return '';return ACC?`<button id="acc" class="accb in" aria-label="account"><div class="av2">${avHTML(ACC)}</div></button>`:`<button id="acc" class="accb"><div class="av2">👤</div><span>${LG().login}</span></button>`}
-const accRender=()=>{const e=$('#acc');if(e)e.outerHTML=acctBtn()};
-function acctData(){return (Q&&Q.lg&&ACC)?{lg:1,cuid:ACC.id,cn:ACC.e||'',cname:ACC.n||''}:{}}
-const setAcc=u=>{ACC=u?{id:u.uid,n:u.displayName||'',e:u.email||'',p:u.photoURL||''}:null;ls('qo_u',ACC?JSON.stringify(ACC):null);try{if(ACC&&ACC.n&&!F.nm){F.nm=ACC.n;const i=$('#nm');if(i&&!i.value)i.value=ACC.n}}catch(e){}accRender()};
-const authLoad=async()=>{if(AU)return AU;const A0=await import(FBV+'firebase-app.js');AM=await import(FBV+'firebase-auth.js');const ap=window.__fbApp||(A0.getApps().length?A0.getApp():A0.initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"}));AU=AM.getAuth(ap);return AU};
-function authInit(){if(AINIT)return;AINIT=true;authLoad().then(()=>{AM.onAuthStateChanged(AU,u=>{try{if(u){const first=!ACC;setAcc(u);lgClose();if(first)toast((LG().wel)+(u.displayName?', '+u.displayName.split(' ')[0]:''))}else if(ACC)setAcc(null)}catch(e){}})}).catch(()=>{AINIT=false})}
-function toast(m){const d=document.createElement('div');d.style.cssText='position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:9500;background:#F5B52E;color:#2a1b00;font-weight:800;padding:10px 18px;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:90vw';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
-function lgCheck(){if(!(Q&&Q.lg)||oid)return;authInit();try{if(!ACC&&!sessionStorage.getItem('qo_skip')&&!$('#lgx'))lgOpen()}catch(e){}}
-function lgClose(){const d=$('#lgx');if(!d)return;d.classList.add('out');setTimeout(()=>{d.remove();setTimeout(instToast,500)},300)}
-function lgOpen(){if($('#lgx'))return;const L=LG(),d=document.createElement('div');d.id='lgx';d.className='lg-ov';
- let st='';for(let i=0;i<14;i++)st+=`<b style="left:${Math.round(Math.random()*96)}%;animation-duration:${(7+Math.random()*8).toFixed(1)}s;animation-delay:${(-Math.random()*12).toFixed(1)}s;transform:scale(${(.5+Math.random()).toFixed(2)})"></b>`;
- d.innerHTML=`<div class="lg-bg"><i class="lg-o1"></i><i class="lg-o2"></i><i class="lg-o3"></i></div><div class="lg-st">${st}</div><div class="lg-card"><div class="lg-logo">${LOGO}</div><h1>${esc((C&&C.name)||'Musafir')}</h1><p>${L.s}</p>
- <label class="lg-tc" id="lgtcw"><input type="checkbox" id="lgtc"><span>${L.tc}</span></label>
- <div class="lg-f" id="lgE"><input id="lgN" placeholder="${L.nm}" autocomplete="name"><input id="lgU" type="email" placeholder="${L.mail}" autocomplete="email"><input id="lgP" type="password" placeholder="${L.pw}" autocomplete="current-password"><button class="lg-go" id="lgGo">${L.up}</button><button class="lg-sw" id="lgSw">${L.have}</button></div>
- <div class="lg-r" id="lgR"></div><button class="lg-s" id="lgS">${L.skip}</button></div>`;
- document.body.appendChild(d);
- let mode='up';const q=s=>d.querySelector(s),err=m=>{q('#lgR').textContent=m||''},busy=b=>d.querySelectorAll('button').forEach(x=>x.disabled=b);
- const tcOk=()=>{if(q('#lgtc').checked)return true;const w=q('#lgtcw');w.classList.remove('bad');void w.offsetWidth;w.classList.add('bad');err(L.needtc);return false};
- const fail=e=>{const c=e&&e.code;if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'){err('');return}err(L.e[c]||(L.e.x+' ['+(c||(e&&e.message)||'error')+']'))};
- q('#lgS').onclick=()=>{try{sessionStorage.setItem('qo_skip','1')}catch(e){}lgClose()};
- q('#lgSw').onclick=()=>{mode=mode==='up'?'in':'up';q('#lgN').style.display=mode==='up'?'':'none';q('#lgGo').textContent=mode==='up'?L.up:L.inn;q('#lgSw').textContent=mode==='up'?L.have:L.nw;q('#lgP').autocomplete=mode==='up'?'new-password':'current-password'};
- q('#lgGo').onclick=async()=>{if(!tcOk())return;const em=q('#lgU').value.trim(),pw=q('#lgP').value;if(!em||pw.length<6){err(L.need);return}err('');busy(true);try{await authLoad();if(mode==='up'){const r=await AM.createUserWithEmailAndPassword(AU,em,pw),n=q('#lgN').value.trim();if(n){await AM.updateProfile(r.user,{displayName:n});setAcc(r.user)}}else await AM.signInWithEmailAndPassword(AU,em,pw)}catch(e){fail(e)}busy(false)}}
-/* ---------- অর্ডার ইতিহাস (এই ফোনে) ---------- */
-const hist=()=>{try{return JSON.parse(ls('qo_h')||'[]')}catch(e){return[]}};
-function histAdd(id,data){try{const a=hist().filter(x=>x.id!==id);a.unshift({id,t:data.t,tot:(data.items||[]).reduce((s,x)=>s+(+x.p||0)*(+x.q||0),0)+(+data.fee||0),s:(data.items||[]).map(x=>x.n+(x.q>1?' ×'+x.q:'')).join(', ').slice(0,90),ty:data.type||'dine',tb:data.table||''});ls('qo_h',JSON.stringify(a.slice(0,40)))}catch(e){}}
-function stCls(s,pend){if(pend)return['p',LG().st.u];return s=='accepted'?['a',LG().st.a]:s=='ready'?['r',LG().st.r]:(s=='served'||s=='billed')?['d',LG().st.d]:s=='cancelled'?['c',LG().st.c]:['n',LG().st.n]}
-function accOpen(){if(!ACC){lgOpen();return}if($('#lgsb'))return;const L=LG(),cur=(C&&C.cur)||'৳',h=hist().slice(0,12),b=document.createElement('div');b.id='lgsb';b.className='lgs-bk';
- const rows=h.length?h.map(x=>{let pend=false;try{const v=JSON.parse(ls('qo_o_'+x.id)||'null');pend=!!(v&&v.ack===false)}catch(e){}const c=stCls('new',pend),tn=x.ty==='delivery'?'🛵':x.ty==='pickup'?'🏪':(x.tb&&x.tb!='-'?'🪑 '+esc(x.tb):'🍽');return `<div class="lgo" data-id="${esc(x.id)}"><div class="t"><span>${tn}</span><span>${new Date(x.t).toLocaleString(lang==='en'?'en-GB':'bn-BD',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span></div><div class="s">${esc(x.s)}</div><div class="b"><span>${esc(cur)}${(+x.tot||0).toFixed(0)}</span><span class="st ${c[0]}">${c[1]}</span></div></div>`}).join(''):`<div class="lgo" style="text-align:center;color:var(--mu)">${L.none}</div>`;
- b.innerHTML=`<div class="lgs"><div class="pf"><div class="av2">${avHTML(ACC)}</div><div><b>${esc(ACC.n||ACC.e)}</b><small>${esc(ACC.e)}</small></div></div><h3>📋 ${L.my}</h3>${rows}<button class="bt o" id="lgsC">${L.close}</button><button class="bt x" id="lgsO">${L.out}</button></div>`;
- document.body.appendChild(b);const cl=()=>b.remove();b.onclick=e=>{if(e.target===b)cl()};b.querySelector('#lgsC').onclick=cl;
- b.querySelector('#lgsO').onclick=async()=>{try{await authLoad();await AM.signOut(AU)}catch(e){}setAcc(null);try{sessionStorage.setItem('qo_skip','1')}catch(e){}cl()};
- fbWait(8000).then(async fb=>{if(!fb)return;for(const x of h.slice(0,8)){try{const s=await fb.getDoc(fb.doc(db,'orders',x.id));if(s.exists()){const e=b.querySelector('.lgo[data-id="'+x.id+'"] .st');if(e){const c=stCls(s.data().status,false);e.className='st '+c[0];e.textContent=c[1]}}}catch(e){}}})}
-document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('#acc');if(a){e.preventDefault();e.stopPropagation();ACC?accOpen():lgOpen()}},true);
-function instToast(){try{if(oid||$('#lgx')||sessionStorage.getItem('qo_it')||matchMedia('(display-mode:standalone)').matches||navigator.standalone||!(C&&C.name))return;sessionStorage.setItem('qo_it','1');const en=lang==='en',d=document.createElement('div');d.className='it-t';d.innerHTML=`<b>📲 ${en?'Add to Home Screen':'হোম স্ক্রিনে যোগ করুন'}</b><span>${esc(C.name)} ${en?'will open like an app: menu, orders and live order status':'অ্যাপের মতো খুলবে: মেনু, অর্ডার ও অর্ডারের অবস্থা'}</span><small>${en?'Browser ⋮ menu → Add to Home screen':'ব্রাউজারের ⋮ মেনু → Add to Home screen'}</small>`;document.body.appendChild(d);setTimeout(()=>d.classList.add('x'),2600);setTimeout(()=>d.remove(),3300)}catch(e){}}
-function hdr(){const cur=bi?'bi':lang;$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><div class="hn"><b>${esc(C.name||T2('মেনু','Menu'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}</div>
- <div class="hb">${[['bn','বাং'],['en','EN']].map(x=>`<button data-lang="${x[0]}" class="${cur===x[0]?'on':''}">${x[1]}</button>`).join('')}</div>${acctBtn()}</header>
- <div id="ib"><div class="zp"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div><button class="sun" id="th" aria-label="theme">${SUN}</button><div class="clk"><b id="ck"></b><span id="cdt"></span></div></div><div class="w" id="bd"></div>`;clk();try{lgCheck()}catch(e){}setTimeout(instToast,1600)}
-const qrBanner=()=>`<div class="qrb"><span>📲 ${T2('QR অর্ডার','QR Orders')}</span><span class="qs">${tbl?esc(t('table')+tbl):HM?T2('পিকআপ / ডেলিভারি','Pickup / Delivery'):Q.open===false?T2('বন্ধ','Closed'):T2('অর্ডার দিন','Order here')}</span></div>`;
-function bestHTML(){const dl=lang==='en'?(Q.dte||Q.dt):(Q.dt||Q.dte);if(!dl||/[:：]\s*$/.test(String(dl).trim()))return '';const ic=/^\p{Extended_Pictographic}/u.test(String(dl).trim())?'':'🔥 ';return `<div class="deal">${ic}${esc(dl)}</div>`}
+function hdr(){$('#app').innerHTML=`<header><img src="logo-192.png" alt=""><b>${esc(C.name||(lang==='en'?'Menu':'মেনু'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}
+ <div class="hb"><button data-lang="bn" class="${lang==='bn'?'on':''}">বাং</button><button data-lang="en" class="${lang==='en'?'on':''}">EN</button></div>
+ <div class="hb"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div></header><div class="w" id="bd"></div>`}
+function bestHTML(){let h='';const dl=lang==='en'?(Q.dte||Q.dt):(Q.dt||Q.dte);if(dl)h+=`<div class="cd" style="margin-bottom:10px;animation:none;text-align:center;font-weight:800">🔥 ${esc(dl)}</div>`;
+ const L=(C.best||[]).map(id=>items.find(x=>x.id==id)).filter(i=>i&&!soldOut(i));
+ if(L.length){const ti=lang==='en'?(Q.bte||"Today's best sellers"):(Q.bt||'আজকের সেরা বিক্রি');h+=`<div style="margin-bottom:10px"><b>⭐ ${esc(ti)}</b><div class="ch" style="padding-top:6px">${L.map(i=>`<button class="bch" data-a="1" data-i="${i.id}">${esc(nmOf(i))} · ${m(i.p)} +</button>`).join('')}</div></div>`}return h}
 function list(){
- const cs=[...new Set(items.map(i=>i.c).filter(Boolean))],CB={Drinks:'পানীয়',Food:'খাবার'},cL=c=>lang==='en'?c:(CB[c]||c);
+ const cs=[...new Set(items.map(i=>i.c||t('other')))];
  let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
- bestHTML()+homeBar()+`<input id="sq" name="menu_search" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(cL(c))}</span>`).join('')}</div><div class="g" id="gr"></div>`;
+ bestHTML()+homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}"><div class="ch"><span class="${cat?'':'on'}" data-c="">${t('all')}</span>${cs.map(c=>`<span class="${cat==c?'on':''}" data-c="${esc(c)}">${esc(c)}</span>`).join('')}</div><div class="g" id="gr"></div>`;
  $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar();showInst()}
 const stand=matchMedia('(display-mode: standalone)').matches||navigator.standalone,isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();DI=e;showInst()});
@@ -335,27 +129,28 @@ function homeBar(){if(!HM)return '';const lk=(h,x)=>`<a class="lk" href="${h}" t
 function mkManifest(){try{const u=new URL(location.href),sc=u.origin+u.pathname.replace(/[^/]*$/,''),nm=C.name||'Menu';
  const mf={name:nm,short_name:nm.slice(0,12),start_url:u.origin+u.pathname+'?s='+encodeURIComponent(uid)+'&h=1',scope:sc,display:'standalone',background_color:'#0b2a2e',theme_color:C.color||'#0b2a2e',icons:[{src:sc+'logo-192.png',sizes:'192x192',type:'image/png'},{src:sc+'logo-512.png',sizes:'512x512',type:'image/png'}]};
  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}}
-const cbItems=()=>(C.combos||[]).map(c=>({id:'cb_'+c.id,n:c.n,e:c.e||c.n,p:+c.p,o:+c.o,c:'',s:c.s===undefined?'':c.s,cb:c.ids||[],combo:1})),allItems=()=>items.concat(cbItems());
-const tagOf=i=>{let tx='';if(i.combo)tx=Q.cl||T2('আজকের কম্বো অফার','Today\u2019s combo deal');else{if((C.best||[]).some(b=>b==i.id))tx=lang==='en'?(Q.ble||'Today\u2019s best'):(Q.bl||'আজকের সেরা')}
- return tx?`<div class="dtag ${i.combo?'c':((hue(String(i.id))%2)?'y':'k')}">${esc(tx)}</div>`:''};
-const cbThumbs=i=>{const L=(i.cb||[]).slice(0,3),pos=L.length>=3?['left:3%;top:4%;width:46%','right:3%;top:4%;width:46%','left:27%;bottom:4%;width:46%']:['left:3%;top:5%;width:54%','right:3%;bottom:5%;width:54%'];return `<div class="av cbv" style="background:linear-gradient(135deg,hsl(${hue(String(i.n))} 45% 26%),hsl(${hue(String(i.n))} 45% 38%))">${L.map((id,k)=>{const it=items.find(x=>String(x.id)===String(id)),lt=((it&&nmOf(it))||'?')[0];return `<div class="cbk" style="${pos[k]}"><img class="cbt" data-i="${esc(id)}" alt="" style="display:none"><span class="cbg" style="background:hsl(${hue(it?(it.e||it.n):String(id))} 45% 40%)">${esc(lt)}</span></div>`}).join('')}<span class="cbp">+</span></div>`};
-const cbPrice=i=>{const cu=C.cur||'৳',pc=i.o>i.p?Math.round((1-i.p/i.o)*100):0;return `<div class="prw"><span class="pr">${cu}${(+i.p).toFixed(2)}</span>${i.o>i.p?`<span class="old">${cu}${(+i.o).toFixed(2)}</span>${pc?`<span class="off">${pc}% OFF</span>`:''}`:''}</div>`};
-function cbImgs(L){L.filter(i=>i.combo).forEach(c=>(c.cb||[]).slice(0,3).forEach(id=>{img({id}).then(()=>{document.querySelectorAll('.cbt[data-i="'+id+'"]').forEach(e=>{if(imc[id]){e.src=imc[id];e.style.display='block';const g=e.parentNode&&e.parentNode.querySelector('.cbg');if(g)g.style.display='none'}})})}))}
-const savN=()=>Object.values(cart).reduce((a,x)=>a+(x.cb&&x.o>x.p?(x.o-x.p)*x.q:0),0);
 const soldOut=i=>i.s!==''&&i.s!=null&&i.s<=0;
-const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)||!n?'':`<span class="qty">${n}</span><span class="mn" data-a="-1" data-i="${i.id}">−</span>`};
-function grid(){const qq=q.toLowerCase(),L=(cat?items:allItems().sort((a,b)=>(b.combo?1:0)-(a.combo?1:0))).filter(i=>(!cat||(i.c||t('other'))==cat)&&((i.n+'').toLowerCase().includes(qq)||((i.e||'')+'').toLowerCase().includes(qq)));
- $('#gr').innerHTML=L.map(i=>{const so=soldOut(i),low=!so&&i.s!==''&&i.s!=null&&i.s<=5;return `<button class="p ${so?'off':''} ${(cart[i.id]||{}).q?'sel':''}" ${so?'disabled':''} data-a="1" data-i="${i.id}"><span id="q${i.id}" style="display:contents">${ctl(i)}</span>${i.combo?cbThumbs(i):`<div class="av" id="im${i.id}" style="background:hsl(${hue(i.e||i.n)} 45% 40%)">${esc((nmOf(i)||'?')[0])}</div>`}${tagOf(i)}<b>${esc(nmOf(i))}</b>${i.combo?cbPrice(i):`<span class="pr">${(C.cur||'৳')+(+i.p).toFixed(2)}</span>`}${so?`<small>${t('out')}</small>`:low?`<small style="color:var(--wr)">${i.s}${lang==='en'?' left':' টি আছে'}</small>`:''}</button>`}).join('')||`<p class="mu">${t('none')}</p>`;L.filter(i=>!i.combo).forEach(img);cbImgs(L)}
-const imc={},imw=[];let imq=0;async function img(i){try{if(imc[i.id]===undefined){await new Promise(r=>{if(imq<4){imq++;r()}else imw.push(r)});try{if(imc[i.id]===undefined){const v=await Promise.race([imgGet(i.id),new Promise(r=>setTimeout(()=>r(undefined),12000))]);if(v!==undefined)imc[i.id]=v}}finally{const n=imw.shift();if(n)n();else imq--}}
+const ctl=i=>{const n=(cart[i.id]||{}).q||0;return soldOut(i)?`<span class="mu">${t('out')}</span>`:n?`<button data-a="-1" data-i="${i.id}">−</button><b>${n}</b><button data-a="1" data-i="${i.id}">+</button>`:`<button class="ad" data-a="1" data-i="${i.id}">${t('add')}</button>`};
+function grid(){const qq=q.toLowerCase(),L=items.filter(i=>(!cat||(i.c||t('other'))==cat)&&((i.n+'').toLowerCase().includes(qq)||((i.e||'')+'').toLowerCase().includes(qq)));
+ $('#gr').innerHTML=L.map((i,k)=>`<div class="cd ${soldOut(i)?'off':''}" style="animation-delay:${Math.min(k,12)*40}ms"><div class="av" id="im${i.id}" style="background:hsl(${hue(i.id)} 42% 34%)">${esc((nmOf(i)||'?')[0])}</div><div class="nm">${esc(nmOf(i))}</div><div class="pr">${m(i.p)}</div><div class="ct" id="q${i.id}">${ctl(i)}</div></div>`).join('')||`<p class="mu">${t('none')}</p>`;L.forEach(img)}
+const imc={};async function img(i){try{if(imc[i.id]===undefined){imc[i.id]=await imgGet(i.id)}
  if(imc[i.id]){const e=$('#im'+i.id);if(e)e.outerHTML=`<img class="av" id="im${i.id}" src="${imc[i.id]}" alt="">`}}catch(e){}}
-/* ---------- POS-এর মতো নিচের "অর্ডার দেখুন" বার ---------- */
-function bar(){const b=$('#bar');if(!cnt()||oid||$('#sh')){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>${cnt()} ${T2('আইটেম','items')} · ${T2('অর্ডার দেখুন','View order')}</span><span>${m(sub())}</span></div>`}
-$('#bar').addEventListener('click',()=>{if(cnt())sheet()});
-function add(id,a){const it=allItems().find(x=>x.id==id),x=cart[id]||(cart[id]={id,n:it.n,e:it.e,p:it.p,q:0,...(it.cb?{cb:it.cb,o:it.o}:{})});x.q=Math.max(0,x.q+a);if(it.s!==''&&it.s!=null&&x.q>it.s)x.q=it.s;if(!x.q)delete cart[id];saveCart();
+/* ---------- ভাসমান কার্ট বাটন (ধরে সরানো যায়) ---------- */
+function bar(){const b=$('#bar');if(!cnt()||oid||$('#sh')){b.innerHTML='';return}b.innerHTML=`<div class="bar" id="go"><span>${t('cartN')(cnt())}</span><span>${m(sub())} · ${t('view')}</span><small>↔ ${t('tapDrag')}</small></div>`}
+(function(){const b=$('#bar');let dn=false,mv=false,sx=0,sy=0,ox=0,oy=0;
+ const put=(x,y)=>{const w=b.offsetWidth,h=b.offsetHeight;x=Math.max(4,Math.min(innerWidth-w-4,x));y=Math.max(4,Math.min(innerHeight-h-4,y));b.style.left=x+'px';b.style.top=y+'px';b.style.right='auto';b.style.bottom='auto'};
+ try{const p=JSON.parse(ls('qo_bpos')||'null');if(p)put(p.x,p.y)}catch(e){}
+ addEventListener('resize',()=>{if(b.style.left)put(parseFloat(b.style.left),parseFloat(b.style.top))});
+ b.addEventListener('pointerdown',e=>{dn=true;mv=false;const r=b.getBoundingClientRect();sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;try{b.setPointerCapture(e.pointerId)}catch(_){}});
+ b.addEventListener('pointermove',e=>{if(!dn)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(!mv&&Math.abs(dx)+Math.abs(dy)<8)return;mv=true;b.classList.add('drag');put(ox+dx,oy+dy)});
+ const end=()=>{if(!dn)return;dn=false;b.classList.remove('drag');if(mv)ls('qo_bpos',JSON.stringify({x:parseFloat(b.style.left),y:parseFloat(b.style.top)}))};
+ b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
+ b.addEventListener('click',()=>{if(mv){mv=false;return}if(cnt())sheet()})})();
+function add(id,a){const it=items.find(x=>x.id==id),x=cart[id]||(cart[id]={id,n:it.n,e:it.e,p:it.p,q:0});x.q=Math.max(0,x.q+a);if(it.s!==''&&it.s!=null&&x.q>it.s)x.q=it.s;if(!x.q)delete cart[id];saveCart();
  const e=$('#q'+id);if(e)e.innerHTML=ctl(it);bar();if($('#sh'))sheet()}
 document.addEventListener('click',e=>{const t0=e.target;if(!t0.dataset)return;
  if(t0.dataset.a)add(t0.dataset.i,+t0.dataset.a);
- else if(t0.dataset.lang){const v=t0.dataset.lang;if(v!==(bi?'bi':lang)){bi=v==='bi';lang=v==='en'?'en':'bn';ls('qo_lang',v);rerender()}}
+ else if(t0.dataset.lang){if(lang!==t0.dataset.lang){lang=t0.dataset.lang;ls('qo_lang',lang);rerender()}}
  else if(t0.dataset.sz){si=Math.max(0,Math.min(SZ.length-1,si+(+t0.dataset.sz)));applySz();rerender()}
  else if(t0.dataset.star){R.s=+t0.dataset.star;paint()}
  else if(t0.dataset.ty){H.ty=t0.dataset.ty;saveH();sheet()}
@@ -378,33 +173,30 @@ function collect(){const tn=tbl||($('#tn')?$('#tn').value.trim():''),o={type:'di
 function waText(o){const L=['🛒 '+(C.name||'')+' — '+(o.type==='delivery'?'ডেলিভারি অর্ডার':o.type==='pickup'?'পিকআপ অর্ডার':'অর্ডার')];
  Object.values(cart).forEach(x=>L.push(x.q+' × '+x.n+' = '+m(x.p*x.q)));L.push('সাবটোটাল: '+m(sub()));if(o.fee)L.push('ডেলিভারি চার্জ: '+m(o.fee));L.push('সর্বমোট: '+m(o.total));
  const nm=$('#nm').value.trim(),nt=$('#nt').value.trim();if(nm)L.push('নাম: '+nm);if(o.phone)L.push('ফোন: '+o.phone);if(o.addr)L.push('ঠিকানা: '+o.addr);if(o.loc)L.push('লোকেশন: https://www.google.com/maps/search/?api=1&query='+o.loc.lat+','+o.loc.lng);if(o.table&&o.table!=='-')L.push('টেবিল: '+o.table);if(nt)L.push('নোট: '+nt);return L.join('\n')}
-function sheet(){if(!cnt()){closeSh();return}const sv=savN();const need=!HM&&Q.needTable!==false&&!tbl,closed=Q.open===false||(HM&&!opts().length);
+function sheet(){if(!cnt()){closeSh();return}const need=!HM&&Q.needTable!==false&&!tbl,closed=Q.open===false||(HM&&!opts().length);
  if(HM&&opts().length&&opts().indexOf(H.ty)<0)H.ty=opts()[0];
  const dlv=HM&&H.ty==='delivery',fe=feeNow(),z=dlv?zoneInfo():null;
  const homeHTML=HM?`<div class="tg">${opts().map(o=>`<button data-ty="${o}" class="${H.ty===o?'on':''}">${t(o==='pickup'?'pk':'dl')}</button>`).join('')}</div><label class="mu">${t('ph')}</label><input id="ph" type="tel" inputmode="tel" maxlength="16" placeholder="01XXXXXXXXX" value="${esc(H.ph)}">
   ${dlv?`<label class="mu">${t('ad')}</label><input id="ad" maxlength="200" value="${esc(H.ad)}"><button class="big" id="lc" style="background:var(--ln);color:var(--ink)">${t('mylc')}</button><div class="mu" style="margin:6px 0">${H.loc?t('lcok')+(H.loc.d!=null?' · '+H.loc.d+t('km'):'')+'<br>':''}${z.msg?esc(z.msg):''}</div>${+Q.min>0&&sub()<+Q.min?`<div style="color:#ffb4a8;margin:4px 0">${t('minmsg')(m(+Q.min))}</div>`:''}`:(Q.addr?`<div class="mu" style="margin:8px 0">${t('shopat')}: ${esc(Q.addr)}</div>`:'')}`:'';
- $('#ovl').innerHTML=`<div class="ov" id="sh"><div class="sh"><b style="font-size:18px">${t('yours')}</b>${Object.values(cart).map(x=>`<div class="row"><span>${esc(nmOf(x))}<br>${x.cb&&x.o>x.p?`<s class="mu">${m(x.o)}</s> <b class="of">${m(x.p)}</b> <span class="sv">${T2('সাশ্রয়','Save')} ${m(x.o-x.p)}</span>`:`<span class="mu">${m(x.p)}</span>`}</span><button class="qb" data-a="-1" data-i="${x.id}">−</button><b>${x.q}</b><button class="qb" data-a="1" data-i="${x.id}">+</button></div>`).join('')}
- ${sv>0?`<div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span>${T2('আসল দাম','Original price')}</span><s class="mu">${m(sub()+sv)}</s></div><div class="row"><span class="of2"><b>🎉 ${T2('অফার ছাড়','Offer discount')}</b></span><b class="of2">−${m(sv)}</b></div>`:''}<div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span><b>${t('total')}</b></span><b style="font-size:19px">${m(sub())}</b></div>
+ $('#ovl').innerHTML=`<div class="ov" id="sh"><div class="sh"><b style="font-size:18px">${t('yours')}</b>${Object.values(cart).map(x=>`<div class="row"><span>${esc(nmOf(x))}<br><span class="mu">${m(x.p)}</span></span><button class="qb" data-a="-1" data-i="${x.id}">−</button><b>${x.q}</b><button class="qb" data-a="1" data-i="${x.id}">+</button></div>`).join('')}
+ <div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span><b>${t('total')}</b></span><b style="font-size:19px">${m(sub())}</b></div>
  ${dlv?`<div class="row"><span>${t('fee')}</span><b>${fe?m(fe):t('free')}</b></div><div class="row"><span><b>${t('gtot')}</b></span><b style="font-size:19px">${m(sub()+fe)}</b></div>`:''}
- ${homeHTML}${need?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="${t('tph')}" value="${esc(F.tn)}">`:''}<label class="mu">${t('yname')}</label><input id="nm" maxlength="60" autocomplete="off" name="qo-nick" value="${esc(F.nm)}"><label class="mu">${t('note')}</label><input id="nt" maxlength="150" autocomplete="off" value="${esc(F.nt)}">
+ ${homeHTML}${need?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" placeholder="${t('tph')}" value="${esc(F.tn)}">`:''}<label class="mu">${t('yname')}</label><input id="nm" maxlength="60" value="${esc(F.nm)}"><label class="mu">${t('note')}</label><input id="nt" maxlength="150" value="${esc(F.nt)}">
  <button class="big" id="sd" ${closed?'disabled style="opacity:.5"':''}>${closed?t('closedBtn'):t('confirm')}</button>${Q.wa?`<button class="big" id="wab" style="background:#25d366;color:#05301a">${t('wa')}</button>`:''}<button class="big" id="cl" style="background:var(--ln);color:var(--ink)">${t('back')}</button></div></div>`;
  $('#cl').onclick=closeSh;$('#sd').onclick=send;$('#sh').onclick=e=>{if(e.target.id=='sh')closeSh()};bar()}
 async function send(){
  const o=collect();if(!o)return;const tn=o.table;
- try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<8000){alert(t('wait'));return}}catch(e){}
- const sb=$('#sd');sb.disabled=true;
+ try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<20000){alert(t('wait'));return}}catch(e){}
+ if(!FS||!db){alert(t('fail')+' (Firebase unavailable / ফায়ারবেস সংযোগ নেই)');return}
+ const btn=$('#sd');if(btn){btn.disabled=true;btn.dataset.original=btn.textContent;btn.textContent=lang==='en'?'Sending order…':'অর্ডার পাঠানো হচ্ছে…'}
  const id=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
- const data=JSON.parse(JSON.stringify({uid,shop:C.name||'',...acctData(),status:'new',t:Date.now(),name:$('#nm').value.trim(),note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q,...(x.cb?{cb:x.cb.map(String),o:x.o}:{})})),...o}));
- /* আগে ফোনে সেভ: নেট/ফায়ারবেস যা-ই হোক অর্ডার হারাবে না, ট্র্যাকিং পাতা নিজে পাঠিয়ে দেবে */
- ls('qo_o_'+id,JSON.stringify({d:data,ack:false}));histAdd(id,data);
- let ok=false,perr=null;sb.textContent=T2('পাঠানো হচ্ছে…','Sending…');
- if(navigator.onLine!==false){for(let k=0;k<2&&!ok;k++){const r=await restPut(id,data,k?12000:10000);if(r.ok)ok=true;else{perr=r;if(r.perm)break;await new Promise(z=>setTimeout(z,700))}}}
- ls('qo_dbg',ok?null:(perr?perr.code:'offline'));
- if(perr&&perr.perm){ls('qo_o_'+id,null);alert(t('fail')+' (permission-denied)');sb.disabled=false;sb.textContent=t('confirm');return}
- if(ok)ls('qo_o_'+id,JSON.stringify({d:data,ack:true}));
- try{localStorage.setItem('qo_t',Date.now())}catch(e){}
- cart={};saveCart();try{const nv=$('#nm')?$('#nm').value.trim():(F.nm||'');ls('qo_nm',nv||null)}catch(e){}F.nt='';F.tn='';
- location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+(HM?'&h=1':'')+'&o='+id}
+ let timer;
+ try{
+  const payload={uid,shop:C.name||'',status:'new',t:Date.now(),name:$('#nm').value.trim(),note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q})),...o};
+  /* Only show confirmation after Firestore acknowledges the write. Never treat a timeout as success. */
+  await Promise.race([orderPut(id,payload),new Promise((_,reject)=>{timer=setTimeout(()=>{const e=new Error('Order confirmation timed out');e.code='deadline-exceeded';reject(e)},15000)})]);clearTimeout(timer);
+  try{localStorage.setItem('qo_t',Date.now())}catch(e){}cart={};saveCart();F.nt='';saveF();location.href='?s='+uid+(tn&&tn!='-'?'&t='+encodeURIComponent(tn):'')+(HM?'&h=1':'')+'&o='+id
+ }catch(e){clearTimeout(timer);const code=e&&e.code?String(e.code):'unknown';let msg=t('fail')+' ('+code+')';if(code.includes('permission-denied'))msg+=lang==='en'?' — Firestore Rules denied this order.':' — Firestore Rules অর্ডারটি আটকে দিয়েছে।';else if(code.includes('deadline-exceeded'))msg+=lang==='en'?' — no server confirmation; check connection and Firestore Rules.':' — সার্ভার থেকে নিশ্চিতকরণ আসেনি; ইন্টারনেট ও Firestore Rules পরীক্ষা করুন।';alert(msg);if(btn){btn.disabled=false;btn.textContent=btn.dataset.original||t('confirm')}}}
 /* ---------- অর্ডার ট্র্যাকিং + সার্ভিস রেটিং ---------- */
 const nmId=x=>{if(lang!=='en')return x.n;const it=items.find(i=>i.id==x.id);return (it&&it.e)||x.n};
 function ratingHTML(){const done=ls('rt_'+oid);
@@ -418,13 +210,12 @@ function homeExtra(o,home,vs,can){if(!home||can||vs>=2)return '';let x='';
  const ph=String(Q.ph||'').replace(/[^\d+]/g,''),wa=String(Q.wa||'').replace(/\D/g,''),mt=encodeURIComponent(t('etaAsk')+(o.name?' ('+o.name+')':'')),lk=(h,y)=>`<a class="lk" href="${h}" target="_blank" rel="noopener">${y}</a>`;let b='';
  if(ph)b+=lk('tel:'+ph,t('callShop'));if(wa)b+=lk('https://wa.me/'+wa+'?text='+mt,t('msgEta'));else if(ph)b+=lk('sms:'+ph+'?body='+mt,t('msgEta'));
  return x+(b?`<div class="cd" style="animation:none;text-align:center">${b}</div>`:'')}
-function paint(){try{if(!lastO){connecting();return}paint0()}catch(e){$('#bd').innerHTML='<div class="cd" style="animation:none;text-align:center;margin-top:20px"><b>'+t('conn')+'</b><div class="mu" style="margin:8px 0 12px">'+esc(e&&e.message||'')+'</div><button class="big" onclick="location.reload()">'+t('retry')+'</button></div>'}}
-function paint0(){const o=lastO;if(!o)return;if(document.activeElement&&document.activeElement.id==='rc'){dirty=true;return}
- const home=o.type==='pickup'||o.type==='delivery',can=o.status=='cancelled',st=o.status=='new'?(lastPend?-1:0):o.status=='accepted'?1:o.status=='ready'?2:3;
+function paint(){const o=lastO;if(!o)return;if(document.activeElement&&document.activeElement.id==='rc'){dirty=true;return}
+ const home=o.type==='pickup'||o.type==='delivery',can=o.status=='cancelled',st=o.status=='new'?0:o.status=='accepted'?1:o.status=='ready'?2:3;
  const vs=o.status=='ready'?1:(o.status=='served'||o.status=='billed')?2:0,VF=['wait','ready','served'],VA=[1,1.304,1.837];
- $('#bd').innerHTML=(lastPend&&o.status=='new'?`<div class="cd" style="margin-bottom:10px;background:#5a3b12;animation:none">${t(navigator.onLine===false?'pend':'pend2')}${dbg&&P.get('debug')?`<br><small>⚙ ${esc(dbg)}</small>`:''}</div>`:(dbg&&P.get('debug')&&o.status=='new'?`<div class="mu" style="text-align:center;font-size:.8em;margin-bottom:6px">⚙ ${esc(dbg)}</div>`:''))+''+`<div style="text-align:center">${can?'<div class="ok">✕</div>':`<div class="hero">${vs==0?'👨‍🍳':vs==1?(o.type==='pickup'?'🛍️':o.type==='delivery'?'🛵':'🍽️'):'✅'}</div>`+`<span class="bdg">${t(home?'hvw':'vw')[vs]}</span>`}<h2 style="margin:6px 0">${can?t('sorry'):(vs==0?(lastPend&&o.status=='new'?T2('অর্ডার পাঠানো হচ্ছে…','Sending your order…'):t('sent')):vs==1?t('vt')[1]:'❤')}</h2><div class="mu">${can?'':(vs==0?t('vt')[0]+'<br>':vs==2?t('vt')[2]+'<br>':(o.type==='pickup'?t('pkGo')+'<br>':o.type==='delivery'?t('dlGo')+'<br>':''))}${o.type==='delivery'?t('dl')+' · ':o.type==='pickup'?t('pk')+' · ':''}${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
+ $('#bd').innerHTML=(lastPend&&o.status=='new'&&navigator.onLine===false?`<div class="cd" style="margin-bottom:10px;background:#5a3b12;animation:none">${t('pend')}</div>`:'')+(can||home?'':`<div class="vh"><i class="bgi" style="background-image:url(${VF[vs]}.jpg)"></i><div class="fr" style="--a:${VA[vs]}"><video id="vv" src="${VF[vs]}.mp4" poster="${VF[vs]}.jpg" muted loop autoplay playsinline preload="auto"></video></div></div>`)+`<div style="text-align:center">${can?'<div class="ok">✕</div>':(home?`<div class="hero">${vs==0?'👨‍🍳':vs==1?(o.type==='pickup'?'🛍️':'🛵'):'✅'}</div>`:'')+`<span class="bdg">${t(home?'hvw':'vw')[vs]}</span>`}<h2 style="margin:6px 0">${can?t('sorry'):(vs==0?t('sent'):vs==1?t('vt')[1]:'❤')}</h2><div class="mu">${can?'':(vs==0?t('vt')[0]+'<br>':vs==2?t('vt')[2]+'<br>':(o.type==='pickup'?t('pkGo')+'<br>':o.type==='delivery'?t('dlGo')+'<br>':''))}${o.type==='delivery'?t('dl')+' · ':o.type==='pickup'?t('pk')+' · ':''}${o.table&&o.table!='-'?t('table')+esc(o.table)+' · ':''}${esc(o.name||'')}</div></div>
  ${can?'':`<div class="stp">${(home?t(o.type==='pickup'?'hpk':'hdl'):t('steps')).map((s,k)=>`<div class="${k<=st?'d':''}"><i>${k<=st?'✓':k+1}</i>${s}</div>`).join('')}</div>`}
- ${homeExtra(o,home,vs,can)}<div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(nmId(x))} × ${x.q}</span><b>${x.o>x.p?`<s class="mu" style="font-weight:500">${m(x.o*x.q)}</s> `:''}${m(x.p*x.q)}</b></div>`).join('')}${o.fee?`<div class="row"><span>${t('fee')}</span><b>${m(o.fee)}</b></div>`:''}<div class="row" style="border-top:1px solid var(--ln)"><span><b>${t('total')}</b></span><b>${m(o.total)}</b></div></div>
+ ${homeExtra(o,home,vs,can)}<div class="cd" style="animation:none">${o.items.map(x=>`<div class="row"><span>${esc(nmId(x))} × ${x.q}</span><b>${m(x.p*x.q)}</b></div>`).join('')}${o.fee?`<div class="row"><span>${t('fee')}</span><b>${m(o.fee)}</b></div>`:''}<div class="row" style="border-top:1px solid var(--ln)"><span><b>${t('total')}</b></span><b>${m(o.total)}</b></div></div>
  ${can||st<1?'':ratingHTML()}
  <p class="mu" style="text-align:center">${t('foot')}</p><button class="big" onclick="location.href='?s=${uid}${tbl?'&t='+encodeURIComponent(tbl):''}${HM?'&h=1':''}'">${t('more')}</button>`;
  const v=$('#vv');if(v){v.muted=true;const p=v.play();if(p&&p.catch)p.catch(()=>{})}
@@ -447,40 +238,13 @@ function draw(){cx.clearRect(0,0,cv.width,cv.height);
   else{p.r+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.scale(1,Math.cos(p.f));cx.fillStyle=p.c;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore()}
   return p.y<cv.height+150*D});
  if(ps.length)requestAnimationFrame(draw);else{run=0;cx.clearRect(0,0,cv.width,cv.height)}}
-let dbg=ls('qo_dbg')||'',lastPend=false,lastSig='',unsub=null,srvOk=false,wtry=0,resendAt=0;
-const loGet=()=>{try{return JSON.parse(ls('qo_o_'+oid)||'null')}catch(e){return null}};
-const loSet=(d,ack)=>ls('qo_o_'+oid,JSON.stringify({d,ack:!!ack}));
-function connecting(){const b=$('#bd');if(!b)return;b.innerHTML=`<div class="cd" style="animation:none;text-align:center;margin-top:20px"><div class="hero">⏳</div><b>${t('conn')}</b><div class="mu" style="margin:6px 0 12px">${t('connh')}</div><button class="big" onclick="location.reload()">${t('retry')}</button></div>`}
-let dlv=false;async function deliver(){if(dlv)return;const l0=loGet();if(!l0||!l0.d||l0.ack)return;dlv=true;
- try{for(let k=0;k<60;k++){const l=loGet();if(!l||l.ack)break;if(navigator.onLine!==false){const r=await restPut(oid,l.d,15000);if(r.ok){loSet(l.d,true);ls('qo_dbg',null);dbg='';lastPend=false;if(lastO)paint();break}dbg=r.code;ls('qo_dbg',dbg);if(r.perm)break}
-  await new Promise(z=>setTimeout(z,Math.min(15000,3000+k*1500)))}}finally{dlv=false}}
-let pt=null;function pollStart(){if(pt||!oid)return;pt=setInterval(async()=>{if(document.hidden||srvOk||navigator.onLine===false)return;const l=loGet();if(l&&!l.ack)return;
- try{const r=await fetch(RB+'/orders/'+encodeURIComponent(oid)+'?key='+RK);if(!r.ok)return;const j=await r.json(),d={};Object.keys(j.fields||{}).forEach(k=>{d[k]=fromFS(j.fields[k])});const sg=JSON.stringify(d);if(sg===lastSig)return;lastSig=sg;lastO=d;lastPend=false;paint()}catch(e){}},6000)}
-function trackStart(){const lo=loGet();if(lo&&lo.d){lastO=lo.d;lastPend=!lo.ack;paint()}else connecting();watch();deliver();pollStart()}
-async function watch(){
- if(!oid)return;if(unsub){try{unsub()}catch(e){}unsub=null}
- const F=await fbWait(8000);
- if(!F){if(navigator.onLine!==false&&!sessionStorage.getItem('fbr')){sessionStorage.setItem('fbr',1);setTimeout(()=>location.reload(),1200)}return}
- const again=()=>{setTimeout(watch,Math.min(30000,4000*(++wtry)))};
- try{unsub=F.onSnapshot(F.doc(db,'orders',oid),{includeMetadataChanges:true},s=>{
-   const md=s.metadata;wtry=0;
-   if(s.exists()){const d=s.data();
-    if(!md.fromCache&&!md.hasPendingWrites){srvOk=true;dbg='';ls('qo_dbg',null);const lo=loGet();if(lo&&!lo.ack)loSet(lo.d,true)}
-    const lo0=loGet(),pend=md.hasPendingWrites||(md.fromCache&&!srvOk&&!(lo0&&lo0.ack)),sg=JSON.stringify(d)+pend;if(sg===lastSig)return;lastSig=sg;lastO=d;lastPend=pend;paint();return}
-   const lo=loGet();
-   if(!md.fromCache){srvOk=true;
-    /* সার্ভার বলছে অর্ডার নেই কিন্তু ফোনে সেভ করা আছে → আবার পাঠানো */
-    if(lo&&lo.d){if(!lastO){lastO=lo.d;lastPend=true;paint()}if(Date.now()-resendAt>10000){resendAt=Date.now();try{const p=F.setDoc(F.doc(db,'orders',oid),lo.d);p.catch(()=>{})}catch(e){}}return}
-    if(!lastO)$('#bd').innerHTML='<div class="w" style="text-align:center"><p>'+t('nf')+'</p><button class="big" onclick="location.href=\'?s='+esc(uid)+(HM?'&h=1':'')+'\'">'+t('more')+'</button></div>'}
-   else if(!lastO){if(lo&&lo.d){lastO=lo.d;lastPend=true;paint()}else connecting()}
-  },err=>{srvOk=false;dbg=(err&&err.code)||'listen-error';ls('qo_dbg',dbg);if(!lastO)connecting();else paint();again()})}catch(e){again()}}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&oid)watch()});
-addEventListener('online',()=>{if(!oid)return;deliver();if(!FS&&!sessionStorage.getItem('fbr2')){sessionStorage.setItem('fbr2',1);location.reload();return}srvOk=false;wtry=0;watch();if(lastO)paint()});addEventListener('offline',()=>{if(oid&&lastO)paint()});
+let lastPend=false,lastSig='';function track(){orderWatch(oid,(d,pend)=>{if(!d){if(!lastO)$('#bd').textContent=t('nf');return}const sg=JSON.stringify(d)+pend;if(sg===lastSig)return;lastSig=sg;lastO=d;lastPend=pend;paint()})}
+addEventListener('online',()=>{if(oid&&lastO)paint()});addEventListener('offline',()=>{if(oid&&lastO)paint()});
 init();
 setInterval(()=>{if(oid&&lastO&&lastO.eta&&lastO.type!=='dine'&&lastO.status!=='served'&&lastO.status!=='billed')paint()},30000);
 /* অফলাইন প্রস্তুতি: সার্ভিস ওয়ার্কার চালু করে Firebase ফাইল ও ভিডিও ক্যাশে রাখা */
 const regSW=()=>{navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
- const B='https://www.gstatic.com/firebasejs/10.12.2/';['firebase-app.js','firebase-firestore.js','firebase-component.js','firebase-logger.js','firebase-util.js'].forEach(f=>fetch(B+f).catch(()=>{}));
- ['logo-192.png'].forEach(f=>fetch(f).catch(()=>{}))}).catch(()=>{})};
+ const B='https://www.gstatic.com/firebasejs/10.12.2/';['firebase-app.js','firebase-firestore.js','firebase-component.js','firebase-logger.js','firebase-util.js'].forEach(f=>fetch(B+f,{mode:'no-cors'}).catch(()=>{}));
+ ['wait.mp4','ready.mp4','served.mp4','wait.jpg','ready.jpg','served.jpg','logo-192.png'].forEach(f=>fetch(f).catch(()=>{}))}).catch(()=>{})};
 if('serviceWorker' in navigator){document.readyState==='complete'?regSW():addEventListener('load',regSW)}
 </script></body></html>

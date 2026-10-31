@@ -1,6 +1,6 @@
-var V='musafir-supermarket-v1';
-var CORE=['./','./index.html','./manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png',];
-var VID=[];
+var V='musafir-pos-v25';
+var CORE=['./','./index.html','./order.html','./manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png','./wait.jpg','./ready.jpg','./served.jpg'];
+var VID=['./wait.mp4','./ready.mp4','./served.mp4'];
 var FB='https://www.gstatic.com/firebasejs/10.12.2/';
 var CDN=[FB+'firebase-app.js',FB+'firebase-auth.js',FB+'firebase-firestore.js',FB+'firebase-component.js',FB+'firebase-logger.js',FB+'firebase-util.js','https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap'];
 self.addEventListener('install',function(e){e.waitUntil(caches.open(V).then(function(c){
@@ -26,7 +26,7 @@ function vid(r){
  }).catch(function(){return Response.error()})}
 
 self.addEventListener('fetch',function(e){
- var r=e.request;if(r.method!=='GET')return;var u=new URL(r.url);var NAV='./index.html';
+ var r=e.request;if(r.method!=='GET')return;var u=new URL(r.url);var NAV=/order\.html$/.test(u.pathname)?'./order.html':'./index.html';
  var ok=u.origin===location.origin||u.host==='www.gstatic.com'||u.host==='fonts.gstatic.com'||u.host==='fonts.googleapis.com';
  if(!ok)return;
  if(u.origin===location.origin&&/\.(mp4|webm)$/.test(u.pathname)){e.respondWith(vid(r));return}
