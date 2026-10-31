@@ -1094,8 +1094,8 @@ function startAuth(){FB.watch(function(u){FB.stop();
 function hasLocal(){try{return !!localStorage.getItem('pos_uid')}catch(e){return false}}
 function enterLocal(){$('#lgn').classList.remove('show');CU=null;sy('off');render();toast(L('অফলাইন মোড: বিক্রি ফোনে জমা হবে','Offline mode: sales kept on device'))}
 
-function boot(){if(PUBR){startPub();return}if(!cfgOK){sy('cfg');$('#lgn').classList.add('show');$('#lb').innerHTML='<h2>Firebase setup</h2><p>index.html এর শুরুতে <b>FIREBASE_CONFIG</b> বসান।</p>';return}
- if(window.FB)startAuth();else{window.onFB=startAuth;setTimeout(function(){if(!window.FB&&hasLocal()){enterLocal();return}if(!window.FB){$('#lgn').classList.add('show');$('#lb').innerHTML='<h2>Firebase</h2><p style="color:var(--warn);font-weight:700">'+L('Firebase লোড হয়নি। নেট চেক করে পেজ রিফ্রেশ করুন।','Firebase failed to load. Refresh page.')+'</p>'}},6000)}}
+function boot(){if(PUBR){startPub();return}showLogin();if(!cfgOK){sy('cfg');$('#lb').innerHTML='<h2>Firebase setup</h2><p>index.html এর শুরুতে <b>FIREBASE_CONFIG</b> বসান।</p>';return}
+ if(window.FB){startAuth();return}window.onFB=startAuth;setTimeout(function(){if(!window.FB&&hasLocal()){enterLocal();return}if(!window.FB){showLogin(L('Firebase লোড হয়নি। নেট চেক করে পেজ রিফ্রেশ করুন।','Firebase failed to load. Refresh page.'))}},6000)}
 
 function greet(h){return h>=5&&h<11?L('সুপ্রভাত','Good morning'):h>=11&&h<16?L('শুভ দুপুর','Good afternoon'):h>=16&&h<19?L('শুভ সন্ধ্যা','Good evening'):L('শুভ রাত্রি','Good night')}
 function welcome(){var r=RD();if(!r.welcome)return;try{if(sessionStorage.getItem('pos_wel'))return;sessionStorage.setItem('pos_wel','1')}catch(e){}
