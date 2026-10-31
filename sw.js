@@ -1,5 +1,5 @@
-var V='musafir-pos-v30';
-var CORE=['./','./index.html','./order.html','./manifest.json','./menu-manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png'];
+var V='musafir-supermarket-v1';
+var CORE=['./','./index.html','./manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png',];
 var VID=[];
 var FB='https://www.gstatic.com/firebasejs/10.12.2/';
 var CDN=[FB+'firebase-app.js',FB+'firebase-auth.js',FB+'firebase-firestore.js',FB+'firebase-component.js',FB+'firebase-logger.js',FB+'firebase-util.js','https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap'];
@@ -26,7 +26,7 @@ function vid(r){
  }).catch(function(){return Response.error()})}
 
 self.addEventListener('fetch',function(e){
- var r=e.request;if(r.method!=='GET')return;var u=new URL(r.url);if(u.searchParams.has('_v'))return;var NAV=/order\.html$/.test(u.pathname)?'./order.html':'./index.html';
+ var r=e.request;if(r.method!=='GET')return;var u=new URL(r.url);var NAV='./index.html';
  var ok=u.origin===location.origin||u.host==='www.gstatic.com'||u.host==='fonts.gstatic.com'||u.host==='fonts.googleapis.com';
  if(!ok)return;
  if(u.origin===location.origin&&/\.(mp4|webm)$/.test(u.pathname)){e.respondWith(vid(r));return}
@@ -34,19 +34,10 @@ self.addEventListener('fetch',function(e){
   var net=fetch(req,{cache:'reload'}).then(function(n){if(n&&n.ok){var cp=n.clone();caches.open(V).then(function(c){c.put(key,cp)})}return n}).catch(function(){return null});
   if(hit){e.waitUntil(net);return hit}
   return net.then(function(n){return n||Response.error()})})}
- function nf(key,url){return new Promise(function(res){var done=false;
-  var fb=function(){return caches.match(key,{ignoreSearch:true})};
-  var to=setTimeout(function(){fb().then(function(h){if(h&&!done){done=true;res(h)}})},3000);
-  fetch(url,{cache:'no-store'}).then(function(n){if(n&&n.ok){var cp=n.clone();caches.open(V).then(function(c){c.put(key,cp)})}
-   if(!done){done=true;clearTimeout(to);res(n)}}).catch(function(){clearTimeout(to);if(done)return;fb().then(function(h){done=true;res(h||Response.error())})})})}
- /* পেজ: আগে নেট (৩ সেকেন্ড), না পেলে ফোনে জমানো কপি। এতে নতুন ফাইল সাথে সাথে আসে, অফলাইনেও চলে */
- if(r.mode==='navigate'){e.respondWith(nf(NAV,r.url));return}
+ if(r.mode==='navigate'){e.respondWith(swr(NAV,r.url));return}
  if(u.origin===location.origin&&/\.(html|js|json)$/.test(u.pathname)){e.respondWith(swr(r,r.url));return}
  e.respondWith(caches.match(r,{ignoreSearch:true}).then(function(hit){
-  /* Firebase মডিউল (gstatic) কখনো opaque কপি হিসেবে জমানো/দেওয়া হবে না: opaque কপি দিলে import() ব্যর্থ হয় */
-  var fbjs=u.host==='www.gstatic.com';
-  if(hit&&hit.type==='opaque'&&(fbjs||r.mode!=='no-cors'))hit=null;
-  var net=fetch(r).then(function(n){if(n&&(n.ok||(n.type==='opaque'&&!fbjs))){var cp=n.clone();caches.open(V).then(function(c){c.put(r,cp)})}return n}).catch(function(){return hit||Response.error()});
+  var net=fetch(r).then(function(n){if(n&&(n.ok||n.type==='opaque')){var cp=n.clone();caches.open(V).then(function(c){c.put(r,cp)})}return n}).catch(function(){return hit});
   return hit||net}))});
 
 self.addEventListener('notificationclick',function(e){e.notification.close();e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(function(l){for(var i=0;i<l.length;i++){if('focus' in l[i])return l[i].focus()}return clients.openWindow('./')}))});
