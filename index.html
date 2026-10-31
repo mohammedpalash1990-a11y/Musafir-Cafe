@@ -299,7 +299,7 @@ function rpSet(k,v){S.rp=S.rp||{};S.rp[k]=v;save();render();rqFlush()}
 function rpTest(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}rqAdd({k:'test',t:Date.now(),shop:S.shop});toast(L('টেস্ট পাঠানো হয়েছে, ইমেইল দেখুন','Test sent, check your email'))}
 function rpNow(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var d=tdy();H.filter(function(h){return day(h.t)==d}).forEach(function(h){rqAdd(rqSale(h))});rqAdd({k:'report',day:d,shop:S.shop});toast(L('আজকের রিপোর্ট পাঠানো হচ্ছে','Sending today\'s report'))}
 function rpHist(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}H.forEach(function(h){rqAdd(rqSale(h))});toast(L('সব পুরনো বিক্রি পাঠানো হচ্ছে','Sending all past sales'))}
-var APP_V='v8 · ZATCA setup · 2026-10-31';
+var APP_V='v9 · Search fix · ZATCA prep · 2026-10-31';
 function updApp(){if(!navigator.onLine){toast(L('আপডেটের জন্য নেট লাগবে','Internet needed to update'));return}toast(L('আপডেট হচ্ছে…','Updating…'));var p=[];try{if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}))}catch(e){}Promise.all(p).catch(function(){}).then(function(){location.reload()})}
 function verBox(){return '<div class="box"><div class="hd">'+I('set')+'<b>'+L('অ্যাপ ভার্সন','App version')+'</b></div><div class="dl"><span>'+APP_V+'</span><button class="pri" onclick="updApp()">'+L('এখনই আপডেট করুন','Update now')+'</button></div><div class="mute" style="font-size:12px">'+L('আপনার বিক্রি ও ডেটা মুছবে না। নতুন ফাইল GitHub-এ দেওয়ার পর এটা চাপলে নতুন ভার্সন চলে আসবে।','Your sales and data are kept. Press this after uploading new files to GitHub.')+'</div></div>'}
 function rpBox(){var r=S.rp||{};return '<div class="box"><div class="hd">'+I('cash')+'<b>'+L('দৈনিক রিপোর্ট (ইমেইল ও ড্রাইভ)','Daily report (email & Drive)')+'</b></div>'
@@ -1390,7 +1390,7 @@ function rfPays(s,R){
  pl.forEach(function(p){tot+=p.a});
  pl.forEach(function(p,ix){var a=ix==pl.length-1?r2(R-used):r2(R*p.a/(tot||1));used=r2(used+a);var o={m:p.m,a:-a};if(p.debtor)o.debtor=p.debtor;out.push(o)});
  return out.filter(function(p){return Math.abs(p.a)>0.004})}
-function keep(){var w=document.getElementById('rfWhy'),k=document.getElementById('rfStk');if(w)RF.why=w.value;if(k)RF.stk=k.checked}
+function rfKeepFields(){var w=document.getElementById('rfWhy'),k=document.getElementById('rfStk');if(w)RF.why=w.value;if(k)RF.stk=k.checked}
 function rfDraw(){
  var s=origOf(RF.no),c=rfCalc(),pl=rfPays(s,c.R);
  var h='<div><b style="font-size:19px">↩ '+L('রিফান্ড','Refund')+' · '+L('ইনভয়েস','Invoice')+' #'+s.sn+'</b><div class="mute" style="margin:4px 0 6px">'+L('যে পণ্য ফেরত হচ্ছে তার সংখ্যা ঠিক করুন','Set the quantity being returned')+'</div>';
@@ -1404,8 +1404,8 @@ function rfDraw(){
  +'<button class="bad" '+(c.R>0?'':'disabled ')+'style="width:100%;margin-top:12px;padding:14px;font-weight:800" onclick="rfGo()">↩ '+L('রিফান্ড নিশ্চিত করুন','Confirm refund')+'</button>'
  +'<button style="width:100%;margin-top:8px" onclick="showRc('+s.no+')">'+L('ফিরে যান','Back')+'</button></div>';
  document.getElementById('rb').innerHTML=h;document.getElementById('rc').classList.add('show')}
-window.rfKeep=function(){if(RF)keep()};
-window.rfChg=function(ix,d){if(!RF)return;keep();var n=RF.q[ix]+d;if(n<0||n>RF.rem[ix])return;RF.q[ix]=n;rfDraw()};
+window.rfKeep=function(){if(RF)rfKeepFields()};
+window.rfChg=function(ix,d){if(!RF)return;rfKeepFields();var n=RF.q[ix]+d;if(n<0||n>RF.rem[ix])return;RF.q[ix]=n;rfDraw()};
 window.refundSale=function(no){
  var s=origOf(no);if(!s||s.refund)return;
  var done=refundedQty(no),rem=s.items.map(function(i,ix){return Math.max(0,i.qty-(done[ix]||0))});
