@@ -26,7 +26,7 @@ function vid(r){
  }).catch(function(){return Response.error()})}
 
 self.addEventListener('fetch',function(e){
- var r=e.request;if(r.method!=='GET')return;var u=new URL(r.url);var NAV=/order\.html$/.test(u.pathname)?'./order.html':'./index.html';
+ var r=e.request;if(r.method!=='GET')return;var u=new URL(r.url);var NAV='./index.html';
  var ok=u.origin===location.origin||u.host==='www.gstatic.com'||u.host==='fonts.gstatic.com'||u.host==='fonts.googleapis.com';
  if(!ok)return;
  if(u.origin===location.origin&&/\.(mp4|webm)$/.test(u.pathname)){e.respondWith(vid(r));return}
