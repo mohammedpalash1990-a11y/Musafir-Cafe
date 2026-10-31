@@ -343,7 +343,7 @@ var NP={
 };
 var PV=['bg','card','ink','mute','line','ac','soft','warn','blue','head'];
 function curNight(){return 'teal'}
-function applyPal(){var el=document.documentElement,dk=curTheme()=='dark',p=NP[curNight()];PV.forEach(function(k){if(dk)el.style.setProperty('--'+k,p[k]);else el.style.removeProperty('--'+k)});var mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=dk?p.head:'#14454b'}
+function applyPal(){var doc=window.document||document,el=doc&&doc.documentElement;if(!el)return;var dk=curTheme()=='dark',p=NP[curNight()];PV.forEach(function(k){if(dk)el.style.setProperty('--'+k,p[k]);else el.style.removeProperty('--'+k)});var mt=doc.querySelector('meta[name=theme-color]');if(mt)mt.content=dk?p.head:'#14454b'}
 function setNight(k){try{localStorage.setItem('pos_night',k)}catch(e){}setTheme('dark')}
 function setTheme(m){if(m=='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',m);try{localStorage.setItem('pos_theme',m)}catch(e){}applyPal();render()}
 function togTheme(){setTheme(curTheme()=='dark'?'light':'dark')}
@@ -1184,7 +1184,7 @@ function end(){if(!dn)return;dn=false;b.classList.remove('drag');if(mv){try{var 
 b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
 b.addEventListener('click',function(){if(mv){return}openCart()})})();
 try{applyPal()}catch(e){console.error('Musafir theme init:',e)}
-try{render()}catch(e){console.error('Musafir render:',e);try{$('#m').innerHTML='<div class="box" style="margin:16px"><b>App display error</b><p>Please refresh this page. If it continues, send this message to support: '+esc(e&&e.message||e)+'</p></div>'}catch(x){}}
+try{render()}catch(e){console.error('Musafir render:',e);try{var d=window.document||document,m=d&&d.getElementById('m');if(m)m.innerHTML='<div class="box" style="margin:16px"><b>App display error</b><p>Please send this technical detail to support:</p><pre style="white-space:pre-wrap">'+esc(e&&e.stack||e&&e.message||e)+'</pre></div>'}catch(x){}}
 try{boot()}catch(e){console.error('Musafir boot:',e);try{showLogin('App startup error: '+(e&&e.message||e))}catch(x){}}if(__restoreCs&&typeof openCart=='function'&&Object.keys(cart).length&&!PUBR)setTimeout(function(){try{openCart()}catch(e){}},300);
 document.addEventListener('keydown',function(ev){var tg=(ev.target&&ev.target.tagName)||'';if(ev.key=='/'&&!/INPUT|TEXTAREA|SELECT/.test(tg)){var q0=$('#sq');if(q0){ev.preventDefault();q0.focus();q0.select()}}if(ev.key=='Escape'){var o=document.querySelector('.ov.show:not(#lgn)');if(o)o.classList.remove('show')}});
 </script>
