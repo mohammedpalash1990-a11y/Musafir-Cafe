@@ -684,10 +684,12 @@ function zatcaBox(){
  +zi('district','District / الحي')+zi('city','City / المدينة')+zi('postalCode','Postal code / الرمز البريدي')
  +'<label>Invoice type / نوع الفاتورة</label><select onchange="zatcaSet(\'invoiceType\',this.value)"><option value="simplified" '+(z.invoiceType!=='standard'?'selected':'')+'>Simplified (B2C)</option><option value="standard" '+(z.invoiceType==='standard'?'selected':'')+'>Standard (B2B)</option></select>'
  +'<div class="mute" style="font-size:12px;margin-top:8px">Integration status: Not connected. FATOORA onboarding, CSID/certificate, compliant XML signing and Sandbox tests are still required before live submission.</div>'
- +'<button class="pri" style="width:100%;margin-top:10px" onclick="zatcaSave()">Save ZATCA business profile</button></div>'
+ +'<div id="zatcaCheckResult" class="mute" style="font-size:12px;margin-top:8px">'+esc(z.checkMessage||'Save your profile, then run the server-side readiness check.')+'</div>'
+ +'<button class="pri" style="width:100%;margin-top:10px" onclick="zatcaSave()">Save ZATCA business profile</button><button style="width:100%;margin-top:8px" onclick="zatcaCheck()">Check ZATCA setup readiness</button></div>'
 }
 function zatcaSet(k,v){S.zatca=S.zatca||{};S.zatca[k]=v;S.zatca.enabled=true;save()}
 function zatcaSave(){S.zatca=S.zatca||{};S.zatca.enabled=true;save();toast(L('ZATCA business profile saved','ZATCA business profile saved'));render()}
+async function zatcaCheck(){var el=$('#zatcaCheckResult');if(el)el.textContent=L('সার্ভার পরীক্ষা হচ্ছে…','Checking server readiness…');try{if(!window.zatcaCheckServer)throw new Error('Firebase Functions client is unavailable');var r=await window.zatcaCheckServer();var msg=(r.missing&&r.missing.length?'Missing: '+r.missing.join(', '):'Profile fields look complete.')+' '+(r.message||'');S.zatca=S.zatca||{};S.zatca.checkMessage=msg;save();if(el)el.textContent=msg;toast(L('ZATCA প্রস্তুতি পরীক্ষা সম্পন্ন','ZATCA readiness check completed'))}catch(e){var msg=e.message||String(e);if(el)el.textContent=msg;toast(L('ZATCA সার্ভার পরীক্ষা ব্যর্থ','ZATCA server check failed')+': '+msg)}}
 function vSet0(){
  return zatcaBox()+'<div class="box"><label>'+t('shop')+'</label><input value="'+esc(S.shop)+'" onchange="S.shop=this.value;save();render()"><label>'+t('cur')+'</label><input value="'+esc(S.cur)+'" onchange="S.cur=this.value;save();render()"><label>'+t('taxp')+'</label><input type="number" inputmode="decimal" value="'+S.tax+'" onchange="S.tax=+this.value||0;save();render()"><div class="mute" style="font-size:12px;margin-top:7px">'+L('সৌদি আরবে VAT নিবন্ধিত প্রতিষ্ঠানের সাধারণ হার ১৫%। আপনার VAT নিবন্ধন নিশ্চিত হলে তবেই প্রয়োগ করুন।','Saudi Arabia standard VAT rate is 15% for VAT-registered businesses. Apply only if your business is VAT registered.')+'</div><button style="margin-top:8px" onclick="S.tax=15;save();render()">'+L('VAT ১৫% সেট করুন','Set VAT to 15%')+'</button></div>'
  +'<div class="box"><b>'+t('data')+'</b><p class="mute">'+esc(CE||'')+'</p><button onclick="FB.out()">'+L('লগআউট','Log out')+'</button><p class="mute">'+t('note')+'</p><button class="bad" onclick="wipe()">'+(arm?t('erase2'):t('erase'))+'</button></div>'
@@ -1186,10 +1188,12 @@ document.addEventListener('keydown',function(ev){var tg=(ev.target&&ev.target.ta
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,doc,setDoc,deleteDoc,collection,onSnapshot,getDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 if(!/PASTE/.test(window.FIREBASE_CONFIG.apiKey)){
- const app=initializeApp(window.FIREBASE_CONFIG),auth=getAuth(app),db=(function(){try{return initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){return getFirestore(app)}})();let un=[];
+ const app=initializeApp(window.FIREBASE_CONFIG),auth=getAuth(app),functions=getFunctions(app,'me-central1'),db=(function(){try{return initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){return getFirestore(app)}})();let un=[];
  const ref=(c,i)=>doc(db,'users',auth.currentUser.uid,c,i);
+ window.zatcaCheckServer=async function(){try{const call=httpsCallable(functions,'zatcaCheckSetup');return (await call()).data}catch(e){throw new Error(e&&e.message?e.message:'ZATCA setup checker unavailable')}};
  window.FB={
   watch:cb=>onAuthStateChanged(auth,cb),
   login:(e,p)=>signInWithEmailAndPassword(auth,e,p),
