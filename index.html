@@ -1183,7 +1183,9 @@ b.addEventListener('pointermove',function(e){if(!dn)return;var dx=e.clientX-sx,d
 function end(){if(!dn)return;dn=false;b.classList.remove('drag');if(mv){try{var r=b.getBoundingClientRect();localStorage.setItem('pos_barpos2',JSON.stringify({x:r.left,y:r.top}))}catch(e){}}setTimeout(function(){mv=false},50)}
 b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
 b.addEventListener('click',function(){if(mv){return}openCart()})})();
-applyPal();render();boot();if(__restoreCs&&typeof openCart=='function'&&Object.keys(cart).length&&!PUBR)setTimeout(function(){try{openCart()}catch(e){}},300);
+try{applyPal()}catch(e){console.error('Musafir theme init:',e)}
+try{render()}catch(e){console.error('Musafir render:',e);try{$('#m').innerHTML='<div class="box" style="margin:16px"><b>App display error</b><p>Please refresh this page. If it continues, send this message to support: '+esc(e&&e.message||e)+'</p></div>'}catch(x){}}
+try{boot()}catch(e){console.error('Musafir boot:',e);try{showLogin('App startup error: '+(e&&e.message||e))}catch(x){}}if(__restoreCs&&typeof openCart=='function'&&Object.keys(cart).length&&!PUBR)setTimeout(function(){try{openCart()}catch(e){}},300);
 document.addEventListener('keydown',function(ev){var tg=(ev.target&&ev.target.tagName)||'';if(ev.key=='/'&&!/INPUT|TEXTAREA|SELECT/.test(tg)){var q0=$('#sq');if(q0){ev.preventDefault();q0.focus();q0.select()}}if(ev.key=='Escape'){var o=document.querySelector('.ov.show:not(#lgn)');if(o)o.classList.remove('show')}});
 </script>
 
