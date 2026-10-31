@@ -588,7 +588,7 @@ function monthReport(m){var l=H.filter(function(s){return day(s.t).slice(0,7)==m
  l.forEach(function(s){var k=day(s.t);by[k]=by[k]||{n:0,t:0};by[k].n++;by[k].t+=s.total});
  var o=[S.shop,L('মাসিক রিপোর্ট','Monthly report')+': '+m,'--------------------------------'];
  Object.keys(by).sort().forEach(function(k){o.push(k+'   '+by[k].n+L(' টি',' inv')+'   '+$$(by[k].t))});
- o.push('--------------------------------',L('ইনভয়েস','Invoices')+': '+r.n,t('Cash')+': '+$$(r.Cash),L('মোবাইল ব্যাংকিং','Digital')+': '+$$((r.bKash||0)+(r.Nagad||0)+(r.Rocket||0)+(r.BanglaQR||0)),t('Due')+': '+$$(r.Due||0));
+ o.push('--------------------------------',L('ইনভয়েস','Invoices')+': '+r.n,t('Cash')+': '+$$(r.Cash),L('কার্ড / ডিজিটাল','Card / Digital')+': '+$((r.Card||0)+(r.Mada||0)+(r['STC Pay']||0)+(r['Bank Transfer']||0)),t('Due')+': '+$$(r.Due||0));
  if(r.disc)o.push(t('disc')+': '+$$(r.disc));if(r.tax)o.push(t('tax')+': '+$$(r.tax));
  o.push('--------------------------------',t('total')+': '+$$(r.t));return o.join('\n')}
 function showMonRpt(m){var r=sums(H.filter(function(s){return day(s.t).slice(0,7)==m}));
