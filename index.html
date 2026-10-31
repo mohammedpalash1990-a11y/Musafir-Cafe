@@ -445,7 +445,7 @@ function charge(){
  if(!Object.keys(cart).length)return;var ps=pst();if(!ps.ok){toast(ps.rows.some(function(x){return x.m=='Due'&&!x.debtor})?t('needDebtor'):L('পেমেন্ট পুরো হয়নি','Payment is not complete'));return}
  if(otpOn()&&!otpPass){var oq=otpQueue(ps);if(oq.length){otpStart(oq);return}}otpPass=false;
  var c=calc(),items=[];
- for(var id in cart){var p=gp(id);items.push({id:p.id,name:p.name,bn:p.bn,price:p.price,qty:cart[id]});if(p.stock!=='')p.stock-=cart[id]}
+ for(var id in cart){var p=gp(id);items.push({id:p.id,name:p.name,bn:p.bn,ar:p.ar||'',cost:+p.cost||0,price:p.price,qty:cart[id]});if(p.stock!=='')p.stock-=cart[id]}
  var left=ps.chg,mg={},cashGiven=0,dueRows=[];
  ps.rows.forEach(function(x){var a=+x.a||0;if(x.m=='Due'){if(a>0.004)dueRows.push({debtor:x.debtor,a:a});return}if(x.m=='Cash'){cashGiven+=a;var d=Math.min(a,left);a-=d;left-=d}if(a>0.004)mg[x.m]=(mg[x.m]||0)+a});
  var pl=Object.keys(mg).map(function(m){return{m:m,a:+mg[m].toFixed(2)}});
@@ -462,7 +462,7 @@ function plainFoot(s){return footMsg(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,'
 function pubDue(d){if(!CU||!window.FB||!FB.setPub)return;if(!d.pc)d.pc=randCode();
  w(FB.setPub(d.pc,{type:'due',uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,name:d.name,phone:d.phone||'',nid:d.nid||'',photo:d.photo||'',total:duTotal(d),entries:(d.entries||[]).map(function(e,ix,ar){var o={t:e.t,a:e.a,items:e.items||'',no:e.no};if(e.sid&&ix>=ar.length-40){var sl=H.find(function(h){return h.no==e.sid});if(sl){o.tot=sl.total;o.lines=sl.items.map(function(i){return{name:i.name,bn:i.bn||'',qty:i.qty,price:i.price}})}}return o}),pays:(d.pays||[]).map(function(p){return{t:p.t,a:p.a}}),updated:Date.now()}))}
 function pubReceipt(s){if(!CU||!window.FB||!FB.setPub||!s.pc)return;var ids=[],m={};s.items.forEach(function(i){if(i.id&&IMG[i.id]&&ids.indexOf(i.id)<0)ids.push(i.id)});var left=ids.length;
- function fin(){w(FB.setPub(s.pc,{uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,t:s.t,sn:s.sn,day:day(s.t),total:s.total,sub:s.sub,disc:s.disc||0,tax:s.tax||0,pays:s.pays||[],msg:plainFoot(s),items:s.items.map(function(i){return{name:i.name,bn:i.bn||'',price:i.price,qty:i.qty,img:m[i.id]||''}})}))}
+ function fin(){w(FB.setPub(s.pc,{uid:CU,shop:S.shop,cur:S.cur,lang:S.lang,t:s.t,sn:s.sn,day:day(s.t),total:s.total,sub:s.sub,disc:s.disc||0,tax:s.tax||0,pays:s.pays||[],msg:plainFoot(s),items:s.items.map(function(i){return{name:i.name,bn:i.bn||'',ar:i.ar||'',price:i.price,qty:i.qty,img:m[i.id]||''}})}))}
  if(!left)return fin();ids.forEach(function(id){thumb(IMG[id],function(x){if(x)m[id]=x;if(--left==0)fin()})})}
 
 function footMsg(s){var r=RD();if(!r.foot)return '';var bn=S.lang!='en',h=new Date(s.t).getHours(),k=r.mode,m;
