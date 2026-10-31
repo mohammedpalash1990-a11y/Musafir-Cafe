@@ -1,48 +1,40 @@
-# ZATCA — বর্তমান অবস্থা ও ডিপ্লয় গাইড
+# ZATCA — ডিপ্লয় ও চালু করার গাইড (সহজ বাংলা)
 
-> **গুরুত্বপূর্ণ:** এই রিলিজে শুধু ZATCA business profile save, server-side readiness check এবং status display আছে। এটি FATOORA integration নয়, কোনো invoice submit করে না, এবং ZATCA compliance/certification প্রমাণ করে না। Production বন্ধ।
-
-## ১. এই রিলিজে যা আছে
-- POS → Settings → ZATCA-তে seller name, VAT, CR ও address profile save।
-- `functions/index.js`-এ `zatcaCheckSetup` callable: profile-এর প্রয়োজনীয় field ও VAT format পরীক্ষা করে।
-- `functions/index.js`-এ `zatcaStatus` callable: বর্তমান profile-only অবস্থা দেখায়; EGS/CSID/compliance/submission status-কে “not configured” দেখায়।
-- Firebase Functions-এর source `functions/` হিসেবে `firebase.json`-এ সেট করা।
-- Node.js 20 runtime।
-
-## ২. Firebase-এ deploy করার আগে
-1. সঠিক Firebase project ID নিশ্চিত করুন। ভুল project-এ deploy করবেন না।
-2. Firebase Authentication-এ Email/Password চালু এবং POS hosting domain authorized আছে নিশ্চিত করুন।
-3. Cloud Functions deploy-এর জন্য Firebase project-এর প্রয়োজনীয় billing/Blaze setup এবং IAM permissions নিশ্চিত করুন।
-4. কোনো password, OTP, private key বা certificate ChatGPT-তে পাঠাবেন না।
-
-## ৩. Deploy
-আপনার কম্পিউটার বা নিরাপদ terminal-এ repository clone/update করে চালান:
-
-```sh
-npm install -g firebase-tools
-firebase login
-firebase use <YOUR_FIREBASE_PROJECT_ID>
-cd functions
-npm install
-npm test
-cd ..
-firebase deploy --only functions:zatca
+## ১. একবারের সেটআপ (আপনার কম্পিউটারে)
 ```
+npm i -g firebase-tools
+firebase login
+firebase use <আপনার-প্রজেক্ট-আইডি>
+cd functions && npm install && npm test      # 14টি টেস্ট পাস হওয়ার কথা
+cd .. && firebase deploy --only functions:zatca
+```
+Firebase কনসোলে লাগবে: **Blaze প্ল্যান**, **Secret Manager API** ও **Cloud Scheduler API** চালু, আর Functions-এর সার্ভিস অ্যাকাউন্টে **Secret Manager Admin** রোল।
+(`zatcaRetryScheduled` ডিপ্লয়ে Scheduler-এর অঞ্চল নিয়ে এরর এলে আমাকে এরর লাইনটা পাঠান।)
 
-`npm test` এখানে শুধু function entrypoint-এর JavaScript syntax পরীক্ষা করে; এটি live ZATCA বা Firebase end-to-end test নয়।
+## ২. Firestore Rules (আপনি অনুমতি দিয়েছেন)
+`firestore.rules.ZATCA-ADD.txt` ফাইলের ২টি `match` লাইন আপনার rules-এ যোগ করে **Publish** করুন। ZATCA ডেটা (ইনভয়েস, হ্যাশ, অডিট) শুধু সার্ভার লিখবে। আপনার `users/{uid}/...` নিয়ম অপরিবর্তিত থাকবে।
 
-## ৪. POS থেকে যাচাই
-1. POS-এ আপনার account দিয়ে login করুন।
-2. Settings → ZATCA-তে business profile পূরণ করে Save করুন।
-3. “Check ZATCA setup readiness” চাপুন; missing field দেখালে ঠিক করুন।
-4. “Refresh ZATCA status” চাপলে এই রিলিজে EGS onboarding, CSID, compliance checks ও invoice submission “not configured” দেখাবে।
+## ৩. POS-এ ZATCA চালু করা (Settings → ZATCA ফোল্ডার)
+1. প্রোফাইল পূরণ → **Save ZATCA business profile**। (VAT ১৫ ডিজিট, ৩ দিয়ে শুরু ও শেষ; বিল্ডিং ৪ ডিজিট; পোস্টাল ৫ ডিজিট)
+2. Settings → Shop & VAT-এ **VAT ১৫%** দিন।
+3. **Environment = Sandbox** → ধাপ ১ (Onboard) → ২ (Compliance checks) → ৩ (Production CSID) → ৪ (Activate)। Sandbox-এ OTP লাগে না।
+4. **Auto-send invoices: ON** করুন, একটি টেস্ট বিক্রি করুন → রসিদে "تم الإبلاغ ✓ / Reported" ও QR আসবে (Sandbox-এ "TEST ONLY" লেখা থাকবে)।
+5. **Refresh ZATCA status** চেপে অবস্থা দেখুন।
 
-## ৫. এখনো যা করা হয়নি
-- FATOORA developer portal onboarding ও EGS CSID request।
-- CSR/private key/certificate lifecycle এবং secure Secret Manager integration।
-- Official ZATCA SDK দিয়ে UBL 2.1 XML, hash, signature, QR validation।
-- Simplified invoice Reporting এবং Standard invoice Clearance।
-- Retry/idempotency, audit trail, credit/debit notes, production approval।
-- POS sale completion থেকে ZATCA invoice generation/submission।
+## ৪. অফিসিয়াল SDK যাচাই (আপনার কম্পিউটারে, Java লাগবে)
+ZATCA Developer Portal থেকে SDK নামিয়ে একটি জেনারেটেড ইনভয়েসের XML-এ `fatoora -validate` ও `-qr` চালান। পাস না হওয়া পর্যন্ত ইনভয়েসকে "compliant" ধরবেন না। ফল আমাকে জানান।
 
-এই কাজগুলো সম্পূর্ণ ও official SDK/Sandbox-এ যাচাই না হওয়া পর্যন্ত POS receipt-কে ZATCA-compliant tax invoice হিসেবে ব্যবহার করবেন না। Production কোনোভাবেই enable করবেন না।
+## ৫. আসল (Production) চালু — শুধু আপনার OTP লাগবে
+1. Fatoora পোর্টালে লগইন → EGS Onboarding → **OTP** নিন (একবার ব্যবহারযোগ্য, কিছুক্ষণ বৈধ)।
+2. POS → Settings → ZATCA → **Environment = Production (LIVE)** → OTP ঘরে ৬ ডিজিট দিন → ধাপ ১ → ২ → ৩ → ৪।
+3. LIVE-এ প্রতিবার নিশ্চিতকরণ বার্তা আসবে। OTP কোথাও জমা হয় না, ব্যবহারের পর ঘর খালি হয়।
+**আগে Sandbox ও SDK টেস্ট পাস করুন, তারপর Production।**
+
+## ৬. কী নিজে থেকে হয়
+বিক্রি হলে → ইনভয়েস XML তৈরি, সই, হ্যাশ-চেইন, QR → ZATCA-তে Reporting → ফল রসিদে। নেট না থাকলে ফোনে জমা থাকে, নেট এলে আবার যায়; সার্ভারও প্রতি ১৫ মিনিটে ব্যর্থগুলো আবার চেষ্টা করে। ZATCA নিজে "REPORTED" না বললে কখনো সফল দেখানো হয় না।
+
+## ৭. এখনো সীমাবদ্ধতা
+- শুধু Simplified (B2C) ইনভয়েস অটো-যায়। Standard (B2B)-এ ক্রেতার তথ্য নেওয়ার ঘর POS-এ নেই।
+- শুধু ১৫% VAT। শূন্য-হার/ছাড়প্রাপ্ত পণ্য সমর্থিত নয়।
+- রিটার্ন/ক্রেডিট নোট ব্যাকএন্ডে আছে, POS-এর রিটার্ন বাটনের সঙ্গে এখনো জোড়া হয়নি।
+- XML/সই/QR ZATCA-র স্পেক অনুযায়ী লেখা, কিন্তু অফিসিয়াল SDK দিয়ে আপনার মেশিনে যাচাই বাকি।
