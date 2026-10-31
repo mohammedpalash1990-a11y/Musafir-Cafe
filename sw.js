@@ -1,4 +1,4 @@
-var V='musafir-supermarket-v34';
+var V='musafir-supermarket-v35';
 var CORE=['./','./index.html','./manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png','./wait.jpg','./ready.jpg','./served.jpg'];
 var VID=['./wait.mp4','./ready.mp4','./served.mp4'];
 var FB='https://www.gstatic.com/firebasejs/10.12.2/';
