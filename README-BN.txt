@@ -1,7 +1,7 @@
 MUSAFIR SUPER MARKET POS
 ========================
 
-এই repository-তে Musafir Super Market-এর browser-based POS রাখা হয়েছে। পুরোনো Musafir logo এবং Firebase project config রাখা হয়েছে। অ্যাপটি English / Arabic (RTL) / বাংলা / বাংলা+English ভাষা সমর্থন করে। Saudi Riyal (ر.س), Cash, Card, Mada, STC Pay, Bank Transfer এবং Due payment option আছে।
+এই repository-তে Musafir Super Market-এর browser-based POS রাখা হয়েছে। Super Market storefront icon এবং Firebase project config রাখা হয়েছে। অ্যাপটি English / Arabic (RTL) / বাংলা / বাংলা+English ভাষা সমর্থন করে। Saudi Riyal (ر.س), Cash, Card, Mada, STC Pay, Bank Transfer এবং Due payment option আছে।
 
 বর্তমান POS ফিচার
 -----------------
