@@ -363,12 +363,13 @@ function flt(){return P.filter(function(p){return(cat=='All'||p.cat==cat)&&(p.na
 
 function vSell0(){
  var cats=['All'].concat(P.map(function(p){return p.cat}).filter(function(c,i,a){return c&&a.indexOf(c)==i}));
- return '<input id="sq" placeholder="'+t('search')+'" value="'+esc(q)+'" oninput="q=this.value;keep()"><div class="cats">'+cats.map(function(c){return '<button class="'+(c==cat?'on':'')+'" onclick="cat=\''+esc(c+'\';render()')+'">'+esc(c=='All'?t('all'):tc(c))+'</button>'}).join('')+'</div>'
+ return '<input id="sq" placeholder="'+L('পণ্য খুঁজুন / বারকোড স্ক্যান','Search product / scan barcode')+'" value="'+esc(q)+'" oninput="q=this.value;keep()" onkeydown="if(event.key===\'Enter\'){event.preventDefault();scanProduct(this.value)}"><div class="cats">'+cats.map(function(c){return '<button class="'+(c==cat?'on':'')+'" onclick="cat=\''+esc(c+'\';render()')+'">'+esc(c=='All'?t('all'):tc(c))+'</button>'}).join('')+'</div>'
  +(P.length?'<div class="grid" id="gr">'+gridHtml(flt())+'</div>':'<div class="empty">'+t('noItems')+'</div>');
 }
 function gridHtml(l){return l.map(function(p){var out=p.stock!==''&&p.stock<=0,low=p.stock!==''&&p.stock<=5,n=cart[p.id]||0,u=IMG[p.id];
  return '<button class="p" '+(out?'disabled':'')+' onclick="add('+p.id+')">'+(n?'<div class="qty">'+n+'</div>':'')+(u?'<img class="pimg" alt="" src="'+u+'">':'<div class="dot" style="background:hsl('+hue(p.name)+',45%,40%)">'+esc((nm(p)||'?').charAt(0).toUpperCase())+'</div>')+'<b>'+esc(nm(p))+'</b><span>'+$$(p.price)+'</span>'+(p.stock!==''?'<small style="'+(low?'color:var(--warn)':'')+'">'+(out?t('out'):p.stock+t('left'))+'</small>':'')+'</button>'}).join('')}
 function keep(){var g=$('#gr');if(g)g.innerHTML=gridHtml(flt())}
+function scanProduct(v){var code=String(v||'').trim();if(!code)return;var p=P.find(function(x){return String(x.code||'').trim()===code});if(!p){toast(L('বারকোড মেলেনি','Barcode not found'));return}add(p.id);q='';var x=$('#sq');if(x)x.value='';keep()}
 function add(id){var p=gp(id),n=(cart[id]||0)+1;if(p.stock!==''&&n>p.stock)return;cart[id]=n;render()}
 function chg(id,d){var p=gp(id),n=(cart[id]||0)+d;if(n<=0)delete cart[id];else if(p.stock===''||n<=p.stock)cart[id]=n;render();openCart()}
 function rm(id){delete cart[id];render();openCart()}
