@@ -595,7 +595,7 @@ function monthReport(m){var l=H.filter(function(s){return day(s.t).slice(0,7)==m
 function showMonRpt(m){var r=sums(H.filter(function(s){return day(s.t).slice(0,7)==m}));
  showTxt(monthReport(m),'RPT'+m.replace('-',''),'RPT:'+m.replace('-','')+';N:'+r.n+';T:'+r.t.toFixed(2)+';CASH:'+(r.Cash||0).toFixed(2)+';DUE:'+(r.Due||0).toFixed(2))}
 
-function csv(){var r=['no,invoice,date,time,items,subtotal,discount,tax,total,cash,digital,due'];H.slice().sort(function(a,b){return a.t-b.t}).forEach(function(s){var q=sums([s]),d=new Date(s.t);r.push([s.no,s.sn,day(s.t),d.toLocaleTimeString(),'"'+s.items.map(function(i){return i.qty+'x '+i.name}).join('; ').replace(/"/g,'""')+'"',s.sub,s.disc,s.tax,s.total,q.Cash||0,(q.bKash||0)+(q.Nagad||0)+(q.Rocket||0)+(q.BanglaQR||0),q.Due||0].join(','))});
+function csv(){var r=['no,invoice,date,time,items,subtotal,discount,tax,total,cash,digital,due'];H.slice().sort(function(a,b){return a.t-b.t}).forEach(function(s){var q=sums([s]),d=new Date(s.t);r.push([s.no,s.sn,day(s.t),d.toLocaleTimeString(),'"'+s.items.map(function(i){return i.qty+'x '+i.name}).join('; ').replace(/"/g,'""')+'"',s.sub,s.disc,s.tax,s.total,q.Cash||0,q.Card||0,q.Mada||0,q['STC Pay']||0,q['Bank Transfer']||0,q.Due||0].join(','))});
  try{navigator.clipboard.writeText(r.join('\n'));toast(t('csvok'))}catch(e){toast(t('csvno'))}}
 
 function vSell(){var g=vSell0();return isWide()?'<div class="split"><aside class="side" id="side"></aside><div class="prods">'+g+'</div></div>':g}
