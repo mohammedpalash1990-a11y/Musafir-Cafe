@@ -1,5 +1,5 @@
-var V='musafir-pos-v25';
-var CORE=['./','./index.html','./order.html','./manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png','./wait.jpg','./ready.jpg','./served.jpg'];
+var V='musafir-supermarket-v26';
+var CORE=['./','./index.html','./manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png','./wait.jpg','./ready.jpg','./served.jpg'];
 var VID=['./wait.mp4','./ready.mp4','./served.mp4'];
 var FB='https://www.gstatic.com/firebasejs/10.12.2/';
 var CDN=[FB+'firebase-app.js',FB+'firebase-auth.js',FB+'firebase-firestore.js',FB+'firebase-component.js',FB+'firebase-logger.js',FB+'firebase-util.js','https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap'];
