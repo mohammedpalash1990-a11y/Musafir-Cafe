@@ -4,7 +4,7 @@
 
 The POS includes a ZATCA business-profile form in Settings. It can store seller legal name, VAT registration number, CR number, address and invoice type in the signed-in user's existing POS settings document.
 
-**This is profile storage only. It is not a ZATCA integration or certification.** There is no deployed zatcaCheckSetup callable function in this repository, no CSID/certificate onboarding, no signed UBL 2.1 invoice generation, no complete TLV QR, and no Reporting/Clearance API connection. Do not describe receipts from this application as ZATCA-compliant tax invoices.
+**This is profile storage and server-side profile readiness checking only. It is not a ZATCA integration or certification.** The repository contains zatcaCheckSetup and zatcaStatus callable functions under functions/; they must still be deployed to the connected Firebase project. No CSID/certificate onboarding, signed UBL 2.1 invoice generation, complete TLV QR, or Reporting/Clearance API connection is implemented. Do not describe receipts from this application as ZATCA-compliant tax invoices.
 
 ## Saudi requirements to account for
 
@@ -33,4 +33,4 @@ The POS includes a ZATCA business-profile form in Settings. It can store seller 
 
 ## Deployment status
 
-No Firebase Functions or ZATCA service has been deployed by this repository update. Review the existing Firebase project, create a secure server-side integration, and test it in Sandbox before any production deployment.
+Firebase Functions source is configured in firebase.json and the profile-only callables are in functions/. They have not been deployed from this repository update. Deploy only after confirming the Firebase project and permissions. This deployment does not onboard an EGS, request CSIDs, or submit invoices. Build and verify the full Sandbox integration separately before any production deployment.
