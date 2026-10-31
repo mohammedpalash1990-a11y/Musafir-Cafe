@@ -1,6 +1,6 @@
 {
   "name": "Musafir Super Market POS",
-  "short_name": "Musafir POS",
+  "short_name": "Musafir Market",
   "description": "Musafir Super Market point of sale and inventory",
   "id": "./",
   "start_url": "./",
@@ -11,28 +11,10 @@
   "theme_color": "#14454b",
   "icons": [
     {
-      "src": "logo-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any"
-    },
-    {
-      "src": "logo-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "logo-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "logo-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }
