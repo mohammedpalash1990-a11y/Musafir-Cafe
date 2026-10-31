@@ -238,6 +238,7 @@ var P = load('pos_p',[{id:1,name:'Tea',price:30,cat:'Drinks',stock:''},{id:2,nam
 P.forEach(function(p){if(p.bn===undefined)p.bn=BN[p.id]||''});
 
 var H=load('pos_h',[]), IMG=load('pos_img',{}), DU=load('pos_du',[]), PUR=load('pos_pur',[]), cart={}, cat='All', q='', view='sell', edit=null, arm=0, vArm=0, pay='Cash', disc='', recv='', pays=null, pPhoto, dview=null, dq='', pdRow=null, pdPhoto='';
+var prodReturn='prod';
 var CU=null, CE='', ready=false, tm=0, ss='off', upl=false, cfgOK=!/PASTE/.test((window.FIREBASE_CONFIG||{}).apiKey||'PASTE');
 var dd=null, dm=null, curDay=null;
 var KH=(function(){var o={p:[],tx:[],ex:[]};try{var s=JSON.parse(localStorage.getItem('pos_kh'));if(s){o.p=s.p||[];o.tx=s.tx||[];o.ex=s.ex||[]}}catch(e){}return o})();
@@ -365,7 +366,7 @@ function flt(){return P.filter(function(p){return(cat=='All'||p.cat==cat)&&(p.na
 
 function vSell0(){
  var cats=['All'].concat(P.map(function(p){return p.cat}).filter(function(c,i,a){return c&&a.indexOf(c)==i}));
- return '<div style="display:flex;gap:8px;align-items:stretch"><input id="sq" style="flex:1;min-width:0" placeholder="'+L('পণ্য খুঁজুন / বারকোড স্ক্যান','Search product / scan barcode')+'" value="'+esc(q)+'" oninput="q=this.value;keep()" onkeydown="if(event.key===\'Enter\'){event.preventDefault();scanProduct(this.value)}"><button type="button" onclick="startCameraScan()" title="Camera barcode scan" style="white-space:nowrap">'+I('camera')+' '+L('স্ক্যান','Scan')+'</button></div><div class="mute" style="font-size:11px;margin:4px 0 8px">'+L('USB তারযুক্ত বা Bluetooth স্ক্যানার: স্ক্যান করে Enter চাপুন।','USB wired or Bluetooth scanner: scan the barcode; it sends Enter automatically.')+'</div><div class="cats">'+cats.map(function(c){return '<button class="'+(c==cat?'on':'')+'" onclick="cat=\''+esc(c+'\';render()')+'">'+esc(c=='All'?t('all'):tc(c))+'</button>'}).join('')+'</div>'
+ return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 10px"><b style="font-size:17px">'+L('পণ্য তালিকা','Products')+'</b><button class="pri" type="button" onclick="prodReturn=\'sell\';go(\'prod\')">＋ '+t('add')+'</button></div><div style="display:flex;gap:8px;align-items:stretch"><input id="sq" style="flex:1;min-width:0" placeholder="'+L('পণ্য খুঁজুন / বারকোড স্ক্যান','Search product / scan barcode')+'" value="'+esc(q)+'" oninput="q=this.value;keep()" onkeydown="if(event.key===\'Enter\'){event.preventDefault();scanProduct(this.value)}"><button type="button" onclick="startCameraScan()" title="Camera barcode scan" style="white-space:nowrap">'+I('camera')+' '+L('স্ক্যান','Scan')+'</button></div><div class="mute" style="font-size:11px;margin:4px 0 8px">'+L('USB তারযুক্ত বা Bluetooth স্ক্যানার: স্ক্যান করে Enter চাপুন।','USB wired or Bluetooth scanner: scan the barcode; it sends Enter automatically.')+'</div><div class="cats">'+cats.map(function(c){return '<button class="'+(c==cat?'on':'')+'" onclick="cat=\''+esc(c+'\';render()')+'">'+esc(c=='All'?t('all'):tc(c))+'</button>'}).join('')+'</div>'
  +(P.length?'<div class="grid" id="gr">'+gridHtml(flt())+'</div>':'<div class="empty">'+t('noItems')+'</div>');
 }
 function gridHtml(l){return l.map(function(p){var out=p.stock!==''&&p.stock<=0,low=p.stock!==''&&p.stock<=5,n=cart[p.id]||0,u=IMG[p.id];
@@ -627,7 +628,7 @@ function saveP(){var n=$('#pn').value.trim(),b=$('#pb').value.trim(),pr=parseFlo
  var o={name:n||b,bn:b,ar:$('#par').value.trim(),code:$('#pcode').value.trim(),cost:+($('#pcost').value||0),price:pr,cat:$('#pc').value.trim(),stock:$('#ps').value===''?'':+$('#ps').value};
  var pid;if(edit){Object.assign(gp(edit),o);pid=edit}else{o.id=Date.now();P.push(o);pid=o.id}
  if(pPhoto){IMG[pid]=pPhoto;if(CU)w(FB.set('pos','img_'+pid,{d:pPhoto}))}else if(pPhoto===null&&IMG[pid]){delete IMG[pid];if(CU)w(FB.del('pos','img_'+pid))}
- pPhoto=undefined;edit=null;save();lsave();render()}
+ pPhoto=undefined;edit=null;save();lsave();view=prodReturn;prodReturn='prod';render()}
 function delP(){var p=gp(edit);if(!p)return;ask(L('"'+nm(p)+'" মুছে ফেলতে চান?','Delete "'+nm(p)+'"?'),function(){var id=p.id;P=P.filter(function(x){return x.id!=id});delete cart[id];if(IMG[id]){delete IMG[id];if(CU)w(FB.del('pos','img_'+id))}edit=null;save();render()})}
 
 function setImg(id,u){IMG[id]=u;lsave();if(CU)w(FB.set('pos','img_'+id,{d:u}));render()}
