@@ -275,7 +275,10 @@ function nm(p){return S.lang=='bi'?biJoin(p.bn,p.name):S.lang=='bn'&&p.bn?p.bn:S
 function tc(c){return S.lang=='bi'&&CB[c]?biJoin(CB[c],c):S.lang=='bn'&&CB[c]?CB[c]:c}
 var AR={'Saudi Arabia standard VAT rate is 15% for VAT-registered businesses. Apply only if your business is VAT registered.':'النسبة الأساسية لضريبة القيمة المضافة في السعودية ١٥٪ للمنشآت المسجلة. لا تطبقها إلا إذا كانت منشأتك مسجلة في ضريبة القيمة المضافة.','Purchases':'المشتريات','Supplier':'المورد','Supplier name':'اسم المورد','Product':'المنتج','Quantity':'الكمية','Unit purchase cost (SAR)':'تكلفة الشراء للوحدة (ريال)','New purchase entry':'إدخال عملية شراء','Save purchase & increase stock':'حفظ الشراء وزيادة المخزون','Purchase history':'سجل المشتريات','No purchases yet':'لا توجد مشتريات بعد','Enter supplier, product, quantity and cost':'أدخل المورد والمنتج والكمية والتكلفة','Purchase saved and stock increased':'تم حفظ الشراء وزيادة المخزون','Name (Arabic)':'الاسم بالعربية','Purchase cost':'تكلفة الشراء','Sell':'بيع','Sales':'المبيعات','Items':'المنتجات','Settings':'الإعدادات','Dashboard':'لوحة المعلومات','Khata':'دفتر الحسابات','Due':'آجل','Search product / scan barcode':'ابحث عن منتج / امسح الباركود','Barcode / SKU':'الباركود / رمز المنتج','Scan':'مسح','Scan barcode':'امسح الباركود','USB wired or Bluetooth scanner: scan the barcode; it sends Enter automatically.':'ماسح USB سلكي أو Bluetooth: امسح الرمز وسيُرسل Enter تلقائياً.','Camera barcode scanning is not supported here. Use a USB/Bluetooth scanner.':'مسح الباركود بالكاميرا غير مدعوم هنا. استخدم ماسح USB أو Bluetooth.','Scan barcode':'مسح الباركود','Place the barcode inside the camera frame':'ضع الباركود داخل إطار الكاميرا','Camera could not start. Allow camera access or use a USB/Bluetooth scanner':'تعذر تشغيل الكاميرا. اسمح بالوصول أو استخدم ماسح USB أو Bluetooth','Barcode not found; showing matching products':'لم يتم العثور على الرمز؛ تظهر المنتجات المطابقة','Scan or enter barcode':'امسح الباركود أو أدخله','Supplier':'المورد','Supplier name':'اسم المورد','Product':'المنتج','Quantity':'الكمية','Unit purchase cost (SAR)':'تكلفة الشراء للوحدة (ريال)','New purchase entry':'إدخال عملية شراء','Save purchase & increase stock':'حفظ الشراء وزيادة المخزون','Purchase history':'سجل المشتريات','No purchases yet':'لا توجد مشتريات بعد','Enter supplier, product, quantity and cost':'أدخل المورد والمنتج والكمية والتكلفة','Purchase saved and stock increased':'تم حفظ الشراء وزيادة المخزون','Name (Arabic)':'الاسم بالعربية','Purchase cost':'تكلفة الشراء','Payment':'الدفع','Order':'طلب','Cancel order':'إلغاء الطلب','Keep selling':'متابعة البيع','Add item':'إضافة منتج','Edit item':'تعديل المنتج','Save item':'حفظ المنتج','Delete':'حذف','Cancel':'إلغاء','Shop name':'اسم المتجر','Currency symbol':'رمز العملة','Tax / VAT %':'ضريبة القيمة المضافة %','Language':'اللغة','Theme':'المظهر','Auto':'تلقائي','Day':'نهاري','Night':'ليلي','Receipt & welcome':'الإيصال والترحيب','Preview receipt':'معاينة الإيصال','Last invoice':'آخر فاتورة','Log in':'تسجيل الدخول','Sign up':'إنشاء حساب','Forgot password?':'هل نسيت كلمة المرور؟','Password (min 6 characters)':'كلمة المرور (6 أحرف على الأقل)','Opening hours & phone':'ساعات العمل والهاتف','Item images':'صور المنتجات','Photo (optional)':'صورة (اختياري)','Add / change photo':'إضافة / تغيير الصورة','Change':'تغيير','Add':'إضافة','Add:':'إضافة:','Single payment':'دفعة واحدة','Split payment':'تقسيم الدفع','Remaining':'المتبقي','Paid':'المدفوع','Exact':'بالضبط','Cash received':'المبلغ النقدي المستلم','Print':'طباعة','Share':'مشاركة','Today':'اليوم','Monthly report':'التقرير الشهري','Invoices':'الفواتير','Card / Digital':'بطاقة / دفع إلكتروني','Log out':'تسجيل الخروج','Welcome':'مرحباً','Good morning':'صباح الخير','Good afternoon':'مساء الخير','Good evening':'مساء الخير','Good night':'تصبح على خير','No internet':'لا يوجد اتصال بالإنترنت','Wrong email or password':'البريد الإلكتروني أو كلمة المرور غير صحيحة','Invalid email':'البريد الإلكتروني غير صحيح','Please wait…':'يرجى الانتظار…'};function L(bn,en){return S.lang=='en'?en:S.lang=='ar'?(AR[en]||en):S.lang=='bi'&&bn!==en?bn+' / '+en:bn}
 function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function $$(n){return S.cur+' '+(+n).toFixed(2)}
+var RS_OK=null;
+function riyalOk(){if(RS_OK!==null)return RS_OK;try{var c=document.createElement('canvas').getContext('2d');c.font='40px SaudiRiyal,sans-serif';var a=c.measureText('\u20C1').width,b=c.measureText('\u{10FFFF}').width;RS_OK=a>0&&Math.abs(a-b)>0.5}catch(e){RS_OK=false}return RS_OK}
+function curSym(){var c=S.cur;return((c==='ر.س'||c==='SAR'||c==='SR'||c==='\u20C1')&&riyalOk())?'\u20C1':c}
+function $$(n){return curSym()+' '+(+n).toFixed(2)}
 function toast(m){var e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(function(){e.style.display='none'},2200)}
 
 function RD(){return Object.assign({foot:true,mode:'shop',custom:'',wifi:false,wn:'',wp:'',offer:false,offerTxt:'',info:false,hours:'',phone:'',qr:true,qm:'view',l_maps:'',l_wa:'',l_fb:'',qs:60,dayReset:true,dayStart:0,welcome:true},S.rc||{})}
@@ -299,7 +302,7 @@ function rpSet(k,v){S.rp=S.rp||{};S.rp[k]=v;save();render();rqFlush()}
 function rpTest(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}rqAdd({k:'test',t:Date.now(),shop:S.shop});toast(L('টেস্ট পাঠানো হয়েছে, ইমেইল দেখুন','Test sent, check your email'))}
 function rpNow(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var d=tdy();H.filter(function(h){return day(h.t)==d}).forEach(function(h){rqAdd(rqSale(h))});rqAdd({k:'report',day:d,shop:S.shop});toast(L('আজকের রিপোর্ট পাঠানো হচ্ছে','Sending today\'s report'))}
 function rpHist(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}H.forEach(function(h){rqAdd(rqSale(h))});toast(L('সব পুরনো বিক্রি পাঠানো হচ্ছে','Sending all past sales'))}
-var APP_V='v9 · Search fix · ZATCA prep · 2026-10-31';
+var APP_V='v10 · ZATCA live-ready · Settings folders · 2026-10-31';
 function updApp(){if(!navigator.onLine){toast(L('আপডেটের জন্য নেট লাগবে','Internet needed to update'));return}toast(L('আপডেট হচ্ছে…','Updating…'));var p=[];try{if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}))}catch(e){}Promise.all(p).catch(function(){}).then(function(){location.reload()})}
 function verBox(){return '<div class="box"><div class="hd">'+I('set')+'<b>'+L('অ্যাপ ভার্সন','App version')+'</b></div><div class="dl"><span>'+APP_V+'</span><button class="pri" onclick="updApp()">'+L('এখনই আপডেট করুন','Update now')+'</button></div><div class="mute" style="font-size:12px">'+L('আপনার বিক্রি ও ডেটা মুছবে না। নতুন ফাইল GitHub-এ দেওয়ার পর এটা চাপলে নতুন ভার্সন চলে আসবে।','Your sales and data are kept. Press this after uploading new files to GitHub.')+'</div></div>'}
 function rpBox(){var r=S.rp||{};return '<div class="box"><div class="hd">'+I('cash')+'<b>'+L('দৈনিক রিপোর্ট (ইমেইল ও ড্রাইভ)','Daily report (email & Drive)')+'</b></div>'
@@ -466,7 +469,7 @@ function charge(){
  if(!CU)s.lc=true;
  H.push(s);
  dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,otp:otpDone[x.debtor.id]||false,no:s.sn,sid:s.no,items:items.map(function(i){return nm(i)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
- save();if(dueRows.length)dusave();cSale(s);rqAdd(rqSale(s));pubReceipt(s);cart={};disc='';recv='';pays=null;otpDone={};$('#cs').classList.remove('show');render();showRc(s.no);
+ save();if(dueRows.length)dusave();cSale(s);rqAdd(rqSale(s));pubReceipt(s);try{zatcaQueueSale(s)}catch(e){}cart={};disc='';recv='';pays=null;otpDone={};$('#cs').classList.remove('show');render();showRc(s.no);
 }
 
 function plainFoot(s){return footMsg(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
@@ -498,7 +501,7 @@ function rcHtml(s){
  h+='<div class="rt g"><span>'+t('total')+'</span><span>'+$$(s.total)+'</span></div>';
  pl.forEach(function(x){h+='<div class="rt py"><span>'+t(x.m)+(x.debtor?' · '+esc(x.debtor):'')+'</span><span>'+$$(x.a)+'</span></div>'});
  if(s.recv!=null&&(s.chg||0)>0)h+='<div class="rt py"><span>'+t('received')+'</span><span>'+$$(s.recv)+'</span></div><div class="rt py"><span>'+t('chg')+'</span><span>'+$$(s.chg)+'</span></div>';
- h+='<div class="ft">'+(r.qr?'<div class="qrw" style="--q:'+qz+'px">'+qrSvg(qrT)+'</div>':'')+'<div>'+footMsg(s)+'<div class="cid">'+esc(id)+'</div></div></div>';
+ h+=zatcaRcBlock(s);h+='<div class="ft">'+(r.qr?'<div class="qrw" style="--q:'+qz+'px">'+qrSvg(qrT)+'</div>':'')+'<div>'+footMsg(s)+'<div class="cid">'+esc(id)+'</div></div></div>';
  if(r.wifi&&(r.wn||r.wp))h+='<div class="xl">Wi-Fi: <b>'+esc(r.wn)+'</b>'+(r.wp?' · '+esc(r.wp):'')+'</div>';
  if(r.offer&&r.offerTxt)h+='<div class="xl">'+esc(r.offerTxt)+'</div>';
  if(r.info&&(r.hours||r.phone))h+='<div class="xl">'+[r.hours,r.phone].filter(Boolean).map(esc).join(' · ')+'</div>';
@@ -701,17 +704,78 @@ function zatcaBox(){
  +zi('street','Street / الشارع')+zi('building','Building number / رقم المبنى')
  +zi('district','District / الحي')+zi('city','City / المدينة')+zi('postalCode','Postal code / الرمز البريدي')
  +'<label>Invoice type / نوع الفاتورة</label><select onchange="zatcaSet(\'invoiceType\',this.value)"><option value="simplified" '+(z.invoiceType!=='standard'?'selected':'')+'>Simplified (B2C)</option><option value="standard" '+(z.invoiceType==='standard'?'selected':'')+'>Standard (B2B)</option></select>'
- +'<div id="zatcaStatusBox" class="mute" style="font-size:12px;margin-top:8px;white-space:pre-line">'+esc(z.statusText||'Sandbox only. Live Production is OFF. Press "Refresh ZATCA status" to read the server state.')+'</div>'
+ +'<div id="zatcaStatusBox" class="mute" style="font-size:12px;margin-top:8px;white-space:pre-line">'+esc(z.statusText||'Press "Refresh ZATCA status" to read the server state.')+'</div>'
+ +'<div class="box" style="margin-top:10px"><b>'+L('ZATCA সংযোগ','Connection to ZATCA')+' / الربط مع هيئة الزكاة</b><label>Environment</label><select id="zEnv"><option value="sandbox">Sandbox (test)</option><option value="simulation">Simulation (test)</option><option value="production">Production (LIVE)</option></select><label>OTP (Fatoora portal, 6 digits · Sandbox needs none)</label><input id="zOtp" type="text" inputmode="numeric" maxlength="6" name="zatca-otp" autocomplete="off" style="-webkit-text-security:disc" placeholder="••••••"><button style="width:100%;margin-top:8px" onclick="zatcaStep(\'onboard\')">1) Onboard (CSR + Compliance CSID)</button><button style="width:100%;margin-top:8px" onclick="zatcaStep(\'checks\')">2) Run compliance checks</button><button style="width:100%;margin-top:8px" onclick="zatcaStep(\'csid\')">3) Get Production CSID</button><button style="width:100%;margin-top:8px" onclick="zatcaStep(\'activate\')">4) Activate this environment</button><button class="'+(z.auto?'pri':'')+'" style="width:100%;margin-top:12px" onclick="zatcaToggleAuto()">'+(z.auto?'Auto-send invoices: ON':'Auto-send invoices: OFF')+'</button><div id="zQ" class="mute" style="font-size:12px;margin-top:6px"></div></div>'
  +'<div id="zatcaCheckResult" class="mute" style="font-size:12px;margin-top:8px">'+esc(z.checkMessage||'Save your profile, then run the server-side readiness check.')+'</div>'
  +'<button class="pri" style="width:100%;margin-top:10px" onclick="zatcaSave()">Save ZATCA business profile</button><button style="width:100%;margin-top:8px" onclick="zatcaCheck()">Check ZATCA setup readiness</button><button style="width:100%;margin-top:8px" onclick="zatcaStatus()">Refresh ZATCA status</button></div>'
 }
 function zatcaSet(k,v){S.zatca=S.zatca||{};S.zatca[k]=v;S.zatca.enabled=true;save()}
 function zatcaSave(){S.zatca=S.zatca||{};S.zatca.enabled=true;save();toast(L('ZATCA business profile saved','ZATCA business profile saved'));render()}
-async function zatcaStatus(){var el=$('#zatcaStatusBox');if(el)el.textContent='Reading server status…';try{if(!window.zatcaStatusServer)throw new Error('Firebase Functions client is unavailable');var r=await window.zatcaStatusServer();var l=r.lastSubmission;var t='Environment: '+r.environment+' (Production OFF)\nProfile: '+(r.profileReady?'ready':'incomplete'+(r.profileErrors&&r.profileErrors.length?' — '+r.profileErrors.join('; '):''))+'\nEGS onboarding: '+r.egsOnboarding+'\nCompliance CSID: '+r.complianceCsid+'\nCompliance checks: '+r.complianceChecks+'\nSandbox production CSID: '+r.productionCsidSandbox+'\nSDK validation: run on your computer (not done by the server)\nLast invoice: '+(l?l.status+(l.error?' — '+l.error:''):'none yet');S.zatca=S.zatca||{};S.zatca.statusText=t;save();if(el)el.textContent=t}catch(e){var m=e.message||String(e);if(el)el.textContent='ZATCA status unavailable: '+m}}
+/* ===== ZATCA: queue, status, receipt (Arabic first) ===== */
+var ZQ_KEY='zatca_q',ZR_KEY='zatca_r',zBusy=false;
+function zqLoad(){try{return JSON.parse(localStorage.getItem(ZQ_KEY)||'[]')}catch(e){return[]}}
+function zqSave(a){try{localStorage.setItem(ZQ_KEY,JSON.stringify(a))}catch(e){}}
+function zrLoad(){try{return JSON.parse(localStorage.getItem(ZR_KEY)||'{}')}catch(e){return{}}}
+function zrSet(no,o){var r=zrLoad();r[no]=Object.assign(r[no]||{},o);try{localStorage.setItem(ZR_KEY,JSON.stringify(r))}catch(e){}}
+function zName(i){var ok=function(x){x=String(x||'').trim();return x&&!/^[\u0980-\u09FF\s\d.,-]+$/.test(x)};return [i.ar,i.name,i.bn].find(ok)||'Item'}
+function zatcaSaleToPayload(s){var z=S.zatca||{};
+ if(z.invoiceType==='standard')return{blocked:'Standard (B2B) invoices need buyer details. Automatic sending supports Simplified only.'};
+ if(+S.tax!==15)return{blocked:'VAT must be 15% to send invoices to ZATCA.'};
+ var pm=s.pay==='Cash'?'10':s.pay==='Card'?'48':'1';
+ return{sale:{saleId:'S'+s.no+'-'+s.t,issuedAt:new Date(s.t).toISOString(),lines:s.items.map(function(i){return{name:zName(i),qty:i.qty,unitPriceExclVat:i.price}}),discount:+(+s.disc||0).toFixed(2),paymentMeansCode:pm}}}
+function zatcaQueueSale(s){var z=S.zatca||{};if(!z.auto)return;var p=zatcaSaleToPayload(s);
+ if(p.blocked){zrSet(s.no,{st:'blocked',msg:p.blocked});return}
+ var q=zqLoad();q.push({no:s.no,sale:p.sale});zqSave(q);zrSet(s.no,{st:'queued',saleId:p.sale.saleId});setTimeout(zatcaPump,300)}
+async function zatcaPump(){if(zBusy||!navigator.onLine||!window.zatcaCall||!CU)return;zBusy=true;
+ try{var q=zqLoad();
+  for(var k=0;k<q.length;){var it=q[k];
+   try{var r=await window.zatcaCall('zatcaSubmitInvoice',{sale:it.sale});
+    if(r.status==='InProgress'){k++;continue}
+    if(r.status==='Reported'||r.status==='Cleared')zrSet(it.no,{st:r.status,num:r.invoiceNumber,qr:r.qr,env:r.environment,msg:''});
+    else if(r.status==='Rejected')zrSet(it.no,{st:'rejected',num:r.invoiceNumber,env:r.environment,msg:r.reason||''});
+    else zrSet(it.no,{st:r.retryable?'retry':'failed',num:r.invoiceNumber,env:r.environment,msg:r.reason||''});
+    q.splice(k,1);zqSave(q)
+   }catch(e){var c=String((e&&e.code)||'');
+    if(/invalid-argument/.test(c)){zrSet(it.no,{st:'blocked',msg:e.message});q.splice(k,1);zqSave(q);continue}
+    if(/failed-precondition/.test(c)){zrSet(it.no,{st:'waiting',msg:e.message});break}
+    break}}
+  var rr=zrLoad(),ids=Object.keys(rr).filter(function(n){return rr[n].st==='retry'&&rr[n].saleId});
+  if(ids.length){try{var sv=await window.zatcaCall('zatcaInvoiceStatus',{saleIds:ids.map(function(n){return rr[n].saleId})});
+   ids.forEach(function(n){var x=sv.statuses[rr[n].saleId];if(x&&(x.status==='Reported'||x.status==='Cleared'))zrSet(n,{st:x.status,num:x.number,qr:x.qr,env:x.env,msg:''});else if(x&&x.status==='Rejected')zrSet(n,{st:'rejected',msg:x.error||''})})}catch(e){}}
+ }finally{zBusy=false;zatcaPanelRefresh()}}
+window.addEventListener('online',function(){zatcaPump()});setInterval(function(){zatcaPump()},60000);
+function zatcaPanelRefresh(){var e=$('#zQ');if(!e)return;var q=zqLoad().length,r=zrLoad(),c={};Object.keys(r).forEach(function(n){c[r[n].st]=(c[r[n].st]||0)+1});
+ e.textContent='Queue: '+q+' waiting · Reported/Cleared: '+((c.Reported||0)+(c.Cleared||0))+' · Retrying: '+(c.retry||0)+' · Rejected: '+(c.rejected||0)+' · Not sent: '+((c.blocked||0)+(c.waiting||0)+(c.failed||0))}
+function zatcaToggleAuto(){S.zatca=S.zatca||{};S.zatca.auto=!S.zatca.auto;save();render();if(S.zatca.auto)zatcaPump()}
+function zatcaRcBlock(s){var z=S.zatca||{},R=zrLoad(),r=R[s.no];if(!r&&!z.auto)return '';r=r||{};
+ var ok=(r.st==='Reported'||r.st==='Cleared'),test=r.env&&r.env!=='production',net=(+s.sub||0)-(+s.disc||0),tx=+s.tax||0;
+ var st=ok?'تم الإبلاغ ✓ / Reported':r.st==='rejected'?'مرفوضة / Rejected':(r.st==='blocked'||r.st==='failed')?'غير مرسلة / Not sent':'بانتظار الإبلاغ / Pending';
+ var h='<div class="xl" dir="rtl" style="text-align:center;font-weight:800">فاتورة ضريبية مبسطة<br><span dir="ltr">Simplified Tax Invoice</span></div>';
+ if(test)h+='<div class="xl" style="text-align:center;font-weight:700">نسخة تجريبية – ليست فاتورة ضريبية حقيقية<br>TEST ONLY – not a real tax invoice</div>';
+ h+='<div class="xl" dir="rtl">'+esc(z.sellerName||S.shop)+'<br>الرقم الضريبي / VAT No: <b dir="ltr">'+esc(z.vatNumber||'')+'</b>'+(z.crNumber?'<br>السجل التجاري / CR: <span dir="ltr">'+esc(z.crNumber)+'</span>':'')+'<br>'+esc([z.building,z.street,z.district,z.city,z.postalCode].filter(Boolean).join('، '))+'</div>';
+ h+='<div class="xl">رقم الفاتورة / Invoice No: <b>'+esc(r.num||('INV-'+s.sn))+'</b> · '+day(s.t)+'</div>';
+ h+='<div class="rt"><span>الإجمالي غير شامل الضريبة / Total (excl. VAT)</span><span>'+$$(net)+'</span></div><div class="rt"><span>ضريبة القيمة المضافة 15% / VAT 15%</span><span>'+$$(tx)+'</span></div><div class="rt g"><span>الإجمالي شامل الضريبة / Total (incl. VAT)</span><span>'+$$(s.total)+'</span></div>';
+ h+='<div class="xl" style="text-align:center">'+st+(r.msg&&!ok?' · '+esc(r.msg):'')+'</div>';
+ if(ok&&r.qr)h+='<div class="ft"><div class="qrw" style="--q:120px">'+qrSvg(r.qr)+'</div></div>';
+ return h}
+async function zatcaStep(step){var env=($('#zEnv')||{}).value||'sandbox',otp=(($('#zOtp')||{}).value||'').trim(),el=$('#zatcaStatusBox');
+ if(env==='production'&&!confirm('LIVE PRODUCTION: real tax records will be created. Continue? / بيئة حقيقية، هل تريد المتابعة؟'))return;
+ var map={onboard:'zatcaOnboard',checks:'zatcaRunComplianceChecks',csid:'zatcaGetProductionCsid',activate:'zatcaSetEnvironment'};
+ if(el)el.textContent='Working… ('+step+', '+env+')';
+ try{if(!window.zatcaCall)throw new Error('Firebase Functions client is unavailable');
+  var r=await window.zatcaCall(map[step],{environment:env,otp:otp,approveProduction:env==='production',confirm:true});
+  if($('#zOtp'))$('#zOtp').value='';
+  var t=step==='checks'?('Compliance checks: '+(r.pass?'PASSED':'FAILED')+'\n'+(r.results||[]).map(function(x){return x.kind+': HTTP '+x.http+' '+(x.status||'')+(x.errors&&x.errors.length?' — '+x.errors.map(function(e){return e.message||e.code||JSON.stringify(e)}).join('; '):'')}).join('\n')):(r.message||'Done');
+  if(el)el.textContent=t;toast(L('সম্পন্ন','Done'))
+ }catch(e){if($('#zOtp'))$('#zOtp').value='';if(el)el.textContent='Failed: '+(e.message||e)}}
+async function zatcaStatus(){var el=$('#zatcaStatusBox');if(el)el.textContent='Reading server status…';try{if(!window.zatcaStatusServer)throw new Error('Firebase Functions client is unavailable');var r=await window.zatcaStatusServer();var l=r.lastSubmission;
+ var t='Environment: '+r.environment+(r.live?' (LIVE)':' (test – not real)')+'\nProfile: '+(r.profileReady?'ready':'incomplete'+(r.profileErrors&&r.profileErrors.length?' — '+r.profileErrors.join('; '):''))+'\nEGS onboarding: '+r.egsOnboarding+'\nCompliance CSID: '+r.complianceCsid+'\nCompliance checks: '+r.complianceChecks+'\nProduction CSID: '+r.productionCsid+'\nReady to send invoices: '+(r.readyToSubmit?'yes':'no')+'\nRetrying on server: '+r.pendingRetry+'\nSDK validation: run on your computer (not done by the server)\nLast invoice: '+(l?l.status+(l.error?' — '+l.error:''):'none yet');
+ S.zatca=S.zatca||{};S.zatca.statusText=t;save();if(el)el.textContent=t;zatcaPanelRefresh()}catch(e){var m=e.message||String(e);if(el)el.textContent='ZATCA status unavailable: '+m}}
 async function zatcaCheck(){var el=$('#zatcaCheckResult');if(el)el.textContent=L('সার্ভার পরীক্ষা হচ্ছে…','Checking server readiness…');try{if(!window.zatcaCheckServer)throw new Error('Firebase Functions client is unavailable');var r=await window.zatcaCheckServer();var msg=(r.missing&&r.missing.length?'Missing: '+r.missing.join(', '):'Profile fields look complete.')+' '+(r.message||'');S.zatca=S.zatca||{};S.zatca.checkMessage=msg;save();if(el)el.textContent=msg;toast(L('ZATCA প্রস্তুতি পরীক্ষা সম্পন্ন','ZATCA readiness check completed'))}catch(e){var msg=e.message||String(e);if(el)el.textContent=msg;toast(L('ZATCA সার্ভার পরীক্ষা ব্যর্থ','ZATCA server check failed')+': '+msg)}}
 function vSet0(){
- return zatcaBox()+'<div class="box"><label>'+t('shop')+'</label><input value="'+esc(S.shop)+'" onchange="S.shop=this.value;save();render()"><label>'+t('cur')+'</label><input value="'+esc(S.cur)+'" onchange="S.cur=this.value;save();render()"><label>'+t('taxp')+'</label><input type="number" inputmode="decimal" value="'+S.tax+'" onchange="S.tax=+this.value||0;save();render()"><div class="mute" style="font-size:12px;margin-top:7px">'+L('সৌদি আরবে VAT নিবন্ধিত প্রতিষ্ঠানের সাধারণ হার ১৫%। আপনার VAT নিবন্ধন নিশ্চিত হলে তবেই প্রয়োগ করুন।','Saudi Arabia standard VAT rate is 15% for VAT-registered businesses. Apply only if your business is VAT registered.')+'</div><button style="margin-top:8px" onclick="S.tax=15;save();render()">'+L('VAT ১৫% সেট করুন','Set VAT to 15%')+'</button></div>'
- +'<div class="box"><b>'+t('data')+'</b><p class="mute">'+esc(CE||'')+'</p><button onclick="FB.out()">'+L('লগআউট','Log out')+'</button><p class="mute">'+t('note')+'</p><button class="bad" onclick="wipe()">'+(arm?t('erase2'):t('erase'))+'</button></div>'
+ return vSetShop()+vSetAcct()}
+function vSetShop(){return '<div class="box"><label>'+t('shop')+'</label><input value="'+esc(S.shop)+'" onchange="S.shop=this.value;save();render()"><label>'+t('cur')+'</label><input value="'+esc(S.cur)+'" onchange="S.cur=this.value;save();render()"><label>'+t('taxp')+'</label><input type="number" inputmode="decimal" value="'+S.tax+'" onchange="S.tax=+this.value||0;save();render()"><div class="mute" style="font-size:12px;margin-top:7px">'+L('সৌদি আরবে VAT নিবন্ধিত প্রতিষ্ঠানের সাধারণ হার ১৫%। আপনার VAT নিবন্ধন নিশ্চিত হলে তবেই প্রয়োগ করুন।','Saudi Arabia standard VAT rate is 15% for VAT-registered businesses. Apply only if your business is VAT registered.')+'</div><button style="margin-top:8px" onclick="S.tax=15;save();render()">'+L('VAT ১৫% সেট করুন','Set VAT to 15%')+'</button></div>'}
+function vSetAcct(){return '<div class="box"><b>'+t('data')+'</b><p class="mute">'+esc(CE||'')+'</p><button onclick="FB.out()">'+L('লগআউট','Log out')+'</button><p class="mute">'+t('note')+'</p><button class="bad" onclick="wipe()">'+(arm?t('erase2'):t('erase'))+'</button></div>'
 }
 
 function wipe(){ask(L('সব বিক্রির হিসাব মুছে ফেলতে চান?','Delete ALL sales records?'),function(){H.forEach(function(s){cDel(s.no)});H=[];save();render()})}
@@ -719,8 +783,16 @@ function wipe(){ask(L('সব বিক্রির হিসাব মুছে
 function fontBox(){var m='md';try{m=localStorage.getItem('pos_fsz')||'md'}catch(e){}
  return '<div class="box"><div class="hd">'+I('sun')+'<b>'+L('ফন্ট সাইজ','Font size')+'</b></div><div style="display:flex;gap:8px">'+[['sm',L('ছোট','Small')],['md',L('মাঝারি','Medium')],['lg',L('বড়','Large')],['xl',L('অনেক বড়','XL')]].map(function(x){return '<button style="flex:1" class="'+(m==x[0]?'pri':'')+'" onclick="setFsz(\''+x[0]+'\')">'+x[1]+'</button>'}).join('')+'</div></div>'}
 function setFsz(v){if(v=='md')document.documentElement.removeAttribute('data-fsz');else document.documentElement.setAttribute('data-fsz',v);try{localStorage.setItem('pos_fsz',v)}catch(e){}render()}
-function sec(ttl,html,open){return '<details'+(open?' open':'')+' style="margin:14px 0"><summary style="cursor:pointer;font-weight:800;font-size:16px;padding:10px 2px;color:var(--ink)">'+ttl+'</summary><div style="margin-top:4px">'+html+'</div></details>'}
-function vSet(){return sec(L('থীম ও ফন্ট','Theme & font'),themeBox()+fontBox(),true)+sec(L('রসিদ, স্বাগতম ও দিনের হিসাব','Receipt, welcome & daily accounts'),rcBox()+accBox())+sec(L('দোকান, ব্যাকআপ ও লগইন','Shop, backup & login'),verBox()+otpBox()+vSet0()+rpBox()+bkBox())}
+var SECO={};
+function sec(ttl,html,open,key){key=key||('k'+ttl.replace(/[^A-Za-z0-9]/g,'').slice(0,14)+ttl.length);var o=(key in SECO)?SECO[key]:!!open;return '<details'+(o?' open':'')+' ontoggle="SECO[\''+key+'\']=this.open" style="margin:10px 0;border:1px solid var(--line,rgba(128,128,128,.25));border-radius:14px;padding:2px 12px"><summary style="cursor:pointer;font-weight:800;font-size:16px;padding:12px 2px;color:var(--ink)">'+ttl+'</summary><div style="margin-top:4px">'+html+'</div></details>'}
+function vSet(){return sec(L('থীম ও ফন্ট','Theme & font'),themeBox()+fontBox(),true,'th')
+ +sec(L('রসিদ, স্বাগতম ও দিনের হিসাব','Receipt, welcome & daily accounts'),rcBox()+accBox(),false,'rc')
+ +sec('🇸🇦 ZATCA · '+L('ই-ইনভয়েস','E-invoicing'),zatcaBox(),false,'zt')
+ +sec(L('দোকান ও VAT','Shop & VAT'),vSetShop()+otpBox(),false,'shop')
+ +sec(L('দৈনিক রিপোর্ট','Daily report'),rpBox(),false,'rp')
+ +sec(L('ব্যাকআপ','Backup'),bkBox(),false,'bk')
+ +sec(L('লগইন ও একাউন্ট','Login & account'),vSetAcct(),false,'acct')
+ +sec(L('অ্যাপ ভার্সন','App version'),verBox(),false,'ver')}
 
 function vBuy(){var opts=P.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+' / '+esc(p.code||'')+'</option>'}).join('');return '<div class="box"><b>'+L('নতুন ক্রয় এন্ট্রি','New purchase entry')+'</b><label>'+L('সরবরাহকারী','Supplier')+'</label><input id="buySupplier" placeholder="'+L('সরবরাহকারীর নাম','Supplier name')+'"><label>'+L('পণ্য','Product')+'</label><select id="buyProduct">'+opts+'</select><label>'+L('পরিমাণ','Quantity')+'</label><input id="buyQty" type="number" min="1" value="1"><label>'+L('প্রতি ইউনিট ক্রয়মূল্য (SAR)','Unit purchase cost (SAR)')+'</label><input id="buyCost" type="number" min="0" step="0.01" placeholder="0.00"><button class="pri" style="width:100%;margin-top:12px" onclick="savePurchase()">'+L('ক্রয় সেভ করুন ও স্টক বাড়ান','Save purchase & increase stock')+'</button></div><div class="box"><b>'+L('ক্রয়ের ইতিহাস','Purchase history')+'</b>'+(PUR.length?PUR.slice().sort(function(a,b){return b.t-a.t}).map(function(x){return '<div class="row"><div><b>'+esc(x.product)+'</b><div class="mute">'+esc(x.supplier)+' · '+new Date(x.t).toLocaleDateString(S.lang=='ar'?'ar-SA':'en-GB')+' · '+x.qty+' × '+$(x.cost)+'</div></div><b>'+$(x.total)+'</b></div>'}).join(''):'<div class="empty">'+L('এখনো কোনো ক্রয় নেই','No purchases yet')+'</div>')+'</div>'}
 function savePurchase(){try{var pe=$('#buyProduct'),se=$('#buySupplier'),qe=$('#buyQty'),ce=$('#buyCost');if(!pe||!se||!qe||!ce){toast(L('ক্রয়ের ফর্ম আবার খুলুন','Please reopen the purchase form'));return}var p=gp(pe.value),supplier=se.value.trim(),qty=Number(qe.value),cost=Number(ce.value);if(!p||!supplier||!Number.isFinite(qty)||qty<=0||!Number.isFinite(cost)||cost<0){toast(L('সরবরাহকারী, পণ্য, সঠিক পরিমাণ ও ক্রয়মূল্য দিন','Enter supplier, product, valid quantity and purchase cost'));return}var stock=Number(p.stock);if(p.stock===''||p.stock==null||!Number.isFinite(stock))stock=0;p.stock=stock+qty;p.cost=cost;var now=Date.now();PUR.push({id:now,t:now,supplier:supplier,product:p.name,productId:p.id,qty:qty,cost:cost,total:+(qty*cost).toFixed(2)});save();render();toast(L('ক্রয় সেভ হয়েছে, স্টক বেড়েছে','Purchase saved and stock increased'))}catch(e){console.error('Purchase save failed:',e);toast(L('ক্রয় সেভ হয়নি: ','Purchase was not saved: ')+(e&&e.message?e.message:''))}}
@@ -1049,7 +1121,7 @@ function otpOk(){var o=otpS,c=otpCur().c,v=($('#otpin').value||'').trim();
  if(o.i<o.q.length){o.qr=false;otpFresh();otpView();return}
  otpDone=o.done;otpPass=true;otpS=null;closeDs();window.charge()}
 
-function navHtml(){var tabs=[['sell',L('বিক্রি','Sell'),'sell'],['stock',L('স্টক','Stocks'),'sell'],['buy',L('ক্রয়','Purchases'),'sell'],['due',t('dueTab'),'cash'],['dash',L('ড্যাশবোর্ড','Dashboard'),'dash'],['set',L('সেটিংস','Settings'),'set'],['kh',L('খাতা','Khata'),'book']];return '<nav id="nav">'+tabs.map(function(x){return '<button type="button" class="'+(view==x[0]?'on':'')+'" onclick="window.go(\''+x[0]+'\')">'+I(x[2])+'<span>'+x[1]+'</span></button>'}).join('')+'</nav>'}
+function navHtml(){var tabs=[['sell',L('বিক্রি','Sell'),'sell'],['stock',L('স্টক','Stocks'),'sell'],['buy',L('ক্রয়','Purchases'),'sell'],['due',t('dueTab'),'cash'],['dash',L('ড্যাশবোর্ড','Dashboard'),'dash'],['set',L('সেটিংস','Settings'),'set']];return '<nav id="nav">'+tabs.map(function(x){return '<button type="button" class="'+(view==x[0]?'on':'')+'" onclick="window.go(\''+x[0]+'\')">'+I(x[2])+'<span>'+x[1]+'</span></button>'}).join('')+'</nav>'}
 function info(){var e=$('#ib');if(!e)return;var l=H.length?H.reduce(function(a,x){return x.t>a.t?x:a}):null,d=new Date();
  e.innerHTML='<button class="lb" '+(l?'onclick="showRc('+l.no+')"':'disabled')+'>'+I('print')+' '+L('শেষ ইনভয়েস','Last invoice')+(l?' #'+l.sn+' · '+$$(l.total):'')+'</button>'+navHtml()+'<div style="display:flex;align-items:center;gap:10px"><button class="thm" aria-label="Theme" onclick="togTheme()">'+I(curTheme()=='dark'?'sun':'moon')+'</button><div class="clk"><b>'+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</b><span>'+d.toLocaleDateString(S.lang=='ar'?'ar-SA':S.lang=='bn'?'bn-BD':'en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+'</span></div></div>'}
 
@@ -1058,6 +1130,7 @@ function lastInv(){var s=H.slice().sort(function(a,b){return b.t-a.t})[0];if(s)s
 function ask(msg,fn,yes){var e=$('#cf');if(!e){e=document.createElement('div');e.id='cf';e.className='ov';e.style.alignItems='center';e.style.zIndex=40;document.body.appendChild(e)}
  window.__cf=fn;e.innerHTML='<div class="sheet" style="border-radius:20px;max-width:340px;margin:16px;text-align:center"><div style="font-size:17px;font-weight:700">'+esc(msg)+'</div><div class="mute" style="margin-top:4px">'+L('এটা আর ফেরানো যাবে না','This cannot be undone')+'</div><div style="display:flex;gap:10px;margin-top:16px"><button style="flex:1" onclick="$(\'#cf\').classList.remove(\'show\')">'+L('না','No')+'</button><button class="bad2" style="flex:1" onclick="$(\'#cf\').classList.remove(\'show\');window.__cf()">'+(yes||L('হ্যাঁ, মুছুন','Yes, delete'))+'</button></div></div>';e.classList.add('show')}
 
+function splash(){$('#lgn').classList.add('show');$('#lb').innerHTML='<div style="display:flex;justify-content:center;margin:14px 0 6px">'+LOGO.replace('width="40" height="40"','width="64" height="64"')+'</div><p class="mute" style="text-align:center;margin:6px 0 14px">…</p>'}
 function showLogin(msg,em){
  $('#lgn').classList.add('show');
  $('#lb').innerHTML='<div style="display:flex;justify-content:center;margin-bottom:8px">'+LOGO.replace('width="40" height="40"','width="64" height="64"')+'</div><h2 style="margin:0 0 4px;text-align:center">'+esc(S.shop)+'</h2><p class="mute" style="text-align:center">'+L('লগইন করুন, সব ডিভাইসে একই হিসাব পাবেন','Log in to see the same data on every device')+'</p>'+(msg?'<p style="color:var(--warn);font-weight:600;text-align:center">'+esc(msg)+'</p>':'')+'<label>Email</label><input id="le" type="email" autocomplete="email" value="'+esc(em||'')+'"><label>'+L('পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)','Password (min 6 characters)')+'</label><input id="lp" type="password" autocomplete="current-password"><div style="display:flex;gap:10px;margin-top:14px"><button class="pri" style="flex:1" onclick="doAuth(0)">'+L('লগইন','Log in')+'</button><button style="flex:1" onclick="doAuth(1)">'+L('নতুন একাউন্ট','Sign up')+'</button></div><button style="width:100%;margin-top:10px;border:0;background:none;color:var(--ac)" onclick="doReset()">'+L('পাসওয়ার্ড ভুলে গেছেন?','Forgot password?')+'</button><div class="lg" style="width:max-content;margin:8px auto 0"><button class="'+(S.lang=='en'?'on':'')+'" onclick="S.lang=\'en\';showLogin()">English</button><button class="'+(S.lang=='ar'?'on':'')+'" onclick="S.lang=\'ar\';showLogin()">العربية</button><button class="'+(S.lang=='bn'?'on':'')+'" onclick="S.lang=\'bn\';showLogin()">বাংলা</button><button class="'+(S.lang=='bi'?'on':'')+'" onclick="S.lang=\'bi\';showLogin()">বাংলা+EN</button></div><p class="mute" style="font-size:11px;text-align:center;margin:10px 0 0">Musafir Super Market POS · '+esc((window.FIREBASE_CONFIG||{}).projectId||'')+'</p>';
@@ -1104,14 +1177,14 @@ function startAuth(){FB.watch(function(u){FB.stop();
  if(!u){CU=null;ready=false;upl=false;showLogin();return}
  CU=u.uid;CE=u.email||'';var lu=null;try{lu=localStorage.getItem('pos_uid');localStorage.setItem('pos_uid',CU)}catch(e){}
  if(lu&&lu!==CU){H=[];P=[];IMG={};S={shop:'Musafir Super Market',cur:'ر.س',tax:0,lang:S.lang}}
- $('#lgn').classList.remove('show');upl=false;ready=false;sy('off');render();
+ $('#lgn').classList.remove('show');$('#lb').innerHTML='';upl=false;ready=false;sy('off');render();
  FB.listen('pos',onPos,onErr);FB.listen('sales',onSales,onErr)
 })}
 
 function hasLocal(){try{return !!localStorage.getItem('pos_uid')}catch(e){return false}}
-function enterLocal(){$('#lgn').classList.remove('show');CU=null;sy('off');render();toast(L('অফলাইন মোড: বিক্রি ফোনে জমা হবে','Offline mode: sales kept on device'))}
+function enterLocal(){$('#lgn').classList.remove('show');$('#lb').innerHTML='';CU=null;sy('off');render();toast(L('অফলাইন মোড: বিক্রি ফোনে জমা হবে','Offline mode: sales kept on device'))}
 
-function boot(){if(PUBR){startPub();return}showLogin();if(!cfgOK){sy('cfg');$('#lb').innerHTML='<h2>Firebase setup</h2><p>index.html এর শুরুতে <b>FIREBASE_CONFIG</b> বসান।</p>';return}
+function boot(){if(PUBR){startPub();return}if(hasLocal()&&cfgOK)splash();else showLogin();if(!cfgOK){sy('cfg');$('#lb').innerHTML='<h2>Firebase setup</h2><p>index.html এর শুরুতে <b>FIREBASE_CONFIG</b> বসান।</p>';return}
  if(window.FB){startAuth();return}window.onFB=startAuth;setTimeout(function(){if(!window.FB&&hasLocal()){enterLocal();return}if(!window.FB){showLogin(L('Firebase লোড হয়নি। নেট চেক করে পেজ রিফ্রেশ করুন।','Firebase failed to load. Refresh page.'))}},6000)}
 
 function greet(h){return h>=5&&h<11?L('সুপ্রভাত','Good morning'):h>=11&&h<16?L('শুভ দুপুর','Good afternoon'):h>=16&&h<19?L('শুভ সন্ধ্যা','Good evening'):L('শুভ রাত্রি','Good night')}
@@ -1214,6 +1287,7 @@ import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/10.
 if(!/PASTE/.test(window.FIREBASE_CONFIG.apiKey)){
  const app=initializeApp(window.FIREBASE_CONFIG),auth=getAuth(app),functions=getFunctions(app,'me-central1'),db=(function(){try{return initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){return getFirestore(app)}})();let un=[];
  const ref=(c,i)=>doc(db,'users',auth.currentUser.uid,c,i);
+ window.zatcaCall=async function(name,data){const call=httpsCallable(functions,name);return (await call(data||{})).data};
  window.zatcaStatusServer=async function(){try{const call=httpsCallable(functions,'zatcaStatus');return (await call()).data}catch(e){throw new Error(e&&e.message?e.message:'ZATCA status unavailable')}};
  window.zatcaCheckServer=async function(){try{const call=httpsCallable(functions,'zatcaCheckSetup');return (await call()).data}catch(e){throw new Error(e&&e.message?e.message:'ZATCA setup checker unavailable')}};
  window.FB={
