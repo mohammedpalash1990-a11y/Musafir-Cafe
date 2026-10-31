@@ -350,7 +350,7 @@ function togTheme(){setTheme(curTheme()=='dark'?'light':'dark')}
 try{window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',function(){applyPal()})}catch(e){}
 
 function render(){
- fixSn();document.documentElement.lang=S.lang=='ar'?'ar':S.lang=='en'?'en':'bn';document.document.documentElement.dir=S.lang=='ar'?'rtl':'ltr';$('#shop').textContent=S.shop;document.title=S.shop;sy();
+ fixSn();document.documentElement.lang=S.lang=='ar'?'ar':S.lang=='en'?'en':'bn';document.documentElement.dir=S.lang=='ar'?'rtl':'ltr';$('#shop').textContent=S.shop;document.title=S.shop;sy();
  $('#lg').innerHTML=['en','ar','bn','bi'].map(function(l){return '<button class="'+(S.lang==l?'on':'')+'" onclick="setLang(\''+l+'\')">'+(l=='bn'?'বাং':l=='en'?'EN':l=='ar'?'عربي':'বাং+EN')+'</button>'}).join('');
  var td=H.filter(function(h){return day(h.t)==tdy()}).reduce(function(a,h){return a+h.total},0);
  $('#today').textContent=t('today')+' '+$$(td);
