@@ -7,7 +7,9 @@ MUSAFIR SUPER MARKET POS
 -----------------
 - Firebase Email/Password authentication; আগের Firebase project-এর authenticated user data path ব্যবহার করে।
 - পণ্য যোগ/সম্পাদনা, English / Bangla / Arabic নাম, barcode/SKU, ক্রয়মূল্য, বিক্রয়মূল্য, category, stock এবং ছবি।
-- USB/Bluetooth keyboard-type barcode scanner: scanner barcode লিখে Enter পাঠালে পণ্য কার্টে যোগ হয়।
+- Barcode workflow: exact SKU/barcode scan করলে পণ্য কার্টে যোগ হয়; code না মিললে search results-এ matching products দেখায়।
+- Wired USB এবং Bluetooth keyboard-wedge scanner: দুটোই keyboard input হিসেবে কাজ করে; POS search box-এ focus রেখে scan করুন (scanner Enter suffix পাঠাবে)।
+- Supported browser/device-এ camera barcode scan (BarcodeDetector API) আছে; HTTPS camera permission প্রয়োজন। Unsupported browser হলে USB/Bluetooth scanner ব্যবহার করুন।
 - Sales, receipt, discount, manually configured VAT, split payments, due/customer ledger এবং stock deduction।
 - Purchase entry: supplier name, product, quantity এবং unit purchase cost; purchase save করলে stock বৃদ্ধি পায় এবং purchase history সংরক্ষিত হয়।
 - Existing expenses / Khata, sales reports, CSV copy, JSON backup / restore.
@@ -20,8 +22,8 @@ Firestore data
 Saudi VAT / ZATCA সতর্কতা
 ------------------------
 - Saudi Arabia-তে standard VAT rate 15%; VAT-registered business-এর ক্ষেত্রে প্রযোজ্য। VAT registration নিশ্চিত না করে VAT charge করবেন না। Settings থেকে VAT rate হাতে সেট করা যায়; 15% shortcut আছে।
-- Settings-এর ZATCA section-এ seller profile, VAT number, CR, address এবং invoice type সংরক্ষণ করা যায়।
-- এটি এখনো ZATCA FATOORA-তে connected বা certified নয়। UBL 2.1 invoice XML, cryptographic stamp, full TLV QR, CSID onboarding, Reporting/Clearance API, retry/idempotency এবং official SDK/Sandbox end-to-end test সম্পূর্ণ না হওয়া পর্যন্ত এই POS-এর receipt-কে ZATCA-compliant tax invoice হিসেবে ব্যবহার করবেন না।
+- Settings-এর ZATCA section-এ seller profile, VAT number, CR, address এবং invoice type সংরক্ষণ করা যায়; `zatcaCheckSetup` callable function দিয়ে server-side profile readiness check করা যায়।
+- এটি এখনো ZATCA FATOORA-তে connected বা certified নয়। Readiness checker শুধু profile field পরীক্ষা করে; invoice submit করে না। UBL 2.1 invoice XML, cryptographic stamp, full TLV QR, CSID onboarding, Reporting/Clearance API, retry/idempotency এবং official SDK/Sandbox end-to-end test সম্পূর্ণ না হওয়া পর্যন্ত এই POS-এর receipt-কে ZATCA-compliant tax invoice হিসেবে ব্যবহার করবেন না।
 - VAT number, CR, address এবং invoice requirements আপনার accountant / ZATCA advisor-এর সঙ্গে যাচাই করুন।
 
 প্রকাশ / পরীক্ষা
