@@ -1,31 +1,36 @@
-# Musafir POS — Saudi ZATCA FATOORA integration work
+# Saudi VAT and ZATCA FATOORA — Musafir Super Market POS
 
-## Current state in this package
-- Added a bilingual Arabic/English ZATCA business-profile panel under Settings.
-- The profile is stored inside the existing user's `pos/settings` document, using the existing Firebase account.
-- Added a Firebase callable function `zatcaCheckSetup` in `functions/index.js`. It checks profile completeness only.
-- No FATOORA credentials, OTP, private key or certificate are stored in browser code.
+## Current application status
 
-## Important: not production compliant yet
-This is an integration foundation, NOT a completed or approved ZATCA integration. Do not issue this app's current receipt as a ZATCA-compliant tax invoice based only on this patch. It does not yet generate the final UBL 2.1 XML, apply the EGS cryptographic stamp, create the complete ZATCA TLV QR, call Reporting/Clearance endpoints, or handle ZATCA response/retry states.
+The POS includes a ZATCA business-profile form in Settings. It can store seller legal name, VAT registration number, CR number, address and invoice type in the signed-in user's existing POS settings document.
 
-## Next implementation steps
-1. Confirm the taxpayer's VAT registration and the ZATCA Phase 2 integration notification / applicable wave.
-2. Complete FATOORA EGS onboarding and obtain the correct CSID(s) for the required functionality map (simplified, standard, or both).
-3. Implement the current ZATCA XML implementation standard and security features using the official developer specifications and Compliance & Enablement SDK.
-4. Implement server-side invoice sequencing, UUID, previous-invoice hash chain, XML canonicalization/hash/signature, QR TLV and immutable audit logs.
-5. For Standard invoices/notes, implement Clearance; for Simplified invoices/notes, implement Reporting, with response validation and retry-safe idempotency.
-6. Validate generated invoices with the official ZATCA SDK, then run Sandbox onboarding and end-to-end tests before production credentials are enabled.
+**This is profile storage only. It is not a ZATCA integration or certification.** There is no deployed zatcaCheckSetup callable function in this repository, no CSID/certificate onboarding, no signed UBL 2.1 invoice generation, no complete TLV QR, and no Reporting/Clearance API connection. Do not describe receipts from this application as ZATCA-compliant tax invoices.
 
-## Firebase deployment (not run)
-From this folder's parent project root, initialize/configure Firebase Functions if not already configured, then install dependencies in `functions/` and deploy only after reviewing the existing Firebase project configuration. This package deliberately does not include a Firebase CLI config because the existing repository's deployment setup has not been provided.
+## Saudi requirements to account for
 
-## Sensitive setup
-Never paste ERAD password, OTP, CSID secret, private key or certificate into chat or frontend JavaScript. Store production secrets only in an approved server-side secret store (e.g. Google Secret Manager / Firebase Functions secrets) with least-privilege access.
+- ZATCA describes Phase 1 (Generation) as enforceable from 4 December 2021 for taxpayers subject to the e-invoicing regulation.
+- Phase 2 (Integration) has been rolling out in waves since 1 January 2023. ZATCA notifies targeted taxpayers at least six months before their integration date. Check the taxpayer's own notification; do not assume every business has the same deadline.
+- ZATCA states that human-readable invoice data fields must be in Arabic. An invoice may also include English (bilingual).
+- Standard VAT is 15%; some supplies may be zero-rated. Apply the correct tax treatment to the actual supply and the business's VAT registration status. The POS VAT rate is manually configurable and should not be treated as tax advice.
 
-## Official references
-- ZATCA Developer Portal: https://zatca.gov.sa/en/E-Invoicing/SystemsDevelopers/Pages/default.aspx
-- E-Invoice specifications: https://www.zatca.gov.sa/en/e-invoicing/systemsdevelopers/pages/e-invoice-specifications.aspx
-- Simplified technical guide: https://www.zatca.gov.sa/en/E-Invoicing/SystemsDevelopers/Pages/Simplified-technical-guide.aspx
+## Required engineering before production
+
+1. Confirm the taxpayer's VAT registration, business details, invoice types and Phase 2 wave.
+2. Complete FATOORA EGS onboarding and obtain the correct CSID(s) for the required functionality map.
+3. Implement ZATCA's current XML implementation standard, invoice UUID, invoice sequencing, previous-invoice hash chain, XML canonicalization/hash/signature, cryptographic stamp, QR TLV and immutable audit records.
+4. Implement Reporting for Simplified invoices and Clearance for Standard invoices, including response validation, retries and idempotency.
+5. Validate invoices using the official ZATCA SDK and Sandbox. Complete the relevant compliance and simulation tests before production credentials are enabled.
+6. Store secrets only server-side in a suitable secret manager. Never put ERAD passwords, OTPs, CSID secrets, private keys or certificates in browser JavaScript or chat.
+
+## Official ZATCA references
+
+- Roll-out phases: https://zatca.gov.sa/en/E-Invoicing/Introduction/Pages/Roll-out-phases.aspx
+- E-invoicing FAQ (including Arabic invoice language requirement): https://zatca.gov.sa/en/E-Invoicing/Introduction/FAQ/Pages/default.aspx
+- Standard VAT rate FAQ: https://zatca.gov.sa/en/HelpCenter/FAQs/Pages/FAQArchiveEservices.aspx?page=Tax-FAQs-9
+- E-invoicing implementation rules and specifications: https://zatca.gov.sa/en/RulesRegulations/Taxes/Pages/ConReqTech.aspx
+- Developer portal: https://zatca.gov.sa/en/E-Invoicing/SystemsDevelopers/Pages/default.aspx
 - Compliance & Enablement SDK: https://www.zatca.gov.sa/en/E-Invoicing/SystemsDevelopers/ComplianceEnablementToolbox/Pages/DownloadSDK.aspx
-- ZATCA FAQ: https://www.zatca.gov.sa/en/E-Invoicing/Introduction/FAQ/Pages/default.aspx
+
+## Deployment status
+
+No Firebase Functions or ZATCA service has been deployed by this repository update. Review the existing Firebase project, create a secure server-side integration, and test it in Sandbox before any production deployment.
