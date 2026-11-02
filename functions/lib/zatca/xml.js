@@ -44,8 +44,11 @@ function computeTotals(inv) {
 
 function party(inv) {
   const s = inv.seller;
+  const identification = String(s.crNumber || '').trim()
+    ? raw('cac:PartyIdentification', el('cbc:ID', String(s.crNumber).trim(), { schemeID: 'CRN' }))
+    : '';
   return raw('cac:AccountingSupplierParty', raw('cac:Party',
-    raw('cac:PartyIdentification', el('cbc:ID', s.crNumber || '', { schemeID: 'CRN' })) +
+    identification +
     raw('cac:PostalAddress', el('cbc:StreetName', s.street) + el('cbc:BuildingNumber', s.building) +
       el('cbc:CitySubdivisionName', s.district) + el('cbc:CityName', s.city) + el('cbc:PostalZone', s.postalCode) +
       raw('cac:Country', el('cbc:IdentificationCode', 'SA'))) +
