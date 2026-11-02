@@ -47,9 +47,22 @@ test('accepts a Base64 SHA-256 digest and rejects hexadecimal form', () => {
   assert.equal(isSha256Base64('not-a-hash'), false);
 });
 
-test('holds invoices when POS line VAT category and rate are missing', () => {
-  const result = assessSaleForZatca(sale, settings);
-  assert.ok(result.reasons.some((reason) => reason.includes('explicit ZATCA VAT category')));
+test('inherits global Standard-rated 15% VAT when product tax overrides are absent', () => {
+  const ordinarySale = {
+    ...sale,
+    sub: 100,
+    disc: 0,
+    tax: 15,
+    total: 115,
+    vatInclusive: false,
+    vatEnabled: true,
+    vatRate: 15,
+    zatca: { documentType: 'simplified' },
+    items: [{ name: 'Coffee', qty: 1, price: 100 }]
+  };
+  const result = assessSaleForZatca(ordinarySale, settings);
+  assert.equal(result.status, 'awaiting_egs');
+  assert.ok(!result.reasons.some((reason) => reason.includes('tax override is invalid')));
 });
 
 test('detects inconsistent line subtotal and sale total arithmetic', () => {
@@ -88,7 +101,7 @@ test('reconciles a 15% VAT-inclusive POS price without adding VAT twice', () => 
     vatInclusive: true,
     vatEnabled: true,
     vatRate: 15,
-    items: [{ name: 'Coffee', qty: 1, price: 9.90, zatcaVatCategory: 'S', zatcaVatRate: 15 }],
+    items: [{ name: 'Coffee', qty: 1, price: 9.90 }],
     zatca: { documentType: 'simplified' }
   };
   const result = assessSaleForZatca(inclusiveSale, settings);

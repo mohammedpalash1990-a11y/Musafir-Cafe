@@ -387,11 +387,15 @@ exports.zatcaGenerateInvoice = onCall({
   if (!privateKeyPem) throw new HttpsError('failed-precondition', 'Configure ZATCA_EGS_PRIVATE_KEY in Firebase Secret Manager.');
 
   const lines = (sale.items || []).map((item, index) => {
-    const category = String(item.zatcaVatCategory || '').toUpperCase();
-    const rate = Number(item.zatcaVatRate);
+    // The global POS setting is the default: no per-product VAT entry is
+    // required for standard Saudi menu items. Explicit special-category
+    // overrides are deliberately rejected by this 15%-only EGS path.
+    const category = String(item.zatcaVatCategory || 'S').toUpperCase();
+    const rawRate = item.zatcaVatRate;
+    const rate = rawRate === null || rawRate === undefined || rawRate === '' ? Number(sale.vatRate || 15) : Number(rawRate);
     const grossUnitPrice = Number(item.price);
     if (category !== 'S' || rate !== 15 || !Number.isFinite(grossUnitPrice) || grossUnitPrice < 0) {
-      throw new HttpsError('failed-precondition', `Sale line ${index + 1} must use the automatic Standard-rated 15% VAT classification.`);
+      throw new HttpsError('failed-precondition', `Sale line ${index + 1} must use the global Standard-rated 15% VAT setting or be reviewed for a special tax treatment.`);
     }
     return {
       name: String(item.name || '').trim(),
