@@ -333,7 +333,7 @@ exports.zatcaQueueSale = onDocumentCreated({
 exports.zatcaGenerateInvoice = onCall({
   region: REGION,
   timeoutSeconds: 60,
-  secrets: [ZATCA_EGS_PRIVATE_KEY, ZATCA_ONBOARDING_ENCRYPTION_KEY, ZATCA_PROD_TOKEN]
+  secrets: [ZATCA_EGS_PRIVATE_KEY, ZATCA_ONBOARDING_ENCRYPTION_KEY]
 }, async (request) => {
   const uid = requireUser(request);
   const input = request.data || {};
@@ -343,9 +343,8 @@ exports.zatcaGenerateInvoice = onCall({
   }
 
   const env = getEnvironment();
-  if (env === 'production' &&
-      (process.env.ZATCA_PRODUCTION_ENABLED !== 'true' || process.env.ZATCA_PRODUCTION_CSID_VERIFIED !== 'true')) {
-    throw new HttpsError('failed-precondition', 'Production invoice generation is locked until Production CSID and end-to-end verification are confirmed.');
+  if (env !== 'sandbox') {
+    throw new HttpsError('failed-precondition', 'This invoice-generation callable is sandbox-only. Production generation remains disabled until the official SDK and end-to-end gates are verified.');
   }
 
   const [saleSnap, settingsSnap] = await Promise.all([
@@ -374,20 +373,15 @@ exports.zatcaGenerateInvoice = onCall({
     throw new HttpsError('failed-precondition', 'Choose Standard or Simplified invoice type on the POS sale first.');
   }
 
-  let certToken;
-  if (env === 'sandbox') {
-    const checked = validateProductionRequest({ requestId: input.onboardingRequestId });
-    if (!checked.valid) throw new HttpsError('invalid-argument', 'A valid sandbox onboardingRequestId is required.');
-    onboardingEncryptionKey();
-    const onboardingSnap = await db.doc(`users/${uid}/zatcaOnboarding/${checked.requestId}`).get();
-    if (!onboardingSnap.exists || onboardingSnap.data().status !== 'sandbox_production_csid_issued') {
-      throw new HttpsError('failed-precondition', 'A sandbox Production CSID must be issued through onboarding before invoice generation.');
-    }
-    const sandboxCredentials = decryptOnboardingValue(onboardingSnap.data().sandboxProductionCredentialsEncrypted);
-    certToken = sandboxCredentials.token;
-  } else {
-    certToken = ZATCA_PROD_TOKEN.value();
+  const checked = validateProductionRequest({ requestId: input.onboardingRequestId });
+  if (!checked.valid) throw new HttpsError('invalid-argument', 'A valid sandbox onboardingRequestId is required.');
+  onboardingEncryptionKey();
+  const onboardingSnap = await db.doc(`users/${uid}/zatcaOnboarding/${checked.requestId}`).get();
+  if (!onboardingSnap.exists || onboardingSnap.data().status !== 'sandbox_production_csid_issued') {
+    throw new HttpsError('failed-precondition', 'A sandbox Production CSID must be issued through onboarding before invoice generation.');
   }
+  const sandboxCredentials = decryptOnboardingValue(onboardingSnap.data().sandboxProductionCredentialsEncrypted);
+  const certToken = sandboxCredentials.token;
 
   const privateKeyPem = String(ZATCA_EGS_PRIVATE_KEY.value() || '');
   if (!privateKeyPem) throw new HttpsError('failed-precondition', 'Configure ZATCA_EGS_PRIVATE_KEY in Firebase Secret Manager.');
