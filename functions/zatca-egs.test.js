@@ -101,7 +101,7 @@ test('reconciles a 15% VAT-inclusive POS price without adding VAT twice', () => 
     vatInclusive: true,
     vatEnabled: true,
     vatRate: 15,
-    items: [{ name: 'Coffee', qty: 1, price: 9.90, zatcaVatCategory: 'S', zatcaVatRate: 15 }],
+    items: [{ name: 'Coffee', qty: 1, price: 9.90 }],
     zatca: { documentType: 'simplified' }
   };
   const result = assessSaleForZatca(inclusiveSale, settings);
