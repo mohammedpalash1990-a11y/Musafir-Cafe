@@ -484,6 +484,112 @@ exports.zatcaGetGeneratedInvoice = onCall({ region: REGION }, async (request) =>
 });
 
 /**
+ * Explicit sandbox submission of an already generated immutable invoice.
+ * Ambiguous outcomes are blocked from automatic retry to prevent duplicate reporting.
+ */
+exports.zatcaSubmitGeneratedInvoice = onCall({
+  region: REGION,
+  timeoutSeconds: 60,
+  secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY]
+}, async (request) => {
+  const uid = requireUser(request);
+  const input = request.data || {};
+  const saleId = String(input.saleId || '').trim();
+  if (!/^[A-Za-z0-9_-]{1,100}$/.test(saleId)) {
+    throw new HttpsError('invalid-argument', 'A valid POS sale document ID is required.');
+  }
+  const env = getEnvironment();
+  if (env !== 'sandbox') {
+    throw new HttpsError('failed-precondition', 'This generated-invoice submission callable is sandbox-only.');
+  }
+  const checked = validateProductionRequest({ requestId: input.onboardingRequestId });
+  if (!checked.valid) throw new HttpsError('invalid-argument', 'A valid sandbox onboardingRequestId is required.');
+  onboardingEncryptionKey();
+
+  const onboardingSnap = await db.doc('users/' + uid + '/zatcaOnboarding/' + checked.requestId).get();
+  if (!onboardingSnap.exists || onboardingSnap.data().status !== 'sandbox_production_csid_issued') {
+    throw new HttpsError('failed-precondition', 'A sandbox Production CSID must be issued through onboarding before submission.');
+  }
+  const credentials = decryptOnboardingValue(onboardingSnap.data().sandboxProductionCredentialsEncrypted);
+  const invoiceRef = db.doc('zatca_tenants/' + uid + '/invoices/' + saleId);
+  const submissionRef = db.doc('zatca_tenants/' + uid + '/submissions/' + saleId);
+  const jobRef = db.doc('users/' + uid + '/zatcaInvoices/sale-' + saleId);
+  const invoiceSnap = await invoiceRef.get();
+  if (!invoiceSnap.exists) throw new HttpsError('not-found', 'Generate the invoice before submitting it.');
+  const invoice = invoiceSnap.data();
+  const documentType = String(invoice.subtype || '').toLowerCase();
+  if (!['standard', 'simplified'].includes(documentType)) {
+    throw new HttpsError('failed-precondition', 'Generated invoice has an invalid document type.');
+  }
+  const invoiceBase64 = Buffer.from(String(invoice.xml || ''), 'utf8').toString('base64');
+  const payloadCheck = validateSignedInvoicePayload({
+    uuid: invoice.uuid, invoiceHash: invoice.invoiceHash, invoice: invoiceBase64
+  });
+  if (!payloadCheck.valid) throw new HttpsError('failed-precondition', payloadCheck.reason);
+
+  const reservation = await db.runTransaction(async (tx) => {
+    const existing = await tx.get(submissionRef);
+    if (existing.exists) {
+      const state = String(existing.data().status || '').toLowerCase();
+      if (state === 'reported' || state === 'cleared') return { duplicate: true, status: state };
+      if (state === 'processing') throw new HttpsError('aborted', 'This invoice is already being submitted.');
+      if (state === 'submission_unknown' || state === 'submitted') {
+        throw new HttpsError('failed-precondition', 'A previous request may have reached FATOORA. Reconcile its outcome before retrying this invoice.');
+      }
+      tx.set(submissionRef, {
+        status: 'processing',
+        attempts: Number(existing.data().attempts || 0) + 1,
+        updatedAt: FieldValue.serverTimestamp()
+      }, { merge: true });
+      return { duplicate: false };
+    }
+    tx.create(submissionRef, {
+      saleId, uuid: invoice.uuid, invoiceHash: invoice.invoiceHash,
+      status: 'processing', attempts: 1,
+      createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+    });
+    return { duplicate: false };
+  });
+  if (reservation.duplicate) return { duplicate: true, status: reservation.status, saleId, uuid: invoice.uuid };
+
+  try {
+    const standard = documentType === 'standard';
+    const result = await zatcaRequest({
+      env,
+      path: standard ? '/invoices/clearance/single' : '/invoices/reporting/single',
+      headers: { 'Clearance-Status': standard ? '1' : '0' },
+      credentials,
+      body: { invoiceHash: invoice.invoiceHash, uuid: invoice.uuid, invoice: invoiceBase64 }
+    });
+    const status = classifySubmissionOutcome({ documentType, responseData: result.data });
+    await submissionRef.set({
+      status, response: result.data, requestId: result.headers.requestId || null,
+      submittedAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+    await jobRef.set({
+      status, response: result.data, requestId: result.headers.requestId || null,
+      submittedAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+    return { saleId, uuid: invoice.uuid, status, environment: env, response: result.data };
+  } catch (error) {
+    const httpStatus = Number(error.details && error.details.status);
+    const uncertain = error.code === 'unavailable' || httpStatus >= 500;
+    const status = uncertain ? 'submission_unknown' : 'failed';
+    const details = {
+      status,
+      errorCode: error.code || 'zatca_error',
+      errorMessage: error.message || 'FATOORA submission failed',
+      errorDetails: error.details || null,
+      manualReconciliationRequired: uncertain,
+      updatedAt: FieldValue.serverTimestamp()
+    };
+    await submissionRef.set(details, { merge: true });
+    await jobRef.set(details, { merge: true });
+    throw error;
+  }
+});
+
+/**
  * Starts FATOORA Compliance CSID onboarding. OTP is accepted only for this
  * request and is never persisted. CSID credentials are encrypted at rest
  * before the callable returns; they are never exposed to the browser.
