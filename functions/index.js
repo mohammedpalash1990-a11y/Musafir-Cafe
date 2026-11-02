@@ -62,7 +62,7 @@ function getBaseUrl(env) {
     if (parsed.protocol !== 'https:' || parsed.hostname !== 'gw-fatoora.zatca.gov.sa') {
       throw new HttpsError('failed-precondition', 'ZATCA_API_BASE_URL must use the official ZATCA gateway host over HTTPS.');
     }
-    return configured.replace(/\\/+$/, '');
+    return parsed.origin + parsed.pathname.replace(/\\/+$/, '');
   }
   return env === 'production' ? PRODUCTION_URL : SANDBOX_URL;
 }
