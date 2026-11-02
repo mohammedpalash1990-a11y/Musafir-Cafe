@@ -55,10 +55,14 @@ function getCredentials(env) {
 function getBaseUrl(env) {
   const configured = String(process.env.ZATCA_API_BASE_URL || '').trim();
   if (configured) {
-    if (!configured.startsWith('https://')) {
-      throw new HttpsError('failed-precondition', 'ZATCA_API_BASE_URL must use HTTPS.');
+    let parsed;
+    try { parsed = new URL(configured); } catch (_) {
+      throw new HttpsError('failed-precondition', 'ZATCA_API_BASE_URL must be a valid HTTPS URL.');
     }
-    return configured.replace(/\/+$/, '');
+    if (parsed.protocol !== 'https:' || parsed.hostname !== 'gw-fatoora.zatca.gov.sa') {
+      throw new HttpsError('failed-precondition', 'ZATCA_API_BASE_URL must use the official ZATCA gateway host over HTTPS.');
+    }
+    return configured.replace(/\\/+$/, '');
   }
   return env === 'production' ? PRODUCTION_URL : SANDBOX_URL;
 }
