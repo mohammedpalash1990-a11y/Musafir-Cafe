@@ -3,7 +3,9 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { assessSaleForZatca } = require('./zatca-egs');
 const { validateSignedInvoicePayload, classifySubmissionOutcome } = require('./zatca-invoice-validation');
+const { validateComplianceRequest, extractCsidCredentials, validateProductionRequest } = require('./zatca-onboarding');
 const { defineSecret } = require('firebase-functions/params');
+const crypto = require('node:crypto');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 
@@ -14,11 +16,54 @@ const ZATCA_PROD_TOKEN = defineSecret('ZATCA_PROD_TOKEN');
 const ZATCA_PROD_SECRET = defineSecret('ZATCA_PROD_SECRET');
 const ZATCA_SANDBOX_TOKEN = defineSecret('ZATCA_SANDBOX_TOKEN');
 const ZATCA_SANDBOX_SECRET = defineSecret('ZATCA_SANDBOX_SECRET');
+const ZATCA_ONBOARDING_ENCRYPTION_KEY = defineSecret('ZATCA_ONBOARDING_ENCRYPTION_KEY');
 
 const REGION = 'me-central1';
 const API_VERSION = 'V2';
 const SANDBOX_URL = 'https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation';
 const PRODUCTION_URL = 'https://gw-fatoora.zatca.gov.sa/e-invoicing/core';
+
+
+function onboardingEncryptionKey() {
+  const key = Buffer.from(String(ZATCA_ONBOARDING_ENCRYPTION_KEY.value() || ''), 'base64');
+  if (key.length !== 32) {
+    throw new HttpsError('failed-precondition', 'ZATCA_ONBOARDING_ENCRYPTION_KEY must be a base64-encoded 32-byte key in Firebase Secret Manager.');
+  }
+  return key;
+}
+
+function encryptOnboardingValue(value) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', onboardingEncryptionKey(), iv);
+  const ciphertext = Buffer.concat([cipher.update(JSON.stringify(value), 'utf8'), cipher.final()]);
+  return {
+    algorithm: 'aes-256-gcm',
+    iv: iv.toString('base64'),
+    tag: cipher.getAuthTag().toString('base64'),
+    ciphertext: ciphertext.toString('base64')
+  };
+}
+
+function decryptOnboardingValue(envelope) {
+  if (!envelope || envelope.algorithm !== 'aes-256-gcm') {
+    throw new HttpsError('failed-precondition', 'Encrypted ZATCA onboarding credentials are missing or use an unsupported format.');
+  }
+  try {
+    const decipher = crypto.createDecipheriv(
+      'aes-256-gcm',
+      onboardingEncryptionKey(),
+      Buffer.from(envelope.iv, 'base64')
+    );
+    decipher.setAuthTag(Buffer.from(envelope.tag, 'base64'));
+    const plaintext = Buffer.concat([
+      decipher.update(Buffer.from(envelope.ciphertext, 'base64')),
+      decipher.final()
+    ]).toString('utf8');
+    return JSON.parse(plaintext);
+  } catch (_) {
+    throw new HttpsError('data-loss', 'Could not decrypt the stored ZATCA onboarding credentials.');
+  }
+}
 
 function requireUser(request) {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Please sign in first.');
@@ -275,6 +320,164 @@ exports.zatcaQueueSale = onDocumentCreated({
       updatedAt: FieldValue.serverTimestamp()
     });
   });
+});
+
+
+/**
+ * Starts FATOORA Compliance CSID onboarding. OTP is accepted only for this
+ * request and is never persisted. CSID credentials are encrypted at rest
+ * before the callable returns; they are never exposed to the browser.
+ */
+exports.zatcaRequestComplianceCsid = onCall({ region: REGION, timeoutSeconds: 60, secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY] }, async (request) => {
+  requireUser(request);
+  const checked = validateComplianceRequest({
+    otp: request.data && request.data.otp,
+    csr: request.data && request.data.csr
+  });
+  if (!checked.valid) throw new HttpsError('invalid-argument', checked.reason);
+  onboardingEncryptionKey(); // Fail before requesting a certificate if secure storage is not configured.
+  const env = getEnvironment();
+  if (env === 'production') {
+    throw new HttpsError('failed-precondition', 'Compliance onboarding must be performed in the configured sandbox workflow first; production onboarding is not enabled by this callable.');
+  }
+  const url = getBaseUrl(env) + '/compliance';
+  let response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'Accept-Language': 'en',
+        'Accept-Version': API_VERSION,
+        OTP: checked.otp
+      },
+      body: JSON.stringify({ csr: checked.csr }),
+      signal: AbortSignal.timeout(25000)
+    });
+  } catch (error) {
+    throw new HttpsError('unavailable', 'Could not reach the FATOORA compliance onboarding endpoint.', {
+      cause: String(error && error.message || error)
+    });
+  }
+  const raw = await response.text();
+  let data;
+  try { data = raw ? JSON.parse(raw) : {}; } catch (_) { data = { message: raw.slice(0, 1000) }; }
+  if (!response.ok) {
+    throw new HttpsError('failed-precondition', 'FATOORA rejected the Compliance CSID request.', {
+      status: response.status, response: data
+    });
+  }
+  const credentials = extractCsidCredentials(data);
+  if (!credentials.valid) {
+    throw new HttpsError('data-loss', credentials.reason);
+  }
+  await db.doc(`users/${request.auth.uid}/zatcaOnboarding/${credentials.requestId}`).set({
+    requestId: credentials.requestId, environment: env, status: 'compliance_csid_issued',
+    complianceCredentialsEncrypted: encryptOnboardingValue({ token: credentials.token, secret: credentials.secret }),
+    createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+  return {
+    accepted: true,
+    environment: env,
+    requestId: credentials.requestId,
+    credentialsStoredEncrypted: true,
+    warning: 'Compliance credentials are encrypted server-side with AES-256-GCM. The encryption key must remain in Firebase Secret Manager.'
+  };
+});
+
+/**
+ * Sends one pre-generated, signed compliance test invoice. It never creates
+ * tax XML or signs documents. The caller supplies official SDK-validated
+ * signed test fixtures; Compliance CSID credentials are decrypted server-side.
+ */
+exports.zatcaSubmitComplianceInvoice = onCall({ region: REGION, timeoutSeconds: 60, secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY] }, async (request) => {
+  requireUser(request);
+  const input = request.data || {};
+  const uuid = String(input.uuid || '').trim();
+  const invoiceHash = String(input.invoiceHash || '').trim();
+  const invoice = String(input.invoice || '').trim();
+  const clearanceStatus = String(input.clearanceStatus || '');
+  const requestId = String(input.requestId || '').trim();
+  const scenario = String(input.scenario || '').trim();
+  const scenarios = ['standard_invoice', 'standard_credit_note', 'standard_debit_note', 'simplified_invoice', 'simplified_credit_note', 'simplified_debit_note'];
+  if (!validateProductionRequest({ requestId }).valid || !scenarios.includes(scenario)) {
+    throw new HttpsError('invalid-argument', 'A valid compliance requestId and supported scenario are required.');
+  }
+  if (!['0', '1'].includes(clearanceStatus)) {
+    throw new HttpsError('invalid-argument', 'clearanceStatus must be 0 (reporting) or 1 (clearance).');
+  }
+  if ((scenario.startsWith('standard_') && clearanceStatus !== '1') || (scenario.startsWith('simplified_') && clearanceStatus !== '0')) {
+    throw new HttpsError('invalid-argument', 'clearanceStatus must match the Standard or Simplified scenario.');
+  }
+  const payloadCheck = validateSignedInvoicePayload({ uuid, invoiceHash, invoice });
+  if (!payloadCheck.valid) throw new HttpsError('invalid-argument', payloadCheck.reason);
+  const env = getEnvironment();
+  if (env !== 'sandbox') throw new HttpsError('failed-precondition', 'Compliance invoice checks are locked to sandbox in this workflow.');
+  const onboardingRef = db.doc(`users/${request.auth.uid}/zatcaOnboarding/${requestId}`);
+  const onboardingSnap = await onboardingRef.get();
+  if (!onboardingSnap.exists || onboardingSnap.data().status !== 'compliance_csid_issued') {
+    throw new HttpsError('failed-precondition', 'No matching Compliance CSID onboarding request exists for this account.');
+  }
+  const credentials = decryptOnboardingValue(onboardingSnap.data().complianceCredentialsEncrypted);
+  const result = await zatcaRequest({
+    env,
+    path: '/compliance/invoices',
+    credentials,
+    headers: { 'Clearance-Status': clearanceStatus },
+    body: { invoiceHash, uuid, invoice }
+  });
+  const validationStatus = String(result.data && result.data.validationResults && result.data.validationResults.status || '').toUpperCase();
+  const passed = validationStatus === 'PASS';
+  await onboardingRef.collection('checks').doc(scenario).set({
+    scenario, uuid, clearanceStatus, validationStatus: validationStatus || 'UNKNOWN',
+    passed, response: result.data, updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+  return { accepted: passed, environment: env, uuid, scenario, validationStatus: validationStatus || 'UNKNOWN', response: result.data };
+});
+
+/**
+ * Exchanges a Compliance CSID for a Production CSID only after the taxpayer
+ * confirms all required compliance invoice checks have passed. This callable
+ * remains sandbox-only and stores the resulting credentials encrypted server-side.
+ */
+exports.zatcaRequestProductionCsid = onCall({ region: REGION, timeoutSeconds: 60, secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY] }, async (request) => {
+  requireUser(request);
+  const input = request.data || {};
+  const checked = validateProductionRequest({ requestId: input.requestId });
+  if (!checked.valid) throw new HttpsError('invalid-argument', checked.reason);
+  const env = getEnvironment();
+  if (env !== 'sandbox') throw new HttpsError('failed-precondition', 'Production CSID exchange is locked to sandbox in this workflow.');
+  const onboardingRef = db.doc(`users/${request.auth.uid}/zatcaOnboarding/${checked.requestId}`);
+  const onboardingSnap = await onboardingRef.get();
+  if (!onboardingSnap.exists || onboardingSnap.data().status !== 'compliance_csid_issued') {
+    throw new HttpsError('failed-precondition', 'No matching Compliance CSID onboarding request exists for this account.');
+  }
+  const complianceCredentials = decryptOnboardingValue(onboardingSnap.data().complianceCredentialsEncrypted);
+  const requiredScenarios = ['standard_invoice', 'standard_credit_note', 'standard_debit_note', 'simplified_invoice', 'simplified_credit_note', 'simplified_debit_note'];
+  const checkSnaps = await Promise.all(requiredScenarios.map((name) => onboardingRef.collection('checks').doc(name).get()));
+  const missingChecks = requiredScenarios.filter((name, index) => !checkSnaps[index].exists || checkSnaps[index].data().passed !== true);
+  if (missingChecks.length) throw new HttpsError('failed-precondition', 'Required compliance scenarios have not all passed.', { missingChecks });
+  const result = await zatcaRequest({
+    env,
+    path: '/production/csids',
+    credentials: complianceCredentials,
+    body: { compliance_request_id: checked.requestId }
+  });
+  const issued = extractCsidCredentials(result.data, { requireRequestId: false });
+  if (!issued.valid) throw new HttpsError('data-loss', issued.reason);
+  await onboardingRef.set({
+    sandboxProductionCredentialsEncrypted: encryptOnboardingValue({ token: issued.token, secret: issued.secret }),
+    status: 'sandbox_production_csid_issued',
+    updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+  return {
+    accepted: true,
+    environment: env,
+    requestId: checked.requestId,
+    credentialsStoredEncrypted: true,
+    warning: 'Sandbox Production CSID credentials are encrypted server-side. This does not create or verify a production CSID.'
+  };
 });
 
 exports.zatcaCheckCredentials = onCall({
