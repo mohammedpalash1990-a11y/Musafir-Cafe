@@ -29,7 +29,7 @@ function getProfile(uid) {
     const required = ['sellerName', 'vatNumber', 'street', 'building', 'district', 'city', 'postalCode'];
     const missing = required.filter((key) => !String(z[key] || '').trim());
     const vat = String(z.vatNumber || '').trim();
-    if (vat && !/^3\\d{13}3$/.test(vat)) missing.push('vatNumber (must be a 15-digit Saudi VAT number)');
+    if (vat && !/^3\d{13}3$/.test(vat)) missing.push('vatNumber (must be a 15-digit Saudi VAT number)');
     return { z, missing };
   });
 }
