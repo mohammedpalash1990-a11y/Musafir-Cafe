@@ -707,6 +707,8 @@ function zatcaBox(){
  +'<label>Base64 CSR (public request only)</label><textarea id="z_csr" rows="3" style="width:100%">'+esc(z.csrDraft||'')+'</textarea>'
  +'<button class="g" style="width:100%;margin-top:6px" onclick="zatcaRequestCsidFromUi()">Request sandbox Compliance CSID</button>'
  +'<label>Compliance request ID</label><input id="z_request_id" value="'+esc(z.onboardingRequestId||'')+'">'
+ +'<details style="margin-top:8px"><summary>Compliance invoice test fixtures (advanced)</summary><label>Scenario</label><select id="z_scenario"><option value="standard_invoice">Standard invoice</option><option value="standard_credit_note">Standard credit note</option><option value="standard_debit_note">Standard debit note</option><option value="simplified_invoice">Simplified invoice</option><option value="simplified_credit_note">Simplified credit note</option><option value="simplified_debit_note">Simplified debit note</option></select><label>Invoice UUID</label><input id="z_test_uuid"><label>Invoice hash (Base64 SHA-256)</label><input id="z_test_hash"><label>Signed invoice XML (Base64)</label><textarea id="z_test_invoice" rows="5" style="width:100%"></textarea><button class="g" style="width:100%;margin-top:6px" onclick="zatcaComplianceTestFromUi()">Submit compliance test fixture</button></details>'
+ +'<button class="g" style="width:100%;margin-top:6px" onclick="zatcaRequestSandboxProductionFromUi()">Request sandbox Production CSID after all PASS</button>'
  +'<label>POS sale document ID (example: s1001)</label><input id="z_sale_id" value="'+esc(saleDefault)+'">'
  +'<button class="pri" style="width:100%;margin-top:6px" onclick="zatcaGenerateFromUi()">Generate & sign sandbox invoice</button>'
  +'<button class="g" style="width:100%;margin-top:6px" onclick="zatcaDownloadFromUi()">Download XML for official SDK validation</button>'
@@ -729,9 +731,28 @@ async function zatcaRequestCsidFromUi(){
  try{
   var r=await FB.call('zatcaRequestComplianceCsid',{otp:otp,csr:csr});
   $('z_otp').value='';
-  if(r.requestId){$('z_request_id').value=r.requestId;S.zatca=S.zatca||{};S.zatca.onboardingRequestId=r.requestId;save()}
+  if(r.requestId){$('z_request_id').value=r.requestId;S.zatca=S.zatca||{};S.zatca.onboardingRequestId=r.requestId;save();if(FB&&FB.set)await FB.set('pos','settings',S)}
   if(m)m.textContent=L('Compliance CSID অনুরোধ গ্রহণ হয়েছে। এখন প্রয়োজনীয় test invoice PASS করাতে হবে।','Compliance CSID request accepted. Complete all required compliance invoice PASS checks next.');
   toast(L('Compliance CSID অনুরোধ পাঠানো হয়েছে','Compliance CSID request submitted'));
+ }catch(e){if(m)m.textContent=e.message||String(e);toast('ZATCA: '+(e.message||e))}
+}
+async function zatcaComplianceTestFromUi(){
+ var requestId=$('z_request_id')&&$('z_request_id').value.trim(),scenario=$('z_scenario').value,uuid=$('z_test_uuid').value.trim(),invoiceHash=$('z_test_hash').value.trim(),invoice=$('z_test_invoice').value.trim(),clearanceStatus=scenario.indexOf('standard_')===0?'1':'0',m=$('z_egs_msg');
+ if(!requestId||!uuid||!invoiceHash||!invoice){toast(L('সব test fixture তথ্য পূরণ করুন','Complete all compliance test fixture fields'));return}
+ try{
+  var r=await FB.call('zatcaSubmitComplianceInvoice',{requestId:requestId,scenario:scenario,uuid:uuid,invoiceHash:invoiceHash,invoice:invoice,clearanceStatus:clearanceStatus});
+  if(m)m.textContent=scenario+': '+r.validationStatus+(r.accepted?' · PASS':' · NOT PASS');
+  toast('ZATCA compliance: '+r.validationStatus);
+ }catch(e){if(m)m.textContent=e.message||String(e);toast('ZATCA: '+(e.message||e))}
+}
+async function zatcaRequestSandboxProductionFromUi(){
+ var requestId=$('z_request_id')&&$('z_request_id').value.trim(),m=$('z_egs_msg');
+ if(!requestId){toast(L('Compliance request ID দিন','Enter compliance request ID'));return}
+ if(!confirm(L('সব প্রয়োজনীয় scenario PASS হয়েছে? PASS না হলে Production CSID request করবেন না।','Have all required scenarios passed? Do not request a Production CSID unless they have.')))return;
+ try{
+  var r=await FB.call('zatcaRequestProductionCsid',{requestId:requestId});
+  if(m)m.textContent=L('Sandbox Production CSID encrypted অবস্থায় সেভ হয়েছে।','Sandbox Production CSID was stored encrypted.');
+  toast(L('Sandbox Production CSID পাওয়া গেছে','Sandbox Production CSID issued'));
  }catch(e){if(m)m.textContent=e.message||String(e);toast('ZATCA: '+(e.message||e))}
 }
 async function zatcaGenerateFromUi(){
@@ -739,6 +760,7 @@ async function zatcaGenerateFromUi(){
  if(!saleId||!requestId){toast(L('Sale ID ও onboarding request ID দিন','Enter sale ID and onboarding request ID'));return}
  if(!window.FB||!FB.call){toast(L('Firebase Functions এখনো সংযুক্ত নয়','Firebase Functions are not connected'));return}
  try{
+  saveZatcaProfile();await FB.set('pos','settings',S);
   var r=await FB.call('zatcaGenerateInvoice',{saleId:saleId,onboardingRequestId:requestId});
   S.zatca=S.zatca||{};S.zatca.lastSaleId=saleId;S.zatca.onboardingRequestId=requestId;save();
   if(m)m.textContent='Generated '+r.invoiceNumber+' · '+r.status+' · '+r.totalWithVat+' SAR';
