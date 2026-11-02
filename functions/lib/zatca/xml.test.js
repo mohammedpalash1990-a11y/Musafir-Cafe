@@ -49,6 +49,6 @@ test('preserves sub-halala VAT-exclusive unit prices for multi-quantity low-pric
   assert.equal(result.totals.net, 87);
   assert.equal(result.totals.tax, 13);
   assert.equal(result.totals.total, 100);
-  assert.ok(result.xmlBody.includes('<cbc:PriceAmount>0.008696</cbc:PriceAmount>'));
+  assert.ok(result.xmlBody.includes('<cbc:PriceAmount currencyID="SAR">0.008696</cbc:PriceAmount>'));
   assert.ok(result.xmlBody.includes('<cbc:LineExtensionAmount currencyID="SAR">0.87</cbc:LineExtensionAmount>'));
 });
