@@ -46,7 +46,6 @@ function assessSaleForZatca(sale, settings) {
     reasons.push('Sale subtotal, discount, VAT and total must all be finite numeric values.');
   } else {
     const [subtotal, discount, tax, total] = amounts;
-    const inclusive = sale.vatInclusive === true;
     const lineSubtotal = sale.items.reduce((sum, item) => {
       const gross = Number(item.qty) * Number(item.price);
       const category = String(item.zatcaVatCategory || '').toUpperCase();
