@@ -61,6 +61,24 @@ function assessSaleForZatca(sale, settings) {
   );
   if (missingLineTax) {
     reasons.push('Add an explicit ZATCA VAT category (S/Z/E/O) and VAT rate to every invoice line; the POS global tax rate is not enough.');
+  } else if (amounts.every(Number.isFinite) && Number(sale.sub) > 0) {
+    const subtotal = Number(sale.sub);
+    const discountRatio = Number(sale.disc) / subtotal;
+    if (discountRatio < 0 || discountRatio > 1) {
+      reasons.push('Discount must be between zero and the invoice subtotal before VAT allocation.');
+    } else {
+      const expectedVat = sale.items.reduce((sum, item) => {
+        const category = String(item.zatcaVatCategory).toUpperCase();
+        const rate = Number(item.zatcaVatRate);
+        if (category !== 'S' && rate !== 0) {
+          reasons.push('Zero-rated, exempt and out-of-scope lines must use a zero VAT rate.');
+        }
+        return sum + (Number(item.qty) * Number(item.price) * (1 - discountRatio) * rate / 100);
+      }, 0);
+      if (Math.abs(expectedVat - Number(sale.tax)) > 0.02) {
+        reasons.push('Calculated VAT from the per-line categories and rates does not reconcile with the POS VAT total.');
+      }
+    }
   }
   reasons.push('Confirm Standard (B2B) or Simplified (B2C) for this transaction using the buyer details.');
   reasons.push('UBL 2.1 generation, invoice hash/PIH, XAdES signing, and TLV QR are not yet implemented.');
