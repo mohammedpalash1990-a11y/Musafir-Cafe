@@ -31,3 +31,10 @@ test('builds compact UBL XML with canonical text escaping and no XML declaration
   assert.ok(!result.xmlBody.includes('&gt; Coffee'));
   assert.equal(result.totals.total, 990);
 });
+
+test('omits optional seller CRN identification when no CR number is configured', () => {
+  const withoutCr = { ...invoice, seller: { ...invoice.seller, crNumber: '' } };
+  const result = buildInvoiceXml(withoutCr);
+  assert.ok(!result.xmlBody.includes('<cac:PartyIdentification>'));
+  assert.ok(!result.xmlBody.includes('<cbc:ID schemeID="CRN"></cbc:ID>'));
+});
