@@ -46,10 +46,14 @@ function assessSaleForZatca(sale, settings) {
     reasons.push('Sale subtotal, discount, VAT and total must all be finite numeric values.');
   } else {
     const [subtotal, discount, tax, total] = amounts;
+    const globalVatForSubtotal = settings && settings.vat && typeof settings.vat === 'object' ? settings.vat : {};
+    const globalRateForSubtotal = Number(sale.vatRate ?? globalVatForSubtotal.rate ?? (settings && settings.tax) ?? 15);
+    const globalEnabledForSubtotal = sale.vatEnabled !== false && globalVatForSubtotal.enabled !== false;
     const lineSubtotal = sale.items.reduce((sum, item) => {
       const gross = Number(item.qty) * Number(item.price);
-      const category = String(item.zatcaVatCategory || '').toUpperCase();
-      const rate = Number(item.zatcaVatRate);
+      const category = String(item.zatcaVatCategory || '').toUpperCase() || (globalEnabledForSubtotal && globalRateForSubtotal === 15 ? 'S' : '');
+      const hasRate = item.zatcaVatRate !== null && item.zatcaVatRate !== undefined && item.zatcaVatRate !== '';
+      const rate = hasRate ? Number(item.zatcaVatRate) : (category === 'S' && globalEnabledForSubtotal ? globalRateForSubtotal : 0);
       return sum + (inclusive && category === 'S' && rate > 0 ? gross * 100 / (100 + rate) : gross);
     }, 0);
     if (Math.abs(lineSubtotal - subtotal) > 0.02) {
