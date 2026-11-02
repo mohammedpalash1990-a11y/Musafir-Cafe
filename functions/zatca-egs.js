@@ -40,7 +40,8 @@ function assessSaleForZatca(sale, settings) {
   if (currency !== 'SAR') reasons.push('Set the POS currency to SAR before issuing Saudi VAT invoices.');
 
   // Reconcile the persisted POS arithmetic before any legal invoice is built.
-  const inclusive = sale.vatInclusive === true;\n  const amounts = ['sub', 'disc', 'tax', 'total'].map((key) => Number(sale[key]));
+  const inclusive = sale.vatInclusive === true;
+  const amounts = ['sub', 'disc', 'tax', 'total'].map((key) => Number(sale[key]));
   if (amounts.some((value) => !Number.isFinite(value))) {
     reasons.push('Sale subtotal, discount, VAT and total must all be finite numeric values.');
   } else {
