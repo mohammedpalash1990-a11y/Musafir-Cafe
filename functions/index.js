@@ -388,8 +388,8 @@ exports.zatcaRequestComplianceCsid = onCall({ region: REGION, timeoutSeconds: 60
 
 /**
  * Sends one pre-generated, signed compliance test invoice. It never creates
- * tax XML or signs documents. The caller must supply official SDK-validated
- * test fixtures and Compliance CSID credentials.
+ * tax XML or signs documents. The caller supplies official SDK-validated
+ * signed test fixtures; Compliance CSID credentials are decrypted server-side.
  */
 exports.zatcaSubmitComplianceInvoice = onCall({ region: REGION, timeoutSeconds: 60, secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY] }, async (request) => {
   requireUser(request);
@@ -439,7 +439,7 @@ exports.zatcaSubmitComplianceInvoice = onCall({ region: REGION, timeoutSeconds: 
 /**
  * Exchanges a Compliance CSID for a Production CSID only after the taxpayer
  * confirms all required compliance invoice checks have passed. This callable
- * remains sandbox-only and returns credentials once; it does not persist them.
+ * remains sandbox-only and stores the resulting credentials encrypted server-side.
  */
 exports.zatcaRequestProductionCsid = onCall({ region: REGION, timeoutSeconds: 60, secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY] }, async (request) => {
   requireUser(request);
