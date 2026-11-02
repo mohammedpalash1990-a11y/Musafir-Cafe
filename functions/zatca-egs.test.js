@@ -63,3 +63,30 @@ test('detects inconsistent line subtotal and sale total arithmetic', () => {
   assert.ok(result.reasons.some((reason) => reason.includes('line extension amounts')));
   assert.ok(result.reasons.some((reason) => reason.includes('does not reconcile with the sale total')));
 });
+
+test('reconciles per-line VAT category/rate against the POS VAT total', () => {
+  const vatSale = {
+    ...sale,
+    sub: 100,
+    disc: 0,
+    tax: 15,
+    total: 115,
+    items: [{ name: 'Coffee', qty: 1, price: 100, zatcaVatCategory: 'S', zatcaVatRate: 15 }]
+  };
+  const valid = assessSaleForZatca(vatSale, settings);
+  assert.ok(!valid.reasons.some((reason) => reason.includes('per-line categories and rates')));
+  const invalid = assessSaleForZatca({ ...vatSale, tax: 10, total: 110 }, settings);
+  assert.ok(invalid.reasons.some((reason) => reason.includes('per-line categories and rates')));
+});
+
+test('rejects non-zero VAT rates on zero-rated, exempt or out-of-scope lines', () => {
+  const result = assessSaleForZatca({
+    ...sale,
+    sub: 100,
+    disc: 0,
+    tax: 5,
+    total: 105,
+    items: [{ name: 'Coffee', qty: 1, price: 100, zatcaVatCategory: 'Z', zatcaVatRate: 5 }]
+  }, settings);
+  assert.ok(result.reasons.some((reason) => reason.includes('must use a zero VAT rate')));
+});
