@@ -2,6 +2,12 @@
 
 const VAT_NUMBER_RE = /^3\\d{13}3$/;
 
+function isSha256Base64(value) {
+  if (!/^[A-Za-z0-9+/]{43}=$/.test(String(value || ''))) return false;
+  const decoded = Buffer.from(value, 'base64');
+  return decoded.length === 32 && decoded.toString('base64') === value;
+}
+
 function assessSaleForZatca(sale, settings) {
   const z = (settings && settings.zatca) || {};
   const missingProfile = ['sellerName', 'vatNumber', 'street', 'building', 'district', 'city', 'postalCode']
@@ -45,4 +51,4 @@ function assessSaleForZatca(sale, settings) {
   };
 }
 
-module.exports = { assessSaleForZatca };
+module.exports = { assessSaleForZatca, isSha256Base64 };
