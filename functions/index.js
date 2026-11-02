@@ -364,11 +364,14 @@ exports.zatcaSubmitComplianceInvoice = onCall({ region: REGION, timeoutSeconds: 
   const requestId = String(input.requestId || '').trim();
   const scenario = String(input.scenario || '').trim();
   const scenarios = ['standard_invoice', 'standard_credit_note', 'standard_debit_note', 'simplified_invoice', 'simplified_credit_note', 'simplified_debit_note'];
-  if (!/^\\d{5,30}$/.test(requestId) || !scenarios.includes(scenario)) {
+  if (!scenarios.includes(scenario)) {
     throw new HttpsError('invalid-argument', 'A valid compliance requestId and supported scenario are required.');
   }
   if (!['0', '1'].includes(clearanceStatus)) {
     throw new HttpsError('invalid-argument', 'clearanceStatus must be 0 (reporting) or 1 (clearance).');
+  }
+  if ((scenario.startsWith('standard_') && clearanceStatus !== '1') || (scenario.startsWith('simplified_') && clearanceStatus !== '0')) {
+    throw new HttpsError('invalid-argument', 'clearanceStatus must match the Standard or Simplified scenario.');
   }
   const payloadCheck = validateSignedInvoicePayload({ uuid, invoiceHash, invoice });
   if (!payloadCheck.valid) throw new HttpsError('invalid-argument', payloadCheck.reason);
@@ -425,12 +428,12 @@ exports.zatcaRequestProductionCsid = onCall({ region: REGION, timeoutSeconds: 60
     credentials: { token, secret },
     body: { compliance_request_id: checked.requestId }
   });
-  const issued = extractCsidCredentials(result.data);
+  const issued = extractCsidCredentials(result.data, { requireRequestId: false });
   if (!issued.valid) throw new HttpsError('data-loss', issued.reason);
   return {
     accepted: true,
     environment: env,
-    requestId: issued.requestId,
+    requestId: checked.requestId,
     productionCsid: issued.token,
     productionSecret: issued.secret,
     warning: 'Sensitive one-time response. Store only in Firebase Secret Manager. Production invoice submission remains disabled until separate administrator verification.'
