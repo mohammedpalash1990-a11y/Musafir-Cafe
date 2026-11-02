@@ -16,7 +16,17 @@ const tenant = (db, uid) => db.collection('zatca_tenants').doc(uid);
  */
 async function generateInvoice({ db, uid, stateKey, sale, seller, subtype, privateKeyPem, certToken, numberPrefix = 'INV-' }) {
   if (!SAFE_ID.test(String(sale.saleId || ''))) throw new Error('saleId must be 1-100 chars: letters, digits, _ or -');
+  if (!SAFE_ID.test(String(stateKey || ''))) throw new Error('stateKey must be 1-100 chars: letters, digits, _ or -');
   const { certB64, x509 } = S.loadCertificate(certToken);
+  const privateKey = crypto.createPrivateKey(privateKeyPem);
+  if (privateKey.asymmetricKeyType !== 'ec' || privateKey.asymmetricKeyDetails?.namedCurve !== 'secp256k1') {
+    throw new Error('ZATCA invoice signing requires a secp256k1 EC private key');
+  }
+  const privatePublicDer = crypto.createPublicKey(privateKey).export({ type: 'spki', format: 'der' });
+  const certificatePublicDer = x509.publicKey.export({ type: 'spki', format: 'der' });
+  if (privatePublicDer.length !== certificatePublicDer.length || !crypto.timingSafeEqual(privatePublicDer, certificatePublicDer)) {
+    throw new Error('The configured EGS private key does not match the CSID certificate public key');
+  }
   const invRef = tenant(db, uid).collection('invoices').doc(sale.saleId);
   const stRef = tenant(db, uid).collection('state').doc(stateKey);
   const subRef = tenant(db, uid).collection('submissions').doc(sale.saleId);
@@ -31,10 +41,12 @@ async function generateInvoice({ db, uid, stateKey, sale, seller, subtype, priva
     const core = buildInvoiceXml(inv);                       // hash input (no extensions/QR/signature)
     const hash = S.invoiceHash(core.xmlBody);
     const signature = S.signHash(hash, privateKeyPem);
+    if (!S.verifyHash(hash, signature, x509.publicKey)) throw new Error('Generated ECDSA signature did not verify against the CSID certificate');
     const signingTime = new Date().toISOString().slice(0, 19) + 'Z';
     const qr = buildQr({ sellerName: seller.sellerName, vatNumber: seller.vatNumber, timestamp: `${core.date}T${core.time}Z`,
       totalWithVat: fmt(core.totals.total), vatTotal: fmt(core.totals.tax), invoiceHash: hash, signature,
       publicKey: S.publicKeyDer(x509), certSignature: subtype === 'simplified' ? S.certSignature(x509) : undefined });
+    if (qr.length > 700) throw new Error('Generated ZATCA TLV QR exceeds the 700-character limit');
     const extensionsXml = S.buildExtensions({ invoiceHashB64: hash, signatureB64: signature, certB64, x509, signingTime });
     const final = buildInvoiceXml(inv, { extensionsXml, qrB64: qr, signatureStub: true });
     const record = { saleId: sale.saleId, number: inv.number, uuid: inv.uuid, icv, pih, invoiceHash: hash, subtype, kind: inv.kind,
