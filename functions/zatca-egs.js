@@ -88,7 +88,7 @@ function assessSaleForZatca(sale, settings) {
     const buyer = sale.zatca && sale.zatca.buyer || {};
     const buyerRequired = ['name', 'vatNumber', 'street', 'building', 'district', 'city', 'postalCode'];
     const missingBuyer = buyerRequired.filter((key) => !String(buyer[key] || '').trim());
-    if (!/^3\\d{13}3$/.test(String(buyer.vatNumber || '').trim())) missingBuyer.push('vatNumber (invalid Saudi VAT number format)');
+    if (!/^3\d{13}3$/.test(String(buyer.vatNumber || '').trim())) missingBuyer.push('vatNumber (invalid Saudi VAT number format)');
     if (missingBuyer.length) reasons.push('Complete Standard invoice buyer details: ' + missingBuyer.join(', ') + '.');
   }
   reasons.push('UBL 2.1 generation, invoice hash/PIH, XAdES signing, and TLV QR are not yet implemented.');
