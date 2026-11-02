@@ -1,0 +1,39 @@
+name: Replace repository with final Cafe Musafir package
+
+on:
+  push:
+    paths:
+      - "IMPORT_CAFE_FINAL.trigger"
+
+permissions:
+  contents: write
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Replace all old files with the final Cafe Musafir ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "Cafe Musafir.zip"
+          mkdir -p /tmp/cafe-final
+          cp "Cafe Musafir.zip" /tmp/cafe-final/final.zip
+          unzip -t /tmp/cafe-final/final.zip
+          find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
+          unzip -q /tmp/cafe-final/final.zip -d .
+          test -f index.html
+          test -f order.html
+          test -f manifest.json
+          test -f menu-manifest.json
+          test -f sw.js
+          test -f theme.css
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Replace old project with final Musafir Cafe package"
+          git push
