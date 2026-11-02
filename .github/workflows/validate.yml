@@ -14,3 +14,6 @@ jobs:
           node-version: 20
       - name: Check POS and Firebase Functions JavaScript
         run: node scripts/check-syntax.js
+      - name: Run ZATCA Functions unit tests
+        working-directory: functions
+        run: npm test
