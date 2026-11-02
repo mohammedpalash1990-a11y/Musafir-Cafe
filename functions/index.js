@@ -325,9 +325,8 @@ exports.zatcaQueueSale = onDocumentCreated({
 
 /**
  * Starts FATOORA Compliance CSID onboarding. OTP is accepted only for this
- * request and is never persisted. Returned CSID credentials are sensitive:
- * caller must transfer them directly to a secure secret store and must not
- * place them in browser storage, Firestore, logs, or source control.
+ * request and is never persisted. CSID credentials are encrypted at rest
+ * before the callable returns; they are never exposed to the browser.
  */
 exports.zatcaRequestComplianceCsid = onCall({ region: REGION, timeoutSeconds: 60, secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY] }, async (request) => {
   requireUser(request);
@@ -336,6 +335,7 @@ exports.zatcaRequestComplianceCsid = onCall({ region: REGION, timeoutSeconds: 60
     csr: request.data && request.data.csr
   });
   if (!checked.valid) throw new HttpsError('invalid-argument', checked.reason);
+  onboardingEncryptionKey(); // Fail before requesting a certificate if secure storage is not configured.
   const env = getEnvironment();
   if (env === 'production') {
     throw new HttpsError('failed-precondition', 'Compliance onboarding must be performed in the configured sandbox workflow first; production onboarding is not enabled by this callable.');
@@ -401,7 +401,7 @@ exports.zatcaSubmitComplianceInvoice = onCall({ region: REGION, timeoutSeconds: 
   const requestId = String(input.requestId || '').trim();
   const scenario = String(input.scenario || '').trim();
   const scenarios = ['standard_invoice', 'standard_credit_note', 'standard_debit_note', 'simplified_invoice', 'simplified_credit_note', 'simplified_debit_note'];
-  if (!scenarios.includes(scenario)) {
+  if (!validateProductionRequest({ requestId }).valid || !scenarios.includes(scenario)) {
     throw new HttpsError('invalid-argument', 'A valid compliance requestId and supported scenario are required.');
   }
   if (!['0', '1'].includes(clearanceStatus)) {
