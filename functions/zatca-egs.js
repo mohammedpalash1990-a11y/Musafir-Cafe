@@ -53,8 +53,9 @@ function assessSaleForZatca(sale, settings) {
     }
   }
 
-  // POS currently stores one global tax percentage, not ZATCA VAT categories
-  // and rates per line. Never infer a line's tax category from its menu category.
+  // POS tax totals are still calculated from its global tax setting. Require
+  // explicit per-product ZATCA categories/rates and reconcile them before use.
+  // Never infer a line's tax category from its menu category.
   const missingLineTax = sale.items.some((item) =>
     !['S', 'Z', 'E', 'O'].includes(String(item.zatcaVatCategory || '').toUpperCase()) ||
     item.zatcaVatRate === null || item.zatcaVatRate === undefined || item.zatcaVatRate === '' || !Number.isFinite(Number(item.zatcaVatRate)) || Number(item.zatcaVatRate) < 0
