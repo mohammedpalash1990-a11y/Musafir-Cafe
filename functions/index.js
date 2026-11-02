@@ -2,6 +2,7 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { assessSaleForZatca } = require('./zatca-egs');
+const { validateSignedInvoicePayload, classifySubmissionOutcome } = require('./zatca-invoice-validation');
 const { defineSecret } = require('firebase-functions/params');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
@@ -162,24 +163,14 @@ exports.zatcaSubmitInvoice = onCall({
   const invoiceBase64 = String(input.invoice || '').trim();
   const documentType = String(input.documentType || '').toLowerCase();
 
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid)) {
-    throw new HttpsError('invalid-argument', 'A valid invoice UUID is required.');
-  }
-  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(invoiceBase64) || invoiceBase64.length > 1400000) {
-    throw new HttpsError('invalid-argument', 'Invoice must be a base64-encoded XML string under 1 MB.');
-  }
-  if (!/^[A-Za-z0-9+/]{43}=$/.test(invoiceHash) ||
-      Buffer.from(invoiceHash, 'base64').length !== 32 ||
-      Buffer.from(invoiceHash, 'base64').toString('base64') !== invoiceHash) {
-    throw new HttpsError('invalid-argument', 'invoiceHash must be a Base64-encoded 32-byte SHA-256 digest as required by FATOORA.');
-  }
   if (!['simplified', 'standard'].includes(documentType)) {
     throw new HttpsError('invalid-argument', 'documentType must be simplified or standard.');
   }
-
-  const xml = Buffer.from(invoiceBase64, 'base64').toString('utf8');
-  if (!xml.includes('<Invoice') || /<!DOCTYPE|<!ENTITY/i.test(xml)) {
-    throw new HttpsError('invalid-argument', 'A UBL Invoice XML document is required; DTD and ENTITY declarations are forbidden.');
+  const payloadCheck = validateSignedInvoicePayload({
+    uuid, invoiceHash, invoice: invoiceBase64
+  });
+  if (!payloadCheck.valid) {
+    throw new HttpsError('invalid-argument', payloadCheck.reason);
   }
 
   const { z, missing } = await getProfile(uid);
@@ -223,19 +214,23 @@ exports.zatcaSubmitInvoice = onCall({
       env, path, headers,
       body: { invoiceHash, uuid, invoice: invoiceBase64 }
     });
-    const status = documentType === 'standard'
-      ? (result.data.clearedInvoice ? 'cleared' : 'submitted')
-      : (String(result.data.status || '').toLowerCase() === 'reported' ? 'reported' : 'submitted');
+    const status = classifySubmissionOutcome({ documentType, responseData: result.data });
     await invoiceRef.update({
       status, response: result.data, requestId: result.headers.requestId,
       submittedAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
     });
     return { uuid, status, environment: env, response: result.data };
   } catch (error) {
+    // A timeout/network failure can happen after ZATCA accepted the request.
+    // Do not automatically re-submit an ambiguous invoice; reconcile it first.
+    const uncertain = error.code === 'unavailable' ||
+      (error.details && Number(error.details.status) >= 500);
     await invoiceRef.update({
-      status: 'failed', errorCode: error.code || 'zatca_error',
+      status: uncertain ? 'submission_unknown' : 'failed',
+      errorCode: error.code || 'zatca_error',
       errorMessage: error.message || 'ZATCA submission failed',
       errorDetails: error.details || null,
+      manualReconciliationRequired: uncertain,
       updatedAt: FieldValue.serverTimestamp()
     });
     throw error;
