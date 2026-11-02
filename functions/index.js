@@ -459,6 +459,31 @@ exports.zatcaGenerateInvoice = onCall({
 });
 
 /**
+ * Returns a previously generated invoice XML for authenticated SDK validation.
+ * The XML contains public certificate/signature material, never the private key.
+ */
+exports.zatcaGetGeneratedInvoice = onCall({ region: REGION }, async (request) => {
+  const uid = requireUser(request);
+  const saleId = String(request.data && request.data.saleId || '').trim();
+  if (!/^[A-Za-z0-9_-]{1,100}$/.test(saleId)) {
+    throw new HttpsError('invalid-argument', 'A valid POS sale document ID is required.');
+  }
+  const snap = await db.doc(\`zatca_tenants/\${uid}/invoices/\${saleId}\`).get();
+  if (!snap.exists) throw new HttpsError('not-found', 'Generated invoice was not found.');
+  const invoice = snap.data();
+  return {
+    saleId,
+    invoiceNumber: invoice.number,
+    uuid: invoice.uuid,
+    invoiceHash: invoice.invoiceHash,
+    icv: invoice.icv,
+    pih: invoice.pih,
+    qr: invoice.qr,
+    xml: invoice.xml
+  };
+});
+
+/**
  * Starts FATOORA Compliance CSID onboarding. OTP is accepted only for this
  * request and is never persisted. CSID credentials are encrypted at rest
  * before the callable returns; they are never exposed to the browser.
