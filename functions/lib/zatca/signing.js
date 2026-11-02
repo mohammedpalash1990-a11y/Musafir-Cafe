@@ -9,8 +9,25 @@ const sha256HexB64 = (d) => Buffer.from(crypto.createHash('sha256').update(d).di
 const invoiceHash = (hashInputXml) => sha256b64(Buffer.from(hashInputXml, 'utf8'));
 
 function signHash(invoiceHashB64, privateKeyPem) {
-  const s = crypto.createSign('sha256'); s.update(Buffer.from(invoiceHashB64, 'base64'));
-  return s.sign(privateKeyPem).toString('base64'); // DER ECDSA
+  const digest = Buffer.from(String(invoiceHashB64 || ''), 'base64');
+  if (digest.length !== 32 || digest.toString('base64') !== invoiceHashB64) {
+    throw new Error('Invoice hash must be a canonical Base64-encoded 32-byte SHA-256 digest');
+  }
+  const key = crypto.createPrivateKey(privateKeyPem);
+  if (key.asymmetricKeyType !== 'ec' || key.asymmetricKeyDetails?.namedCurve !== 'secp256k1') {
+    throw new Error('ZATCA invoice signing requires a secp256k1 EC private key');
+  }
+  // ZATCA requires ECDSA over the already-computed invoice digest. Passing
+  // "sha256" here would hash the digest a second time and produce an invalid stamp.
+  return crypto.sign(null, digest, { key, dsaEncoding: 'der' }).toString('base64');
+}
+function verifyHash(invoiceHashB64, signatureB64, publicKeyPem) {
+  const digest = Buffer.from(String(invoiceHashB64 || ''), 'base64');
+  const signature = Buffer.from(String(signatureB64 || ''), 'base64');
+  if (digest.length !== 32 || digest.toString('base64') !== invoiceHashB64 || !signature.length) return false;
+  const key = crypto.createPublicKey(publicKeyPem);
+  if (key.asymmetricKeyType !== 'ec' || key.asymmetricKeyDetails?.namedCurve !== 'secp256k1') return false;
+  return crypto.verify(null, digest, { key, dsaEncoding: 'der' }, signature);
 }
 
 // ZATCA returns binarySecurityToken = base64( base64(DER) ). Returns {certB64, x509}.
@@ -63,4 +80,4 @@ function buildExtensions({ invoiceHashB64, signatureB64, certB64, x509, signingT
     `<sac:SignatureInformation><cbc:ID>urn:oasis:names:specification:ubl:signature:1</cbc:ID><sbc:ReferencedSignatureID>urn:oasis:names:specification:ubl:signature:Invoice</sbc:ReferencedSignatureID>${sig}</sac:SignatureInformation>` +
     '</sig:UBLDocumentSignatures></ext:ExtensionContent></ext:UBLExtension></ext:UBLExtensions>';
 }
-module.exports = { invoiceHash, signHash, loadCertificate, certSignature, publicKeyDer, buildExtensions, sha256b64 };
+module.exports = { invoiceHash, signHash, verifyHash, loadCertificate, certSignature, publicKeyDer, buildExtensions, sha256b64 };
