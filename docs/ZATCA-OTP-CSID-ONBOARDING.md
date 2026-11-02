@@ -15,16 +15,18 @@ This runbook describes the sandbox onboarding callables currently added to Musaf
 
 All callables require Firebase Authentication and use the configured sandbox gateway. Production onboarding is intentionally blocked.
 
-- `zatcaRequestComplianceCsid({ otp, csr })`: sends `POST /compliance`, with the OTP header and Base64 CSR body. It stores only the non-secret request tracking record. The callable currently returns the Compliance CSID and secret to the authenticated caller once; this is sensitive and must not be logged, persisted in browser storage, or shared. This transient return path still needs a production-grade secret handoff before live deployment.
+- `zatcaRequestComplianceCsid({ otp, csr })`: sends `POST /compliance`, with the OTP header and Base64 CSR body. It stores only the non-secret request tracking record. The callable stores the Compliance CSID and secret encrypted at rest using AES-256-GCM. The encryption key is read from Firebase Secret Manager; the raw credentials are not returned to the browser.
 - `zatcaSubmitComplianceInvoice({ requestId, complianceCsid, complianceSecret, scenario, uuid, invoiceHash, invoice, clearanceStatus })`: sends one pre-generated signed invoice to `POST /compliance/invoices`. It records the result server-side and marks a scenario passed only when the response contains `validationResults.status = PASS`. Standard scenarios require clearance status 1; Simplified scenarios require 0.
-- `zatcaRequestProductionCsid({ requestId, complianceCsid, complianceSecret })`: server-checks all six tracked scenarios before calling `POST /production/csids`. The call is sandbox-only and returns the resulting sandbox CSID/secret once to the authenticated caller. It does not enable production submissions.
+- `zatcaRequestProductionCsid({ requestId, complianceCsid, complianceSecret })`: server-checks all six tracked scenarios before calling `POST /production/csids`. The call is sandbox-only and stores the resulting sandbox CSID/secret encrypted at rest. It does not enable production submissions.
+
+Before deploying these callables, create the encryption key with `openssl rand -base64 32` and set it with `firebase functions:secrets:set ZATCA_ONBOARDING_ENCRYPTION_KEY`. Never commit the generated value. Then deploy only to a non-production Firebase project for integration testing.
 
 All API calls use `Accept-Version: V2`, `Accept: application/json`, and `Content-Type: application/json`. The existing gateway uses Basic authentication with the CSID token as username and secret as password for authenticated calls.
 
 ## Still required before production
 
 - A compliant CSR/private-key generator matching the official ZATCA EGS configuration, with protected key custody and rotation.
-- A production-grade secret handoff/storage mechanism. The current onboarding callables' one-time credential return is not an acceptable final production secret lifecycle.
+- Provision and rotate the 32-byte base64 encryption key as a Firebase Secret Manager secret named ZATCA_ONBOARDING_ENCRYPTION_KEY; restrict secret access to the Functions runtime service account. The current encrypted Firestore envelope is for onboarding workflow state, not a replacement for the production invoice credential lifecycle.
 - Official ZATCA SDK validation of generated CSR, signed UBL XML, invoice hash, signature, QR, and all required invoice types.
 - Confirm the required compliance test matrix for the actual EGS Functionality Map; the six scenario tracker is a conservative gate, not a claim that every taxpayer's matrix is identical.
 - End-to-end sandbox tests against the official gateway with taxpayer-owned test credentials and valid signed fixtures.
