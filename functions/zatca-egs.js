@@ -57,7 +57,7 @@ function assessSaleForZatca(sale, settings) {
   // and rates per line. Never infer a line's tax category from its menu category.
   const missingLineTax = sale.items.some((item) =>
     !['S', 'Z', 'E', 'O'].includes(String(item.zatcaVatCategory || '').toUpperCase()) ||
-    !Number.isFinite(Number(item.zatcaVatRate))
+    item.zatcaVatRate === null || item.zatcaVatRate === undefined || item.zatcaVatRate === '' || !Number.isFinite(Number(item.zatcaVatRate)) || Number(item.zatcaVatRate) < 0
   );
   if (missingLineTax) {
     reasons.push('Add an explicit ZATCA VAT category (S/Z/E/O) and VAT rate to every invoice line; the POS global tax rate is not enough.');
