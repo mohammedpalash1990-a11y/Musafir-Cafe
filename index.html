@@ -691,7 +691,7 @@ function bkBox(){var t0=0;try{t0=+localStorage.getItem('pos_bk')||0}catch(e){}va
  +'<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="pri" style="flex:1" onclick="backup()">'+I('copy')+' '+L('ডেটা ডাউনলোড','Download data')+'</button><label class="btn" style="flex:1;text-align:center">'+L('ব্যাকআপ থেকে ফেরান','Restore')+'<input type="file" accept=".json,application/json" hidden onchange="restoreFile(this)"></label></div></div>'}
 
 function zatcaBox(){
- var z=S.zatca||{};
+ var z=S.zatca||{},latest=H.slice().sort(function(a,b){return b.t-a.t})[0],saleDefault=z.lastSaleId||(latest?'s'+latest.no:'');
  return '<div class="box"><div class="hd">🧾 <b>'+L('সৌদি ZATCA / FATOORA সেটআপ','Saudi ZATCA / FATOORA setup')+'</b></div>'
  +'<p class="mute" style="font-size:12px">'+L('আপনার VAT ব্যবসার তথ্য দিন। CSID, private key, OTP বা গোপন credentials এখানে লিখবেন না।','Enter your VAT business details. Never enter CSID, private key, OTP or secret credentials here.')+'</p>'
  +'<label>'+L('আইনগত ব্যবসার নাম','Legal seller name')+'</label><input id="z_name" value="'+esc(z.sellerName||'')+'">'
@@ -701,16 +701,70 @@ function zatcaBox(){
  +'<label>'+L('জেলা / এলাকা','District')+'</label><input id="z_district" value="'+esc(z.district||'')+'">'
  +'<label>'+L('শহর','City')+'</label><input id="z_city" value="'+esc(z.city||'')+'">'
  +'<label>Invoice type</label><select id="z_type"><option value="simplified" '+((z.invoiceType||'simplified')==='simplified'?'selected':'')+'>Simplified (B2C)</option><option value="standard" '+(z.invoiceType==='standard'?'selected':'')+'>Standard (B2B)</option></select>'
+ +'<label>Commercial Registration (CR) number</label><input id="z_cr" value="'+esc(z.crNumber||'')+'">'
+ +'<div class="box" style="margin-top:10px"><b>Sandbox EGS onboarding / invoice tools</b><p class="mute" style="font-size:12px">Sandbox only. Never enter or save your private key here. Generate the CSR with the official ZATCA profile; keep its matching private key in Firebase Secret Manager.</p>'
+ +'<label>FATOORA OTP (one-time; not saved)</label><input id="z_otp" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="6-digit OTP">'
+ +'<label>Base64 CSR (public request only)</label><textarea id="z_csr" rows="3" style="width:100%">'+esc(z.csrDraft||'')+'</textarea>'
+ +'<button class="g" style="width:100%;margin-top:6px" onclick="zatcaRequestCsidFromUi()">Request sandbox Compliance CSID</button>'
+ +'<label>Compliance request ID</label><input id="z_request_id" value="'+esc(z.onboardingRequestId||'')+'">'
+ +'<label>POS sale document ID (example: s1001)</label><input id="z_sale_id" value="'+esc(saleDefault)+'">'
+ +'<button class="pri" style="width:100%;margin-top:6px" onclick="zatcaGenerateFromUi()">Generate & sign sandbox invoice</button>'
+ +'<button class="g" style="width:100%;margin-top:6px" onclick="zatcaDownloadFromUi()">Download XML for official SDK validation</button>'
+ +'<button class="g" style="width:100%;margin-top:6px" onclick="zatcaSubmitFromUi()">Submit to sandbox after SDK validation</button>'
+ +'<div class="mute" id="z_egs_msg" style="font-size:12px;margin-top:8px">Compliance scenario PASS checks and sandbox Production CSID are required before invoice generation.</div></div>'
  +'<label style="display:flex;align-items:center;gap:8px;color:var(--ink)"><input id="z_enabled" type="checkbox" style="width:auto" '+(z.enabled?'checked':'')+'> '+L('ZATCA seller profile চালু','Enable ZATCA seller profile')+'</label>'
  +'<button class="pri" style="width:100%;margin-top:8px" onclick="saveZatcaProfile()">'+L('ZATCA তথ্য সেভ করুন','Save ZATCA profile')+'</button>'
  +'<div class="mute" id="z_msg" style="font-size:12px;margin-top:8px">'+L('এটি শুধু ব্যবসার প্রোফাইল সেভ করবে; সরকারি সংযোগ/অনুমোদন নয়।','This only saves the seller profile; it does not connect to or certify with ZATCA.')+'</div></div>'
 }
 function saveZatcaProfile(){
  var $z=id=>document.getElementById(id);
- S.zatca={enabled:!!$z('z_enabled').checked,sellerName:$z('z_name').value.trim(),vatNumber:$z('z_vat').value.trim(),street:$z('z_street').value.trim(),building:$z('z_building').value.trim(),postalCode:$z('z_postal').value.trim(),district:$z('z_district').value.trim(),city:$z('z_city').value.trim(),invoiceType:$z('z_type').value};
+ S.zatca={enabled:!!$z('z_enabled').checked,sellerName:$z('z_name').value.trim(),vatNumber:$z('z_vat').value.trim(),crNumber:$z('z_cr').value.trim(),street:$z('z_street').value.trim(),building:$z('z_building').value.trim(),postalCode:$z('z_postal').value.trim(),district:$z('z_district').value.trim(),city:$z('z_city').value.trim(),invoiceType:$z('z_type').value,onboardingRequestId:$z('z_request_id').value.trim(),lastSaleId:$z('z_sale_id').value.trim()};
  save();
  var m=$z('z_msg');if(m)m.textContent=L('ZATCA ব্যবসার তথ্য সেভ হয়েছে।','ZATCA seller profile saved.');
 }
+async function zatcaRequestCsidFromUi(){
+ var otp=$('z_otp')&&$('z_otp').value.trim(),csr=$('z_csr')&&$('z_csr').value.trim(),m=$('z_egs_msg');
+ if(!otp||!csr){toast(L('OTP ও CSR দিন','Enter OTP and CSR'));return}
+ if(!window.FB||!FB.call){toast(L('Firebase Functions এখনো সংযুক্ত নয়','Firebase Functions are not connected'));return}
+ try{
+  var r=await FB.call('zatcaRequestComplianceCsid',{otp:otp,csr:csr});
+  $('z_otp').value='';
+  if(r.requestId){$('z_request_id').value=r.requestId;S.zatca=S.zatca||{};S.zatca.onboardingRequestId=r.requestId;save()}
+  if(m)m.textContent=L('Compliance CSID অনুরোধ গ্রহণ হয়েছে। এখন প্রয়োজনীয় test invoice PASS করাতে হবে।','Compliance CSID request accepted. Complete all required compliance invoice PASS checks next.');
+  toast(L('Compliance CSID অনুরোধ পাঠানো হয়েছে','Compliance CSID request submitted'));
+ }catch(e){if(m)m.textContent=e.message||String(e);toast('ZATCA: '+(e.message||e))}
+}
+async function zatcaGenerateFromUi(){
+ var saleId=$('z_sale_id')&&$('z_sale_id').value.trim(),requestId=$('z_request_id')&&$('z_request_id').value.trim(),m=$('z_egs_msg');
+ if(!saleId||!requestId){toast(L('Sale ID ও onboarding request ID দিন','Enter sale ID and onboarding request ID'));return}
+ if(!window.FB||!FB.call){toast(L('Firebase Functions এখনো সংযুক্ত নয়','Firebase Functions are not connected'));return}
+ try{
+  var r=await FB.call('zatcaGenerateInvoice',{saleId:saleId,onboardingRequestId:requestId});
+  S.zatca=S.zatca||{};S.zatca.lastSaleId=saleId;S.zatca.onboardingRequestId=requestId;save();
+  if(m)m.textContent='Generated '+r.invoiceNumber+' · '+r.status+' · '+r.totalWithVat+' SAR';
+  toast(L('Sandbox invoice তৈরি হয়েছে','Sandbox invoice generated'));
+ }catch(e){if(m)m.textContent=e.message||String(e);toast('ZATCA: '+(e.message||e))}
+}
+async function zatcaDownloadFromUi(){
+ var saleId=$('z_sale_id')&&$('z_sale_id').value.trim(),m=$('z_egs_msg');
+ if(!saleId){toast(L('Sale ID দিন','Enter sale ID'));return}
+ try{
+  var r=await FB.call('zatcaGetGeneratedInvoice',{saleId:saleId});
+  var blob=new Blob([r.xml],{type:'application/xml;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=(r.invoiceNumber||'musafir-invoice')+'.xml';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  if(m)m.textContent=L('XML ডাউনলোড হয়েছে। official ZATCA SDK দিয়ে validate করুন।','XML downloaded. Validate it with the official ZATCA SDK.');
+ }catch(e){if(m)m.textContent=e.message||String(e);toast('ZATCA: '+(e.message||e))}
+}
+async function zatcaSubmitFromUi(){
+ var saleId=$('z_sale_id')&&$('z_sale_id').value.trim(),requestId=$('z_request_id')&&$('z_request_id').value.trim(),m=$('z_egs_msg');
+ if(!confirm(L('Official ZATCA SDK validation PASS হয়েছে? শুধু PASS হলে sandbox submit করুন।','Has the official ZATCA SDK validation passed? Submit to sandbox only after PASS.')))return;
+ try{
+  var r=await FB.call('zatcaSubmitGeneratedInvoice',{saleId:saleId,onboardingRequestId:requestId});
+  if(m)m.textContent='Sandbox submission: '+r.status;
+  toast('ZATCA: '+r.status);
+ }catch(e){if(m)m.textContent=e.message||String(e);toast('ZATCA: '+(e.message||e))}
+}
+
 function vatBox(){var v=Object.assign({enabled:true,rate:15,pricesIncludeVat:true},S.vat||{});return '<div class="box"><div class="hd">🧾 <b>Saudi VAT / ضريبة القيمة المضافة</b></div><label style="display:flex;align-items:center;gap:8px;color:var(--ink)"><input id="vat_on" type="checkbox" style="width:auto" '+(v.enabled?'checked':'')+'> '+L('VAT চালু','Enable VAT')+'</label><label>'+L('VAT হার (%)','VAT rate (%)')+'</label><input id="vat_rate" type="number" min="0" max="100" step="0.01" value="'+esc(v.rate)+'"><label style="display:flex;align-items:center;gap:8px;color:var(--ink)"><input id="vat_inc" type="checkbox" style="width:auto" '+(v.pricesIncludeVat?'checked':'')+'> '+L('পণ্যের দামের মধ্যেই VAT অন্তর্ভুক্ত','Product prices already include VAT')+'</label><p class="mute" style="font-size:12px">'+L('এই সেটিং সব পণ্যে স্বয়ংক্রিয়ভাবে প্রযোজ্য হবে। আলাদা পণ্যে VAT বসাতে হবে না। 9.90 SAR হলে 15% অন্তর্ভুক্ত VAT হবে 1.29 SAR; মোট দাম 9.90 SAR-ই থাকবে।','Applies globally to every product. No per-product VAT setup is needed. A 9.90 SAR VAT-inclusive price contains 1.29 SAR VAT; customer total stays 9.90 SAR.')+'</p><button class="pri" style="width:100%" onclick="saveVat()">'+L('VAT সেটিংস সেভ করুন','Save VAT settings')+'</button></div>'}
 function saveVat(){var rate=Number(document.getElementById('vat_rate').value);if(!Number.isFinite(rate)||rate<0||rate>100){toast(L('VAT হার ০–১০০ এর মধ্যে দিন','VAT rate must be between 0 and 100'));return}S.vat={enabled:!!document.getElementById('vat_on').checked,rate:rate,pricesIncludeVat:!!document.getElementById('vat_inc').checked};S.tax=rate;save();render()}
 function vSet0(){
@@ -1211,9 +1265,10 @@ document.addEventListener('keydown',function(ev){var tg=(ev.target&&ev.target.ta
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,doc,setDoc,deleteDoc,collection,onSnapshot,getDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 if(!/PASTE/.test(window.FIREBASE_CONFIG.apiKey)){
- const app=initializeApp(window.FIREBASE_CONFIG),auth=getAuth(app),db=(function(){try{return initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()}),experimentalForceLongPolling:true})}catch(e){return getFirestore(app)}})();let un=[];
+ const app=initializeApp(window.FIREBASE_CONFIG),auth=getAuth(app),functions=getFunctions(app,'me-central1'),db=(function(){try{return initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()}),experimentalForceLongPolling:true})}catch(e){return getFirestore(app)}})();let un=[];
  const ref=(c,i)=>doc(db,'users',auth.currentUser.uid,c,i);
  window.FB={
   watch:cb=>onAuthStateChanged(auth,cb),
@@ -1227,7 +1282,8 @@ if(!/PASTE/.test(window.FIREBASE_CONFIG.apiKey)){
   pub:c=>getDoc(doc(db,'receipts',c)).then(s=>s.exists()?s.data():null),
   setPub:(c,d)=>setDoc(doc(db,'receipts',c),JSON.parse(JSON.stringify(d))),
   delPub:c=>deleteDoc(doc(db,'receipts',c)),
-  listen:(c,cb,er)=>un.push(onSnapshot(collection(db,'users',auth.currentUser.uid,c),cb,er))
+  listen:(c,cb,er)=>un.push(onSnapshot(collection(db,'users',auth.currentUser.uid,c),cb,er)),
+  call:(name,data)=>httpsCallable(functions,name)(data).then(result=>result.data)
  };
 }
 if(window.onFB)window.onFB();
