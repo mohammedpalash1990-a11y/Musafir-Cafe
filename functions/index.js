@@ -58,7 +58,7 @@ function getBaseUrl(env) {
     if (!configured.startsWith('https://')) {
       throw new HttpsError('failed-precondition', 'ZATCA_API_BASE_URL must use HTTPS.');
     }
-    return configured.replace(/\\/+$/, '');
+    return configured.replace(/\/+$/, '');
   }
   return env === 'production' ? PRODUCTION_URL : SANDBOX_URL;
 }
