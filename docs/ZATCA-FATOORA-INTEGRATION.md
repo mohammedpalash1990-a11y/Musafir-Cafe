@@ -40,7 +40,7 @@ Configure the callable Functions environment with `ZATCA_ENVIRONMENT=sandbox` fo
 - `zatcaCheckSetup`: authenticated seller-profile completeness check.
 - `zatcaStatus`: environment and secret-presence status; does not validate CSID against ZATCA.
 - `zatcaCheckCredentials`: confirms secrets are mounted; it is not a gateway network test.
-- `zatcaSubmitInvoice`: accepts an already signed UBL XML payload, UUID, SHA-256 invoice hash, and `documentType`; routes Standard to Clearance and Simplified to Reporting. It is not an invoice generator or signer.
+- `zatcaSubmitInvoice`: accepts an already signed UBL XML payload, UUID, SHA-256 invoice hash, and `documentType`; routes Standard to Clearance and Simplified to Reporting. It is not an invoice generator or signer. Before sending, transport validation enforces canonical Base64, a 1 MiB decoded-size limit, valid UTF-8, a UBL Invoice root, a matching XML UUID, a 32-byte Base64 SHA-256 value, and rejects DTD/ENTITY declarations. These checks do **not** validate UBL schema, the ZATCA invoice-hash algorithm, XAdES signatures, QR content, or SDK compliance.
 
 ## Required EGS work before any live submission
 
@@ -50,7 +50,7 @@ Configure the callable Functions environment with `ZATCA_ENVIRONMENT=sandbox` fo
 4. Implement UBL 2.1 XML generation from the real POS sale record, including invoice UUID, issue date/time, seller/buyer data, VAT categories/rates, tax totals, monetary totals, invoice lines, and required document references.
 5. Implement the ZATCA-prescribed invoice hash/PIH chain, ECDSA/XAdES signing and TLV QR according to the current official Security Features Implementation Standards.
 6. Validate XML and QR using the official ZATCA SDK and complete sandbox API tests.
-7. Wire the EGS pipeline to the POS checkout and store the original XML, hash, QR, clearance/reporting response and status against the sale. Ensure retry/idempotency, credit/debit notes, refunds, and offline queued sales are handled without duplicate issuance.
+7. Wire the EGS pipeline to the POS checkout and store the original XML, hash, QR, clearance/reporting response and status against the sale. Ensure retry/idempotency, credit/debit notes, refunds, and offline queued sales are handled without duplicate issuance. If a gateway timeout or server-side 5xx leaves acceptance ambiguous, the invoice is marked `submission_unknown` and automatic retry for that UUID is blocked pending manual reconciliation.
 8. Only after a successful taxpayer onboarding and end-to-end verification, set both deployment-only flags `ZATCA_PRODUCTION_ENABLED=true` and `ZATCA_PRODUCTION_CSID_VERIFIED=true`, set `ZATCA_ENVIRONMENT=production`, and deploy.
 
 ## Deployment
@@ -72,6 +72,8 @@ The queue assesses seller-profile completeness, invoice-line validity, refund st
 - `manual_review`: sale data is not suitable for invoice creation.
 - `credit_note_required`: refund needs a separate compliant credit-note workflow.
 - `awaiting_egs_review`: sale is recorded, but currency/tax/document classification or the EGS pipeline needs review.
+
+The signed-in submit endpoint also uses `submission_unknown` when a request may have reached the gateway but no definitive response was received. Do not reset this state or retry the UUID until the gateway outcome has been reconciled.
 
 **Important:** every transaction must be classified as Standard or Simplified from its buyer and transaction details. A global default alone is not sufficient. The existing POS currently has no verified buyer VAT-number/address capture or compliant invoice generator, so queued records intentionally remain in review and are not automatically submitted.
 
