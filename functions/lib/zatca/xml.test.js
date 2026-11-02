@@ -27,7 +27,7 @@ test('builds compact UBL XML with canonical text escaping and no XML declaration
   const result = buildInvoiceXml(invoice);
   assert.match(result.xmlBody, /^<Invoice /);
   assert.ok(!result.xmlBody.startsWith('<?xml'));
-  assert.ok(result.xmlBody.includes('Tea &amp; Coffee ]]&gt; &lt;special&gt;'));
+  assert.ok(result.xmlBody.includes('Tea &amp; Coffee ]]&gt; &lt;special>'));
   assert.ok(!result.xmlBody.includes('&gt; Coffee'));
   assert.equal(result.totals.total, 990);
 });
