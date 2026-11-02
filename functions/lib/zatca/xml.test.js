@@ -38,3 +38,17 @@ test('omits optional seller CRN identification when no CR number is configured',
   assert.ok(!result.xmlBody.includes('<cac:PartyIdentification>'));
   assert.ok(!result.xmlBody.includes('<cbc:ID schemeID="CRN"></cbc:ID>'));
 });
+
+
+test('preserves sub-halala VAT-exclusive unit prices for multi-quantity low-price products', () => {
+  const lowPrice = {
+    ...invoice,
+    lines: [{ name: 'Small add-on', qty: 100, unitPriceExclVat: Number((0.01 * 100 / 115).toFixed(6)) }]
+  };
+  const result = buildInvoiceXml(lowPrice);
+  assert.equal(result.totals.net, 87);
+  assert.equal(result.totals.tax, 13);
+  assert.equal(result.totals.total, 100);
+  assert.ok(result.xmlBody.includes('<cbc:PriceAmount>0.008696</cbc:PriceAmount>'));
+  assert.ok(result.xmlBody.includes('<cbc:LineExtensionAmount currencyID="SAR">0.87</cbc:LineExtensionAmount>'));
+});
