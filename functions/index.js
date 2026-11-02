@@ -349,8 +349,8 @@ exports.zatcaGenerateInvoice = onCall({
   }
 
   const [saleSnap, settingsSnap] = await Promise.all([
-    db.doc(\`users/\${uid}/sales/\${saleId}\`).get(),
-    db.doc(\`users/\${uid}/pos/settings\`).get()
+    db.doc(`users/${uid}/sales/${saleId}`).get(),
+    db.doc(`users/${uid}/pos/settings`).get()
   ]);
   if (!saleSnap.exists) throw new HttpsError('not-found', 'POS sale was not found.');
   if (!settingsSnap.exists) throw new HttpsError('failed-precondition', 'POS settings are missing.');
@@ -379,7 +379,7 @@ exports.zatcaGenerateInvoice = onCall({
     const checked = validateProductionRequest({ requestId: input.onboardingRequestId });
     if (!checked.valid) throw new HttpsError('invalid-argument', 'A valid sandbox onboardingRequestId is required.');
     onboardingEncryptionKey();
-    const onboardingSnap = await db.doc(\`users/\${uid}/zatcaOnboarding/\${checked.requestId}\`).get();
+    const onboardingSnap = await db.doc(`users/${uid}/zatcaOnboarding/${checked.requestId}`).get();
     if (!onboardingSnap.exists || onboardingSnap.data().status !== 'sandbox_production_csid_issued') {
       throw new HttpsError('failed-precondition', 'A sandbox Production CSID must be issued through onboarding before invoice generation.');
     }
@@ -397,7 +397,7 @@ exports.zatcaGenerateInvoice = onCall({
     const rate = Number(item.zatcaVatRate);
     const grossUnitPrice = Number(item.price);
     if (category !== 'S' || rate !== 15 || !Number.isFinite(grossUnitPrice) || grossUnitPrice < 0) {
-      throw new HttpsError('failed-precondition', \`Sale line \${index + 1} must use the automatic Standard-rated 15% VAT classification.\`);
+      throw new HttpsError('failed-precondition', `Sale line ${index + 1} must use the automatic Standard-rated 15% VAT classification.`);
     }
     return {
       name: String(item.name || '').trim(),
@@ -436,7 +436,7 @@ exports.zatcaGenerateInvoice = onCall({
     db, uid, stateKey: 'default', sale: invoiceSale, seller: z, subtype,
     privateKeyPem, certToken, numberPrefix: 'MUS-'
   });
-  const jobRef = db.doc(\`users/\${uid}/zatcaInvoices/sale-\${saleId}\`);
+  const jobRef = db.doc(`users/${uid}/zatcaInvoices/sale-${saleId}`);
   await jobRef.set({
     status: 'generated_pending_sdk',
     invoiceNumber: generated.number,
