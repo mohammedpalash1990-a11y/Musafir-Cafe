@@ -46,3 +46,20 @@ test('accepts a Base64 SHA-256 digest and rejects hexadecimal form', () => {
   assert.equal(isSha256Base64('a'.repeat(64)), false);
   assert.equal(isSha256Base64('not-a-hash'), false);
 });
+
+test('holds invoices when POS line VAT category and rate are missing', () => {
+  const result = assessSaleForZatca(sale, settings);
+  assert.ok(result.reasons.some((reason) => reason.includes('explicit ZATCA VAT category')));
+});
+
+test('detects inconsistent line subtotal and sale total arithmetic', () => {
+  const result = assessSaleForZatca({
+    ...sale,
+    sub: 110,
+    disc: 5,
+    tax: 15,
+    total: 115
+  }, settings);
+  assert.ok(result.reasons.some((reason) => reason.includes('line extension amounts')));
+  assert.ok(result.reasons.some((reason) => reason.includes('does not reconcile with the sale total')));
+});
