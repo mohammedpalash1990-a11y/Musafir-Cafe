@@ -231,7 +231,9 @@ var D = {
 var CB = {Drinks:'পানীয়',Food:'খাবার'}, BN = {1:'চা',2:'কফি',3:'ঠান্ডা জুস',4:'পানির বোতল',5:'স্যান্ডউইচ',6:'কেক'};
 
 function load(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v||d}catch(e){return d}}
-var S = load('pos_s',{shop:'Musafir Cafe',cur:'৳',tax:0,lang:'bn'});
+var S = load('pos_s',{shop:'Musafir Cafe',cur:'SAR',tax:15,lang:'bn'});
+// Saudi VAT defaults: one global 15% rate, with menu prices treated as VAT-inclusive.
+if(!S.vat){S.vat={enabled:true,rate:15,pricesIncludeVat:true};S.tax=15;}else{S.vat.enabled=S.vat.enabled!==false;S.vat.rate=Number.isFinite(Number(S.vat.rate))?Math.max(0,Math.min(100,Number(S.vat.rate))):15;S.vat.pricesIncludeVat=S.vat.pricesIncludeVat!==false;S.tax=S.vat.rate;}
 var P = load('pos_p',[{id:1,name:'Tea',price:30,cat:'Drinks',stock:''},{id:2,name:'Coffee',price:60,cat:'Drinks',stock:''},{id:3,name:'Cold juice',price:80,cat:'Drinks',stock:''},{id:4,name:'Water bottle',price:20,cat:'Drinks',stock:50},{id:5,name:'Sandwich',price:120,cat:'Food',stock:''},{id:6,name:'Cake slice',price:90,cat:'Food',stock:20}]);
 P.forEach(function(p){if(p.bn===undefined)p.bn=BN[p.id]||''});
 
@@ -329,7 +331,7 @@ function fits(id,n){var c2=Object.assign({},cart);if(n<=0)delete c2[id];else c2[
 function cleanCart(){for(var k in cart){if(!gp(k))delete cart[k]}}
 function restock(i,q){if(i.cb&&i.cb.length){i.cb.forEach(function(x){var p=P.find(function(y){return y.id==x});if(p&&p.stock!=='')p.stock+=q});return}var p=i.id?P.find(function(y){return y.id==i.id}):P.find(function(y){return y.name==i.name});if(p&&p.stock!=='')p.stock+=q}
 function sub(){var s=0;for(var id in cart){var p=gp(id);if(p)s+=p.price*cart[id]}return s}
-function calc(){var s=rnd2(sub()),d=rnd2(Math.min(Math.max(+disc||0,0),s)),tx=rnd2((s-d)*(+S.tax||0)/100);return{s:s,d:d,tx:tx,t:rnd2(s-d+tx)}}
+function calc(){var s=rnd2(sub()),d=rnd2(Math.min(Math.max(+disc||0,0),s)),v=S.vat||{enabled:true,rate:+S.tax||15,pricesIncludeVat:true},rate=Math.max(0,Math.min(100,Number(v.rate)||0)),enabled=v.enabled!==false,inclusive=v.pricesIncludeVat!==false,base=rnd2(s-d),tx=enabled?(inclusive?rnd2(base*rate/(100+rate)):rnd2(base*rate/100)):0,netS=enabled&&inclusive?rnd2(s*100/(100+rate)):s,netD=enabled&&inclusive?rnd2(d*100/(100+rate)):d;return{s:s,d:d,tx:tx,t:rnd2(base+(enabled&&!inclusive?tx:0)),netS:netS,netD:netD,vatRate:rate,vatInclusive:inclusive,vatEnabled:enabled}}
 function cnt(){var n=0;for(var id in cart)n+=cart[id];return n}
 function hue(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h}
 function isWide(){return !!(window.matchMedia&&window.matchMedia('(min-width:860px)').matches)}
@@ -423,7 +425,7 @@ function cartInner(sheet){
   var ps=pst(),PM=['Cash','bKash','Nagad','Rocket','BanglaQR','Due'],split=pays.length>1||pays.sp,x0=pays[0];
   h+='<div class="cp"><div class="tbar"><span class="mute">'+cnt()+t('itm')+'</span><span>'+t('total')+': <b>'+$$(c.t)+'</b></span></div>'
   +'<div class="dl"><span>'+t('disc')+' ('+esc(S.cur)+')</span><input type="number" inputmode="decimal" value="'+esc(disc)+'" onchange="disc=this.value;openCart();render()"></div>'
-  +((c.d||+S.tax)?'<div class="sm1 mute"><span>'+t('sub')+' '+$$(c.s)+'</span>'+(c.d?'<span>'+t('disc')+' −'+$$(c.d)+'</span>':'')+(+S.tax?'<span>'+t('tax')+' '+S.tax+'% '+$$(c.tx)+'</span>':'')+'</div>':'');
+  +((c.d||c.tx)?'<div class="sm1 mute"><span>'+t('sub')+' '+$(c.s)+'</span>'+(c.d?'<span>'+t('disc')+' −'+$(c.d)+'</span>':'')+(c.vatEnabled&&c.vatRate?'<span>'+L(c.vatInclusive?'VAT included':'VAT','VAT')+' '+c.vatRate+'% '+$(c.tx)+'</span>':'')+'</div>':'');
   h+='<div class="box" style="margin:10px 0;padding:10px"><b>🧾 ZATCA invoice type</b><select onchange="ZBUY.documentType=this.value;openCart()"><option value="" disabled'+(!ZBUY.documentType?' selected':'')+'>'+L('Invoice type নির্বাচন করুন','Select invoice type')+'</option><option value="simplified"'+(ZBUY.documentType==='simplified'?' selected':'')+'>Simplified (B2C)</option><option value="standard"'+(ZBUY.documentType==='standard'?' selected':'')+'>Standard (B2B)</option></select>';
   if(ZBUY.documentType==='standard'){
    h+='<label>Buyer legal name</label><input value="'+esc(ZBUY.buyerName)+'" onchange="ZBUY.buyerName=this.value" placeholder="Company legal name"><label>Buyer VAT number (15 digits)</label><input inputmode="numeric" maxlength="15" value="'+esc(ZBUY.buyerVatNumber)+'" onchange="ZBUY.buyerVatNumber=this.value"><label>Buyer street</label><input value="'+esc(ZBUY.buyerStreet)+'" onchange="ZBUY.buyerStreet=this.value"><div class="dl"><div style="flex:1"><label>Building number</label><input value="'+esc(ZBUY.buyerBuilding)+'" onchange="ZBUY.buyerBuilding=this.value"></div><div style="flex:1"><label>Postal code</label><input value="'+esc(ZBUY.buyerPostalCode)+'" onchange="ZBUY.buyerPostalCode=this.value"></div></div><label>District</label><input value="'+esc(ZBUY.buyerDistrict)+'" onchange="ZBUY.buyerDistrict=this.value"><label>City</label><input value="'+esc(ZBUY.buyerCity)+'" onchange="ZBUY.buyerCity=this.value">';
@@ -468,13 +470,13 @@ function charge(){
   if(buyerRequired.some(function(k){return !String(zb[k]||'').trim()})||!/^3\d{13}3$/.test(String(zb.buyerVatNumber||'').trim())){toast(L('Standard invoice-এর buyer name, সঠিক VAT number ও ঠিকানা পূরণ করুন','Complete the Standard invoice buyer name, valid VAT number and address'));return}
  }
  var c=calc(),items=[];
- for(var id in cart){var p=gp(id);if(!p)continue;var it0={id:p.id,name:p.name,bn:p.bn,price:p.price,qty:cart[id],zatcaVatCategory:p.zatcaVatCategory||null,zatcaVatRate:p.zatcaVatRate===undefined?null:p.zatcaVatRate};if(p.combo){it0.cb=p.cb.slice();(function(q){p.cb.forEach(function(x){var r=P.find(function(y){return y.id==x});if(r&&r.stock!=='')r.stock-=q})})(cart[id])}else if(p.stock!=='')p.stock-=cart[id];items.push(it0)}
+ for(var id in cart){var p=gp(id);if(!p)continue;var vatCfg=S.vat||{enabled:true,rate:+S.tax||15,pricesIncludeVat:true};var it0={id:p.id,name:p.name,bn:p.bn,price:p.price,qty:cart[id],zatcaVatCategory:p.zatcaVatCategory||((vatCfg.enabled!==false&&Number(vatCfg.rate)===15)?'S':null),zatcaVatRate:p.zatcaVatRate===undefined?((vatCfg.enabled!==false&&Number(vatCfg.rate)===15)?15:null):p.zatcaVatRate};if(p.combo){it0.cb=p.cb.slice();(function(q){p.cb.forEach(function(x){var r=P.find(function(y){return y.id==x});if(r&&r.stock!=='')r.stock-=q})})(cart[id])}else if(p.stock!=='')p.stock-=cart[id];items.push(it0)}
  var left=ps.chg,mg={},cashGiven=0,dueRows=[];
  ps.rows.forEach(function(x){var a=+x.a||0;if(x.m=='Due'){if(a>0.004)dueRows.push({debtor:x.debtor,a:a});return}if(x.m=='Cash'){cashGiven+=a;var d=Math.min(a,left);a-=d;left-=d}if(a>0.004)mg[x.m]=(mg[x.m]||0)+a});
  var pl=Object.keys(mg).map(function(m){return{m:m,a:+mg[m].toFixed(2)}});
  dueRows.forEach(function(x){pl.push({m:'Due',a:+x.a.toFixed(2),debtor:x.debtor.name})});
  var no=H.reduce(function(a,x){return Math.max(a,x.no)},1000)+1,now=Date.now();
- var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode(),zatca:{documentType:zb.documentType,buyer:zb.documentType==='standard'?{name:zb.buyerName.trim(),vatNumber:zb.buyerVatNumber.trim(),street:zb.buyerStreet.trim(),building:zb.buyerBuilding.trim(),district:zb.buyerDistrict.trim(),city:zb.buyerCity.trim(),postalCode:zb.buyerPostalCode.trim()}:null}};
+ var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,vatInclusive:c.vatInclusive,vatEnabled:c.vatEnabled,vatRate:c.vatRate,netSubtotal:c.netS,netDiscount:c.netD,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode(),zatca:{documentType:zb.documentType,buyer:zb.documentType==='standard'?{name:zb.buyerName.trim(),vatNumber:zb.buyerVatNumber.trim(),street:zb.buyerStreet.trim(),building:zb.buyerBuilding.trim(),district:zb.buyerDistrict.trim(),city:zb.buyerCity.trim(),postalCode:zb.buyerPostalCode.trim()}:null}};
  if(!CU)s.lc=true;
  s.src=window.QRSRC?'qr':'pos';if(window.QRSRC){s.qr=window.QRSRC.l.slice();window.QRSRC=null}
  H.push(s);
@@ -711,10 +713,10 @@ function saveZatcaProfile(){
  var m=$z('z_msg');if(m)m.textContent=L('ZATCA ব্যবসার তথ্য সেভ হয়েছে।','ZATCA seller profile saved.');
 }
 function vSet0(){
- return '<div class="box"><label>'+t('shop')+'</label><input value="'+esc(S.shop)+'" onchange="S.shop=this.value;save();render()"><label>'+t('cur')+'</label><input value="'+esc(S.cur)+'" onchange="S.cur=this.value;save();render()"><label>'+t('taxp')+'</label><input type="number" inputmode="decimal" value="'+S.tax+'" onchange="S.tax=+this.value||0;save();render()"></div>'
- +zatcaBox()
- +'<div class="box"><b>'+t('data')+'</b><p class="mute">'+esc(CE||'')+'</p><button onclick="FB.out()">'+L('লগআউট','Log out')+'</button><p class="mute">'+t('note')+'</p><button class="bad" onclick="wipe()">'+(arm?t('erase2'):t('erase'))+'</button></div>'
+ var v=S.vat||{enabled:true,rate:15,pricesIncludeVat:true};return '<div class="box"><label>'+t('shop')+'</label><input value="'+esc(S.shop)+'" onchange="S.shop=this.value;save();render()"><label>'+t('cur')+'</label><input value="'+esc(S.cur)+'" onchange="S.cur=this.value;save();render()"><div class="hd">🧾 <b>Saudi VAT / ضريبة القيمة المضافة</b></div><label style="display:flex;align-items:center;gap:8px;color:var(--ink)"><input id="vat_on" type="checkbox" style="width:auto" '+(v.enabled!==false?'checked':'')+'> '+L('VAT চালু','Enable VAT')+'</label><label>'+L('VAT হার (%)','VAT rate (%)')+'</label><input id="vat_rate" type="number" min="0" max="100" step="0.01" value="'+esc(v.rate)+'"><label style="display:flex;align-items:center;gap:8px;color:var(--ink)"><input id="vat_inc" type="checkbox" style="width:auto" '+(v.pricesIncludeVat!==false?'checked':'')+'> '+L('পণ্যের দামের মধ্যেই VAT অন্তর্ভুক্ত','Menu prices include VAT')+'</label><p class="mute" style="font-size:12px">'+L('এই সেটিং সব পণ্যে স্বয়ংক্রিয়ভাবে প্রযোজ্য হবে; আলাদা পণ্যে VAT বসাতে হবে না। 9.90 SAR দামে 1.29 SAR VAT অন্তর্ভুক্ত থাকবে এবং কাস্টমার 9.90 SAR-ই দেবেন।','Applies to every product automatically. No per-product VAT setup is needed. A 9.90 SAR price includes 1.29 SAR VAT; customer still pays 9.90 SAR.')+'</p><button class="pri" style="width:100%" onclick="saveVat()">'+L('VAT সেটিংস সেভ করুন','Save VAT settings')+'</button></div>'
 }
+
+function saveVat(){var rate=Number(document.getElementById('vat_rate').value);if(!Number.isFinite(rate)||rate<0||rate>100){toast(L('VAT হার ০–১০০ এর মধ্যে দিন','VAT rate must be between 0 and 100'));return}S.vat={enabled:!!document.getElementById('vat_on').checked,rate:rate,pricesIncludeVat:!!document.getElementById('vat_inc').checked};S.tax=rate;save();render()}
 
 function wipe(){ask(L('সব বিক্রির হিসাব মুছে ফেলতে চান?','Delete ALL sales records?'),function(){H.forEach(function(s){cDel(s.no)});H=[];save();render()})}
 
