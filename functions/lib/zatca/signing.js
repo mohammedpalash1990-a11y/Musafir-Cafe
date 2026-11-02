@@ -25,7 +25,7 @@ function verifyHash(invoiceHashB64, signatureB64, publicKeyPem) {
   const digest = Buffer.from(String(invoiceHashB64 || ''), 'base64');
   const signature = Buffer.from(String(signatureB64 || ''), 'base64');
   if (digest.length !== 32 || digest.toString('base64') !== invoiceHashB64 || !signature.length) return false;
-  const key = crypto.createPublicKey(publicKeyPem);
+  const key = publicKeyPem && publicKeyPem.type === 'public' ? publicKeyPem : crypto.createPublicKey(publicKeyPem);
   if (key.asymmetricKeyType !== 'ec' || key.asymmetricKeyDetails?.namedCurve !== 'secp256k1') return false;
   return crypto.verify(null, digest, { key, dsaEncoding: 'der' }, signature);
 }
