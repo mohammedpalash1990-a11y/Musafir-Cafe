@@ -133,4 +133,6 @@ test('requires per-transaction invoice classification and Standard buyer VAT/add
   }, settings);
   assert.equal(standardReady.documentType, 'standard');
   assert.ok(!standardReady.reasons.some((reason) => reason.includes('Complete Standard invoice buyer details')));
+  assert.ok(!standardReady.reasons.some((reason) => reason.includes('UBL 2.1 generation')));
+  assert.equal(standardReady.status, 'awaiting_egs');
 });

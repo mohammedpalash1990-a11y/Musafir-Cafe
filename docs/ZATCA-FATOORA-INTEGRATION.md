@@ -2,8 +2,9 @@
 
 ## Current implementation status
 
-This repository contains the authenticated Firebase Functions API adapter in `functions/index.js`.
-It is **not yet a production-ready EGS**: the POS does not yet generate ZATCA-compliant UBL 2.1 XML, calculate the ZATCA invoice hash/PIH chain, create the required XAdES/ECDSA signature, or generate the Integration Phase TLV QR. Do not enable Production submission until these are implemented and the generated invoices pass the official ZATCA Compliance and Enablement Toolbox (SDK) and FATOORA onboarding checks.
+The current main branch includes the Saudi Global VAT setting (15% VAT-inclusive pricing) and the EGS foundation: UBL 2.1 XML construction, SHA-256 invoice hashing, ECDSA/XAdES construction, TLV QR generation, ICV/PIH sequencing, OTP/CSID onboarding, and sandbox-only invoice generation/submission callables. The generated-invoice path verifies the EGS private key against the CSID certificate and signs the raw 32-byte invoice digest (not a second hash).
+
+**This is still not certified or production-ready.** The generated XML/hash/XAdES/QR have not yet been validated against the current official ZATCA SDK, and no taxpayer-owned sandbox E2E submission or Production CSID verification has been performed. The POS checkout/offline queue is not yet fully wired to automatically generate and submit invoices. Keep Production disabled.
 
 ## Existing Musafir POS data locations
 
@@ -20,10 +21,10 @@ VAT format validation is a format check only; it does not validate the taxpayer'
 
 Create secrets without committing values to Git:
 
-- `ZATCA_SANDBOX_TOKEN` — sandbox test Production CSID binary security token.
-- `ZATCA_SANDBOX_SECRET` — matching sandbox secret.
-- `ZATCA_PROD_TOKEN` — Production CSID binary security token.
-- `ZATCA_PROD_SECRET` — matching Production CSID secret.
+- `ZATCA_EGS_PRIVATE_KEY` — PEM-encoded private key matching the EGS CSR/CSID certificate; required by sandbox invoice generation.
+- `ZATCA_ONBOARDING_ENCRYPTION_KEY` — Base64-encoded 32-byte AES-256-GCM key used to encrypt/decrypt onboarding credentials.
+- `ZATCA_SANDBOX_TOKEN` / `ZATCA_SANDBOX_SECRET` — legacy sandbox adapter credentials; generated-invoice sandbox submission uses the encrypted sandbox CSID envelope from onboarding.
+- `ZATCA_PROD_TOKEN` / `ZATCA_PROD_SECRET` — reserved for a separately verified production CSID; production callables remain locked.
 
 Never store private keys, CSID secrets, OTPs, or credentials in browser code, Firestore profile documents, GitHub, or chat messages. Buyer VAT/address details are business personal data: verify that deployed Firestore Security Rules restrict `users/{uid}/sales` and `users/{uid}/zatcaInvoices` to the authenticated owner and trusted server functions. No Firestore rules file was found in this repository during this change, so deployed rule enforcement has not been audited. Private signing keys must be protected in an appropriate key store/HSM and must never be sent to the browser.
 
@@ -39,19 +40,23 @@ Configure the callable Functions environment with `ZATCA_ENVIRONMENT=sandbox` fo
 
 - `zatcaCheckSetup`: authenticated seller-profile completeness check.
 - `zatcaStatus`: environment and secret-presence status; does not validate CSID against ZATCA.
-- `zatcaCheckCredentials`: confirms secrets are mounted; it is not a gateway network test.
-- `zatcaSubmitInvoice`: accepts an already signed UBL XML payload, UUID, SHA-256 invoice hash, and `documentType`; routes Standard to Clearance and Simplified to Reporting. It is not an invoice generator or signer. Before sending, transport validation enforces canonical Base64, a 1 MiB decoded-size limit, valid UTF-8, a UBL Invoice root, a matching XML UUID, a 32-byte Base64 SHA-256 value, and rejects DTD/ENTITY declarations. These checks do **not** validate UBL schema, the ZATCA invoice-hash algorithm, XAdES signatures, QR content, or SDK compliance.
+- `zatcaCheckCredentials`: confirms configured Secret Manager values; it is not a gateway network test.
+- `zatcaRequestComplianceCsid`, `zatcaSubmitComplianceInvoice`, `zatcaRequestProductionCsid`: sandbox-only OTP/CSID onboarding and compliance scenario workflow; credentials are encrypted at rest.
+- `zatcaGenerateInvoice`: sandbox-only invoice generation from an existing POS sale, including ICV/PIH, UBL XML, ECDSA/XAdES and TLV QR. Requires the CSR-matching `ZATCA_EGS_PRIVATE_KEY` Secret Manager secret and a sandbox Production CSID from onboarding.
+- `zatcaGetGeneratedInvoice`: returns the generated XML to the authenticated tenant for official SDK validation.
+- `zatcaSubmitGeneratedInvoice`: explicit sandbox Reporting/Clearance submission of a previously generated invoice, with idempotency and ambiguous-outcome protection.
+- `zatcaSubmitInvoice`: legacy transport adapter for already signed UBL XML. Transport validation enforces canonical Base64, a 1 MiB decoded-size limit, valid UTF-8, a UBL Invoice root, a matching XML UUID, a 32-byte Base64 SHA-256 value, and rejects DTD/ENTITY declarations. These checks do **not** validate UBL schema or official SDK compliance.
 
-## Required EGS work before any live submission
+## Required work before any live submission
 
 1. Confirm seller legal name, VAT number, registered address, branch/location and applicable VAT treatment with the taxpayer.
-2. Decide the EGS Functionality Map for Standard and Simplified documents, then generate a compliant CSR and keep its private key secure.
-3. Complete FATOORA OTP/CSR Compliance CSID onboarding, compliance invoice checks, and Production CSID issuance.
-4. Implement UBL 2.1 XML generation from the real POS sale record, including invoice UUID, issue date/time, seller/buyer data, VAT categories/rates, tax totals, monetary totals, invoice lines, and required document references.
-5. Implement the ZATCA-prescribed invoice hash/PIH chain, ECDSA/XAdES signing and TLV QR according to the current official Security Features Implementation Standards.
-6. Validate XML and QR using the official ZATCA SDK and complete sandbox API tests.
-7. Wire the EGS pipeline to the POS checkout and store the original XML, hash, QR, clearance/reporting response and status against the sale. Ensure retry/idempotency, credit/debit notes, refunds, and offline queued sales are handled without duplicate issuance. If a gateway timeout or server-side 5xx leaves acceptance ambiguous, the invoice is marked `submission_unknown` and automatic retry for that UUID is blocked pending manual reconciliation.
-8. Only after a successful taxpayer onboarding and end-to-end verification, set both deployment-only flags `ZATCA_PRODUCTION_ENABLED=true` and `ZATCA_PRODUCTION_CSID_VERIFIED=true`, set `ZATCA_ENVIRONMENT=production`, and deploy.
+2. Generate the EGS CSR/private key using the current official ZATCA CSR profile; keep the matching private key in Secret Manager or an HSM and verify it matches the CSID certificate.
+3. Run the official ZATCA SDK against representative Simplified and Standard invoices, credit/debit notes, XML hashes, signatures, and QR payloads. Resolve every error and warning before proceeding.
+4. Complete taxpayer-owned sandbox OTP/CSID onboarding and end-to-end Reporting/Clearance submissions. Verify actual FATOORA responses, request IDs, and reconciliation behavior.
+5. Wire invoice generation/submission into the POS UI and offline sync queue without breaking existing checkout, inventory, due, reporting, or sales records. Add safe retry/reconciliation UI for `submission_unknown` and `submitted` outcomes.
+6. Complete credit/debit note and refund mapping, per-EGS device sequencing, backup/restore handling, and audit logs. The current invoice builder supports Standard-rated 15% lines only.
+7. Audit deployed Firestore rules and access controls for sales, buyer data, invoice XML, onboarding records and encrypted credentials.
+8. Only after official SDK validation, taxpayer Production CSID issuance, and end-to-end verification, set `ZATCA_PRODUCTION_ENABLED=true` and `ZATCA_PRODUCTION_CSID_VERIFIED=true`, set `ZATCA_ENVIRONMENT=production`, and deploy.
 
 ## Deployment
 

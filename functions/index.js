@@ -3,7 +3,11 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { assessSaleForZatca } = require('./zatca-egs');
 const { validateSignedInvoicePayload, classifySubmissionOutcome } = require('./zatca-invoice-validation');
+const { validateComplianceRequest, extractCsidCredentials, validateProductionRequest } = require('./zatca-onboarding');
+const { generateInvoice } = require('./lib/zatca/invoice');
+const { computeTotals } = require('./lib/zatca/xml');
 const { defineSecret } = require('firebase-functions/params');
+const crypto = require('node:crypto');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 
@@ -14,11 +18,55 @@ const ZATCA_PROD_TOKEN = defineSecret('ZATCA_PROD_TOKEN');
 const ZATCA_PROD_SECRET = defineSecret('ZATCA_PROD_SECRET');
 const ZATCA_SANDBOX_TOKEN = defineSecret('ZATCA_SANDBOX_TOKEN');
 const ZATCA_SANDBOX_SECRET = defineSecret('ZATCA_SANDBOX_SECRET');
+const ZATCA_ONBOARDING_ENCRYPTION_KEY = defineSecret('ZATCA_ONBOARDING_ENCRYPTION_KEY');
+const ZATCA_EGS_PRIVATE_KEY = defineSecret('ZATCA_EGS_PRIVATE_KEY');
 
 const REGION = 'me-central1';
 const API_VERSION = 'V2';
 const SANDBOX_URL = 'https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation';
 const PRODUCTION_URL = 'https://gw-fatoora.zatca.gov.sa/e-invoicing/core';
+
+
+function onboardingEncryptionKey() {
+  const key = Buffer.from(String(ZATCA_ONBOARDING_ENCRYPTION_KEY.value() || ''), 'base64');
+  if (key.length !== 32) {
+    throw new HttpsError('failed-precondition', 'ZATCA_ONBOARDING_ENCRYPTION_KEY must be a base64-encoded 32-byte key in Firebase Secret Manager.');
+  }
+  return key;
+}
+
+function encryptOnboardingValue(value) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', onboardingEncryptionKey(), iv);
+  const ciphertext = Buffer.concat([cipher.update(JSON.stringify(value), 'utf8'), cipher.final()]);
+  return {
+    algorithm: 'aes-256-gcm',
+    iv: iv.toString('base64'),
+    tag: cipher.getAuthTag().toString('base64'),
+    ciphertext: ciphertext.toString('base64')
+  };
+}
+
+function decryptOnboardingValue(envelope) {
+  if (!envelope || envelope.algorithm !== 'aes-256-gcm') {
+    throw new HttpsError('failed-precondition', 'Encrypted ZATCA onboarding credentials are missing or use an unsupported format.');
+  }
+  try {
+    const decipher = crypto.createDecipheriv(
+      'aes-256-gcm',
+      onboardingEncryptionKey(),
+      Buffer.from(envelope.iv, 'base64')
+    );
+    decipher.setAuthTag(Buffer.from(envelope.tag, 'base64'));
+    const plaintext = Buffer.concat([
+      decipher.update(Buffer.from(envelope.ciphertext, 'base64')),
+      decipher.final()
+    ]).toString('utf8');
+    return JSON.parse(plaintext);
+  } catch (_) {
+    throw new HttpsError('data-loss', 'Could not decrypt the stored ZATCA onboarding credentials.');
+  }
+}
 
 function requireUser(request) {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Please sign in first.');
@@ -275,6 +323,431 @@ exports.zatcaQueueSale = onDocumentCreated({
       updatedAt: FieldValue.serverTimestamp()
     });
   });
+});
+
+
+/**
+ * Generate and sign one immutable invoice from an existing POS sale.
+ * This is generation only; it never submits automatically to FATOORA.
+ */
+exports.zatcaGenerateInvoice = onCall({
+  region: REGION,
+  timeoutSeconds: 60,
+  secrets: [ZATCA_EGS_PRIVATE_KEY, ZATCA_ONBOARDING_ENCRYPTION_KEY]
+}, async (request) => {
+  const uid = requireUser(request);
+  const input = request.data || {};
+  const saleId = String(input.saleId || '').trim();
+  if (!/^[A-Za-z0-9_-]{1,100}$/.test(saleId)) {
+    throw new HttpsError('invalid-argument', 'A valid POS sale document ID is required.');
+  }
+
+  const env = getEnvironment();
+  if (env !== 'sandbox') {
+    throw new HttpsError('failed-precondition', 'This invoice-generation callable is sandbox-only. Production generation remains disabled until the official SDK and end-to-end gates are verified.');
+  }
+
+  const [saleSnap, settingsSnap] = await Promise.all([
+    db.doc(`users/${uid}/sales/${saleId}`).get(),
+    db.doc(`users/${uid}/pos/settings`).get()
+  ]);
+  if (!saleSnap.exists) throw new HttpsError('not-found', 'POS sale was not found.');
+  if (!settingsSnap.exists) throw new HttpsError('failed-precondition', 'POS settings are missing.');
+
+  const sale = saleSnap.data();
+  const settings = settingsSnap.data();
+  const z = settings.zatca || {};
+  const assessment = assessSaleForZatca(sale, settings);
+  if (assessment.reasons && assessment.reasons.length) {
+    throw new HttpsError('failed-precondition', 'Sale is not ready for ZATCA invoice generation.', {
+      reasons: assessment.reasons
+    });
+  }
+  if (String(settings.cur || '').trim().toUpperCase() !== 'SAR' ||
+      sale.vatEnabled === false || sale.vatInclusive !== true || Number(sale.vatRate) !== 15) {
+    throw new HttpsError('failed-precondition', 'Invoice generation currently requires SAR and the global 15% VAT-inclusive POS setting.');
+  }
+
+  const subtype = String(sale.zatca && sale.zatca.documentType || '').toLowerCase();
+  if (!['standard', 'simplified'].includes(subtype)) {
+    throw new HttpsError('failed-precondition', 'Choose Standard or Simplified invoice type on the POS sale first.');
+  }
+
+  const checked = validateProductionRequest({ requestId: input.onboardingRequestId });
+  if (!checked.valid) throw new HttpsError('invalid-argument', 'A valid sandbox onboardingRequestId is required.');
+  onboardingEncryptionKey();
+  const onboardingSnap = await db.doc(`users/${uid}/zatcaOnboarding/${checked.requestId}`).get();
+  if (!onboardingSnap.exists || onboardingSnap.data().status !== 'sandbox_production_csid_issued') {
+    throw new HttpsError('failed-precondition', 'A sandbox Production CSID must be issued through onboarding before invoice generation.');
+  }
+  const sandboxCredentials = decryptOnboardingValue(onboardingSnap.data().sandboxProductionCredentialsEncrypted);
+  const certToken = sandboxCredentials.token;
+
+  const privateKeyPem = String(ZATCA_EGS_PRIVATE_KEY.value() || '');
+  if (!privateKeyPem) throw new HttpsError('failed-precondition', 'Configure ZATCA_EGS_PRIVATE_KEY in Firebase Secret Manager.');
+
+  const lines = (sale.items || []).map((item, index) => {
+    const category = String(item.zatcaVatCategory || '').toUpperCase();
+    const rate = Number(item.zatcaVatRate);
+    const grossUnitPrice = Number(item.price);
+    if (category !== 'S' || rate !== 15 || !Number.isFinite(grossUnitPrice) || grossUnitPrice < 0) {
+      throw new HttpsError('failed-precondition', `Sale line ${index + 1} must use the automatic Standard-rated 15% VAT classification.`);
+    }
+    return {
+      name: String(item.name || '').trim(),
+      qty: Number(item.qty),
+      unitPriceExclVat: Number((grossUnitPrice * 100 / 115).toFixed(2))
+    };
+  });
+
+  const saleTime = Number(sale.t);
+  const issuedAt = Number.isFinite(saleTime) ? new Date(saleTime).toISOString() : new Date().toISOString();
+  const invoiceSale = {
+    saleId,
+    issuedAt,
+    lines,
+    discount: Number(sale.disc) || 0,
+    vatRatePercent: 15,
+    buyer: sale.zatca && sale.zatca.buyer || undefined
+  };
+  const calculated = computeTotals({
+    subtype, kind: 'invoice', number: 'preflight', uuid: '123e4567-e89b-42d3-a456-426614174000',
+    issuedAt, icv: 1, pih: 'preflight', seller: z, buyer: invoiceSale.buyer,
+    lines, discount: invoiceSale.discount, vatRatePercent: 15
+  });
+  const mismatch = Math.abs(calculated.lineNet / 100 - Number(sale.sub)) > 0.02 ||
+    Math.abs(calculated.net / 100 - (Number(sale.sub) - Number(sale.disc || 0))) > 0.02 ||
+    Math.abs(calculated.tax / 100 - Number(sale.tax)) > 0.02 ||
+    Math.abs(calculated.total / 100 - Number(sale.total)) > 0.02;
+  if (mismatch) {
+    throw new HttpsError('failed-precondition', 'POS sale amounts do not reconcile to the generated 15% VAT invoice totals. Keep this sale in manual review.', {
+      pos: { sub: sale.sub, disc: sale.disc, tax: sale.tax, total: sale.total },
+      generated: { lineNet: calculated.lineNet / 100, net: calculated.net / 100, tax: calculated.tax / 100, total: calculated.total / 100 }
+    });
+  }
+
+  const generated = await generateInvoice({
+    db, uid, stateKey: 'default', sale: invoiceSale, seller: z, subtype,
+    privateKeyPem, certToken, numberPrefix: 'MUS-'
+  });
+  const jobRef = db.doc(`users/${uid}/zatcaInvoices/sale-${saleId}`);
+  const submissionSnap = await db.doc(`zatca_tenants/${uid}/submissions/${saleId}`).get();
+  const existingSubmissionStatus = String(submissionSnap.exists ? submissionSnap.data().status || '' : '').toLowerCase();
+  const queueStatus = ['reported', 'cleared', 'submitted', 'submission_unknown'].includes(existingSubmissionStatus)
+    ? existingSubmissionStatus : 'generated_pending_sdk';
+  await jobRef.set({
+    status: queueStatus,
+    invoiceNumber: generated.number,
+    uuid: generated.uuid,
+    invoiceHash: generated.invoiceHash,
+    icv: generated.icv,
+    totalWithVat: generated.totalWithVat,
+    vatTotal: generated.vatTotal,
+    generatedAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  return {
+    generated: true,
+    duplicate: !!generated.duplicate,
+    status: queueStatus,
+    saleId,
+    invoiceNumber: generated.number,
+    uuid: generated.uuid,
+    invoiceHash: generated.invoiceHash,
+    qr: generated.qr,
+    totalWithVat: generated.totalWithVat,
+    vatTotal: generated.vatTotal,
+    warning: 'Invoice is generated and signed locally. Run official ZATCA SDK validation and sandbox submission before any production use.'
+  };
+});
+
+/**
+ * Returns a previously generated invoice XML for authenticated SDK validation.
+ * The XML contains public certificate/signature material, never the private key.
+ */
+exports.zatcaGetGeneratedInvoice = onCall({ region: REGION }, async (request) => {
+  const uid = requireUser(request);
+  const saleId = String(request.data && request.data.saleId || '').trim();
+  if (!/^[A-Za-z0-9_-]{1,100}$/.test(saleId)) {
+    throw new HttpsError('invalid-argument', 'A valid POS sale document ID is required.');
+  }
+  const snap = await db.doc(`zatca_tenants/${uid}/invoices/${saleId}`).get();
+  if (!snap.exists) throw new HttpsError('not-found', 'Generated invoice was not found.');
+  const invoice = snap.data();
+  return {
+    saleId,
+    invoiceNumber: invoice.number,
+    uuid: invoice.uuid,
+    invoiceHash: invoice.invoiceHash,
+    icv: invoice.icv,
+    pih: invoice.pih,
+    qr: invoice.qr,
+    xml: invoice.xml
+  };
+});
+
+/**
+ * Explicit sandbox submission of an already generated immutable invoice.
+ * Ambiguous outcomes are blocked from automatic retry to prevent duplicate reporting.
+ */
+exports.zatcaSubmitGeneratedInvoice = onCall({
+  region: REGION,
+  timeoutSeconds: 60,
+  secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY]
+}, async (request) => {
+  const uid = requireUser(request);
+  const input = request.data || {};
+  const saleId = String(input.saleId || '').trim();
+  if (!/^[A-Za-z0-9_-]{1,100}$/.test(saleId)) {
+    throw new HttpsError('invalid-argument', 'A valid POS sale document ID is required.');
+  }
+  const env = getEnvironment();
+  if (env !== 'sandbox') {
+    throw new HttpsError('failed-precondition', 'This generated-invoice submission callable is sandbox-only.');
+  }
+  const checked = validateProductionRequest({ requestId: input.onboardingRequestId });
+  if (!checked.valid) throw new HttpsError('invalid-argument', 'A valid sandbox onboardingRequestId is required.');
+  onboardingEncryptionKey();
+
+  const onboardingSnap = await db.doc('users/' + uid + '/zatcaOnboarding/' + checked.requestId).get();
+  if (!onboardingSnap.exists || onboardingSnap.data().status !== 'sandbox_production_csid_issued') {
+    throw new HttpsError('failed-precondition', 'A sandbox Production CSID must be issued through onboarding before submission.');
+  }
+  const credentials = decryptOnboardingValue(onboardingSnap.data().sandboxProductionCredentialsEncrypted);
+  const invoiceRef = db.doc('zatca_tenants/' + uid + '/invoices/' + saleId);
+  const submissionRef = db.doc('zatca_tenants/' + uid + '/submissions/' + saleId);
+  const jobRef = db.doc('users/' + uid + '/zatcaInvoices/sale-' + saleId);
+  const invoiceSnap = await invoiceRef.get();
+  if (!invoiceSnap.exists) throw new HttpsError('not-found', 'Generate the invoice before submitting it.');
+  const invoice = invoiceSnap.data();
+  const documentType = String(invoice.subtype || '').toLowerCase();
+  if (!['standard', 'simplified'].includes(documentType)) {
+    throw new HttpsError('failed-precondition', 'Generated invoice has an invalid document type.');
+  }
+  const invoiceBase64 = Buffer.from(String(invoice.xml || ''), 'utf8').toString('base64');
+  const payloadCheck = validateSignedInvoicePayload({
+    uuid: invoice.uuid, invoiceHash: invoice.invoiceHash, invoice: invoiceBase64
+  });
+  if (!payloadCheck.valid) throw new HttpsError('failed-precondition', payloadCheck.reason);
+
+  const reservation = await db.runTransaction(async (tx) => {
+    const existing = await tx.get(submissionRef);
+    if (existing.exists) {
+      const state = String(existing.data().status || '').toLowerCase();
+      if (state === 'reported' || state === 'cleared') return { duplicate: true, status: state };
+      if (state === 'processing') throw new HttpsError('aborted', 'This invoice is already being submitted.');
+      if (state === 'submission_unknown' || state === 'submitted') {
+        throw new HttpsError('failed-precondition', 'A previous request may have reached FATOORA. Reconcile its outcome before retrying this invoice.');
+      }
+      tx.set(submissionRef, {
+        status: 'processing',
+        attempts: Number(existing.data().attempts || 0) + 1,
+        updatedAt: FieldValue.serverTimestamp()
+      }, { merge: true });
+      return { duplicate: false };
+    }
+    tx.create(submissionRef, {
+      saleId, uuid: invoice.uuid, invoiceHash: invoice.invoiceHash,
+      status: 'processing', attempts: 1,
+      createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+    });
+    return { duplicate: false };
+  });
+  if (reservation.duplicate) return { duplicate: true, status: reservation.status, saleId, uuid: invoice.uuid };
+
+  try {
+    const standard = documentType === 'standard';
+    const result = await zatcaRequest({
+      env,
+      path: standard ? '/invoices/clearance/single' : '/invoices/reporting/single',
+      headers: { 'Clearance-Status': standard ? '1' : '0' },
+      credentials,
+      body: { invoiceHash: invoice.invoiceHash, uuid: invoice.uuid, invoice: invoiceBase64 }
+    });
+    const status = classifySubmissionOutcome({ documentType, responseData: result.data });
+    await submissionRef.set({
+      status, response: result.data, requestId: result.headers.requestId || null,
+      submittedAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+    await jobRef.set({
+      status, response: result.data, requestId: result.headers.requestId || null,
+      submittedAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+    return { saleId, uuid: invoice.uuid, status, environment: env, response: result.data };
+  } catch (error) {
+    const httpStatus = Number(error.details && error.details.status);
+    const uncertain = error.code === 'unavailable' || httpStatus >= 500;
+    const status = uncertain ? 'submission_unknown' : 'failed';
+    const details = {
+      status,
+      errorCode: error.code || 'zatca_error',
+      errorMessage: error.message || 'FATOORA submission failed',
+      errorDetails: error.details || null,
+      manualReconciliationRequired: uncertain,
+      updatedAt: FieldValue.serverTimestamp()
+    };
+    await submissionRef.set(details, { merge: true });
+    await jobRef.set(details, { merge: true });
+    throw error;
+  }
+});
+
+/**
+ * Starts FATOORA Compliance CSID onboarding. OTP is accepted only for this
+ * request and is never persisted. CSID credentials are encrypted at rest
+ * before the callable returns; they are never exposed to the browser.
+ */
+exports.zatcaRequestComplianceCsid = onCall({ region: REGION, timeoutSeconds: 60, secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY] }, async (request) => {
+  requireUser(request);
+  const checked = validateComplianceRequest({
+    otp: request.data && request.data.otp,
+    csr: request.data && request.data.csr
+  });
+  if (!checked.valid) throw new HttpsError('invalid-argument', checked.reason);
+  onboardingEncryptionKey(); // Fail before requesting a certificate if secure storage is not configured.
+  const env = getEnvironment();
+  if (env === 'production') {
+    throw new HttpsError('failed-precondition', 'Compliance onboarding must be performed in the configured sandbox workflow first; production onboarding is not enabled by this callable.');
+  }
+  const url = getBaseUrl(env) + '/compliance';
+  let response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'Accept-Language': 'en',
+        'Accept-Version': API_VERSION,
+        OTP: checked.otp
+      },
+      body: JSON.stringify({ csr: checked.csr }),
+      signal: AbortSignal.timeout(25000)
+    });
+  } catch (error) {
+    throw new HttpsError('unavailable', 'Could not reach the FATOORA compliance onboarding endpoint.', {
+      cause: String(error && error.message || error)
+    });
+  }
+  const raw = await response.text();
+  let data;
+  try { data = raw ? JSON.parse(raw) : {}; } catch (_) { data = { message: raw.slice(0, 1000) }; }
+  if (!response.ok) {
+    throw new HttpsError('failed-precondition', 'FATOORA rejected the Compliance CSID request.', {
+      status: response.status, response: data
+    });
+  }
+  const credentials = extractCsidCredentials(data);
+  if (!credentials.valid) {
+    throw new HttpsError('data-loss', credentials.reason);
+  }
+  await db.doc(`users/${request.auth.uid}/zatcaOnboarding/${credentials.requestId}`).set({
+    requestId: credentials.requestId, environment: env, status: 'compliance_csid_issued',
+    complianceCredentialsEncrypted: encryptOnboardingValue({ token: credentials.token, secret: credentials.secret }),
+    createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+  return {
+    accepted: true,
+    environment: env,
+    requestId: credentials.requestId,
+    credentialsStoredEncrypted: true,
+    warning: 'Compliance credentials are encrypted server-side with AES-256-GCM. The encryption key must remain in Firebase Secret Manager.'
+  };
+});
+
+/**
+ * Sends one pre-generated, signed compliance test invoice. It never creates
+ * tax XML or signs documents. The caller supplies official SDK-validated
+ * signed test fixtures; Compliance CSID credentials are decrypted server-side.
+ */
+exports.zatcaSubmitComplianceInvoice = onCall({ region: REGION, timeoutSeconds: 60, secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY] }, async (request) => {
+  requireUser(request);
+  const input = request.data || {};
+  const uuid = String(input.uuid || '').trim();
+  const invoiceHash = String(input.invoiceHash || '').trim();
+  const invoice = String(input.invoice || '').trim();
+  const clearanceStatus = String(input.clearanceStatus || '');
+  const requestId = String(input.requestId || '').trim();
+  const scenario = String(input.scenario || '').trim();
+  const scenarios = ['standard_invoice', 'standard_credit_note', 'standard_debit_note', 'simplified_invoice', 'simplified_credit_note', 'simplified_debit_note'];
+  if (!validateProductionRequest({ requestId }).valid || !scenarios.includes(scenario)) {
+    throw new HttpsError('invalid-argument', 'A valid compliance requestId and supported scenario are required.');
+  }
+  if (!['0', '1'].includes(clearanceStatus)) {
+    throw new HttpsError('invalid-argument', 'clearanceStatus must be 0 (reporting) or 1 (clearance).');
+  }
+  if ((scenario.startsWith('standard_') && clearanceStatus !== '1') || (scenario.startsWith('simplified_') && clearanceStatus !== '0')) {
+    throw new HttpsError('invalid-argument', 'clearanceStatus must match the Standard or Simplified scenario.');
+  }
+  const payloadCheck = validateSignedInvoicePayload({ uuid, invoiceHash, invoice });
+  if (!payloadCheck.valid) throw new HttpsError('invalid-argument', payloadCheck.reason);
+  const env = getEnvironment();
+  if (env !== 'sandbox') throw new HttpsError('failed-precondition', 'Compliance invoice checks are locked to sandbox in this workflow.');
+  const onboardingRef = db.doc(`users/${request.auth.uid}/zatcaOnboarding/${requestId}`);
+  const onboardingSnap = await onboardingRef.get();
+  if (!onboardingSnap.exists || onboardingSnap.data().status !== 'compliance_csid_issued') {
+    throw new HttpsError('failed-precondition', 'No matching Compliance CSID onboarding request exists for this account.');
+  }
+  const credentials = decryptOnboardingValue(onboardingSnap.data().complianceCredentialsEncrypted);
+  const result = await zatcaRequest({
+    env,
+    path: '/compliance/invoices',
+    credentials,
+    headers: { 'Clearance-Status': clearanceStatus },
+    body: { invoiceHash, uuid, invoice }
+  });
+  const validationStatus = String(result.data && result.data.validationResults && result.data.validationResults.status || '').toUpperCase();
+  const passed = validationStatus === 'PASS';
+  await onboardingRef.collection('checks').doc(scenario).set({
+    scenario, uuid, clearanceStatus, validationStatus: validationStatus || 'UNKNOWN',
+    passed, response: result.data, updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+  return { accepted: passed, environment: env, uuid, scenario, validationStatus: validationStatus || 'UNKNOWN', response: result.data };
+});
+
+/**
+ * Exchanges a Compliance CSID for a Production CSID only after the taxpayer
+ * confirms all required compliance invoice checks have passed. This callable
+ * remains sandbox-only and stores the resulting credentials encrypted server-side.
+ */
+exports.zatcaRequestProductionCsid = onCall({ region: REGION, timeoutSeconds: 60, secrets: [ZATCA_ONBOARDING_ENCRYPTION_KEY] }, async (request) => {
+  requireUser(request);
+  const input = request.data || {};
+  const checked = validateProductionRequest({ requestId: input.requestId });
+  if (!checked.valid) throw new HttpsError('invalid-argument', checked.reason);
+  const env = getEnvironment();
+  if (env !== 'sandbox') throw new HttpsError('failed-precondition', 'Production CSID exchange is locked to sandbox in this workflow.');
+  const onboardingRef = db.doc(`users/${request.auth.uid}/zatcaOnboarding/${checked.requestId}`);
+  const onboardingSnap = await onboardingRef.get();
+  if (!onboardingSnap.exists || onboardingSnap.data().status !== 'compliance_csid_issued') {
+    throw new HttpsError('failed-precondition', 'No matching Compliance CSID onboarding request exists for this account.');
+  }
+  const complianceCredentials = decryptOnboardingValue(onboardingSnap.data().complianceCredentialsEncrypted);
+  const requiredScenarios = ['standard_invoice', 'standard_credit_note', 'standard_debit_note', 'simplified_invoice', 'simplified_credit_note', 'simplified_debit_note'];
+  const checkSnaps = await Promise.all(requiredScenarios.map((name) => onboardingRef.collection('checks').doc(name).get()));
+  const missingChecks = requiredScenarios.filter((name, index) => !checkSnaps[index].exists || checkSnaps[index].data().passed !== true);
+  if (missingChecks.length) throw new HttpsError('failed-precondition', 'Required compliance scenarios have not all passed.', { missingChecks });
+  const result = await zatcaRequest({
+    env,
+    path: '/production/csids',
+    credentials: complianceCredentials,
+    body: { compliance_request_id: checked.requestId }
+  });
+  const issued = extractCsidCredentials(result.data, { requireRequestId: false });
+  if (!issued.valid) throw new HttpsError('data-loss', issued.reason);
+  await onboardingRef.set({
+    sandboxProductionCredentialsEncrypted: encryptOnboardingValue({ token: issued.token, secret: issued.secret }),
+    status: 'sandbox_production_csid_issued',
+    updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+  return {
+    accepted: true,
+    environment: env,
+    requestId: checked.requestId,
+    credentialsStoredEncrypted: true,
+    warning: 'Sandbox Production CSID credentials are encrypted server-side. This does not create or verify a production CSID.'
+  };
 });
 
 exports.zatcaCheckCredentials = onCall({

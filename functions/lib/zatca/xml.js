@@ -5,13 +5,18 @@
 // validation decides whether it is accepted - nothing here is "compliant" until that check passes.
 const { toHalala, fmt } = require('./money');
 
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// The invoice builder emits a deterministic C14N 1.1-compatible serialization:
+// fixed namespace declaration order, sorted attributes, normalized line endings,
+// explicit start/end tags, and canonical text/attribute escaping.
+const escText = (s) => String(s).replace(/\r\n?/g, '\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\]\]>/g, ']]&gt;');
+const escAttr = (s) => String(s).replace(/\r\n?/g, '\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/\t/g, '&#x9;').replace(/\n/g, '&#xA;');
+const esc = escText; // Backwards-compatible helper export used by existing tests/tools.
 const el = (name, text, attrs = {}) => {
-  const a = Object.keys(attrs).sort().map((k) => ` ${k}="${esc(attrs[k])}"`).join('');
-  return `<${name}${a}>${text === undefined ? '' : esc(text)}</${name}>`;
+  const a = Object.keys(attrs).sort().map((k) => ` ${k}="${escAttr(attrs[k])}"`).join('');
+  return `<${name}${a}>${text === undefined ? '' : escText(text)}</${name}>`;
 };
 const raw = (name, inner, attrs = {}) => {
-  const a = Object.keys(attrs).sort().map((k) => ` ${k}="${esc(attrs[k])}"`).join('');
+  const a = Object.keys(attrs).sort().map((k) => ` ${k}="${escAttr(attrs[k])}"`).join('');
   return `<${name}${a}>${inner}</${name}>`;
 };
 const TYPE_CODES = { invoice: '388', credit: '381', debit: '383' };
@@ -39,8 +44,11 @@ function computeTotals(inv) {
 
 function party(inv) {
   const s = inv.seller;
+  const identification = String(s.crNumber || '').trim()
+    ? raw('cac:PartyIdentification', el('cbc:ID', String(s.crNumber).trim(), { schemeID: 'CRN' }))
+    : '';
   return raw('cac:AccountingSupplierParty', raw('cac:Party',
-    raw('cac:PartyIdentification', el('cbc:ID', s.crNumber || '', { schemeID: 'CRN' })) +
+    identification +
     raw('cac:PostalAddress', el('cbc:StreetName', s.street) + el('cbc:BuildingNumber', s.building) +
       el('cbc:CitySubdivisionName', s.district) + el('cbc:CityName', s.city) + el('cbc:PostalZone', s.postalCode) +
       raw('cac:Country', el('cbc:IdentificationCode', 'SA'))) +
