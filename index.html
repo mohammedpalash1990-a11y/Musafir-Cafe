@@ -675,8 +675,30 @@ function bkBox(){var t0=0;try{t0=+localStorage.getItem('pos_bk')||0}catch(e){}va
  return '<div class="box"><div class="hd">'+I('copy')+'<b>'+L('ব্যাকআপ','Backup')+'</b></div><p class="mute" style="margin:0 0 8px">'+(t0?L('শেষ ব্যাকআপ: ','Last backup: ')+day(t0):L('এখনো ব্যাকআপ নেওয়া হয়নি','No backup yet'))+(old?' · <b style="color:var(--warn)">'+L('সপ্তাহে একবার নিন','Take one weekly')+'</b>':'')+'</p>'
  +'<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="pri" style="flex:1" onclick="backup()">'+I('copy')+' '+L('ডেটা ডাউনলোড','Download data')+'</button><label class="btn" style="flex:1;text-align:center">'+L('ব্যাকআপ থেকে ফেরান','Restore')+'<input type="file" accept=".json,application/json" hidden onchange="restoreFile(this)"></label></div></div>'}
 
+function zatcaBox(){
+ var z=S.zatca||{};
+ return '<div class="box"><div class="hd">🧾 <b>'+L('সৌদি ZATCA / FATOORA সেটআপ','Saudi ZATCA / FATOORA setup')+'</b></div>'
+ +'<p class="mute" style="font-size:12px">'+L('আপনার VAT ব্যবসার তথ্য দিন। CSID, private key, OTP বা গোপন credentials এখানে লিখবেন না।','Enter your VAT business details. Never enter CSID, private key, OTP or secret credentials here.')+'</p>'
+ +'<label>'+L('আইনগত ব্যবসার নাম','Legal seller name')+'</label><input id="z_name" value="'+esc(z.sellerName||'')+'">'
+ +'<label>Saudi VAT Number (15 digits)</label><input id="z_vat" inputmode="numeric" maxlength="15" value="'+esc(z.vatNumber||'')+'">'
+ +'<label>'+L('রাস্তার নাম','Street')+'</label><input id="z_street" value="'+esc(z.street||'')+'">'
+ +'<div class="dl"><div style="flex:1"><label>'+L('বিল্ডিং নম্বর','Building number')+'</label><input id="z_building" value="'+esc(z.building||'')+'"></div><div style="flex:1"><label>'+L('পোস্টাল কোড','Postal code')+'</label><input id="z_postal" value="'+esc(z.postalCode||'')+'"></div></div>'
+ +'<label>'+L('জেলা / এলাকা','District')+'</label><input id="z_district" value="'+esc(z.district||'')+'">'
+ +'<label>'+L('শহর','City')+'</label><input id="z_city" value="'+esc(z.city||'')+'">'
+ +'<label>Invoice type</label><select id="z_type"><option value="simplified" '+((z.invoiceType||'simplified')==='simplified'?'selected':'')+'>Simplified (B2C)</option><option value="standard" '+(z.invoiceType==='standard'?'selected':'')+'>Standard (B2B)</option></select>'
+ +'<label style="display:flex;align-items:center;gap:8px;color:var(--ink)"><input id="z_enabled" type="checkbox" style="width:auto" '+(z.enabled?'checked':'')+'> '+L('ZATCA seller profile চালু','Enable ZATCA seller profile')+'</label>'
+ +'<button class="pri" style="width:100%;margin-top:8px" onclick="saveZatcaProfile()">'+L('ZATCA তথ্য সেভ করুন','Save ZATCA profile')+'</button>'
+ +'<div class="mute" id="z_msg" style="font-size:12px;margin-top:8px">'+L('এটি শুধু ব্যবসার প্রোফাইল সেভ করবে; সরকারি সংযোগ/অনুমোদন নয়।','This only saves the seller profile; it does not connect to or certify with ZATCA.')+'</div></div>'
+}
+function saveZatcaProfile(){
+ var $z=id=>document.getElementById(id);
+ S.zatca={enabled:!!$z('z_enabled').checked,sellerName:$z('z_name').value.trim(),vatNumber:$z('z_vat').value.trim(),street:$z('z_street').value.trim(),building:$z('z_building').value.trim(),postalCode:$z('z_postal').value.trim(),district:$z('z_district').value.trim(),city:$z('z_city').value.trim(),invoiceType:$z('z_type').value};
+ save();
+ var m=$z('z_msg');if(m)m.textContent=L('ZATCA ব্যবসার তথ্য সেভ হয়েছে।','ZATCA seller profile saved.');
+}
 function vSet0(){
  return '<div class="box"><label>'+t('shop')+'</label><input value="'+esc(S.shop)+'" onchange="S.shop=this.value;save();render()"><label>'+t('cur')+'</label><input value="'+esc(S.cur)+'" onchange="S.cur=this.value;save();render()"><label>'+t('taxp')+'</label><input type="number" inputmode="decimal" value="'+S.tax+'" onchange="S.tax=+this.value||0;save();render()"></div>'
+ +zatcaBox()
  +'<div class="box"><b>'+t('data')+'</b><p class="mute">'+esc(CE||'')+'</p><button onclick="FB.out()">'+L('লগআউট','Log out')+'</button><p class="mute">'+t('note')+'</p><button class="bad" onclick="wipe()">'+(arm?t('erase2'):t('erase'))+'</button></div>'
 }
 
