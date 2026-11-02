@@ -265,7 +265,6 @@ exports.zatcaQueueSale = onDocumentCreated({
       saleNo: Number(sale.no) || null,
       receiptNo: Number(sale.sn) || null,
       documentType: assessment.documentType || null,
-      buyer: sale.zatca && sale.zatca.documentType === 'standard' ? sale.zatca.buyer : null,
       status: assessment.status,
       reasons: assessment.reasons,
       currency: assessment.currency || String(settings.cur || ''),
