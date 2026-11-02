@@ -1,6 +1,6 @@
 'use strict';
 
-const VAT_NUMBER_RE = /^3\\d{13}3$/;
+const VAT_NUMBER_RE = /^3\d{13}3$/;
 
 function isSha256Base64(value) {
   if (!/^[A-Za-z0-9+/]{43}=$/.test(String(value || ''))) return false;
