@@ -14,7 +14,7 @@ const ZATCA_SANDBOX_SECRET = defineSecret('ZATCA_SANDBOX_SECRET');
 
 const REGION = 'me-central1';
 const API_VERSION = 'V2';
-const SANDBOX_URL = 'https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal';
+const SANDBOX_URL = 'https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation';
 const PRODUCTION_URL = 'https://gw-fatoora.zatca.gov.sa/e-invoicing/core';
 
 function requireUser(request) {
@@ -135,8 +135,8 @@ exports.zatcaStatus = onCall({
     apiCredentialsConfigured: credentials,
     egsOnboarding: 'requires CSR and OTP onboarding',
     complianceCsid: 'not verified by this status check',
-    productionCsid: env === 'production' && credentials ? 'configured in Secret Manager' : 'not configured',
-    productionEnabled: env === 'production' && process.env.ZATCA_PRODUCTION_ENABLED === 'true' && credentials && !!z.enabled && missing.length === 0,
+    productionCsid: process.env.ZATCA_PRODUCTION_CSID_VERIFIED === 'true' ? 'explicitly verified by deployment administrator' : 'not verified',
+    productionEnabled: env === 'production' && process.env.ZATCA_PRODUCTION_ENABLED === 'true' && process.env.ZATCA_PRODUCTION_CSID_VERIFIED === 'true' && credentials && !!z.enabled && missing.length === 0,
     apiVersion: API_VERSION
   };
 });
@@ -178,8 +178,8 @@ exports.zatcaSubmitInvoice = onCall({
   }
 
   const env = getEnvironment();
-  if (env === 'production' && process.env.ZATCA_PRODUCTION_ENABLED !== 'true') {
-    throw new HttpsError('failed-precondition', 'Production submission is locked. A deployment administrator must set ZATCA_PRODUCTION_ENABLED=true only after Production CSID onboarding and end-to-end verification.');
+  if (env === 'production' && (process.env.ZATCA_PRODUCTION_ENABLED !== 'true' || process.env.ZATCA_PRODUCTION_CSID_VERIFIED !== 'true')) {
+    throw new HttpsError('failed-precondition', 'Production submission is locked until a deployment administrator confirms Production CSID onboarding and end-to-end verification.');
   }
 
   const invoiceRef = db.doc(`users/${uid}/zatcaInvoices/${uuid}`);
