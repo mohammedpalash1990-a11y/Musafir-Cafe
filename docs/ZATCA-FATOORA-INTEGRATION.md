@@ -21,10 +21,10 @@ VAT format validation is a format check only; it does not validate the taxpayer'
 
 Create secrets without committing values to Git:
 
-- `ZATCA_SANDBOX_TOKEN` — sandbox test Production CSID binary security token.
-- `ZATCA_SANDBOX_SECRET` — matching sandbox secret.
-- `ZATCA_PROD_TOKEN` — Production CSID binary security token.
-- `ZATCA_PROD_SECRET` — matching Production CSID secret.
+- `ZATCA_EGS_PRIVATE_KEY` — PEM-encoded private key matching the EGS CSR/CSID certificate; required by sandbox invoice generation.
+- `ZATCA_ONBOARDING_ENCRYPTION_KEY` — Base64-encoded 32-byte AES-256-GCM key used to encrypt/decrypt onboarding credentials.
+- `ZATCA_SANDBOX_TOKEN` / `ZATCA_SANDBOX_SECRET` — legacy sandbox adapter credentials; generated-invoice sandbox submission uses the encrypted sandbox CSID envelope from onboarding.
+- `ZATCA_PROD_TOKEN` / `ZATCA_PROD_SECRET` — reserved for a separately verified production CSID; production callables remain locked.
 
 Never store private keys, CSID secrets, OTPs, or credentials in browser code, Firestore profile documents, GitHub, or chat messages. Buyer VAT/address details are business personal data: verify that deployed Firestore Security Rules restrict `users/{uid}/sales` and `users/{uid}/zatcaInvoices` to the authenticated owner and trusted server functions. No Firestore rules file was found in this repository during this change, so deployed rule enforcement has not been audited. Private signing keys must be protected in an appropriate key store/HSM and must never be sent to the browser.
 
