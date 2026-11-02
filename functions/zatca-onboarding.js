@@ -1,6 +1,6 @@
 'use strict';
 
-const OTP_RE = /^\\d{6}$/;
+const OTP_RE = /^\d{6}$/;
 const MAX_CSR_BYTES = 32 * 1024;
 
 function validateComplianceRequest({ otp, csr }) {
@@ -26,7 +26,7 @@ function extractCsidCredentials(data) {
 
 function validateProductionRequest({ requestId }) {
   const clean = String(requestId || '').trim();
-  if (!/^\\d{5,30}$/.test(clean)) return { valid: false, reason: 'A valid numeric compliance request ID is required.' };
+  if (!/^\d{5,30}$/.test(clean)) return { valid: false, reason: 'A valid numeric compliance request ID is required.' };
   return { valid: true, requestId: clean };
 }
 
