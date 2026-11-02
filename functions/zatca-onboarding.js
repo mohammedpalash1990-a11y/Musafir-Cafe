@@ -15,13 +15,13 @@ function validateComplianceRequest({ otp, csr }) {
   return { valid: true, otp: cleanOtp, csr: encoded };
 }
 
-function extractCsidCredentials(data) {
+function extractCsidCredentials(data, { requireRequestId = true } = {}) {
   const value = data && typeof data === 'object' ? data : {};
   const token = value.binarySecurityToken || value.binary_security_token || value.BinarySecurityToken;
   const secret = value.secret || value.Secret;
   const requestId = value.requestID || value.requestId || value.request_id || value.RequestID;
-  if (!token || !secret || !requestId) return { valid: false, reason: 'ZATCA response did not contain the expected CSID token, secret, and request ID.' };
-  return { valid: true, token: String(token), secret: String(secret), requestId: String(requestId) };
+  if (!token || !secret || (requireRequestId && !requestId)) return { valid: false, reason: 'ZATCA response did not contain the expected CSID token, secret, and required request ID.' };
+  return { valid: true, token: String(token), secret: String(secret), requestId: requestId ? String(requestId) : null };
 }
 
 function validateProductionRequest({ requestId }) {
