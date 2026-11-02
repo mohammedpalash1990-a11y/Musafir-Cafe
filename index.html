@@ -236,6 +236,7 @@ var P = load('pos_p',[{id:1,name:'Tea',price:30,cat:'Drinks',stock:''},{id:2,nam
 P.forEach(function(p){if(p.bn===undefined)p.bn=BN[p.id]||''});
 
 var H=load('pos_h',[]), IMG=load('pos_img',{}), DU=load('pos_du',[]), cart={}, cat='All', q='', view='sell', edit=null, arm=0, vArm=0, pay='Cash', disc='', recv='', pays=null, pPhoto, dview=null, dq='', pdRow=null, pdPhoto='';
+var ZBUY={documentType:'simplified',buyerName:'',buyerVatNumber:'',buyerStreet:'',buyerBuilding:'',buyerDistrict:'',buyerCity:'',buyerPostalCode:''};
 var CU=null, CE='', ready=false, tm=0, ss='off', upl=false, cfgOK=!/PASTE/.test((window.FIREBASE_CONFIG||{}).apiKey||'PASTE');
 var dd=null, dm=null, curDay=null;
 var KH=(function(){var o={p:[],tx:[],ex:[]};try{var s=JSON.parse(localStorage.getItem('pos_kh'));if(s){o.p=s.p||[];o.tx=s.tx||[];o.ex=s.ex||[]}}catch(e){}return o})();
@@ -423,6 +424,11 @@ function cartInner(sheet){
   h+='<div class="cp"><div class="tbar"><span class="mute">'+cnt()+t('itm')+'</span><span>'+t('total')+': <b>'+$$(c.t)+'</b></span></div>'
   +'<div class="dl"><span>'+t('disc')+' ('+esc(S.cur)+')</span><input type="number" inputmode="decimal" value="'+esc(disc)+'" onchange="disc=this.value;openCart();render()"></div>'
   +((c.d||+S.tax)?'<div class="sm1 mute"><span>'+t('sub')+' '+$$(c.s)+'</span>'+(c.d?'<span>'+t('disc')+' −'+$$(c.d)+'</span>':'')+(+S.tax?'<span>'+t('tax')+' '+S.tax+'% '+$$(c.tx)+'</span>':'')+'</div>':'');
+  h+='<div class="box" style="margin:10px 0;padding:10px"><b>🧾 ZATCA invoice type</b><select onchange="ZBUY.documentType=this.value;openCart()"><option value="simplified"'+(ZBUY.documentType==='simplified'?' selected':'')+'>Simplified (B2C)</option><option value="standard"'+(ZBUY.documentType==='standard'?' selected':'')+'>Standard (B2B)</option></select>';
+  if(ZBUY.documentType==='standard'){
+   h+='<label>Buyer legal name</label><input value="'+esc(ZBUY.buyerName)+'" onchange="ZBUY.buyerName=this.value" placeholder="Company legal name"><label>Buyer VAT number (15 digits)</label><input inputmode="numeric" maxlength="15" value="'+esc(ZBUY.buyerVatNumber)+'" onchange="ZBUY.buyerVatNumber=this.value"><label>Buyer street</label><input value="'+esc(ZBUY.buyerStreet)+'" onchange="ZBUY.buyerStreet=this.value"><div class="dl"><div style="flex:1"><label>Building number</label><input value="'+esc(ZBUY.buyerBuilding)+'" onchange="ZBUY.buyerBuilding=this.value"></div><div style="flex:1"><label>Postal code</label><input value="'+esc(ZBUY.buyerPostalCode)+'" onchange="ZBUY.buyerPostalCode=this.value"></div></div><label>District</label><input value="'+esc(ZBUY.buyerDistrict)+'" onchange="ZBUY.buyerDistrict=this.value"><label>City</label><input value="'+esc(ZBUY.buyerCity)+'" onchange="ZBUY.buyerCity=this.value">';
+  }
+  h+='</div>';
   if(!split){
    h+='<div class="pm">'+PM.map(function(m){return '<button class="'+(x0.m==m?'pri':'')+'" onclick="setM1(\''+m+'\')">'+t(m)+'</button>'}).join('')+'</div>';
    if(x0.m=='Cash'){
@@ -455,6 +461,12 @@ function thumb(u,cb){var im=new Image();im.onload=function(){var c=document.crea
 function charge(){
  cleanCart();if(!Object.keys(cart).length)return;var ps=pst();if(!ps.ok){toast(ps.rows.some(function(x){return x.m=='Due'&&!x.debtor})?t('needDebtor'):L('পেমেন্ট পুরো হয়নি','Payment is not complete'));return}
  if(otpOn()&&!otpPass){var oq=otpQueue(ps);if(oq.length){otpStart(oq);return}}otpPass=false;
+ var zb=Object.assign({},ZBUY);
+ if(!['simplified','standard'].includes(zb.documentType)){toast(L('Invoice type নির্বাচন করুন','Select an invoice type'));return}
+ if(zb.documentType==='standard'){
+  var buyerRequired=['buyerName','buyerVatNumber','buyerStreet','buyerBuilding','buyerDistrict','buyerCity','buyerPostalCode'];
+  if(buyerRequired.some(function(k){return !String(zb[k]||'').trim()})||!/^3\d{13}3$/.test(String(zb.buyerVatNumber||'').trim())){toast(L('Standard invoice-এর buyer name, সঠিক VAT number ও ঠিকানা পূরণ করুন','Complete the Standard invoice buyer name, valid VAT number and address'));return}
+ }
  var c=calc(),items=[];
  for(var id in cart){var p=gp(id);if(!p)continue;var it0={id:p.id,name:p.name,bn:p.bn,price:p.price,qty:cart[id],zatcaVatCategory:p.zatcaVatCategory||null,zatcaVatRate:p.zatcaVatRate===undefined?null:p.zatcaVatRate};if(p.combo){it0.cb=p.cb.slice();(function(q){p.cb.forEach(function(x){var r=P.find(function(y){return y.id==x});if(r&&r.stock!=='')r.stock-=q})})(cart[id])}else if(p.stock!=='')p.stock-=cart[id];items.push(it0)}
  var left=ps.chg,mg={},cashGiven=0,dueRows=[];
@@ -462,12 +474,12 @@ function charge(){
  var pl=Object.keys(mg).map(function(m){return{m:m,a:+mg[m].toFixed(2)}});
  dueRows.forEach(function(x){pl.push({m:'Due',a:+x.a.toFixed(2),debtor:x.debtor.name})});
  var no=H.reduce(function(a,x){return Math.max(a,x.no)},1000)+1,now=Date.now();
- var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode()};
+ var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode(),zatca:{documentType:zb.documentType,buyer:zb.documentType==='standard'?{name:zb.buyerName.trim(),vatNumber:zb.buyerVatNumber.trim(),street:zb.buyerStreet.trim(),building:zb.buyerBuilding.trim(),district:zb.buyerDistrict.trim(),city:zb.buyerCity.trim(),postalCode:zb.buyerPostalCode.trim()}:null}};
  if(!CU)s.lc=true;
  s.src=window.QRSRC?'qr':'pos';if(window.QRSRC){s.qr=window.QRSRC.l.slice();window.QRSRC=null}
  H.push(s);
  dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,otp:otpDone[x.debtor.id]||false,no:s.sn,sid:s.no,items:items.map(function(i){return nm(i)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
- save();if(dueRows.length)dusave();cSale(s);rqAdd(rqSale(s));pubReceipt(s);cart={};disc='';recv='';pays=null;otpDone={};$('#cs').classList.remove('show');render();showRc(s.no);
+ save();if(dueRows.length)dusave();cSale(s);rqAdd(rqSale(s));pubReceipt(s);cart={};disc='';recv='';pays=null;ZBUY={documentType:'simplified',buyerName:'',buyerVatNumber:'',buyerStreet:'',buyerBuilding:'',buyerDistrict:'',buyerCity:'',buyerPostalCode:''};otpDone={};$('#cs').classList.remove('show');render();showRc(s.no);
 }
 
 function plainFoot(s){return footMsg(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
