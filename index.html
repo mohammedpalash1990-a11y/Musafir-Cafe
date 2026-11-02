@@ -453,7 +453,7 @@ function openCart(){
  $('#cb').innerHTML=cartInner(true);$('#cs').classList.add('show')
 }
 
-function cancelOrder(){ask(L('পুরো অর্ডার বাতিল করতে চান?','Cancel the whole order?'),function(){cart={};disc='';recv='';pays=null;window.QRSRC=null;render();openCart()},L('হ্যাঁ, বাতিল','Yes, cancel'))}
+function cancelOrder(){ask(L('পুরো অর্ডার বাতিল করতে চান?','Cancel the whole order?'),function(){cart={};disc='';recv='';pays=null;ZBUY={documentType:'simplified',buyerName:'',buyerVatNumber:'',buyerStreet:'',buyerBuilding:'',buyerDistrict:'',buyerCity:'',buyerPostalCode:''};window.QRSRC=null;render();openCart()},L('হ্যাঁ, বাতিল','Yes, cancel'))}
 
 function randCode(){var a=new Uint8Array(12),s='';(window.crypto||{getRandomValues:function(x){for(var i=0;i<x.length;i++)x[i]=Math.random()*256}}).getRandomValues(a);for(var i=0;i<a.length;i++)s+=(a[i]%36).toString(36);return s+Date.now().toString(36)}
 function thumb(u,cb){var im=new Image();im.onload=function(){var c=document.createElement('canvas');c.width=c.height=96;var m=Math.min(im.width,im.height);c.getContext('2d').drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,96,96);cb(c.toDataURL('image/jpeg',0.74))};im.onerror=function(){cb(null)};im.src=u}
