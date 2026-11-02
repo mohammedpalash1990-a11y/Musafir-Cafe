@@ -35,6 +35,7 @@ function assessSaleForZatca(sale, settings) {
   if (invalidLine) return { status: 'manual_review', reasons: ['One or more sale lines have invalid descriptions, quantities, or prices.'] };
 
   const reasons = [];
+  if (sale.vatEnabled === false) reasons.push('VAT is disabled in POS settings; a VAT-registered Saudi seller must not submit this sale as a standard-rated VAT invoice.');
   const currency = String(settings && settings.cur || '').trim().toUpperCase();
   if (currency !== 'SAR') reasons.push('Set the POS currency to SAR before issuing Saudi VAT invoices.');
 
@@ -44,7 +45,13 @@ function assessSaleForZatca(sale, settings) {
     reasons.push('Sale subtotal, discount, VAT and total must all be finite numeric values.');
   } else {
     const [subtotal, discount, tax, total] = amounts;
-    const lineSubtotal = sale.items.reduce((sum, item) => sum + Number(item.qty) * Number(item.price), 0);
+    const inclusive = sale.vatInclusive === true;
+    const lineSubtotal = sale.items.reduce((sum, item) => {
+      const gross = Number(item.qty) * Number(item.price);
+      const category = String(item.zatcaVatCategory || '').toUpperCase();
+      const rate = Number(item.zatcaVatRate);
+      return sum + (inclusive && category === 'S' && rate > 0 ? gross * 100 / (100 + rate) : gross);
+    }, 0);
     if (Math.abs(lineSubtotal - subtotal) > 0.02) {
       reasons.push('Invoice line extension amounts do not reconcile with the POS subtotal.');
     }
@@ -74,7 +81,8 @@ function assessSaleForZatca(sale, settings) {
         if (rate < 0 || rate > 100 || (category === 'S' && rate <= 0) || (category !== 'S' && rate !== 0)) {
           reasons.push('Zero-rated, exempt and out-of-scope lines must use a zero VAT rate.');
         }
-        return sum + (Number(item.qty) * Number(item.price) * (1 - discountRatio) * rate / 100);
+        const grossAfterDiscount = Number(item.qty) * Number(item.price) * (1 - discountRatio);
+        return sum + (grossAfterDiscount * (inclusive ? rate / (100 + rate) : rate / 100));
       }, 0);
       if (Math.abs(expectedVat - Number(sale.tax)) > 0.02) {
         reasons.push('Calculated VAT from the per-line categories and rates does not reconcile with the POS VAT total.');
