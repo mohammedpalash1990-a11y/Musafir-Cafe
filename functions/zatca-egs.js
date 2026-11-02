@@ -70,7 +70,7 @@ function assessSaleForZatca(sale, settings) {
       const expectedVat = sale.items.reduce((sum, item) => {
         const category = String(item.zatcaVatCategory).toUpperCase();
         const rate = Number(item.zatcaVatRate);
-        if (category !== 'S' && rate !== 0) {
+        if (rate < 0 || rate > 100 || (category === 'S' && rate <= 0) || (category !== 'S' && rate !== 0)) {
           reasons.push('Zero-rated, exempt and out-of-scope lines must use a zero VAT rate.');
         }
         return sum + (Number(item.qty) * Number(item.price) * (1 - discountRatio) * rate / 100);
