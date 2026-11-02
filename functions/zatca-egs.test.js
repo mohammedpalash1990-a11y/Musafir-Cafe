@@ -115,3 +115,27 @@ test('requires per-transaction invoice classification and Standard buyer VAT/add
   assert.equal(standardReady.documentType, 'standard');
   assert.ok(!standardReady.reasons.some((reason) => reason.includes('Complete Standard invoice buyer details')));
 });
+
+test('reconciles VAT-inclusive 9.90 SAR sale with 1.29 SAR embedded VAT', () => {
+  const inclusiveSale = {
+    sub: 9.90, disc: 0, tax: 1.29, total: 9.90,
+    vatInclusive: true, vatEnabled: true, vatRate: 15,
+    zatca: { documentType: 'simplified' },
+    items: [{ name: 'Coffee', qty: 1, price: 9.90, zatcaVatCategory: 'S', zatcaVatRate: 15 }]
+  };
+  const result = assessSaleForZatca(inclusiveSale, settings);
+  assert.ok(!result.reasons.some((reason) => reason.includes('does not reconcile with the sale total')));
+  assert.ok(!result.reasons.some((reason) => reason.includes('Calculated VAT from the per-line categories')));
+});
+
+test('reconciles VAT-inclusive discount using the embedded VAT fraction', () => {
+  const inclusiveSale = {
+    sub: 19.80, disc: 1.00, tax: 2.45, total: 18.80,
+    vatInclusive: true, vatEnabled: true, vatRate: 15,
+    zatca: { documentType: 'simplified' },
+    items: [{ name: 'Coffee', qty: 2, price: 9.90, zatcaVatCategory: 'S', zatcaVatRate: 15 }]
+  };
+  const result = assessSaleForZatca(inclusiveSale, settings);
+  assert.ok(!result.reasons.some((reason) => reason.includes('VAT-inclusive POS subtotal')));
+  assert.ok(!result.reasons.some((reason) => reason.includes('Calculated VAT from the per-line categories')));
+});
