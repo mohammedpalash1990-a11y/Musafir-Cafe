@@ -79,6 +79,25 @@ test('reconciles per-line VAT category/rate against the POS VAT total', () => {
   assert.ok(invalid.reasons.some((reason) => reason.includes('per-line categories and rates')));
 });
 
+test('reconciles a 15% VAT-inclusive POS price without adding VAT twice', () => {
+  const inclusiveSale = {
+    total: 9.90,
+    sub: 8.61,
+    disc: 0,
+    tax: 1.29,
+    vatInclusive: true,
+    vatEnabled: true,
+    vatRate: 15,
+    items: [{ name: 'Coffee', qty: 1, price: 9.90, zatcaVatCategory: 'S', zatcaVatRate: 15 }],
+    zatca: { documentType: 'simplified' }
+  };
+  const result = assessSaleForZatca(inclusiveSale, settings);
+  assert.ok(!result.reasons.some((reason) => reason.includes('line extension amounts')));
+  assert.ok(!result.reasons.some((reason) => reason.includes('does not reconcile with the sale total')));
+  assert.ok(!result.reasons.some((reason) => reason.includes('per-line categories and rates')));
+  assert.ok(!result.reasons.some((reason) => reason.includes('VAT category (S/Z/E/O)')));
+});
+
 test('rejects non-zero VAT rates on zero-rated, exempt or out-of-scope lines', () => {
   const result = assessSaleForZatca({
     ...sale,
