@@ -3,7 +3,7 @@
 // (document minus UBLExtensions / cac:Signature / QR reference) is byte-identical to the final document
 // with those parts removed. Structure follows ZATCA's published sample invoices; the official SDK
 // validation decides whether it is accepted - nothing here is "compliant" until that check passes.
-const { toHalala, fmt } = require('./money');
+const { toHalala, fmt, fmtQty } = require('./money');
 
 // The invoice builder emits a deterministic C14N 1.1-compatible serialization:
 // fixed namespace declaration order, sorted attributes, normalized line endings,
@@ -115,7 +115,7 @@ function buildInvoiceXml(inv, extras = {}) {
     el('cbc:LineExtensionAmount', fmt(l.lineNet), { currencyID: C }) +
     raw('cac:TaxTotal', el('cbc:TaxAmount', fmt(l.lineTax), { currencyID: C }) + el('cbc:RoundingAmount', fmt(l.lineTotal), { currencyID: C })) +
     raw('cac:Item', el('cbc:Name', l.name) + raw('cac:ClassifiedTaxCategory', el('cbc:ID', 'S') + el('cbc:Percent', t.rate.toFixed(2)) + raw('cac:TaxScheme', el('cbc:ID', 'VAT')))) +
-    raw('cac:Price', el('cbc:PriceAmount', l.unit.toFixed(2), { currencyID: C })))));
+    raw('cac:Price', el('cbc:PriceAmount', fmtQty(l.unit), { currencyID: C })))));
   const ns = 'xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"';
   return { xmlBody: `<Invoice ${ns}>${parts.join('')}</Invoice>`, totals: t, date, time, iso };
 }
