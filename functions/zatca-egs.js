@@ -37,8 +37,30 @@ function assessSaleForZatca(sale, settings) {
   const reasons = [];
   const currency = String(settings && settings.cur || '').trim().toUpperCase();
   if (currency !== 'SAR') reasons.push('Set the POS currency to SAR before issuing Saudi VAT invoices.');
-  if (!Number.isFinite(Number(sale.tax)) || Number(sale.tax) <= 0) {
-    reasons.push('Review the VAT rate and item tax categories; zero VAT is not assumed to be correct for cafe sales.');
+
+  // Reconcile the persisted POS arithmetic before any legal invoice is built.
+  const amounts = ['sub', 'disc', 'tax', 'total'].map((key) => Number(sale[key]));
+  if (amounts.some((value) => !Number.isFinite(value))) {
+    reasons.push('Sale subtotal, discount, VAT and total must all be finite numeric values.');
+  } else {
+    const [subtotal, discount, tax, total] = amounts;
+    const lineSubtotal = sale.items.reduce((sum, item) => sum + Number(item.qty) * Number(item.price), 0);
+    if (Math.abs(lineSubtotal - subtotal) > 0.02) {
+      reasons.push('Invoice line extension amounts do not reconcile with the POS subtotal.');
+    }
+    if (Math.abs((subtotal - discount + tax) - total) > 0.02) {
+      reasons.push('POS subtotal minus discount plus tax does not reconcile with the sale total.');
+    }
+  }
+
+  // POS currently stores one global tax percentage, not ZATCA VAT categories
+  // and rates per line. Never infer a line's tax category from its menu category.
+  const missingLineTax = sale.items.some((item) =>
+    !['S', 'Z', 'E', 'O'].includes(String(item.zatcaVatCategory || '').toUpperCase()) ||
+    !Number.isFinite(Number(item.zatcaVatRate))
+  );
+  if (missingLineTax) {
+    reasons.push('Add an explicit ZATCA VAT category (S/Z/E/O) and VAT rate to every invoice line; the POS global tax rate is not enough.');
   }
   reasons.push('Confirm Standard (B2B) or Simplified (B2C) for this transaction using the buyer details.');
   reasons.push('UBL 2.1 generation, invoice hash/PIH, XAdES signing, and TLV QR are not yet implemented.');
