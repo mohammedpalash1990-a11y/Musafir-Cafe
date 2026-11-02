@@ -468,7 +468,7 @@ exports.zatcaGetGeneratedInvoice = onCall({ region: REGION }, async (request) =>
   if (!/^[A-Za-z0-9_-]{1,100}$/.test(saleId)) {
     throw new HttpsError('invalid-argument', 'A valid POS sale document ID is required.');
   }
-  const snap = await db.doc(\`zatca_tenants/\${uid}/invoices/\${saleId}\`).get();
+  const snap = await db.doc(`zatca_tenants/${uid}/invoices/${saleId}`).get();
   if (!snap.exists) throw new HttpsError('not-found', 'Generated invoice was not found.');
   const invoice = snap.data();
   return {
