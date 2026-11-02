@@ -67,7 +67,7 @@ From the repository root, install dependencies in `functions`, configure Secret 
 
 A Firestore `onDocumentCreated` trigger watches `users/{uid}/sales/{saleId}` and creates one idempotent work record at `users/{uid}/zatcaInvoices/sale-{saleId}`. This catches signed-in POS sales and sales uploaded later after offline use. It does not change checkout behavior or send anything to ZATCA.
 
-The queue assesses seller-profile completeness, invoice-line validity, refund status, POS currency and tax amount. Current states include:
+The queue assesses seller-profile completeness, invoice-line validity, refund status, POS currency, line-level VAT metadata and POS arithmetic reconciliation. The current POS applies a single global tax percentage and does not persist ZATCA VAT category/rate per invoice line; the queue therefore blocks legal invoice issuance until each line has an explicit category (`S`, `Z`, `E`, or `O`) and rate. Menu categories such as Drinks/Food must never be treated as VAT categories. It also checks that line extension amounts reconcile with subtotal and that subtotal minus discount plus VAT reconciles with total (0.02 SAR tolerance). Current states include:
 - `blocked_profile`: seller profile is incomplete or disabled.
 - `manual_review`: sale data is not suitable for invoice creation.
 - `credit_note_required`: refund needs a separate compliant credit-note workflow.
@@ -75,6 +75,6 @@ The queue assesses seller-profile completeness, invoice-line validity, refund st
 
 The signed-in submit endpoint also uses `submission_unknown` when a request may have reached the gateway but no definitive response was received. Do not reset this state or retry the UUID until the gateway outcome has been reconciled.
 
-**Important:** every transaction must be classified as Standard or Simplified from its buyer and transaction details. A global default alone is not sufficient. The existing POS currently has no verified buyer VAT-number/address capture or compliant invoice generator, so queued records intentionally remain in review and are not automatically submitted.
+**Important:** every transaction must be classified as Standard or Simplified from its buyer and transaction details. A global default alone is not sufficient. The existing POS currently has no verified buyer VAT-number/address capture, per-line ZATCA VAT-category capture, or compliant invoice generator, so queued records intentionally remain in review and are not automatically submitted.
 
 The built-in Node test suite is `npm test` in `functions/` and uses `node --test`.
