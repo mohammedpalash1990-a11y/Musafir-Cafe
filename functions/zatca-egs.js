@@ -60,32 +60,39 @@ function assessSaleForZatca(sale, settings) {
     }
   }
 
-  // POS tax totals are still calculated from its global tax setting. Require
-  // explicit per-product ZATCA categories/rates and reconcile them before use.
-  // Never infer a line's tax category from its menu category.
-  const missingLineTax = sale.items.some((item) =>
-    !['S', 'Z', 'E', 'O'].includes(String(item.zatcaVatCategory || '').toUpperCase()) ||
-    item.zatcaVatRate === null || item.zatcaVatRate === undefined || item.zatcaVatRate === '' || !Number.isFinite(Number(item.zatcaVatRate)) || Number(item.zatcaVatRate) < 0
+  // One global Saudi VAT setting is the default for ordinary menu items.
+  // If no product override exists, inherit Standard-rated 15% from the POS
+  // global setting. Explicit Z/ZERO/EXEMPT/O overrides remain opt-in for
+  // genuinely different tax treatment; menu category names are never inferred.
+  const globalVat = settings && settings.vat && typeof settings.vat === 'object' ? settings.vat : {};
+  const globalRate = Number(sale.vatRate ?? globalVat.rate ?? settings && settings.tax ?? 15);
+  const globalEnabled = sale.vatEnabled !== false && globalVat.enabled !== false;
+  const lineTax = sale.items.map((item) => {
+    const rawCategory = String(item.zatcaVatCategory || '').trim().toUpperCase();
+    const hasRate = item.zatcaVatRate !== null && item.zatcaVatRate !== undefined && item.zatcaVatRate !== '';
+    if (!rawCategory && !hasRate && globalEnabled && globalRate === 15) return { category: 'S', rate: 15 };
+    if (rawCategory === 'S' && !hasRate && globalEnabled && globalRate === 15) return { category: 'S', rate: 15 };
+    return { category: rawCategory, rate: hasRate ? Number(item.zatcaVatRate) : NaN };
+  });
+  const invalidLineTax = lineTax.some(({ category, rate }) =>
+    !['S', 'Z', 'E', 'O'].includes(category) || !Number.isFinite(rate) || rate < 0 || rate > 100 ||
+    (category === 'S' && rate <= 0) || (category !== 'S' && rate !== 0)
   );
-  if (missingLineTax) {
-    reasons.push('Add an explicit ZATCA VAT category (S/Z/E/O) and VAT rate to every invoice line; the POS global tax rate is not enough.');
+  if (invalidLineTax) {
+    reasons.push('Invoice line tax override is invalid. Ordinary products inherit the global 15% Standard-rated VAT automatically; only special tax treatments need explicit overrides.');
   } else if (amounts.every(Number.isFinite) && Number(sale.sub) > 0) {
     const subtotal = Number(sale.sub);
     const discountRatio = Number(sale.disc) / subtotal;
     if (discountRatio < 0 || discountRatio > 1) {
       reasons.push('Discount must be between zero and the invoice subtotal before VAT allocation.');
     } else {
-      const expectedVat = sale.items.reduce((sum, item) => {
-        const category = String(item.zatcaVatCategory).toUpperCase();
-        const rate = Number(item.zatcaVatRate);
-        if (rate < 0 || rate > 100 || (category === 'S' && rate <= 0) || (category !== 'S' && rate !== 0)) {
-          reasons.push('Zero-rated, exempt and out-of-scope lines must use a zero VAT rate.');
-        }
+      const expectedVat = sale.items.reduce((sum, item, index) => {
+        const { category, rate } = lineTax[index];
         const grossAfterDiscount = Number(item.qty) * Number(item.price) * (1 - discountRatio);
-        return sum + (grossAfterDiscount * (inclusive ? rate / (100 + rate) : rate / 100));
+        return sum + (grossAfterDiscount * (inclusive && category === 'S' ? rate / (100 + rate) : rate / 100));
       }, 0);
       if (Math.abs(expectedVat - Number(sale.tax)) > 0.02) {
-        reasons.push('Calculated VAT from the per-line categories and rates does not reconcile with the POS VAT total.');
+        reasons.push('Calculated VAT from the global default/explicit line overrides does not reconcile with the POS VAT total.');
       }
     }
   }
