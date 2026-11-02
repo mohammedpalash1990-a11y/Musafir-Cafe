@@ -48,8 +48,12 @@ function assessSaleForZatca(sale, settings) {
     if (Math.abs(lineSubtotal - subtotal) > 0.02) {
       reasons.push('Invoice line extension amounts do not reconcile with the POS subtotal.');
     }
-    if (Math.abs((subtotal - discount + tax) - total) > 0.02) {
-      reasons.push('POS subtotal minus discount plus tax does not reconcile with the sale total.');
+    const vatInclusive = sale.vatInclusive === true;
+    const expectedTotal = vatInclusive ? subtotal - discount : subtotal - discount + tax;
+    if (Math.abs(expectedTotal - total) > 0.02) {
+      reasons.push(vatInclusive
+        ? 'VAT-inclusive POS subtotal minus discount does not reconcile with the sale total.'
+        : 'POS subtotal minus discount plus tax does not reconcile with the sale total.');
     }
   }
 
@@ -74,7 +78,11 @@ function assessSaleForZatca(sale, settings) {
         if (rate < 0 || rate > 100 || (category === 'S' && rate <= 0) || (category !== 'S' && rate !== 0)) {
           reasons.push('Zero-rated, exempt and out-of-scope lines must use a zero VAT rate.');
         }
-        return sum + (Number(item.qty) * Number(item.price) * (1 - discountRatio) * rate / 100);
+        const grossLineAfterDiscount = Number(item.qty) * Number(item.price) * (1 - discountRatio);
+        const lineVat = sale.vatInclusive === true
+          ? grossLineAfterDiscount * rate / (100 + rate)
+          : grossLineAfterDiscount * rate / 100;
+        return sum + lineVat;
       }, 0);
       if (Math.abs(expectedVat - Number(sale.tax)) > 0.02) {
         reasons.push('Calculated VAT from the per-line categories and rates does not reconcile with the POS VAT total.');
