@@ -136,7 +136,7 @@ exports.zatcaStatus = onCall({
     egsOnboarding: 'requires CSR and OTP onboarding',
     complianceCsid: 'not verified by this status check',
     productionCsid: env === 'production' && credentials ? 'configured in Secret Manager' : 'not configured',
-    productionEnabled: false, // Enable only after production CSID onboarding and end-to-end compliance verification.
+    productionEnabled: env === 'production' && process.env.ZATCA_PRODUCTION_ENABLED === 'true' && credentials && !!z.enabled && missing.length === 0,
     apiVersion: API_VERSION
   };
 });
@@ -178,8 +178,8 @@ exports.zatcaSubmitInvoice = onCall({
   }
 
   const env = getEnvironment();
-  if (env === 'production' && !z.productionApproved) {
-    throw new HttpsError('failed-precondition', 'Production submission is locked until the taxpayer confirms production CSID onboarding in the ZATCA portal.');
+  if (env === 'production' && process.env.ZATCA_PRODUCTION_ENABLED !== 'true') {
+    throw new HttpsError('failed-precondition', 'Production submission is locked. A deployment administrator must set ZATCA_PRODUCTION_ENABLED=true only after Production CSID onboarding and end-to-end verification.');
   }
 
   const invoiceRef = db.doc(`users/${uid}/zatcaInvoices/${uuid}`);
