@@ -231,7 +231,8 @@ var D = {
 var CB = {Drinks:'পানীয়',Food:'খাবার'}, BN = {1:'চা',2:'কফি',3:'ঠান্ডা জুস',4:'পানির বোতল',5:'স্যান্ডউইচ',6:'কেক'};
 
 function load(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v||d}catch(e){return d}}
-var S = load('pos_s',{shop:'Musafir Cafe',cur:'SAR',tax:15,lang:'bn'});\nS.vat=Object.assign({enabled:true,rate:15,pricesIncludeVat:true},S.vat||{});S.tax=Number(S.vat.rate)||15;
+var S = load('pos_s',{shop:'Musafir Cafe',cur:'SAR',tax:15,lang:'bn'});
+S.vat=Object.assign({enabled:true,rate:15,pricesIncludeVat:true},S.vat||{});S.tax=Number(S.vat.rate)||15;
 var P = load('pos_p',[{id:1,name:'Tea',price:30,cat:'Drinks',stock:''},{id:2,name:'Coffee',price:60,cat:'Drinks',stock:''},{id:3,name:'Cold juice',price:80,cat:'Drinks',stock:''},{id:4,name:'Water bottle',price:20,cat:'Drinks',stock:50},{id:5,name:'Sandwich',price:120,cat:'Food',stock:''},{id:6,name:'Cake slice',price:90,cat:'Food',stock:20}]);
 P.forEach(function(p){if(p.bn===undefined)p.bn=BN[p.id]||''});
 
