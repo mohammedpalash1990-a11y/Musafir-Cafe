@@ -62,3 +62,17 @@ From the repository root, install dependencies in `functions`, configure Secret 
 - https://zatca.gov.sa/en/E-Invoicing/Pages/default.aspx
 - https://zatca.gov.sa/en/E-Invoicing/SystemsDevelopers/ComplianceEnablementToolbox/Pages/DownloadSDK.aspx
 - https://sandbox.zatca.gov.sa/User_Manual_Developer_Portal_Manual_Version_3.pdf
+
+## Automatic POS sale intake (new)
+
+A Firestore `onDocumentCreated` trigger watches `users/{uid}/sales/{saleId}` and creates one idempotent work record at `users/{uid}/zatcaInvoices/sale-{saleId}`. This catches signed-in POS sales and sales uploaded later after offline use. It does not change checkout behavior or send anything to ZATCA.
+
+The queue assesses seller-profile completeness, invoice-line validity, refund status, POS currency and tax amount. Current states include:
+- `blocked_profile`: seller profile is incomplete or disabled.
+- `manual_review`: sale data is not suitable for invoice creation.
+- `credit_note_required`: refund needs a separate compliant credit-note workflow.
+- `awaiting_egs_review`: sale is recorded, but currency/tax/document classification or the EGS pipeline needs review.
+
+**Important:** every transaction must be classified as Standard or Simplified from its buyer and transaction details. A global default alone is not sufficient. The existing POS currently has no verified buyer VAT-number/address capture or compliant invoice generator, so queued records intentionally remain in review and are not automatically submitted.
+
+The built-in Node test suite is `npm test` in `functions/` and uses `node --test`.
