@@ -81,11 +81,21 @@ function assessSaleForZatca(sale, settings) {
       }
     }
   }
-  reasons.push('Confirm Standard (B2B) or Simplified (B2C) for this transaction using the buyer details.');
+  const documentType = String(sale.zatca && sale.zatca.documentType || '').toLowerCase();
+  if (!['standard', 'simplified'].includes(documentType)) {
+    reasons.push('Select Standard (B2B) or Simplified (B2C) for each transaction.');
+  } else if (documentType === 'standard') {
+    const buyer = sale.zatca && sale.zatca.buyer || {};
+    const buyerRequired = ['name', 'vatNumber', 'street', 'building', 'district', 'city', 'postalCode'];
+    const missingBuyer = buyerRequired.filter((key) => !String(buyer[key] || '').trim());
+    if (!/^3\\d{13}3$/.test(String(buyer.vatNumber || '').trim())) missingBuyer.push('vatNumber (invalid Saudi VAT number format)');
+    if (missingBuyer.length) reasons.push('Complete Standard invoice buyer details: ' + missingBuyer.join(', ') + '.');
+  }
   reasons.push('UBL 2.1 generation, invoice hash/PIH, XAdES signing, and TLV QR are not yet implemented.');
   return {
     status: reasons.length ? 'awaiting_egs_review' : 'awaiting_egs',
     reasons,
+    documentType: documentType || null,
     currency: currency || null,
     total: Number(sale.total),
     vatAmount: Number(sale.tax) || 0
