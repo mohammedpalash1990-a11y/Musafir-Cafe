@@ -1,5 +1,7 @@
 'use strict';
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { assessSaleForZatca } = require('./zatca-egs');
 const { defineSecret } = require('firebase-functions/params');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
@@ -236,6 +238,43 @@ exports.zatcaSubmitInvoice = onCall({
     });
     throw error;
   }
+});
+
+/**
+ * Every authenticated POS sale is mirrored into a ZATCA work queue.
+ * This deliberately does NOT submit an invoice: the legal EGS generator,
+ * signer, buyer classification and SDK validation must be completed first.
+ */
+exports.zatcaQueueSale = onDocumentCreated({
+  document: 'users/{uid}/sales/{saleId}',
+  region: REGION
+}, async (event) => {
+  const { uid, saleId } = event.params;
+  const sale = event.data && event.data.data();
+  if (!sale) return;
+  const settingsSnap = await db.doc(`users/${uid}/pos/settings`).get();
+  const settings = settingsSnap.exists ? settingsSnap.data() : {};
+  const assessment = assessSaleForZatca(sale, settings);
+  const jobRef = db.doc(`users/${uid}/zatcaInvoices/sale-${saleId}`);
+  await db.runTransaction(async (tx) => {
+    const existing = await tx.get(jobRef);
+    if (existing.exists) return;
+    tx.create(jobRef, {
+      source: 'pos_sale',
+      saleId: String(saleId),
+      saleNo: Number(sale.no) || null,
+      receiptNo: Number(sale.sn) || null,
+      documentType: null,
+      status: assessment.status,
+      reasons: assessment.reasons,
+      currency: assessment.currency || String(settings.cur || ''),
+      total: Number(sale.total) || 0,
+      vatAmount: Number(sale.tax) || 0,
+      environment: getEnvironment(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp()
+    });
+  });
 });
 
 exports.zatcaCheckCredentials = onCall({
