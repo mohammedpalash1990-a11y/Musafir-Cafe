@@ -65,7 +65,7 @@ function assessSaleForZatca(sale, settings) {
   // global setting. Explicit Z/ZERO/EXEMPT/O overrides remain opt-in for
   // genuinely different tax treatment; menu category names are never inferred.
   const globalVat = settings && settings.vat && typeof settings.vat === 'object' ? settings.vat : {};
-  const globalRate = Number(sale.vatRate ?? globalVat.rate ?? settings && settings.tax ?? 15);
+  const globalRate = Number(sale.vatRate ?? globalVat.rate ?? (settings && settings.tax) ?? 15);
   const globalEnabled = sale.vatEnabled !== false && globalVat.enabled !== false;
   const lineTax = sale.items.map((item) => {
     const rawCategory = String(item.zatcaVatCategory || '').trim().toUpperCase();
