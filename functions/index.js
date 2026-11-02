@@ -328,6 +328,10 @@ exports.zatcaRequestComplianceCsid = onCall({ region: REGION, timeoutSeconds: 60
   if (!credentials.valid) {
     throw new HttpsError('data-loss', credentials.reason);
   }
+  await db.doc(`users/${request.auth.uid}/zatcaOnboarding/${credentials.requestId}`).set({
+    requestId: credentials.requestId, environment: env, status: 'compliance_csid_issued',
+    createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
   return {
     accepted: true,
     environment: env,
@@ -357,6 +361,12 @@ exports.zatcaSubmitComplianceInvoice = onCall({ region: REGION, timeoutSeconds: 
   const invoiceHash = String(input.invoiceHash || '').trim();
   const invoice = String(input.invoice || '').trim();
   const clearanceStatus = String(input.clearanceStatus || '');
+  const requestId = String(input.requestId || '').trim();
+  const scenario = String(input.scenario || '').trim();
+  const scenarios = ['standard_invoice', 'standard_credit_note', 'standard_debit_note', 'simplified_invoice', 'simplified_credit_note', 'simplified_debit_note'];
+  if (!/^\\d{5,30}$/.test(requestId) || !scenarios.includes(scenario)) {
+    throw new HttpsError('invalid-argument', 'A valid compliance requestId and supported scenario are required.');
+  }
   if (!['0', '1'].includes(clearanceStatus)) {
     throw new HttpsError('invalid-argument', 'clearanceStatus must be 0 (reporting) or 1 (clearance).');
   }
@@ -364,6 +374,11 @@ exports.zatcaSubmitComplianceInvoice = onCall({ region: REGION, timeoutSeconds: 
   if (!payloadCheck.valid) throw new HttpsError('invalid-argument', payloadCheck.reason);
   const env = getEnvironment();
   if (env !== 'sandbox') throw new HttpsError('failed-precondition', 'Compliance invoice checks are locked to sandbox in this workflow.');
+  const onboardingRef = db.doc(`users/${request.auth.uid}/zatcaOnboarding/${requestId}`);
+  const onboardingSnap = await onboardingRef.get();
+  if (!onboardingSnap.exists || onboardingSnap.data().status !== 'compliance_csid_issued') {
+    throw new HttpsError('failed-precondition', 'No matching Compliance CSID onboarding request exists for this account.');
+  }
   const result = await zatcaRequest({
     env,
     path: '/compliance/invoices',
@@ -371,7 +386,13 @@ exports.zatcaSubmitComplianceInvoice = onCall({ region: REGION, timeoutSeconds: 
     headers: { 'Clearance-Status': clearanceStatus },
     body: { invoiceHash, uuid, invoice }
   });
-  return { accepted: true, environment: env, uuid, response: result.data };
+  const validationStatus = String(result.data && result.data.validationResults && result.data.validationResults.status || '').toUpperCase();
+  const passed = validationStatus === 'PASS';
+  await onboardingRef.collection('checks').doc(scenario).set({
+    scenario, uuid, clearanceStatus, validationStatus: validationStatus || 'UNKNOWN',
+    passed, response: result.data, updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+  return { accepted: passed, environment: env, uuid, scenario, validationStatus: validationStatus || 'UNKNOWN', response: result.data };
 });
 
 /**
@@ -387,11 +408,17 @@ exports.zatcaRequestProductionCsid = onCall({ region: REGION, timeoutSeconds: 60
   const token = String(input.complianceCsid || '');
   const secret = String(input.complianceSecret || '');
   if (!token || !secret) throw new HttpsError('invalid-argument', 'Compliance CSID and secret are required.');
-  if (input.complianceChecksPassed !== true) {
-    throw new HttpsError('failed-precondition', 'Confirm that every required compliance invoice check passed before requesting a Production CSID.');
-  }
   const env = getEnvironment();
   if (env !== 'sandbox') throw new HttpsError('failed-precondition', 'Production CSID exchange is locked to sandbox in this workflow.');
+  const onboardingRef = db.doc(`users/${request.auth.uid}/zatcaOnboarding/${checked.requestId}`);
+  const onboardingSnap = await onboardingRef.get();
+  if (!onboardingSnap.exists || onboardingSnap.data().status !== 'compliance_csid_issued') {
+    throw new HttpsError('failed-precondition', 'No matching Compliance CSID onboarding request exists for this account.');
+  }
+  const requiredScenarios = ['standard_invoice', 'standard_credit_note', 'standard_debit_note', 'simplified_invoice', 'simplified_credit_note', 'simplified_debit_note'];
+  const checkSnaps = await Promise.all(requiredScenarios.map((name) => onboardingRef.collection('checks').doc(name).get()));
+  const missingChecks = requiredScenarios.filter((name, index) => !checkSnaps[index].exists || checkSnaps[index].data().passed !== true);
+  if (missingChecks.length) throw new HttpsError('failed-precondition', 'Required compliance scenarios have not all passed.', { missingChecks });
   const result = await zatcaRequest({
     env,
     path: '/production/csids',
