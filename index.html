@@ -236,6 +236,7 @@ var P = load('pos_p',[{id:1,name:'Tea',price:30,cat:'Drinks',stock:''},{id:2,nam
 P.forEach(function(p){if(p.bn===undefined)p.bn=BN[p.id]||''});
 
 var H=load('pos_h',[]), IMG=load('pos_img',{}), DU=load('pos_du',[]), cart={}, cat='All', q='', view='sell', edit=null, arm=0, vArm=0, pay='Cash', disc='', recv='', pays=null, pPhoto, dview=null, dq='', pdRow=null, pdPhoto='';
+var ZBUY={documentType:'',buyerName:'',buyerVatNumber:'',buyerStreet:'',buyerBuilding:'',buyerDistrict:'',buyerCity:'',buyerPostalCode:''};
 var CU=null, CE='', ready=false, tm=0, ss='off', upl=false, cfgOK=!/PASTE/.test((window.FIREBASE_CONFIG||{}).apiKey||'PASTE');
 var dd=null, dm=null, curDay=null;
 var KH=(function(){var o={p:[],tx:[],ex:[]};try{var s=JSON.parse(localStorage.getItem('pos_kh'));if(s){o.p=s.p||[];o.tx=s.tx||[];o.ex=s.ex||[]}}catch(e){}return o})();
@@ -423,6 +424,11 @@ function cartInner(sheet){
   h+='<div class="cp"><div class="tbar"><span class="mute">'+cnt()+t('itm')+'</span><span>'+t('total')+': <b>'+$$(c.t)+'</b></span></div>'
   +'<div class="dl"><span>'+t('disc')+' ('+esc(S.cur)+')</span><input type="number" inputmode="decimal" value="'+esc(disc)+'" onchange="disc=this.value;openCart();render()"></div>'
   +((c.d||+S.tax)?'<div class="sm1 mute"><span>'+t('sub')+' '+$$(c.s)+'</span>'+(c.d?'<span>'+t('disc')+' −'+$$(c.d)+'</span>':'')+(+S.tax?'<span>'+t('tax')+' '+S.tax+'% '+$$(c.tx)+'</span>':'')+'</div>':'');
+  h+='<div class="box" style="margin:10px 0;padding:10px"><b>🧾 ZATCA invoice type</b><select onchange="ZBUY.documentType=this.value;openCart()"><option value="" disabled'+(!ZBUY.documentType?' selected':'')+'>'+L('Invoice type নির্বাচন করুন','Select invoice type')+'</option><option value="simplified"'+(ZBUY.documentType==='simplified'?' selected':'')+'>Simplified (B2C)</option><option value="standard"'+(ZBUY.documentType==='standard'?' selected':'')+'>Standard (B2B)</option></select>';
+  if(ZBUY.documentType==='standard'){
+   h+='<label>Buyer legal name</label><input value="'+esc(ZBUY.buyerName)+'" onchange="ZBUY.buyerName=this.value" placeholder="Company legal name"><label>Buyer VAT number (15 digits)</label><input inputmode="numeric" maxlength="15" value="'+esc(ZBUY.buyerVatNumber)+'" onchange="ZBUY.buyerVatNumber=this.value"><label>Buyer street</label><input value="'+esc(ZBUY.buyerStreet)+'" onchange="ZBUY.buyerStreet=this.value"><div class="dl"><div style="flex:1"><label>Building number</label><input value="'+esc(ZBUY.buyerBuilding)+'" onchange="ZBUY.buyerBuilding=this.value"></div><div style="flex:1"><label>Postal code</label><input value="'+esc(ZBUY.buyerPostalCode)+'" onchange="ZBUY.buyerPostalCode=this.value"></div></div><label>District</label><input value="'+esc(ZBUY.buyerDistrict)+'" onchange="ZBUY.buyerDistrict=this.value"><label>City</label><input value="'+esc(ZBUY.buyerCity)+'" onchange="ZBUY.buyerCity=this.value">';
+  }
+  h+='</div>';
   if(!split){
    h+='<div class="pm">'+PM.map(function(m){return '<button class="'+(x0.m==m?'pri':'')+'" onclick="setM1(\''+m+'\')">'+t(m)+'</button>'}).join('')+'</div>';
    if(x0.m=='Cash'){
@@ -447,7 +453,7 @@ function openCart(){
  $('#cb').innerHTML=cartInner(true);$('#cs').classList.add('show')
 }
 
-function cancelOrder(){ask(L('পুরো অর্ডার বাতিল করতে চান?','Cancel the whole order?'),function(){cart={};disc='';recv='';pays=null;window.QRSRC=null;render();openCart()},L('হ্যাঁ, বাতিল','Yes, cancel'))}
+function cancelOrder(){ask(L('পুরো অর্ডার বাতিল করতে চান?','Cancel the whole order?'),function(){cart={};disc='';recv='';pays=null;ZBUY={documentType:'',buyerName:'',buyerVatNumber:'',buyerStreet:'',buyerBuilding:'',buyerDistrict:'',buyerCity:'',buyerPostalCode:''};window.QRSRC=null;render();openCart()},L('হ্যাঁ, বাতিল','Yes, cancel'))}
 
 function randCode(){var a=new Uint8Array(12),s='';(window.crypto||{getRandomValues:function(x){for(var i=0;i<x.length;i++)x[i]=Math.random()*256}}).getRandomValues(a);for(var i=0;i<a.length;i++)s+=(a[i]%36).toString(36);return s+Date.now().toString(36)}
 function thumb(u,cb){var im=new Image();im.onload=function(){var c=document.createElement('canvas');c.width=c.height=96;var m=Math.min(im.width,im.height);c.getContext('2d').drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,96,96);cb(c.toDataURL('image/jpeg',0.74))};im.onerror=function(){cb(null)};im.src=u}
@@ -455,19 +461,25 @@ function thumb(u,cb){var im=new Image();im.onload=function(){var c=document.crea
 function charge(){
  cleanCart();if(!Object.keys(cart).length)return;var ps=pst();if(!ps.ok){toast(ps.rows.some(function(x){return x.m=='Due'&&!x.debtor})?t('needDebtor'):L('পেমেন্ট পুরো হয়নি','Payment is not complete'));return}
  if(otpOn()&&!otpPass){var oq=otpQueue(ps);if(oq.length){otpStart(oq);return}}otpPass=false;
+ var zb=Object.assign({},ZBUY);
+ if(!['simplified','standard'].includes(zb.documentType)){toast(L('Invoice type নির্বাচন করুন','Select an invoice type'));return}
+ if(zb.documentType==='standard'){
+  var buyerRequired=['buyerName','buyerVatNumber','buyerStreet','buyerBuilding','buyerDistrict','buyerCity','buyerPostalCode'];
+  if(buyerRequired.some(function(k){return !String(zb[k]||'').trim()})||!/^3\d{13}3$/.test(String(zb.buyerVatNumber||'').trim())){toast(L('Standard invoice-এর buyer name, সঠিক VAT number ও ঠিকানা পূরণ করুন','Complete the Standard invoice buyer name, valid VAT number and address'));return}
+ }
  var c=calc(),items=[];
- for(var id in cart){var p=gp(id);if(!p)continue;var it0={id:p.id,name:p.name,bn:p.bn,price:p.price,qty:cart[id]};if(p.combo){it0.cb=p.cb.slice();(function(q){p.cb.forEach(function(x){var r=P.find(function(y){return y.id==x});if(r&&r.stock!=='')r.stock-=q})})(cart[id])}else if(p.stock!=='')p.stock-=cart[id];items.push(it0)}
+ for(var id in cart){var p=gp(id);if(!p)continue;var it0={id:p.id,name:p.name,bn:p.bn,price:p.price,qty:cart[id],zatcaVatCategory:p.zatcaVatCategory||null,zatcaVatRate:p.zatcaVatRate===undefined?null:p.zatcaVatRate};if(p.combo){it0.cb=p.cb.slice();(function(q){p.cb.forEach(function(x){var r=P.find(function(y){return y.id==x});if(r&&r.stock!=='')r.stock-=q})})(cart[id])}else if(p.stock!=='')p.stock-=cart[id];items.push(it0)}
  var left=ps.chg,mg={},cashGiven=0,dueRows=[];
  ps.rows.forEach(function(x){var a=+x.a||0;if(x.m=='Due'){if(a>0.004)dueRows.push({debtor:x.debtor,a:a});return}if(x.m=='Cash'){cashGiven+=a;var d=Math.min(a,left);a-=d;left-=d}if(a>0.004)mg[x.m]=(mg[x.m]||0)+a});
  var pl=Object.keys(mg).map(function(m){return{m:m,a:+mg[m].toFixed(2)}});
  dueRows.forEach(function(x){pl.push({m:'Due',a:+x.a.toFixed(2),debtor:x.debtor.name})});
  var no=H.reduce(function(a,x){return Math.max(a,x.no)},1000)+1,now=Date.now();
- var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode()};
+ var s={no:no,sn:snFor(now),t:now,items:items,sub:c.s,disc:c.d,tax:c.tx,total:c.t,pay:pl.length>1?'Split':(pl[0]?pl[0].m:'Cash'),pays:pl,recv:cashGiven>0?cashGiven:null,chg:ps.chg,pc:randCode(),zatca:{documentType:zb.documentType,buyer:zb.documentType==='standard'?{name:zb.buyerName.trim(),vatNumber:zb.buyerVatNumber.trim(),street:zb.buyerStreet.trim(),building:zb.buyerBuilding.trim(),district:zb.buyerDistrict.trim(),city:zb.buyerCity.trim(),postalCode:zb.buyerPostalCode.trim()}:null}};
  if(!CU)s.lc=true;
  s.src=window.QRSRC?'qr':'pos';if(window.QRSRC){s.qr=window.QRSRC.l.slice();window.QRSRC=null}
  H.push(s);
  dueRows.forEach(function(x){var dd2=DU.find(function(y){return y.id==x.debtor.id});if(dd2){dd2.entries=dd2.entries||[];dd2.entries.push({t:now,a:x.a,otp:otpDone[x.debtor.id]||false,no:s.sn,sid:s.no,items:items.map(function(i){return nm(i)+' x'+i.qty}).join(', ')});pubDue(dd2)}});
- save();if(dueRows.length)dusave();cSale(s);rqAdd(rqSale(s));pubReceipt(s);cart={};disc='';recv='';pays=null;otpDone={};$('#cs').classList.remove('show');render();showRc(s.no);
+ save();if(dueRows.length)dusave();cSale(s);rqAdd(rqSale(s));pubReceipt(s);cart={};disc='';recv='';pays=null;ZBUY={documentType:'',buyerName:'',buyerVatNumber:'',buyerStreet:'',buyerBuilding:'',buyerDistrict:'',buyerCity:'',buyerPostalCode:''};otpDone={};$('#cs').classList.remove('show');render();showRc(s.no);
 }
 
 function plainFoot(s){return footMsg(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
@@ -615,7 +627,7 @@ function vSell(){var g=vSell0();return isWide()?'<div class="split"><aside class
 
 function vProd(){
  var e=edit?gp(edit):null;
- var h='<div class="box"><b>'+(e?t('edit'):t('add'))+'</b><label>'+t('nm')+'</label><input id="pn" value="'+esc(e?e.name:'')+'"><label>'+t('nb')+'</label><input id="pb" value="'+esc(e?e.bn||'':'')+'"><label>'+t('pr')+'</label><input id="pp" type="number" inputmode="decimal" value="'+(e?e.price:'')+'"><label>'+t('cat')+'</label><input id="pc" value="'+esc(e?e.cat:'')+'" placeholder="Drinks"><label>'+t('stock')+'</label><input id="ps" type="number" inputmode="numeric" value="'+(e?e.stock:'')+'">'
+ var h='<div class="box"><b>'+(e?t('edit'):t('add'))+'</b><label>'+t('nm')+'</label><input id="pn" value="'+esc(e?e.name:'')+'"><label>'+t('nb')+'</label><input id="pb" value="'+esc(e?e.bn||'':'')+'"><label>'+t('pr')+'</label><input id="pp" type="number" inputmode="decimal" value="'+(e?e.price:'')+'"><label>'+t('cat')+'</label><input id="pc" value="'+esc(e?e.cat:'')+'" placeholder="Drinks"><label>ZATCA VAT category (per product)</label><select id="p_zvat"><option value="">'+L('নির্ধারণ করা হয়নি','Not configured')+'</option>'+[['S','Standard rated'],['Z','Zero rated'],['E','Exempt'],['O','Out of scope']].map(function(x){return '<option value="'+x[0]+'"'+(e&&e.zatcaVatCategory===x[0]?' selected':'')+'>'+x[0]+' — '+x[1]+'</option>'}).join('')+'</select><label>ZATCA VAT rate (%)</label><input id="p_zrate" type="number" min="0" max="100" step="0.01" inputmode="decimal" value="'+(e&&e.zatcaVatRate!==undefined&&e.zatcaVatRate!==null?esc(e.zatcaVatRate):'')+'" placeholder="e.g. 15 or 0"><label>'+t('stock')+'</label><input id="ps" type="number" inputmode="numeric" value="'+(e?e.stock:'')+'">'
  +'<label>'+L('ছবি (ঐচ্ছিক)','Photo (optional)')+'</label><div style="display:flex;align-items:center;gap:10px"><div id="pph">'+pphHtml(e)+'</div><label class="btn">'+I('camera')+' '+L('ছবি দিন / বদলান','Add / change photo')+'<input type="file" accept="image/*" hidden onchange="pickPhoto(this)"></label><button class="x" aria-label="'+t('rm')+'" onclick="rmPhoto()">'+I('trash')+'</button></div>'
  +'<div style="display:flex;gap:10px;margin-top:14px"><button class="pri" style="flex:1" onclick="saveP()">'+t('save')+'</button>'+(e?'<button class="bad" onclick="delP()">'+t('del')+'</button><button onclick="edit=null;pPhoto=undefined;render()">'+t('back')+'</button>':'')+'</div></div><div class="box">';
  h+=P.map(function(p){return '<div class="row" onclick="edit='+p.id+';pPhoto=undefined;render();scrollTo(0,0)"><div style="display:flex;align-items:center;gap:10px">'+pphHtml(p,38,true)+'<div><b>'+esc(nm(p))+'</b><div class="mute">'+esc(p.cat?tc(p.cat):t('noc'))+(p.stock!==''?' · '+p.stock:'')+'</div></div></div><b>'+$$(p.price)+'</b></div>'}).join('');
@@ -625,7 +637,9 @@ function pphHtml(e,z,raw){z=z||56;var u=raw?(e&&IMG[e.id]):(pPhoto===null?null:(
 function pickPhoto(inp){var f=inp.files&&inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas'),s=360;c.width=c.height=s;var m=Math.min(im.width,im.height),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,s,s);pPhoto=c.toDataURL('image/jpeg',0.88);var b=$('#pph');if(b)b.innerHTML=pphHtml(edit?gp(edit):null)};im.src=r.result};r.readAsDataURL(f);inp.value=''}
 function rmPhoto(){pPhoto=null;var b=$('#pph');if(b)b.innerHTML=pphHtml(edit?gp(edit):null)}
 function saveP(){var n=$('#pn').value.trim(),b=$('#pb').value.trim(),pr=parseFloat($('#pp').value);if(!(n||b)||isNaN(pr)){toast(t('need'));return}
- var o={name:n||b,bn:b,price:pr,cat:$('#pc').value.trim(),stock:$('#ps').value===''?'':+$('#ps').value};
+ var zvat=$('#p_zvat').value,zrate=$('#p_zrate').value;
+ if(zvat&&(!zrate.trim()||!Number.isFinite(+zrate)||+zrate<0||+zrate>100)){toast(L('VAT rate ০–১০০ এর মধ্যে দিন','Enter a VAT rate from 0 to 100'));return}
+ var o={name:n||b,bn:b,price:pr,cat:$('#pc').value.trim(),stock:$('#ps').value===''?'':+$('#ps').value,zatcaVatCategory:zvat||null,zatcaVatRate:zvat?+zrate:null};
  var pid;if(edit){Object.assign(gp(edit),o);pid=edit}else{o.id=Date.now();P.push(o);pid=o.id}
  if(pPhoto){IMG[pid]=pPhoto;if(CU)w(FB.set('pos','img_'+pid,{d:pPhoto}))}else if(pPhoto===null&&IMG[pid]){delete IMG[pid];if(CU)w(FB.del('pos','img_'+pid))}
  pPhoto=undefined;edit=null;save();lsave();render()}
@@ -675,8 +689,30 @@ function bkBox(){var t0=0;try{t0=+localStorage.getItem('pos_bk')||0}catch(e){}va
  return '<div class="box"><div class="hd">'+I('copy')+'<b>'+L('ব্যাকআপ','Backup')+'</b></div><p class="mute" style="margin:0 0 8px">'+(t0?L('শেষ ব্যাকআপ: ','Last backup: ')+day(t0):L('এখনো ব্যাকআপ নেওয়া হয়নি','No backup yet'))+(old?' · <b style="color:var(--warn)">'+L('সপ্তাহে একবার নিন','Take one weekly')+'</b>':'')+'</p>'
  +'<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="pri" style="flex:1" onclick="backup()">'+I('copy')+' '+L('ডেটা ডাউনলোড','Download data')+'</button><label class="btn" style="flex:1;text-align:center">'+L('ব্যাকআপ থেকে ফেরান','Restore')+'<input type="file" accept=".json,application/json" hidden onchange="restoreFile(this)"></label></div></div>'}
 
+function zatcaBox(){
+ var z=S.zatca||{};
+ return '<div class="box"><div class="hd">🧾 <b>'+L('সৌদি ZATCA / FATOORA সেটআপ','Saudi ZATCA / FATOORA setup')+'</b></div>'
+ +'<p class="mute" style="font-size:12px">'+L('আপনার VAT ব্যবসার তথ্য দিন। CSID, private key, OTP বা গোপন credentials এখানে লিখবেন না।','Enter your VAT business details. Never enter CSID, private key, OTP or secret credentials here.')+'</p>'
+ +'<label>'+L('আইনগত ব্যবসার নাম','Legal seller name')+'</label><input id="z_name" value="'+esc(z.sellerName||'')+'">'
+ +'<label>Saudi VAT Number (15 digits)</label><input id="z_vat" inputmode="numeric" maxlength="15" value="'+esc(z.vatNumber||'')+'">'
+ +'<label>'+L('রাস্তার নাম','Street')+'</label><input id="z_street" value="'+esc(z.street||'')+'">'
+ +'<div class="dl"><div style="flex:1"><label>'+L('বিল্ডিং নম্বর','Building number')+'</label><input id="z_building" value="'+esc(z.building||'')+'"></div><div style="flex:1"><label>'+L('পোস্টাল কোড','Postal code')+'</label><input id="z_postal" value="'+esc(z.postalCode||'')+'"></div></div>'
+ +'<label>'+L('জেলা / এলাকা','District')+'</label><input id="z_district" value="'+esc(z.district||'')+'">'
+ +'<label>'+L('শহর','City')+'</label><input id="z_city" value="'+esc(z.city||'')+'">'
+ +'<label>Invoice type</label><select id="z_type"><option value="simplified" '+((z.invoiceType||'simplified')==='simplified'?'selected':'')+'>Simplified (B2C)</option><option value="standard" '+(z.invoiceType==='standard'?'selected':'')+'>Standard (B2B)</option></select>'
+ +'<label style="display:flex;align-items:center;gap:8px;color:var(--ink)"><input id="z_enabled" type="checkbox" style="width:auto" '+(z.enabled?'checked':'')+'> '+L('ZATCA seller profile চালু','Enable ZATCA seller profile')+'</label>'
+ +'<button class="pri" style="width:100%;margin-top:8px" onclick="saveZatcaProfile()">'+L('ZATCA তথ্য সেভ করুন','Save ZATCA profile')+'</button>'
+ +'<div class="mute" id="z_msg" style="font-size:12px;margin-top:8px">'+L('এটি শুধু ব্যবসার প্রোফাইল সেভ করবে; সরকারি সংযোগ/অনুমোদন নয়।','This only saves the seller profile; it does not connect to or certify with ZATCA.')+'</div></div>'
+}
+function saveZatcaProfile(){
+ var $z=id=>document.getElementById(id);
+ S.zatca={enabled:!!$z('z_enabled').checked,sellerName:$z('z_name').value.trim(),vatNumber:$z('z_vat').value.trim(),street:$z('z_street').value.trim(),building:$z('z_building').value.trim(),postalCode:$z('z_postal').value.trim(),district:$z('z_district').value.trim(),city:$z('z_city').value.trim(),invoiceType:$z('z_type').value};
+ save();
+ var m=$z('z_msg');if(m)m.textContent=L('ZATCA ব্যবসার তথ্য সেভ হয়েছে।','ZATCA seller profile saved.');
+}
 function vSet0(){
  return '<div class="box"><label>'+t('shop')+'</label><input value="'+esc(S.shop)+'" onchange="S.shop=this.value;save();render()"><label>'+t('cur')+'</label><input value="'+esc(S.cur)+'" onchange="S.cur=this.value;save();render()"><label>'+t('taxp')+'</label><input type="number" inputmode="decimal" value="'+S.tax+'" onchange="S.tax=+this.value||0;save();render()"></div>'
+ +zatcaBox()
  +'<div class="box"><b>'+t('data')+'</b><p class="mute">'+esc(CE||'')+'</p><button onclick="FB.out()">'+L('লগআউট','Log out')+'</button><p class="mute">'+t('note')+'</p><button class="bad" onclick="wipe()">'+(arm?t('erase2'):t('erase'))+'</button></div>'
 }
 
