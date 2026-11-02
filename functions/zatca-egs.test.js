@@ -90,3 +90,28 @@ test('rejects non-zero VAT rates on zero-rated, exempt or out-of-scope lines', (
   }, settings);
   assert.ok(result.reasons.some((reason) => reason.includes('must use a zero VAT rate')));
 });
+
+test('requires per-transaction invoice classification and Standard buyer VAT/address', () => {
+  const base = {
+    ...sale,
+    sub: 100,
+    disc: 0,
+    tax: 15,
+    total: 115,
+    items: [{ name: 'Coffee', qty: 1, price: 100, zatcaVatCategory: 'S', zatcaVatRate: 15 }]
+  };
+  const missingType = assessSaleForZatca(base, settings);
+  assert.ok(missingType.reasons.some((reason) => reason.includes('Select Standard (B2B) or Simplified (B2C)')));
+  const missingBuyer = assessSaleForZatca({ ...base, zatca: { documentType: 'standard', buyer: {} } }, settings);
+  assert.ok(missingBuyer.reasons.some((reason) => reason.includes('Complete Standard invoice buyer details')));
+  const standardReady = assessSaleForZatca({
+    ...base,
+    zatca: { documentType: 'standard', buyer: {
+      name: 'Business Buyer', vatNumber: '312345678901233',
+      street: 'Market Road', building: '1234', district: 'Central',
+      city: 'Madinah', postalCode: '42311'
+    } }
+  }, settings);
+  assert.equal(standardReady.documentType, 'standard');
+  assert.ok(!standardReady.reasons.some((reason) => reason.includes('Complete Standard invoice buyer details')));
+});
