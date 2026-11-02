@@ -168,8 +168,10 @@ exports.zatcaSubmitInvoice = onCall({
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(invoiceBase64) || invoiceBase64.length > 1400000) {
     throw new HttpsError('invalid-argument', 'Invoice must be a base64-encoded XML string under 1 MB.');
   }
-  if (!/^[a-f0-9]{64}$/i.test(invoiceHash)) {
-    throw new HttpsError('invalid-argument', 'invoiceHash must be a 64-character SHA-256 hex digest.');
+  if (!/^[A-Za-z0-9+/]{43}=$/.test(invoiceHash) ||
+      Buffer.from(invoiceHash, 'base64').length !== 32 ||
+      Buffer.from(invoiceHash, 'base64').toString('base64') !== invoiceHash) {
+    throw new HttpsError('invalid-argument', 'invoiceHash must be a Base64-encoded 32-byte SHA-256 digest as required by FATOORA.');
   }
   if (!['simplified', 'standard'].includes(documentType)) {
     throw new HttpsError('invalid-argument', 'documentType must be simplified or standard.');
