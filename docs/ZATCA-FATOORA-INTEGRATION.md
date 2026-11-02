@@ -25,7 +25,7 @@ Create secrets without committing values to Git:
 - `ZATCA_PROD_TOKEN` — Production CSID binary security token.
 - `ZATCA_PROD_SECRET` — matching Production CSID secret.
 
-Never store private keys, CSID secrets, OTPs, or credentials in browser code, Firestore profile documents, GitHub, or chat messages. Private signing keys must be protected in an appropriate key store/HSM and must never be sent to the browser.
+Never store private keys, CSID secrets, OTPs, or credentials in browser code, Firestore profile documents, GitHub, or chat messages. Buyer VAT/address details are business personal data: verify that deployed Firestore Security Rules restrict `users/{uid}/sales` and `users/{uid}/zatcaInvoices` to the authenticated owner and trusted server functions. No Firestore rules file was found in this repository during this change, so deployed rule enforcement has not been audited. Private signing keys must be protected in an appropriate key store/HSM and must never be sent to the browser.
 
 ## API environments
 
@@ -75,6 +75,6 @@ The queue assesses seller-profile completeness, invoice-line validity, refund st
 
 The signed-in submit endpoint also uses `submission_unknown` when a request may have reached the gateway but no definitive response was received. Do not reset this state or retry the UUID until the gateway outcome has been reconciled.
 
-**Important:** every transaction must be classified as Standard or Simplified from its buyer and transaction details. A global default alone is not sufficient. The POS checkout now records the invoice type per transaction. Standard (B2B) selection requires buyer legal name, Saudi VAT number and address fields; the queue validates their presence and VAT-number format. Simplified (B2C) is the default. This is data capture and preflight only; it does not determine legal classification automatically. The POS still has no compliant invoice generator, so queued records intentionally remain in review and are not automatically submitted.
+**Important:** every transaction must be classified as Standard or Simplified from its buyer and transaction details. A global default alone is not sufficient. The POS checkout now records the invoice type per transaction. Standard (B2B) selection requires buyer legal name, Saudi VAT number and address fields; the queue validates their presence and VAT-number format. Buyer details remain on the source sale record and are not duplicated into the ZATCA queue. Simplified (B2C) is the default. This is data capture and preflight only; it does not determine legal classification automatically. The POS still has no compliant invoice generator, so queued records intentionally remain in review and are not automatically submitted.
 
 The built-in Node test suite is `npm test` in `functions/` and uses `node --test`.
