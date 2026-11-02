@@ -431,8 +431,12 @@ exports.zatcaGenerateInvoice = onCall({
     privateKeyPem, certToken, numberPrefix: 'MUS-'
   });
   const jobRef = db.doc(`users/${uid}/zatcaInvoices/sale-${saleId}`);
+  const submissionSnap = await db.doc(`zatca_tenants/${uid}/submissions/${saleId}`).get();
+  const existingSubmissionStatus = String(submissionSnap.exists ? submissionSnap.data().status || '' : '').toLowerCase();
+  const queueStatus = ['reported', 'cleared', 'submitted', 'submission_unknown'].includes(existingSubmissionStatus)
+    ? existingSubmissionStatus : 'generated_pending_sdk';
   await jobRef.set({
-    status: 'generated_pending_sdk',
+    status: queueStatus,
     invoiceNumber: generated.number,
     uuid: generated.uuid,
     invoiceHash: generated.invoiceHash,
@@ -446,7 +450,7 @@ exports.zatcaGenerateInvoice = onCall({
   return {
     generated: true,
     duplicate: !!generated.duplicate,
-    status: 'generated_pending_sdk',
+    status: queueStatus,
     saleId,
     invoiceNumber: generated.number,
     uuid: generated.uuid,
