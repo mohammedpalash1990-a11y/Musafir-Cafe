@@ -23,20 +23,40 @@ Before deploying these callables, create the encryption key with `openssl rand -
 
 All API calls use `Accept-Version: V2`, `Accept: application/json`, and `Content-Type: application/json`. The existing gateway uses Basic authentication with the CSID token as username and secret as password for authenticated calls.
 
+## Sandbox invoice generation and submission
+
+The current branch also adds a sandbox-only EGS path:
+
+- `zatcaGenerateInvoice({ saleId, onboardingRequestId })`: reads an existing authenticated POS sale, checks the global 15% VAT-inclusive amounts and buyer classification, uses the sandbox Production CSID issued by onboarding, verifies that the configured private key matches the CSID certificate, allocates ICV/PIH atomically, and generates a signed UBL invoice plus TLV QR. It does not submit automatically.
+- `zatcaGetGeneratedInvoice({ saleId })`: returns the generated XML and public invoice metadata to the authenticated tenant for official SDK validation.
+- `zatcaSubmitGeneratedInvoice({ saleId, onboardingRequestId })`: explicitly submits a previously generated invoice to the sandbox Reporting or Clearance endpoint. Ambiguous outcomes are marked `submission_unknown`; an HTTP success with an unrecognized final status is marked `submitted`. Both states block automatic retry.
+
+Before using invoice generation, provision the private key that matches the CSR used for the sandbox CSID as a Firebase Secret Manager secret:
+
+```bash
+firebase functions:secrets:set ZATCA_EGS_PRIVATE_KEY
+```
+
+The secret value must be the PEM-encoded EGS private key. Never put it in POS settings, Firestore, GitHub, logs, or chat. The encryption key `ZATCA_ONBOARDING_ENCRYPTION_KEY` is also required to decrypt the sandbox Production CSID envelope. The generated invoice is stored server-side under `zatca_tenants/{uid}/invoices/{saleId}`; the browser receives the XML only through the authenticated retrieval callable.
+
+Current invoice generation supports standard-rated 15% VAT lines only. It is not yet certified: the deterministic XML serialization, hash, XAdES structure and QR must pass the current official ZATCA SDK before the sandbox submission result can be treated as validation evidence. Production remains disabled.
+
 ## Still required before production
 
-- A compliant CSR/private-key generator matching the official ZATCA EGS configuration, with protected key custody and rotation.
+- A compliant CSR/private-key generator matching the official ZATCA EGS configuration, with protected key custody and rotation. The current workflow accepts a CSR and requires the matching private key to be provisioned separately in Secret Manager.
 - Provision and rotate the 32-byte base64 encryption key as a Firebase Secret Manager secret named ZATCA_ONBOARDING_ENCRYPTION_KEY; restrict secret access to the Functions runtime service account. The current encrypted Firestore envelope is for onboarding workflow state, not a replacement for the production invoice credential lifecycle.
 - Official ZATCA SDK validation of generated CSR, signed UBL XML, invoice hash, signature, QR, and all required invoice types.
 - Confirm the required compliance test matrix for the actual EGS Functionality Map; the six scenario tracker is a conservative gate, not a claim that every taxpayer's matrix is identical.
 - End-to-end sandbox tests against the official gateway with taxpayer-owned test credentials and valid signed fixtures.
 - Production CSID onboarding, secure storage in Firebase Secret Manager, independent administrator verification, deployment, and monitoring.
-- End-to-end invoice generation/signing, PIH and ICV sequencing, credit/debit note workflows, and offline-safe idempotent submission.
+- Official SDK validation of the current invoice XML/hash/XAdES/QR implementation, followed by real sandbox Reporting/Clearance tests using taxpayer-owned sandbox credentials.
+- POS UI and offline-sync integration so eligible queued sales can be generated/submitted safely without duplicate ICVs; credit/debit note workflows and refund mapping remain outstanding.
 
 ## Secret names currently used by invoice adapter
 
-- `ZATCA_SANDBOX_TOKEN` / `ZATCA_SANDBOX_SECRET`
-- `ZATCA_PROD_TOKEN` / `ZATCA_PROD_SECRET`
+- `ZATCA_EGS_PRIVATE_KEY` — PEM private key matching the EGS CSR/CSID public key.
+- `ZATCA_ONBOARDING_ENCRYPTION_KEY` — Base64-encoded 32-byte AES-256-GCM key for encrypted onboarding credentials.
+- `ZATCA_SANDBOX_TOKEN` / `ZATCA_SANDBOX_SECRET` and `ZATCA_PROD_TOKEN` / `ZATCA_PROD_SECRET` — used by the legacy direct submission adapter; generated-invoice sandbox submission reads the encrypted sandbox CSID record.
 
 Never place OTPs, CSID secrets, or private keys in source control or Firestore.
 
