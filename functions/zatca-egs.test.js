@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { assessSaleForZatca } = require('./zatca-egs');
+const { assessSaleForZatca, isSha256Base64 } = require('./zatca-egs');
 
 const settings = {
   cur: 'SAR',
@@ -38,4 +38,11 @@ test('requires SAR and transaction classification before EGS issuance', () => {
 
 test('rejects invalid invoice lines', () => {
   assert.equal(assessSaleForZatca({ ...sale, items: [{ name: '', qty: 0, price: -1 }] }, settings).status, 'manual_review');
+});
+
+test('accepts a Base64 SHA-256 digest and rejects hexadecimal form', () => {
+  const digest = Buffer.alloc(32, 7).toString('base64');
+  assert.equal(isSha256Base64(digest), true);
+  assert.equal(isSha256Base64('a'.repeat(64)), false);
+  assert.equal(isSha256Base64('not-a-hash'), false);
 });
