@@ -82,6 +82,9 @@ function assessSaleForZatca(sale, settings) {
     !['S', 'Z', 'E', 'O'].includes(category) || !Number.isFinite(rate) || rate < 0 || rate > 100 ||
     (category === 'S' && rate <= 0) || (category !== 'S' && rate !== 0)
   );
+  if (lineTax.some(({ category, rate }) => ['Z', 'E', 'O'].includes(category) && rate !== 0)) {
+    reasons.push('Zero-rated, exempt and out-of-scope lines must use a zero VAT rate.');
+  }
   if (invalidLineTax) {
     reasons.push('Invoice line tax override is invalid. Ordinary products inherit the global 15% Standard-rated VAT automatically; only special tax treatments need explicit overrides.');
   } else if (amounts.every(Number.isFinite) && Number(sale.sub) > 0) {
@@ -96,7 +99,7 @@ function assessSaleForZatca(sale, settings) {
         return sum + (grossAfterDiscount * (inclusive && category === 'S' ? rate / (100 + rate) : rate / 100));
       }, 0);
       if (Math.abs(expectedVat - Number(sale.tax)) > 0.02) {
-        reasons.push('Calculated VAT from the global default/explicit line overrides does not reconcile with the POS VAT total.');
+        reasons.push('Calculated VAT from the per-line categories and rates (including the global default) does not reconcile with the POS VAT total.');
       }
     }
   }
