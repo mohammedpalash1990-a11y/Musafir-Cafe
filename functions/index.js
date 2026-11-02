@@ -190,6 +190,9 @@ exports.zatcaSubmitInvoice = onCall({
       const state = existing.data().status;
       if (state === 'reported' || state === 'cleared') return { duplicate: true, data: existing.data() };
       if (state === 'processing') throw new HttpsError('aborted', 'This invoice is already being submitted.');
+      if (state === 'submission_unknown') {
+        throw new HttpsError('failed-precondition', 'A previous request may have reached ZATCA. Reconcile its status before retrying this UUID.');
+      }
       tx.update(invoiceRef, { status: 'processing', updatedAt: FieldValue.serverTimestamp() });
       return { duplicate: false };
     }
