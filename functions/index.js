@@ -136,7 +136,7 @@ exports.zatcaStatus = onCall({
     egsOnboarding: 'requires CSR and OTP onboarding',
     complianceCsid: 'not verified by this status check',
     productionCsid: env === 'production' && credentials ? 'configured in Secret Manager' : 'not configured',
-    productionEnabled: env === 'production' && credentials && !!z.enabled && missing.length === 0,
+    productionEnabled: false, // Enable only after production CSID onboarding and end-to-end compliance verification.
     apiVersion: API_VERSION
   };
 });
@@ -232,7 +232,7 @@ exports.zatcaSubmitInvoice = onCall({
   }
 });
 
-exports.zatcaTestGateway = onCall({
+exports.zatcaCheckCredentials = onCall({
   region: REGION,
   secrets: [ZATCA_PROD_TOKEN, ZATCA_PROD_SECRET, ZATCA_SANDBOX_TOKEN, ZATCA_SANDBOX_SECRET]
 }, async (request) => {
@@ -240,10 +240,10 @@ exports.zatcaTestGateway = onCall({
   const env = getEnvironment();
   const credentials = getCredentials(env);
   return {
-    reachableConfiguration: true,
+    credentialsConfigured: true,
     environment: env,
     baseUrl: getBaseUrl(env),
     authenticationConfigured: !!credentials.token && !!credentials.secret,
-    note: 'Credentials are configured. A successful invoice API response still requires a valid onboarded CSID and a compliant signed invoice.'
+    note: 'Secret values are configured. This is not a network test; production activation requires a valid production CSID and successful end-to-end compliance verification.'
   };
 });
