@@ -1,35 +1,45 @@
 # FATOORA OTP and CSID onboarding runbook
 
-This runbook documents the guarded onboarding sequence. It does not claim that a CSR, OTP, CSID, invoice, or production registration exists until the taxpayer and ZATCA complete the relevant steps.
+This runbook describes the sandbox onboarding callables currently added to Musafir Cafe. It is not evidence that a taxpayer has completed ZATCA onboarding or that a CSID has been issued.
 
-## What the taxpayer must do
+## Taxpayer prerequisites
 
-1. Sign in to the official FATOORA portal using the taxpayer's authorized account.
-2. Open the EGS onboarding / OTP area and generate a fresh OTP. ZATCA says OTP generation is performed in the portal, is mandatory for onboarding/renewal, and OTPs are valid for one hour. Never send the OTP in GitHub issues, chat, email, source code, or logs.
-3. Generate a CSR for the specific EGS using the official ZATCA SDK / current CSR configuration requirements. The CSR must match the VAT registration and EGS identity. Keep the matching private key in secure, access-controlled storage; the private key must never be sent to the browser, GitHub, Firestore, or this chat.
-4. Submit the CSR with the portal OTP to the Compliance CSID API. A Compliance CSID and request ID are issued for compliance checks.
-5. Run every applicable official compliance invoice check for the EGS Functionality Map (Standard/B2B, Simplified/B2C, and the required credit/debit note scenarios). Resolve every validation error.
-6. Request the Production CSID using the Compliance CSID credentials and the corresponding compliance request ID. Store the returned Production CSID token and secret in Firebase Secret Manager, never in Firestore or client-side configuration.
-7. Only after the Production CSID is confirmed and the full EGS pipeline passes official SDK and sandbox validation may a deployment administrator enable production flags.
+1. Sign in to the official FATOORA portal with the authorized taxpayer account.
+2. Generate a fresh OTP from the EGS onboarding area. OTPs are short-lived (one hour according to ZATCA's developer portal manual). Never paste the OTP into GitHub, chat, email, tickets, source code, or logs.
+3. Generate a CSR for the EGS using the current official ZATCA CSR configuration / SDK. The CSR must match the taxpayer VAT number and EGS identity. Keep the matching private key under tightly restricted server-side custody. Never upload the private key to the POS browser, Firestore, GitHub, or this chat.
+4. Submit the CSR and OTP to the Compliance CSID endpoint.
+5. Generate and sign the official compliance invoice test fixtures and run every required scenario for the EGS Functionality Map. The current callable tracks six explicit scenarios (Standard invoice/credit note/debit note and Simplified invoice/credit note/debit note); confirm the applicable matrix against the current official ZATCA guidance for the actual device profile.
+6. Only after all applicable compliance scenarios return PASS should the Production CSID be requested.
 
-## API sequence
+## Implemented sandbox callables
 
-All requests use Accept-Version: V2, Accept: application/json, and Content-Type: application/json.
+All callables require Firebase Authentication and use the configured sandbox gateway. Production onboarding is intentionally blocked.
 
-- Compliance CSID: POST {simulation|core}/compliance, with the portal-issued OTP header and a JSON body containing the CSR.
-- Compliance invoice checks: POST {simulation|core}/compliance/invoices, authenticated with the Compliance CSID token and secret. Submit each signed test invoice using the official prescribed payload.
-- Production CSID: POST {simulation|core}/production/csids, authenticated with the Compliance CSID token and secret; include the matching compliance_request_id in the request body. ZATCA's developer manual describes this as the Production CSID onboarding sequence.
+- `zatcaRequestComplianceCsid({ otp, csr })`: sends `POST /compliance`, with the OTP header and Base64 CSR body. It stores only the non-secret request tracking record. The callable currently returns the Compliance CSID and secret to the authenticated caller once; this is sensitive and must not be logged, persisted in browser storage, or shared. This transient return path still needs a production-grade secret handoff before live deployment.
+- `zatcaSubmitComplianceInvoice({ requestId, complianceCsid, complianceSecret, scenario, uuid, invoiceHash, invoice, clearanceStatus })`: sends one pre-generated signed invoice to `POST /compliance/invoices`. It records the result server-side and marks a scenario passed only when the response contains `validationResults.status = PASS`. Standard scenarios require clearance status 1; Simplified scenarios require 0.
+- `zatcaRequestProductionCsid({ requestId, complianceCsid, complianceSecret })`: server-checks all six tracked scenarios before calling `POST /production/csids`. The call is sandbox-only and returns the resulting sandbox CSID/secret once to the authenticated caller. It does not enable production submissions.
 
-The codebase currently validates OTP/CSR input shape and CSID response shape. The production CSR generation, private-key custody, official invoice fixtures, compliance invoice calls, and certificate installation remain gated; do not interpret input validation as ZATCA acceptance.
+All API calls use `Accept-Version: V2`, `Accept: application/json`, and `Content-Type: application/json`. The existing gateway uses Basic authentication with the CSID token as username and secret as password for authenticated calls.
 
-## Secret names
+## Still required before production
 
-- ZATCA_SANDBOX_TOKEN / ZATCA_SANDBOX_SECRET: sandbox Production CSID pair used by the current invoice adapter.
-- ZATCA_PROD_TOKEN / ZATCA_PROD_SECRET: production Production CSID pair.
-- Compliance credentials must be held separately from Production credentials while onboarding. Do not overwrite production secrets with Compliance CSID values.
+- A compliant CSR/private-key generator matching the official ZATCA EGS configuration, with protected key custody and rotation.
+- A production-grade secret handoff/storage mechanism. The current onboarding callables' one-time credential return is not an acceptable final production secret lifecycle.
+- Official ZATCA SDK validation of generated CSR, signed UBL XML, invoice hash, signature, QR, and all required invoice types.
+- Confirm the required compliance test matrix for the actual EGS Functionality Map; the six scenario tracker is a conservative gate, not a claim that every taxpayer's matrix is identical.
+- End-to-end sandbox tests against the official gateway with taxpayer-owned test credentials and valid signed fixtures.
+- Production CSID onboarding, secure storage in Firebase Secret Manager, independent administrator verification, deployment, and monitoring.
+- End-to-end invoice generation/signing, PIH and ICV sequencing, credit/debit note workflows, and offline-safe idempotent submission.
+
+## Secret names currently used by invoice adapter
+
+- `ZATCA_SANDBOX_TOKEN` / `ZATCA_SANDBOX_SECRET`
+- `ZATCA_PROD_TOKEN` / `ZATCA_PROD_SECRET`
+
+Never place OTPs, CSID secrets, or private keys in source control or Firestore.
 
 ## Official references
 
-- ZATCA E-Invoicing Detailed Technical Guideline: https://www.zatca.gov.sa/en/E-Invoicing/Introduction/Guidelines/Documents/E-invoicing-Detailed-Technical-G.pdf
-- ZATCA Developer Portal Manual: https://zatca.gov.sa/en/E-Invoicing/SystemsDevelopers/ComplianceEnablementToolbox/Documents/Developer%20Portal%20User%20Manual.pdf
-- ZATCA Sandbox Developer Portal Manual: https://sandbox.zatca.gov.sa/User_Manual_Developer_Portal_Manual_Version_3.pdf
+- [ZATCA Developer Portal User Manual](https://www.zatca.gov.sa/en/E-Invoicing/SystemsDevelopers/ComplianceEnablementToolbox/Documents/Developer%20Portal%20User%20Manual.pdf)
+- [ZATCA E-Invoicing Detailed Technical Guideline](https://www.zatca.gov.sa/en/E-Invoicing/Introduction/Guidelines/Documents/E-invoicing-Detailed-Technical-G.pdf)
+- [ZATCA Sandbox Developer Portal Manual](https://sandbox.zatca.gov.sa/User_Manual_Developer_Portal_Manual_Version_3.pdf)
