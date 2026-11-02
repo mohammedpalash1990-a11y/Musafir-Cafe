@@ -21,6 +21,10 @@ test('CSID response parser requires token, secret and request ID', () => {
   assert.equal(extractCsidCredentials({ binarySecurityToken: 'token' }).valid, false);
 });
 
+test('production CSID response may omit a new request ID', () => {
+  assert.deepEqual(extractCsidCredentials({ binarySecurityToken: 'pcsid', secret: 'pcsid-secret' }, { requireRequestId: false }), { valid: true, token: 'pcsid', secret: 'pcsid-secret', requestId: null });
+});
+
 test('production CSID requires a numeric compliance request ID', () => {
   assert.equal(validateProductionRequest({ requestId: '1727863119677' }).valid, true);
   assert.equal(validateProductionRequest({ requestId: 'abc' }).valid, false);
