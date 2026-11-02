@@ -8,8 +8,8 @@ const { toHalala, fmt } = require('./money');
 // The invoice builder emits a deterministic C14N 1.1-compatible serialization:
 // fixed namespace declaration order, sorted attributes, normalized line endings,
 // explicit start/end tags, and canonical text/attribute escaping.
-const escText = (s) => String(s).replace(/\\r\\n?/g, '\\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\\]\\]>/g, ']]&gt;');
-const escAttr = (s) => String(s).replace(/\\r\\n?/g, '\\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/\\t/g, '&#x9;').replace(/\\n/g, '&#xA;');
+const escText = (s) => String(s).replace(/\r\n?/g, '\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\]\]>/g, ']]&gt;');
+const escAttr = (s) => String(s).replace(/\r\n?/g, '\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/\t/g, '&#x9;').replace(/\n/g, '&#xA;');
 const el = (name, text, attrs = {}) => {
   const a = Object.keys(attrs).sort().map((k) => ` ${k}="${escAttr(attrs[k])}"`).join('');
   return `<${name}${a}>${text === undefined ? '' : escText(text)}</${name}>`;
