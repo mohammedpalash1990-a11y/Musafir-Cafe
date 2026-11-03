@@ -5,7 +5,7 @@ const { assessSaleForZatca } = require('./zatca-egs');
 const { validateSignedInvoicePayload, classifySubmissionOutcome } = require('./zatca-invoice-validation');
 const { validateComplianceRequest, extractCsidCredentials, validateProductionRequest } = require('./zatca-onboarding');
 const { generateInvoice } = require('./lib/zatca/invoice');
-const { computeTotals } = require('./lib/zatca/xml');
+const { preparePosSaleForInvoice } = require('./lib/zatca/pos-sale');
 const { validateSdkValidation } = require('./zatca-sdk-validation');
 const { defineSecret } = require('firebase-functions/params');
 const crypto = require('node:crypto');
@@ -296,7 +296,8 @@ exports.zatcaSubmitInvoice = onCall({
  */
 exports.zatcaQueueSale = onDocumentCreated({
   document: 'users/{uid}/sales/{saleId}',
-  region: REGION
+  region: REGION,
+  retry: true
 }, async (event) => {
   const { uid, saleId } = event.params;
   const sale = event.data && event.data.data();
@@ -331,6 +332,70 @@ exports.zatcaQueueSale = onDocumentCreated({
  * Generate and sign one immutable invoice from an existing POS sale.
  * This is generation only; it never submits automatically to FATOORA.
  */
+/**
+ * Automatic draft generation for eligible queued POS sales.
+ * Seller-profile enablement is the opt-in; this never submits to FATOORA.
+ */
+exports.zatcaAutoGenerateSandboxDraft = onDocumentCreated({
+  document: 'users/{uid}/zatcaInvoices/{jobId}',
+  region: REGION,
+  retry: true,
+  secrets: [ZATCA_EGS_PRIVATE_KEY, ZATCA_ONBOARDING_ENCRYPTION_KEY]
+}, async (event) => {
+  const { uid, jobId } = event.params;
+  if (!String(jobId).startsWith('sale-')) return;
+  const job = event.data && event.data.data();
+  if (!job || job.source !== 'pos_sale') return;
+  if (['generated_pending_sdk', 'validated', 'reported', 'cleared', 'submitted', 'submission_unknown'].includes(String(job.status || '').toLowerCase())) return;
+  if (String(job.status || '') !== 'awaiting_egs') return;
+
+  const [saleSnap, settingsSnap] = await Promise.all([
+    db.doc(`users/${uid}/sales/${job.saleId}`).get(),
+    db.doc(`users/${uid}/pos/settings`).get()
+  ]);
+  if (!saleSnap.exists || !settingsSnap.exists) return;
+  const sale = saleSnap.data();
+  const settings = settingsSnap.data();
+  const z = settings.zatca || {};
+  if (z.enabled !== true) return;
+
+  const jobRef = db.doc(`users/${uid}/zatcaInvoices/${jobId}`);
+  if (getEnvironment() !== 'sandbox') {
+    await jobRef.set({ status: 'auto_generation_blocked', reasons: ['Automatic draft generation is sandbox-only; production remains disabled.'], updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+    return;
+  }
+  try {
+    const requestId = String(z.onboardingRequestId || '').trim();
+    if (!requestId) throw new Error('Complete sandbox OTP/CSID onboarding and save its request ID before automatic draft generation.');
+    onboardingEncryptionKey();
+    const onboardingSnap = await db.doc(`users/${uid}/zatcaOnboarding/${requestId}`).get();
+    if (!onboardingSnap.exists || onboardingSnap.data().status !== 'sandbox_production_csid_issued') throw new Error('A sandbox Production CSID must be issued before automatic draft generation.');
+    const credentials = decryptOnboardingValue(onboardingSnap.data().sandboxProductionCredentialsEncrypted);
+    const privateKeyPem = String(ZATCA_EGS_PRIVATE_KEY.value() || '');
+    if (!privateKeyPem) throw new Error('Configure ZATCA_EGS_PRIVATE_KEY in Firebase Secret Manager.');
+    const prepared = preparePosSaleForInvoice({ sale, saleId: job.saleId, settings });
+    const generated = await generateInvoice({
+      db, uid, stateKey: 'default', sale: prepared.invoiceSale,
+      seller: prepared.seller, subtype: prepared.subtype,
+      privateKeyPem, certToken: credentials.token, numberPrefix: 'MUS-'
+    });
+    await jobRef.set({
+      status: 'generated_pending_sdk', reasons: [],
+      invoiceNumber: generated.number, uuid: generated.uuid,
+      invoiceHash: generated.invoiceHash, icv: generated.icv,
+      totalWithVat: generated.totalWithVat, vatTotal: generated.vatTotal,
+      generatedAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp(),
+      generationMode: 'automatic_sandbox_draft'
+    }, { merge: true });
+  } catch (error) {
+    await jobRef.set({
+      status: 'auto_generation_blocked',
+      reasons: Array.isArray(error.details && error.details.reasons) ? error.details.reasons : [String(error && error.message || 'Automatic invoice draft generation failed.')],
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+  }
+});
+
 exports.zatcaGenerateInvoice = onCall({
   region: REGION,
   timeoutSeconds: 60,
@@ -357,23 +422,13 @@ exports.zatcaGenerateInvoice = onCall({
 
   const sale = saleSnap.data();
   const settings = settingsSnap.data();
-  const z = settings.zatca || {};
-  const assessment = assessSaleForZatca(sale, settings);
-  if (assessment.reasons && assessment.reasons.length) {
-    throw new HttpsError('failed-precondition', 'Sale is not ready for ZATCA invoice generation.', {
-      reasons: assessment.reasons
-    });
+  let prepared;
+  try {
+    prepared = preparePosSaleForInvoice({ sale, saleId, settings });
+  } catch (error) {
+    throw new HttpsError('failed-precondition', error.message || 'Sale is not ready for ZATCA invoice generation.', error.details || null);
   }
-  if (String(settings.cur || '').trim().toUpperCase() !== 'SAR' ||
-      sale.vatEnabled === false || sale.vatInclusive !== true || Number(sale.vatRate) !== 15) {
-    throw new HttpsError('failed-precondition', 'Invoice generation currently requires SAR and the global 15% VAT-inclusive POS setting.');
-  }
-
-  const subtype = String(sale.zatca && sale.zatca.documentType || '').toLowerCase();
-  if (!['standard', 'simplified'].includes(subtype)) {
-    throw new HttpsError('failed-precondition', 'Choose Standard or Simplified invoice type on the POS sale first.');
-  }
-
+  const { invoiceSale, seller: z, subtype } = prepared;
   const checked = validateProductionRequest({ requestId: input.onboardingRequestId });
   if (!checked.valid) throw new HttpsError('invalid-argument', 'A valid sandbox onboardingRequestId is required.');
   onboardingEncryptionKey();
@@ -383,53 +438,8 @@ exports.zatcaGenerateInvoice = onCall({
   }
   const sandboxCredentials = decryptOnboardingValue(onboardingSnap.data().sandboxProductionCredentialsEncrypted);
   const certToken = sandboxCredentials.token;
-
   const privateKeyPem = String(ZATCA_EGS_PRIVATE_KEY.value() || '');
   if (!privateKeyPem) throw new HttpsError('failed-precondition', 'Configure ZATCA_EGS_PRIVATE_KEY in Firebase Secret Manager.');
-
-  const lines = (sale.items || []).map((item, index) => {
-    // The global POS setting is the default: no per-product VAT entry is
-    // required for standard Saudi menu items. Explicit special-category
-    // overrides are deliberately rejected by this 15%-only EGS path.
-    const category = String(item.zatcaVatCategory || 'S').toUpperCase();
-    const rawRate = item.zatcaVatRate;
-    const rate = rawRate === null || rawRate === undefined || rawRate === '' ? Number(sale.vatRate || 15) : Number(rawRate);
-    const grossUnitPrice = Number(item.price);
-    if (category !== 'S' || rate !== 15 || !Number.isFinite(grossUnitPrice) || grossUnitPrice < 0) {
-      throw new HttpsError('failed-precondition', `Sale line ${index + 1} must use the global Standard-rated 15% VAT setting or be reviewed for a special tax treatment.`);
-    }
-    return {
-      name: String(item.name || '').trim(),
-      qty: Number(item.qty),
-      unitPriceExclVat: Number((grossUnitPrice * 100 / 115).toFixed(6))
-    };
-  });
-
-  const saleTime = Number(sale.t);
-  const issuedAt = Number.isFinite(saleTime) ? new Date(saleTime).toISOString() : new Date().toISOString();
-  const invoiceSale = {
-    saleId,
-    issuedAt,
-    lines,
-    discount: Number(sale.disc) || 0,
-    vatRatePercent: 15,
-    buyer: sale.zatca && sale.zatca.buyer || undefined
-  };
-  const calculated = computeTotals({
-    subtype, kind: 'invoice', number: 'preflight', uuid: '123e4567-e89b-42d3-a456-426614174000',
-    issuedAt, icv: 1, pih: 'preflight', seller: z, buyer: invoiceSale.buyer,
-    lines, discount: invoiceSale.discount, vatRatePercent: 15
-  });
-  const mismatch = Math.abs(calculated.lineNet / 100 - Number(sale.sub)) > 0.02 ||
-    Math.abs(calculated.net / 100 - (Number(sale.sub) - Number(sale.disc || 0))) > 0.02 ||
-    Math.abs(calculated.tax / 100 - Number(sale.tax)) > 0.02 ||
-    Math.abs(calculated.total / 100 - Number(sale.total)) > 0.02;
-  if (mismatch) {
-    throw new HttpsError('failed-precondition', 'POS sale amounts do not reconcile to the generated 15% VAT invoice totals. Keep this sale in manual review.', {
-      pos: { sub: sale.sub, disc: sale.disc, tax: sale.tax, total: sale.total },
-      generated: { lineNet: calculated.lineNet / 100, net: calculated.net / 100, tax: calculated.tax / 100, total: calculated.total / 100 }
-    });
-  }
 
   const generated = await generateInvoice({
     db, uid, stateKey: 'default', sale: invoiceSale, seller: z, subtype,
