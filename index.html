@@ -520,11 +520,15 @@ function rcHtml(s){
  return h+'</div>'
 }
 
+function openInvoice(no){
+ var s=H.find(function(h){return h.no==no});if(!s)return;
+ var w=window.open('','_blank');if(!w){toast(L('Invoice window blocked','Invoice window was blocked'));return}
+ w.document.open();w.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(S.shop)+' · Invoice #'+esc(s.sn)+'</title><style>body{margin:0;padding:20px;background:#f3f4f6;font:15px Arial,sans-serif;color:#111}.page{max-width:520px;margin:0 auto}.rcpt{background:#fff;color:#000;font:700 15px/1.4 Arial,sans-serif;padding:18px;border:1px solid #ddd}.rs{display:block;text-align:center;font-size:25px}.rm,.rt,.ft{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px dashed #777}.rcpt table{width:100%;border-collapse:collapse}.rcpt td{padding:5px 2px}.rcpt td.q{text-align:center}.rcpt td.a{text-align:right}.rt.g{font-size:22px;font-weight:bold;border-top:2px solid #111}.ft{display:block;text-align:center}.qrw svg{width:110px;height:110px}.cid{font:12px monospace;text-align:center;margin-top:8px}.xl{text-align:center;margin-top:8px}.actions{display:flex;gap:10px;margin:14px 0}.actions button{flex:1;padding:12px;border:0;border-radius:8px;font-weight:bold;cursor:pointer}.print{background:#187b36;color:#fff}@media print{body{padding:0;background:#fff}.actions{display:none}.page{max-width:none}.rcpt{border:0}}</style></head><body><main class="page">'+rcHtml(s)+'<div class="actions"><button class="print" onclick="window.print()">'+t('print')+'</button><button onclick="window.close()">'+t('done')+'</button></div></main></body></html>');w.document.close()
+}
 function showRc(no){
  var s=H.find(function(h){return h.no==no});if(!s)return;vArm=0;
  if(CU){if(!s.pc){s.pc=randCode();save();cSale(s)}pubReceipt(s)}
- var id=invCode(s),qr='INV:'+id+';D:'+day(s.t)+';T:'+s.total.toFixed(2)+';P:'+s.pay;
- $('#rb').innerHTML=rcHtml(s)+'<div class="ract"><button class="wa" onclick="waRc('+no+')">WhatsApp</button><button onclick="window.print()">'+I('print')+' '+t('print')+'</button><button class="pri" onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div><button class="bad noprint" id="vb" style="width:100%;margin-top:10px" onclick="voidSale('+no+')">'+I('trash')+' '+t('void')+'</button>';
+ $('#rb').innerHTML=rcHtml(s)+'<div class="ract"><button class="wa" onclick="waRc('+no+')">WhatsApp</button><button onclick="openInvoice('+no+')">'+L('ইনভয়েস','Invoice')+'</button><button class="pri" onclick="window.print()">'+I('print')+' '+t('print')+'</button><button onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div><button class="bad noprint" id="vb" style="width:100%;margin-top:10px" onclick="voidSale('+no+')">'+I('trash')+' '+t('void')+'</button>';
  $('#rc').classList.add('show')
 }
 
