@@ -623,8 +623,6 @@ exports.zatcaSubmitGeneratedInvoice = onCall({
     }, { merge: true });
     return { duplicate: false };
   });
-    return { duplicate: false };
-  });
   if (reservation.duplicate) return { duplicate: true, status: reservation.status, saleId, uuid: invoice.uuid };
 
   try {
