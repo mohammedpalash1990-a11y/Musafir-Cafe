@@ -86,3 +86,16 @@ Historical sales without sufficient tax arithmetic or invoice classification rem
 - `submission_unknown` requires reconciliation before retrying; never blindly resend the same UUID.
 
 The built-in Node test suite is `npm test` in `functions/` and uses `node --test`.
+
+
+## Local CSR generation (no private key upload)
+
+The EGS CSR and its matching secp256k1 private key can be created on a trusted local computer. From the `functions/` directory, run:
+
+```bash
+npm run zatca:csr -- --vat 312345678901233 --organization "Musafir Cafe LLC" --branch "Madinah Branch" --address "Shop registered short address, Madinah" --industry "Cafe and Restaurant" --environment sandbox
+```
+
+The command creates a unique EGS serial, generates and verifies a PKCS#10 CSR with OpenSSL, and stores the private key, CSR, Base64 CSR and config under the repository-root `.secrets/zatca/` directory. That directory is Git-ignored. The default functionality map `1100` enables Standard and Simplified invoices; use `--invoice-type 0100` only if the EGS is intended to issue Simplified invoices only. Environment selects the CSR certificate template: sandbox `TSTZATCA-Code-Signing`, simulation `PREZATCA-Code-Signing`, production `ZATCA-Code-Signing`.
+
+Only the Base64 CSR is supplied to the authenticated onboarding screen. The private key must remain secret and must be provisioned directly from the trusted machine into Firebase Secret Manager as `ZATCA_EGS_PRIVATE_KEY`; never paste it into chat, commit it, or upload it to the browser. This command does not request an OTP or call ZATCA. The taxpayer must obtain the appropriate OTP from the FATOORA portal and submit the CSR within the portal's validity window. CSR subject values must match the taxpayer's actual EGS unit and registered details; review them before requesting a CSID.
