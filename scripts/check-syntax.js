@@ -55,7 +55,10 @@ function checkFirestoreRules() {
     'match /ratings/{ratingId}',
     'match /receipts/{receiptId}',
     'allow read, write: if isOwner(userId);',
-    'allow delete: if false;'
+    'allow create: if signedIn()',
+    'allow update: if signedIn()',
+    'resource.data.uid == request.auth.uid',
+    'allow delete: if signedIn() && resource.data.uid == request.auth.uid;'
   ]) {
     if (!rules.includes(required)) throw new Error('Firestore rules baseline is missing: ' + required);
   }
