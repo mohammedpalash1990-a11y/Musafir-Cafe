@@ -89,6 +89,8 @@ function buildOpenSslConfig(p) {
     'OU = ' + configValue(p.branch),
     'O = ' + configValue(p.organization),
     'C = SA',
+    'organizationIdentifier = ' + configValue(p.vat),
+    'businessCategory = ' + p.invoiceType,
     '',
     '[ req_ext ]',
     'certificateTemplateName = ASN1:PRINTABLESTRING:' + p.template,
@@ -96,8 +98,6 @@ function buildOpenSslConfig(p) {
     '',
     '[ alt_names ]',
     'SN = ' + configValue(p.serialNumber),
-    'UID = ' + configValue(p.vat),
-    'title = ' + p.invoiceType,
     'registeredAddress = ' + configValue(p.address),
     'businessCategory = ' + configValue(p.industry),
     ''
