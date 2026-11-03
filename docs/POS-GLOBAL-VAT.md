@@ -8,7 +8,7 @@ The POS uses one global VAT configuration for all products. Product prices can b
 - Rate: 15%
 - Product prices include VAT: yes
 - Default ZATCA line classification: Standard-rated (S), 15%
-- Product-level ZATCA overrides remain optional for a genuinely different tax treatment; they are not required for ordinary standard-rated products.
+- All POS products inherit the global standard-rated 15% classification automatically; no product-level VAT fields are shown or required. This POS EGS workflow currently supports standard-rated 15% products only.
 
 ## VAT-inclusive calculation
 
@@ -31,3 +31,4 @@ Existing product records without a tax override automatically inherit the global
 Sales store the VAT-exclusive subtotal and discount, the VAT amount, the customer-facing gross total, and the VAT-inclusive flag. Invoice line prices remain the customer-facing gross product prices. The backend converts gross unit prices to VAT-exclusive unit prices with six-decimal precision before computing two-decimal line extensions; premature two-decimal rounding at unit-price level can accumulate reconciliation errors for multi-quantity low-price products.
 
 This change does not claim that the full EGS signing pipeline or production ZATCA certification is complete. Production remains gated until the official UBL, hash/PIH, signing, QR, SDK and sandbox verification work is completed.
+\n\nThe POS product editor does not expose individual VAT category/rate fields. Each new sale line snapshots category `S` and the global VAT rate from Settings. Editing an existing product removes legacy per-product VAT override metadata so it cannot silently override the global rate. Any product with a legally different VAT treatment must be reviewed before being sold through this standard-rated-only workflow.\n
