@@ -295,7 +295,8 @@ exports.zatcaSubmitInvoice = onCall({
  */
 exports.zatcaQueueSale = onDocumentCreated({
   document: 'users/{uid}/sales/{saleId}',
-  region: REGION
+  region: REGION,
+  retry: true
 }, async (event) => {
   const { uid, saleId } = event.params;
   const sale = event.data && event.data.data();
