@@ -24,7 +24,7 @@ The POS must not add another 15% on top of a VAT-inclusive menu price. Discounts
 
 Open Settings → Shop, backup & login → Saudi VAT. The global setting can be enabled/disabled, the rate can be edited, and price-inclusive mode can be selected. The setting is saved with the existing POS settings object and syncs through the existing Firebase settings path.
 
-Existing product records without a tax override automatically inherit the global VAT rate and Standard-rated classification at checkout. No product-by-product setup is needed for the standard 15% case.
+All existing and new products use the global VAT rate and Standard-rated classification at checkout. Legacy product-level tax fields are ignored; editing a product removes those old fields. No product-by-product setup is needed.
 
 ## ZATCA reconciliation
 
