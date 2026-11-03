@@ -400,7 +400,7 @@ exports.zatcaGenerateInvoice = onCall({
     return {
       name: String(item.name || '').trim(),
       qty: Number(item.qty),
-      unitPriceExclVat: Number((grossUnitPrice * 100 / 115).toFixed(2))
+      unitPriceExclVat: Number((grossUnitPrice * 100 / 115).toFixed(6))
     };
   });
 
