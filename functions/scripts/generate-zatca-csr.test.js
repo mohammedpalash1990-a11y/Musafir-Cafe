@@ -32,10 +32,11 @@ test('builds the OpenSSL CSR config with the ZATCA subject alternative-name fiel
   const config = buildOpenSslConfig(validateOptions(base));
   assert.match(config, /certificateTemplateName = ASN1:PRINTABLESTRING:TSTZATCA-Code-Signing/);
   assert.match(config, /subjectAltName = dirName:alt_names/);
-  assert.match(config, /UID = "312345678901233"/);
-  assert.match(config, /title = 1100/);
+  assert.match(config, /organizationIdentifier = "312345678901233"/);
+  assert.match(config, /businessCategory = 1100/);
   assert.match(config, /SN = "1-MusafirCafe\|2-POS\|3-/);
   assert.match(config, /registeredAddress = "King Road\\, Madinah 42311"/);
+  assert.match(config, /businessCategory = "Cafe and Restaurant"/);
 });
 
 test('parses only explicit named CLI options and rejects missing values', () => {
@@ -62,6 +63,10 @@ test('generates a verifiable local secp256k1 CSR and protects the private key fi
     const csrBase64 = fs.readFileSync(result.base64Path, 'utf8');
     assert.equal(keyStat.mode & 0o777, 0o600);
     assert.match(csrPem, /-----BEGIN CERTIFICATE REQUEST-----/);
+    const details = require('node:child_process').execFileSync('openssl', ['req', '-in', result.csrPath, '-noout', '-subject', '-text'], { encoding: 'utf8' });
+    assert.ok(details.includes('organizationIdentifier = 312345678901233'));
+    assert.ok(details.includes('businessCategory = 1100'));
+    assert.ok(details.includes('registeredAddress=King Road, Madinah'));
     assert.equal(Buffer.from(csrBase64, 'base64').toString('utf8'), csrPem);
   } finally {
     fs.rmSync(result.outputDir, { recursive: true, force: true });
