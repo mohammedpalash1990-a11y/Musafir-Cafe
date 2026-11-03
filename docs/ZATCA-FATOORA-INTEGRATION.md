@@ -68,18 +68,21 @@ From the repository root, install dependencies in `functions`, configure Secret 
 - https://zatca.gov.sa/en/E-Invoicing/SystemsDevelopers/ComplianceEnablementToolbox/Pages/DownloadSDK.aspx
 - https://sandbox.zatca.gov.sa/User_Manual_Developer_Portal_Manual_Version_3.pdf
 
-## Automatic POS sale intake (new)
+## POS sale intake and VAT behavior
 
-A Firestore `onDocumentCreated` trigger watches `users/{uid}/sales/{saleId}` and creates one idempotent work record at `users/{uid}/zatcaInvoices/sale-{saleId}`. This catches signed-in POS sales and sales uploaded later after offline use. It does not change checkout behavior or send anything to ZATCA.
+A Firestore `onDocumentCreated` trigger watches `users/{uid}/sales/{saleId}` and creates one idempotent work record at `users/{uid}/zatcaInvoices/sale-{saleId}`. This catches signed-in POS sales and sales uploaded later after offline use. It does not change checkout behavior, generate an invoice automatically, or send anything to ZATCA.
 
-The queue assesses seller-profile completeness, invoice-line validity, refund status, POS currency, line-level VAT metadata and POS arithmetic reconciliation. Every new POS sale line inherits the global VAT setting automatically: the default Saudi standard-rated case is category `S` at 15%, with VAT-inclusive product prices. No per-product VAT setup is required for ordinary cafe products. The product editor may retain an optional category/rate override only for a product whose legally verified treatment differs (for example, zero-rated or exempt); menu categories such as Drinks/Food are never treated as tax categories. Existing historical sales without saved tax classification are not silently reclassified. The POS's displayed VAT amount is calculated from the global VAT-inclusive price setting; the queue independently reconciles the gross line prices, VAT-exclusive subtotal, discount, VAT and total before invoice generation. This is a safety check, not a substitute for official SDK validation. Menu categories such as Drinks/Food must never be treated as VAT categories. The queue checks line extension amounts against subtotal, subtotal minus discount plus VAT against total, and the VAT computed from each line's category/rate against the stored POS VAT total (0.02 SAR tolerance). Standard-rated lines require a positive rate; zero-rated, exempt and out-of-scope lines require zero rate. Combo products currently have no tax breakdown and remain blocked for manual review. Current states include:
-- `blocked_profile`: seller profile is incomplete or disabled.
-- `manual_review`: sale data is not suitable for invoice creation.
-- `credit_note_required`: refund needs a separate compliant credit-note workflow.
-- `awaiting_egs_review`: sale is recorded, but currency/tax/document classification or the EGS pipeline needs review.
+The POS has one global Saudi VAT setting. For ordinary cafe products, the default is Standard-rated 15%; product-level tax metadata is optional. If no special tax override exists, the backend inherits the global 15% rate. For VAT-inclusive menu prices, the amount charged stays unchanged: SAR 9.90 contains SAR 8.61 net plus SAR 1.29 VAT (9.90 × 15 / 115). The POS must not add another 15% on top. Explicit zero-rated, exempt, or out-of-scope treatment must be verified and recorded as an override; it is never inferred from menu categories.
 
-The signed-in submit endpoint also uses `submission_unknown` when a request may have reached the gateway but no definitive response was received. Do not reset this state or retry the UUID until the gateway outcome has been reconciled.
+Historical sales without sufficient tax arithmetic or invoice classification remain in review rather than being silently rewritten. Combo products and refunds may require manual review. Refunds need a compliant credit-note flow; that flow is not yet connected to the POS refund action.
 
-**Important:** every transaction must be classified as Standard or Simplified from its buyer and transaction details. A global default alone is not sufficient. The POS checkout now records the invoice type per transaction. Standard (B2B) selection requires buyer legal name, Saudi VAT number and address fields; the queue validates their presence and VAT-number format. Buyer details remain on the source sale record and are not duplicated into the ZATCA queue. The cashier must explicitly choose Standard or Simplified for every sale; there is no preselected document type. This is data capture and preflight only; it does not determine legal classification automatically. The POS still has no compliant invoice generator, so queued records intentionally remain in review and are not automatically submitted.
+## Current automation boundary
+
+- New POS/offline-synced sales are queued idempotently.
+- An authorized operator can manually generate and sign a sandbox invoice from an existing sale after onboarding and Secret Manager setup.
+- An operator must download the XML and run the official ZATCA SDK validation.
+- Sandbox Reporting/Clearance submission is a separate, explicit action after SDK validation.
+- No automatic submission is enabled. No production submission or certification is claimed.
+- `submission_unknown` requires reconciliation before retrying; never blindly resend the same UUID.
 
 The built-in Node test suite is `npm test` in `functions/` and uses `node --test`.
