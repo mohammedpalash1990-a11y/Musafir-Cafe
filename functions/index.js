@@ -6,6 +6,7 @@ const { validateSignedInvoicePayload, classifySubmissionOutcome } = require('./z
 const { validateComplianceRequest, extractCsidCredentials, validateProductionRequest } = require('./zatca-onboarding');
 const { generateInvoice } = require('./lib/zatca/invoice');
 const { computeTotals } = require('./lib/zatca/xml');
+const { validateSdkValidation } = require('./zatca-sdk-validation');
 const { defineSecret } = require('firebase-functions/params');
 const crypto = require('node:crypto');
 const { initializeApp } = require('firebase-admin/app');
@@ -437,7 +438,7 @@ exports.zatcaGenerateInvoice = onCall({
   const jobRef = db.doc(`users/${uid}/zatcaInvoices/sale-${saleId}`);
   const submissionSnap = await db.doc(`zatca_tenants/${uid}/submissions/${saleId}`).get();
   const existingSubmissionStatus = String(submissionSnap.exists ? submissionSnap.data().status || '' : '').toLowerCase();
-  const queueStatus = ['reported', 'cleared', 'submitted', 'submission_unknown'].includes(existingSubmissionStatus)
+  const queueStatus = ['reported', 'cleared', 'submitted', 'submission_unknown', 'validated'].includes(existingSubmissionStatus)
     ? existingSubmissionStatus : 'generated_pending_sdk';
   await jobRef.set({
     status: queueStatus,
@@ -492,6 +493,73 @@ exports.zatcaGetGeneratedInvoice = onCall({ region: REGION }, async (request) =>
 });
 
 /**
+ * Records an operator-attested official SDK PASS against the exact immutable invoice hash.
+ * The backend binds the evidence/version to the invoice; it does not execute the external SDK.
+ */
+exports.zatcaRecordSdkValidation = onCall({ region: REGION }, async (request) => {
+  const uid = requireUser(request);
+  const input = request.data || {};
+  const saleId = String(input.saleId || '').trim();
+  if (!/^[A-Za-z0-9_-]{1,100}$/.test(saleId)) {
+    throw new HttpsError('invalid-argument', 'A valid POS sale document ID is required.');
+  }
+  if (getEnvironment() !== 'sandbox') {
+    throw new HttpsError('failed-precondition', 'SDK validation attestation is enabled for sandbox invoices only.');
+  }
+  const invoiceRef = db.doc('zatca_tenants/' + uid + '/invoices/' + saleId);
+  const submissionRef = db.doc('zatca_tenants/' + uid + '/submissions/' + saleId);
+  const jobRef = db.doc('users/' + uid + '/zatcaInvoices/sale-' + saleId);
+  const invoiceSnap = await invoiceRef.get();
+  if (!invoiceSnap.exists) throw new HttpsError('not-found', 'Generate the immutable invoice before recording SDK validation.');
+  const invoice = invoiceSnap.data();
+  let validation;
+  try {
+    validation = validateSdkValidation({
+      invoiceHash: input.invoiceHash,
+      expectedHash: invoice.invoiceHash,
+      sdkVersion: input.sdkVersion,
+      result: input.result,
+      evidence: input.evidence
+    });
+  } catch (error) {
+    throw new HttpsError('invalid-argument', error.message || 'Invalid SDK validation evidence.');
+  }
+
+  await db.runTransaction(async (tx) => {
+    const submissionSnap = await tx.get(submissionRef);
+    if (!submissionSnap.exists) throw new HttpsError('failed-precondition', 'Invoice submission state is missing.');
+    const current = submissionSnap.data();
+    const state = String(current.status || '').toLowerCase();
+    if (['processing', 'submitted', 'submission_unknown', 'reported', 'cleared', 'rejected'].includes(state)) {
+      throw new HttpsError('failed-precondition', 'SDK evidence cannot be changed after submission starts or reaches a terminal state.');
+    }
+    if (!['generated', 'validated', 'failed'].includes(state)) {
+      throw new HttpsError('failed-precondition', 'Invoice must be generated and not currently submitting before SDK validation.');
+    }
+    tx.set(submissionRef, {
+      status: 'Validated',
+      sdkValidation: {
+        ...validation,
+        validatedBy: uid,
+        validatedAt: FieldValue.serverTimestamp()
+      },
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+  });
+
+  await jobRef.set({
+    status: 'validated',
+    sdkValidationStatus: 'PASS',
+    sdkVersion: validation.sdkVersion,
+    sdkEvidenceSha256: validation.evidenceSha256,
+    sdkValidatedAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  return { saleId, status: 'Validated', invoiceHash: invoice.invoiceHash, sdkVersion: validation.sdkVersion };
+});
+
+/**
  * Explicit sandbox submission of an already generated immutable invoice.
  * Ambiguous outcomes are blocked from automatic retry to prevent duplicate reporting.
  */
@@ -537,25 +605,22 @@ exports.zatcaSubmitGeneratedInvoice = onCall({
 
   const reservation = await db.runTransaction(async (tx) => {
     const existing = await tx.get(submissionRef);
-    if (existing.exists) {
-      const state = String(existing.data().status || '').toLowerCase();
-      if (state === 'reported' || state === 'cleared') return { duplicate: true, status: state };
-      if (state === 'processing') throw new HttpsError('aborted', 'This invoice is already being submitted.');
-      if (state === 'submission_unknown' || state === 'submitted') {
-        throw new HttpsError('failed-precondition', 'A previous request may have reached FATOORA. Reconcile its outcome before retrying this invoice.');
-      }
-      tx.set(submissionRef, {
-        status: 'processing',
-        attempts: Number(existing.data().attempts || 0) + 1,
-        updatedAt: FieldValue.serverTimestamp()
-      }, { merge: true });
-      return { duplicate: false };
+    if (!existing.exists) throw new HttpsError('failed-precondition', 'Invoice submission state is missing.');
+    const current = existing.data();
+    const state = String(current.status || '').toLowerCase();
+    if (state === 'reported' || state === 'cleared') return { duplicate: true, status: state };
+    if (state === 'processing') throw new HttpsError('aborted', 'This invoice is already being submitted.');
+    if (state === 'submission_unknown' || state === 'submitted') {
+      throw new HttpsError('failed-precondition', 'A previous request may have reached FATOORA. Reconcile its outcome before retrying this invoice.');
     }
-    tx.create(submissionRef, {
-      saleId, uuid: invoice.uuid, invoiceHash: invoice.invoiceHash,
-      status: 'processing', attempts: 1,
-      createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
-    });
+    if (state !== 'validated' || !current.sdkValidation || current.sdkValidation.status !== 'PASS' || current.sdkValidation.invoiceHash !== invoice.invoiceHash) {
+      throw new HttpsError('failed-precondition', 'Record an official SDK PASS for this exact invoice hash before sandbox submission.');
+    }
+    tx.set(submissionRef, {
+      status: 'processing',
+      attempts: Number(current.attempts || 0) + 1,
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
     return { duplicate: false };
   });
   if (reservation.duplicate) return { duplicate: true, status: reservation.status, saleId, uuid: invoice.uuid };

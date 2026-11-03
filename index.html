@@ -711,6 +711,8 @@ function zatcaBox(){
  +'<label>POS sale document ID (example: s1001)</label><input id="z_sale_id" value="'+esc(saleDefault)+'">'
  +'<button class="pri" style="width:100%;margin-top:6px" onclick="zatcaGenerateFromUi()">Generate & sign sandbox invoice</button>'
  +'<button class="g" style="width:100%;margin-top:6px" onclick="zatcaDownloadFromUi()">Download XML for official SDK validation</button>'
+ +'<label>Official ZATCA SDK version</label><input id="z_sdk_version" maxlength="40" placeholder="Enter the SDK version used">'
+ +'<label>Official SDK PASS report summary</label><textarea id="z_sdk_evidence" rows="3" style="width:100%" placeholder="Paste the SDK validation PASS summary"></textarea>'
  +'<button class="g" style="width:100%;margin-top:6px" onclick="zatcaSubmitFromUi()">Submit to sandbox after SDK validation</button>'
  +'<div class="mute" id="z_egs_msg" style="font-size:12px;margin-top:8px">Compliance scenario PASS checks and sandbox Production CSID are required before invoice generation.</div></div>'
  +'<label style="display:flex;align-items:center;gap:8px;color:var(--ink)"><input id="z_enabled" type="checkbox" style="width:auto" '+(z.enabled?'checked':'')+'> '+L('ZATCA seller profile চালু','Enable ZATCA seller profile')+'</label>'
@@ -778,10 +780,14 @@ async function zatcaDownloadFromUi(){
 }
 async function zatcaSubmitFromUi(){
  var saleId=$('z_sale_id')&&$('z_sale_id').value.trim(),requestId=$('z_request_id')&&$('z_request_id').value.trim(),m=$('z_egs_msg');
- if(!confirm(L('Official ZATCA SDK validation PASS হয়েছে? শুধু PASS হলে sandbox submit করুন।','Has the official ZATCA SDK validation passed? Submit to sandbox only after PASS.')))return;
+ var sdkVersion=$('z_sdk_version')&&$('z_sdk_version').value.trim(),evidence=$('z_sdk_evidence')&&$('z_sdk_evidence').value.trim();
+ if(!saleId||!requestId||!sdkVersion||!evidence){toast(L('Sale ID, onboarding ID, SDK version ও PASS report দিন','Enter sale ID, onboarding ID, SDK version and PASS report'));return}
+ if(!confirm(L('আপনি কি official ZATCA SDK চালিয়ে এই invoice-এর PASS report পেয়েছেন?','Did you run the official ZATCA SDK and receive a PASS report for this invoice?')))return;
  try{
+  var invoice=await FB.call('zatcaGetGeneratedInvoice',{saleId:saleId});
+  await FB.call('zatcaRecordSdkValidation',{saleId:saleId,invoiceHash:invoice.invoiceHash,sdkVersion:sdkVersion,result:'PASS',evidence:evidence});
   var r=await FB.call('zatcaSubmitGeneratedInvoice',{saleId:saleId,onboardingRequestId:requestId});
-  if(m)m.textContent='Sandbox submission: '+r.status;
+  if(m)m.textContent='SDK PASS recorded · Sandbox submission: '+r.status;
   toast('ZATCA: '+r.status);
  }catch(e){if(m)m.textContent=e.message||String(e);toast('ZATCA: '+(e.message||e))}
 }
