@@ -469,7 +469,7 @@ function charge(){
   if(buyerRequired.some(function(k){return !String(zb[k]||'').trim()})||!/^3\d{13}3$/.test(String(zb.buyerVatNumber||'').trim())){toast(L('Standard invoice-এর buyer name, সঠিক VAT number ও ঠিকানা পূরণ করুন','Complete the Standard invoice buyer name, valid VAT number and address'));return}
  }
  var c=calc(),items=[];
- for(var id in cart){var p=gp(id);if(!p)continue;var it0={id:p.id,name:p.name,bn:p.bn,price:p.price,qty:cart[id],zatcaVatCategory:p.zatcaVatCategory||'S',zatcaVatRate:p.zatcaVatRate===undefined||p.zatcaVatRate===null?(Number.isFinite(Number((S.vat||{}).rate))?Number((S.vat||{}).rate):15):p.zatcaVatRate};if(p.combo){it0.cb=p.cb.slice();(function(q){p.cb.forEach(function(x){var r=P.find(function(y){return y.id==x});if(r&&r.stock!=='')r.stock-=q})})(cart[id])}else if(p.stock!=='')p.stock-=cart[id];items.push(it0)}
+ for(var id in cart){var p=gp(id);if(!p)continue;var it0={id:p.id,name:p.name,bn:p.bn,price:p.price,qty:cart[id],zatcaVatCategory:'S',zatcaVatRate:Number.isFinite(Number((S.vat||{}).rate))?Number((S.vat||{}).rate):15};if(p.combo){it0.cb=p.cb.slice();(function(q){p.cb.forEach(function(x){var r=P.find(function(y){return y.id==x});if(r&&r.stock!=='')r.stock-=q})})(cart[id])}else if(p.stock!=='')p.stock-=cart[id];items.push(it0)}
  var left=ps.chg,mg={},cashGiven=0,dueRows=[];
  ps.rows.forEach(function(x){var a=+x.a||0;if(x.m=='Due'){if(a>0.004)dueRows.push({debtor:x.debtor,a:a});return}if(x.m=='Cash'){cashGiven+=a;var d=Math.min(a,left);a-=d;left-=d}if(a>0.004)mg[x.m]=(mg[x.m]||0)+a});
  var pl=Object.keys(mg).map(function(m){return{m:m,a:+mg[m].toFixed(2)}});
@@ -640,8 +640,8 @@ function rmPhoto(){pPhoto=null;var b=$('#pph');if(b)b.innerHTML=pphHtml(edit?gp(
 function saveP(){var n=$('#pn').value.trim(),b=$('#pb').value.trim(),pr=parseFloat($('#pp').value);if(!(n||b)||isNaN(pr)){toast(t('need'));return}
  var zvat=$('#p_zvat').value,zrate=$('#p_zrate').value;
  if(zvat&&(!zrate.trim()||!Number.isFinite(+zrate)||+zrate<0||+zrate>100)){toast(L('VAT rate ০–১০০ এর মধ্যে দিন','Enter a VAT rate from 0 to 100'));return}
- var o={name:n||b,bn:b,price:pr,cat:$('#pc').value.trim(),stock:$('#ps').value===''?'':+$('#ps').value,zatcaVatCategory:zvat||null,zatcaVatRate:zvat?+zrate:null};
- var pid;if(edit){Object.assign(gp(edit),o);pid=edit}else{o.id=Date.now();P.push(o);pid=o.id}
+ var o={name:n||b,bn:b,price:pr,cat:$('#pc').value.trim(),stock:$('#ps').value===''?'':+$('#ps').value};
+ var pid;if(edit){var oldProduct=gp(edit);Object.assign(oldProduct,o);delete oldProduct.zatcaVatCategory;delete oldProduct.zatcaVatRate;pid=edit}else{o.id=Date.now();P.push(o);pid=o.id}
  if(pPhoto){IMG[pid]=pPhoto;if(CU)w(FB.set('pos','img_'+pid,{d:pPhoto}))}else if(pPhoto===null&&IMG[pid]){delete IMG[pid];if(CU)w(FB.del('pos','img_'+pid))}
  pPhoto=undefined;edit=null;save();lsave();render()}
 function delP(){var p=gp(edit);if(!p)return;ask(L('"'+nm(p)+'" মুছে ফেলতে চান?','Delete "'+nm(p)+'"?'),function(){var id=p.id;P=P.filter(function(x){return x.id!=id});delete cart[id];cleanCart();if(IMG[id]){delete IMG[id];if(CU)w(FB.del('pos','img_'+id))}edit=null;save();render()})}
