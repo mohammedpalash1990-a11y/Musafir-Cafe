@@ -31,7 +31,6 @@ service cloud.firestore {
 
     function validCustomerOrder() {
       let d = request.resource.data;
-      let shop = get(/databases/$(database)/documents/shops/$(d.uid)).data;
       return d.keys().hasAll([
           'uid', 'shop', 'status', 't', 'name', 'note',
           'items', 'type', 'table', 'fee', 'total'
@@ -45,9 +44,9 @@ service cloud.firestore {
         && d.uid.size() > 0
         && d.uid.size() <= 128
         && exists(/databases/$(database)/documents/shops/$(d.uid))
-        && shop.qs.open != false
-        && (d.type != 'pickup' || shop.qs.pk != false)
-        && (d.type != 'delivery' || shop.qs.dl == true)
+        && get(/databases/$(database)/documents/shops/$(d.uid)).data.qs.open != false
+        && (d.type != 'pickup' || get(/databases/$(database)/documents/shops/$(d.uid)).data.qs.pk != false)
+        && (d.type != 'delivery' || get(/databases/$(database)/documents/shops/$(d.uid)).data.qs.dl == true)
         && d.shop is string
         && d.shop.size() <= 120
         && d.status == 'new'
