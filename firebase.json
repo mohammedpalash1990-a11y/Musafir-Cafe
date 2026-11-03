@@ -1,5 +1,12 @@
 {
   "functions": [
-    { "source": "functions", "codebase": "zatca", "runtime": "nodejs20" }
-  ]
+    {
+      "source": "functions",
+      "codebase": "zatca",
+      "runtime": "nodejs20"
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules"
+  }
 }
