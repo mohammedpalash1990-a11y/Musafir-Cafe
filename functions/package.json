@@ -8,10 +8,11 @@
   "scripts": {
     "test": "node --check index.js && node --test",
     "serve": "firebase emulators:start --only functions",
-    "deploy": "firebase deploy --only functions"
+    "deploy": "firebase deploy --only functions",
+    "zatca:csr": "node scripts/generate-zatca-csr.js"
   },
   "dependencies": {
     "firebase-admin": "^13.0.2",
     "firebase-functions": "^6.3.2"
   }
-}
+}\n
