@@ -1,7 +1,8 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseArgs, validateOptions, buildOpenSslConfig } = require('./generate-zatca-csr');
+const fs = require('node:fs');
+const { parseArgs, validateOptions, buildOpenSslConfig, generate } = require('./generate-zatca-csr');
 
 const base = {
   vat: '312345678901233',
@@ -43,4 +44,26 @@ test('parses only explicit named CLI options and rejects missing values', () => 
   });
   assert.throws(() => parseArgs(['--vat']), /Missing value/);
   assert.throws(() => parseArgs(['--vat', '1', '--vat', '2']), /duplicate/);
+});
+
+
+test('generates a verifiable local secp256k1 CSR and protects the private key file', () => {
+  const result = generate([
+    '--vat', base.vat,
+    '--organization', base.organization,
+    '--branch', base.branch,
+    '--address', base.address,
+    '--industry', base.industry,
+    '--environment', 'sandbox'
+  ]);
+  try {
+    const keyStat = fs.statSync(result.keyPath);
+    const csrPem = fs.readFileSync(result.csrPath, 'utf8');
+    const csrBase64 = fs.readFileSync(result.base64Path, 'utf8');
+    assert.equal(keyStat.mode & 0o777, 0o600);
+    assert.match(csrPem, /-----BEGIN CERTIFICATE REQUEST-----/);
+    assert.equal(Buffer.from(csrBase64, 'base64').toString('utf8'), csrPem);
+  } finally {
+    fs.rmSync(result.outputDir, { recursive: true, force: true });
+  }
 });
