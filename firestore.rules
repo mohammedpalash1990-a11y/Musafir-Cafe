@@ -44,6 +44,9 @@ service cloud.firestore {
         && d.uid.size() > 0
         && d.uid.size() <= 128
         && exists(/databases/$(database)/documents/shops/$(d.uid))
+        && get(/databases/$(database)/documents/shops/$(d.uid)).data.qs.open != false
+        && (d.type != 'pickup' || get(/databases/$(database)/documents/shops/$(d.uid)).data.qs.pk != false)
+        && (d.type != 'delivery' || get(/databases/$(database)/documents/shops/$(d.uid)).data.qs.dl == true)
         && d.shop is string
         && d.shop.size() <= 120
         && d.status == 'new'
@@ -62,6 +65,8 @@ service cloud.firestore {
         && d.fee >= 0
         && d.total is number
         && d.total >= 0
+        && (d.type == 'dine' || ('phone' in d && d.phone is string && d.phone.size() >= 7 && d.phone.size() <= 16))
+        && (d.type != 'delivery' || ('addr' in d && d.addr is string && d.addr.size() > 0 && d.addr.size() <= 200))
         && (!('phone' in d) || (d.phone is string && d.phone.size() <= 16))
         && (!('addr' in d) || (d.addr is string && d.addr.size() <= 200))
         && (!('lg' in d) || d.lg == 1)
