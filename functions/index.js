@@ -357,23 +357,13 @@ exports.zatcaGenerateInvoice = onCall({
 
   const sale = saleSnap.data();
   const settings = settingsSnap.data();
-  const z = settings.zatca || {};
-  const assessment = assessSaleForZatca(sale, settings);
-  if (assessment.reasons && assessment.reasons.length) {
-    throw new HttpsError('failed-precondition', 'Sale is not ready for ZATCA invoice generation.', {
-      reasons: assessment.reasons
-    });
+  let prepared;
+  try {
+    prepared = preparePosSaleForInvoice({ sale, saleId, settings });
+  } catch (error) {
+    throw new HttpsError('failed-precondition', error.message || 'Sale is not ready for ZATCA invoice generation.', error.details || null);
   }
-  if (String(settings.cur || '').trim().toUpperCase() !== 'SAR' ||
-      sale.vatEnabled === false || sale.vatInclusive !== true || Number(sale.vatRate) !== 15) {
-    throw new HttpsError('failed-precondition', 'Invoice generation currently requires SAR and the global 15% VAT-inclusive POS setting.');
-  }
-
-  const subtype = String(sale.zatca && sale.zatca.documentType || '').toLowerCase();
-  if (!['standard', 'simplified'].includes(subtype)) {
-    throw new HttpsError('failed-precondition', 'Choose Standard or Simplified invoice type on the POS sale first.');
-  }
-
+  const { invoiceSale, seller: z, subtype } = prepared;
   const checked = validateProductionRequest({ requestId: input.onboardingRequestId });
   if (!checked.valid) throw new HttpsError('invalid-argument', 'A valid sandbox onboardingRequestId is required.');
   onboardingEncryptionKey();
@@ -383,53 +373,8 @@ exports.zatcaGenerateInvoice = onCall({
   }
   const sandboxCredentials = decryptOnboardingValue(onboardingSnap.data().sandboxProductionCredentialsEncrypted);
   const certToken = sandboxCredentials.token;
-
   const privateKeyPem = String(ZATCA_EGS_PRIVATE_KEY.value() || '');
   if (!privateKeyPem) throw new HttpsError('failed-precondition', 'Configure ZATCA_EGS_PRIVATE_KEY in Firebase Secret Manager.');
-
-  const lines = (sale.items || []).map((item, index) => {
-    // The global POS setting is the default: no per-product VAT entry is
-    // required for standard Saudi menu items. Explicit special-category
-    // overrides are deliberately rejected by this 15%-only EGS path.
-    const category = String(item.zatcaVatCategory || 'S').toUpperCase();
-    const rawRate = item.zatcaVatRate;
-    const rate = rawRate === null || rawRate === undefined || rawRate === '' ? Number(sale.vatRate || 15) : Number(rawRate);
-    const grossUnitPrice = Number(item.price);
-    if (category !== 'S' || rate !== 15 || !Number.isFinite(grossUnitPrice) || grossUnitPrice < 0) {
-      throw new HttpsError('failed-precondition', `Sale line ${index + 1} must use the global Standard-rated 15% VAT setting or be reviewed for a special tax treatment.`);
-    }
-    return {
-      name: String(item.name || '').trim(),
-      qty: Number(item.qty),
-      unitPriceExclVat: Number((grossUnitPrice * 100 / 115).toFixed(6))
-    };
-  });
-
-  const saleTime = Number(sale.t);
-  const issuedAt = Number.isFinite(saleTime) ? new Date(saleTime).toISOString() : new Date().toISOString();
-  const invoiceSale = {
-    saleId,
-    issuedAt,
-    lines,
-    discount: Number(sale.disc) || 0,
-    vatRatePercent: 15,
-    buyer: sale.zatca && sale.zatca.buyer || undefined
-  };
-  const calculated = computeTotals({
-    subtype, kind: 'invoice', number: 'preflight', uuid: '123e4567-e89b-42d3-a456-426614174000',
-    issuedAt, icv: 1, pih: 'preflight', seller: z, buyer: invoiceSale.buyer,
-    lines, discount: invoiceSale.discount, vatRatePercent: 15
-  });
-  const mismatch = Math.abs(calculated.lineNet / 100 - Number(sale.sub)) > 0.02 ||
-    Math.abs(calculated.net / 100 - (Number(sale.sub) - Number(sale.disc || 0))) > 0.02 ||
-    Math.abs(calculated.tax / 100 - Number(sale.tax)) > 0.02 ||
-    Math.abs(calculated.total / 100 - Number(sale.total)) > 0.02;
-  if (mismatch) {
-    throw new HttpsError('failed-precondition', 'POS sale amounts do not reconcile to the generated 15% VAT invoice totals. Keep this sale in manual review.', {
-      pos: { sub: sale.sub, disc: sale.disc, tax: sale.tax, total: sale.total },
-      generated: { lineNet: calculated.lineNet / 100, net: calculated.net / 100, tax: calculated.tax / 100, total: calculated.total / 100 }
-    });
-  }
 
   const generated = await generateInvoice({
     db, uid, stateKey: 'default', sale: invoiceSale, seller: z, subtype,
