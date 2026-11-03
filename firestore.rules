@@ -124,7 +124,13 @@ service cloud.firestore {
     match /receipts/{receiptId} {
       allow get: if true;
       allow list: if false;
-      allow create, update: if signedIn()
+      // A caller may create only under their own UID. For updates, also
+      // verify the existing document owner so another user's receipt cannot
+      // be taken over by rewriting its uid field.
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid;
+      allow update: if signedIn()
+        && resource.data.uid == request.auth.uid
         && request.resource.data.uid == request.auth.uid;
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
