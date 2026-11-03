@@ -64,9 +64,9 @@ test('generates a verifiable local secp256k1 CSR and protects the private key fi
     assert.equal(keyStat.mode & 0o777, 0o600);
     assert.match(csrPem, /-----BEGIN CERTIFICATE REQUEST-----/);
     const details = require('node:child_process').execFileSync('openssl', ['req', '-in', result.csrPath, '-noout', '-subject', '-text'], { encoding: 'utf8' });
-    assert.match(details, /organizationIdentifier\\s*=\\s*312345678901233/);
-    assert.match(details, /businessCategory\\s*=\\s*1100/);
-    assert.match(details, /registeredAddress=King Road\\, Madinah/);
+    assert.ok(details.includes('organizationIdentifier = 312345678901233'));
+    assert.ok(details.includes('businessCategory = 1100'));
+    assert.ok(details.includes('registeredAddress=King Road, Madinah'));
     assert.equal(Buffer.from(csrBase64, 'base64').toString('utf8'), csrPem);
   } finally {
     fs.rmSync(result.outputDir, { recursive: true, force: true });
