@@ -6,7 +6,6 @@ const { preparePosSaleForInvoice } = require('./lib/zatca/pos-sale');
 const { validateSignedInvoicePayload, classifySubmissionOutcome } = require('./zatca-invoice-validation');
 const { validateComplianceRequest, extractCsidCredentials, validateProductionRequest } = require('./zatca-onboarding');
 const { generateInvoice } = require('./lib/zatca/invoice');
-const { computeTotals } = require('./lib/zatca/xml');
 const { defineSecret } = require('firebase-functions/params');
 const crypto = require('node:crypto');
 const { initializeApp } = require('firebase-admin/app');
