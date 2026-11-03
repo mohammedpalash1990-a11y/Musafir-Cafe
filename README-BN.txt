@@ -1,42 +1,84 @@
-MUSAFIR SUPER MARKET POS
-========================
+MUSAFIR CAFE — POS ও CUSTOMER MENU
+==================================
 
-এই repository-তে Musafir Super Market-এর browser-based POS রাখা হয়েছে। Super Market storefront icon এবং Firebase project config রাখা হয়েছে। অ্যাপটি English / Arabic (RTL) / বাংলা / বাংলা+English ভাষা সমর্থন করে। Saudi Riyal (ر.س), Cash, Card, Mada, STC Pay, Bank Transfer এবং Due payment option আছে।
+এই repository-তে Musafir Cafe-এর browser-based POS এবং customer-facing menu/order page রাখা হয়েছে। প্রধান অ্যাপ: index.html (POS) এবং order.html (customer menu/order UI)। manifest.json ও sw.js PWA installation এবং service-worker caching পরিচালনা করে।
 
-বর্তমান POS ফিচার
------------------
-- Firebase Email/Password authentication; আগের Firebase project-এর authenticated user data path ব্যবহার করে।
-- পণ্য যোগ/সম্পাদনা, English / Bangla / Arabic নাম, barcode/SKU, ক্রয়মূল্য, বিক্রয়মূল্য, category, stock এবং ছবি।
-- Barcode workflow: exact SKU/barcode scan করলে পণ্য কার্টে যোগ হয়; code না মিললে search results-এ matching products দেখায়।
-- Wired USB এবং Bluetooth keyboard-wedge scanner: দুটোই keyboard input হিসেবে কাজ করে; POS search box-এ focus রেখে scan করুন (scanner Enter suffix পাঠাবে)।
-- Supported browser/device-এ camera barcode scan (BarcodeDetector API) আছে; HTTPS camera permission প্রয়োজন। Unsupported browser হলে USB/Bluetooth scanner ব্যবহার করুন।
-- Sales, receipt, discount, manually configured VAT, split payments, due/customer ledger এবং stock deduction।
-- Purchase entry: supplier name, product, quantity এবং unit purchase cost; purchase save করলে stock বৃদ্ধি পায় এবং purchase history সংরক্ষিত হয়।
-- Existing expenses / Khata, sales reports, CSV copy, JSON backup / restore.
-- PWA service worker caching. Firebase authentication এবং cloud sync-এর জন্য internet প্রয়োজন; offline sale local device-এ queue হতে পারে এবং reconnect হলে sync workflow আছে, তবে multi-device offline conflict-free guarantee নয়।
+## বর্তমান অ্যাপের কাঠামো
 
-Firestore data
---------------
-বর্তমান Firebase adapter authenticated user-এর অধীনে users/{uid}/pos এবং users/{uid}/sales collections ব্যবহার করে। POS documents-এর মধ্যে settings, products, due, purchases, log ইত্যাদি থাকে। পুরোনো collection path-এ migration করা হয়নি। Existing Firebase Rules-এ authenticated user-কে নিজের users/{uid}/... documents read/write করতে দিতে হবে। Rules পরিবর্তনের আগে deployed rules backup ও যাচাই করুন।
+- POS: index.html
+- Customer menu/order page: order.html
+- PWA metadata: manifest.json
+- Service worker/cache: sw.js
+- Firebase client initialization: index.js
+- Firebase Functions: functions/
+- ZATCA integration notes: docs/ এবং ZATCA-*.md
 
-Saudi VAT / ZATCA সতর্কতা
-------------------------
-- Saudi Arabia-তে standard VAT rate 15%; VAT-registered business-এর ক্ষেত্রে প্রযোজ্য। VAT registration নিশ্চিত না করে VAT charge করবেন না। Settings থেকে VAT rate হাতে সেট করা যায়; 15% shortcut আছে।
-- Settings-এর ZATCA section-এ seller profile, VAT number, CR, address এবং invoice type সংরক্ষণ করা যায়; `zatcaCheckSetup` callable function দিয়ে server-side profile readiness check করা যায়।
-- এটি এখনো ZATCA FATOORA-তে connected বা certified নয়। Readiness checker শুধু profile field পরীক্ষা করে; invoice submit করে না। UBL 2.1 invoice XML, cryptographic stamp, full TLV QR, CSID onboarding, Reporting/Clearance API, retry/idempotency এবং official SDK/Sandbox end-to-end test সম্পূর্ণ না হওয়া পর্যন্ত এই POS-এর receipt-কে ZATCA-compliant tax invoice হিসেবে ব্যবহার করবেন না।
-- VAT number, CR, address এবং invoice requirements আপনার accountant / ZATCA advisor-এর সঙ্গে যাচাই করুন।
+## POS ও ডেটা
 
-প্রকাশ / পরীক্ষা
----------------
-1. GitHub repository-র main branch থেকে আপনার HTTPS hosting বা GitHub Pages publish করুন।
-2. Firebase Authentication-এ Email/Password enabled এবং hosting domain Authorized domains-এ আছে নিশ্চিত করুন।
-3. Firestore Rules-এ users/{uid}/... path-এর access authenticated UID-তে সীমাবদ্ধ রাখুন।
-4. পুরোনো Admin account দিয়ে login করে আগে test data-তে product, purchase, stock, sale, due, expense, Arabic RTL, receipt ও CSV পরীক্ষা করুন।
-5. Production ব্যবহারের আগে backup নিন এবং real payment terminal / ZATCA integration আলাদাভাবে test করুন।
+বর্তমান client code-এ Firebase Email/Password authentication এবং authenticated user-এর অধীনে Firestore data path ব্যবহার করা হয়। প্রধান POS data path-গুলোর মধ্যে users/{uid}/pos এবং users/{uid}/sales রয়েছে। নতুন deployment বা migration-এর আগে বাস্তব Firebase project, existing documents এবং deployed Security Rules আলাদাভাবে যাচাই করতে হবে।
 
-গুরুত্বপূর্ণ
------------
-- Barcode scanning-এর বর্তমান supported path হলো USB/Bluetooth keyboard-type scanner; camera barcode scan এখনো নিশ্চিতভাবে implemented নয়।
-- Supplier entry এখন purchase record-এর supplier name হিসেবে রাখা হয়; আলাদা supplier directory, supplier balances এবং purchase returns এখনো নেই।
-- Purchase records stock বাড়ায়; full landed-cost accounting, weighted-average costing এবং complete profit statement এখনো নেই।
-- ZATCA profile form থাকা মানে live ZATCA integration নয়।
+POS-এ থাকা/ডকুমেন্টেড workflow:
+- Product create/edit, category, price, stock এবং product image
+- Barcode/SKU search এবং keyboard-wedge USB/Bluetooth scanner workflow
+- Sales, receipt, discount, payment split, due/customer ledger এবং stock deduction
+- Purchase entry এবং purchase history
+- Expenses/Khata, sales reporting, CSV copy এবং JSON backup/restore
+- English, বাংলা ও Arabic/RTL language support এবং theme controls
+- PWA caching; network না থাকলে কিছু UI asset cache থেকে খোলা যায়
+
+গুরুত্বপূর্ণ: service-worker asset caching মানেই সম্পূর্ণ offline database বা conflict-free multi-device sync নয়। Offline sale queue, reconnect sync, duplicate prevention এবং multi-device conflict behavior বাস্তব ডিভাইসে পরীক্ষা করতে হবে।
+
+## Customer menu / order page
+
+order.html customer-facing menu/order interface। GitHub-এ page থাকা মানেই customer order সফলভাবে POS-এ পৌঁছায়—এটি প্রমাণিত নয়। Production release-এর আগে menu product mapping, order write path, order status lifecycle, payment/delivery fields, duplicate submission handling এবং POS-side order visibility end-to-end পরীক্ষা করতে হবে।
+
+## Firebase ও security
+
+1. Firebase Authentication-এ প্রয়োজনীয় sign-in method enabled এবং hosting domain Authorized domains-এ থাকতে হবে।
+2. Firestore Rules অবশ্যই authenticated UID/tenant boundary অনুযায়ী access সীমাবদ্ধ করবে।
+3. Rules পরিবর্তনের আগে deployed rules export/backup ও review করতে হবে।
+4. Client-এ private API key, ZATCA token/secret, private key, OTP বা encryption key রাখা যাবে না।
+5. Firebase Functions deployment-এর আগে project ID, billing, region, runtime, Secret Manager এবং IAM permission যাচাই করতে হবে।
+
+এই repository-র Firebase Functions ZATCA workflow-এর জন্য। Functions test command:
+`cd functions && npm ci && npm test`
+
+## Saudi VAT ও ZATCA
+
+- POS global VAT setting এবং VAT-inclusive price calculation সমর্থনের code/tests রয়েছে। 15% standard rate কেবল প্রযোজ্য registered business এবং standard-rated supply-এর ক্ষেত্রে ব্যবহার করতে হবে।
+- উদাহরণ: VAT-inclusive SAR 9.90 হলে 15% VAT breakdown প্রায় SAR 8.61 net + SAR 1.29 VAT; checkout total SAR 9.90-ই থাকে।
+- Product-specific exceptional tax treatment accountant/ZATCA guidance ছাড়া অনুমান করা যাবে না।
+- ZATCA code-এ sandbox onboarding, CSR generation, invoice XML/signing, SDK evidence gate এবং explicit sandbox submission workflow রয়েছে।
+- GitHub unit tests বা code presence ZATCA certification নয়। Official current ZATCA SDK PASS, taxpayer-owned sandbox end-to-end evidence, Production CSID এবং accountant/ZATCA review ছাড়া production compliance দাবি করা যাবে না।
+- Production submission নিরাপত্তার কারণে sandbox workflow থেকে আলাদা এবং credentials/authorization ছাড়া enable করা যাবে না।
+
+বিস্তারিত নির্দেশনা:
+- ZATCA-SETUP-BN-EN.md
+- ZATCA-TESTING-BN.md
+- docs/ZATCA-FATOORA-INTEGRATION.md
+- docs/ZATCA-OTP-CSID-ONBOARDING.md
+- docs/POS-GLOBAL-VAT.md
+
+## Automated validation
+
+GitHub Actions workflow: .github/workflows/validate.yml
+
+এটি POS/customer page inline JavaScript, service worker ও Functions JavaScript syntax check এবং Functions unit tests চালায়। CI pass হওয়া browser/Firebase end-to-end QA বা production deployment-এর বিকল্প নয়।
+
+## Release checklist
+
+- [ ] Existing POS workflows regression test: product, purchase, stock, sale, receipt, due, expense, report, backup/restore
+- [ ] বাংলা/English/Arabic language এবং RTL visual test
+- [ ] POS PWA install/update এবং service-worker cache refresh test
+- [ ] Offline sale queue, reconnect sync, duplicate protection এবং multi-device behavior test
+- [ ] Customer menu থেকে order submit এবং POS-এ order visibility end-to-end test
+- [ ] Pickup/home-delivery, customer contact, payment state এবং order status lifecycle test
+- [ ] Firebase Auth, Firestore Rules, tenant isolation ও backup/restore audit
+- [ ] Daily report reconciliation: sales, purchases, expenses, salary, due এবং profit definitions
+- [ ] VAT calculation and invoice regression tests
+- [ ] Official ZATCA SDK and taxpayer-owned sandbox tests
+- [ ] HTTPS hosting deployment and live smoke test
+
+## Deployment সতর্কতা
+
+এই repository-তে code থাকা মানেই Firebase production deployment বা live website deployment সম্পন্ন হয়েছে—এমন নয়। Deployment-এর আগে project owner-এর Firebase/hosting access, production data backup, approved security rules, required secrets এবং test evidence আবশ্যক। কোনো secret, OTP বা private key GitHub issue, commit বা chat-এ শেয়ার করবেন না।
