@@ -2,6 +2,7 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { assessSaleForZatca } = require('./zatca-egs');
+const { preparePosSaleForInvoice } = require('./lib/zatca/pos-sale');
 const { validateSignedInvoicePayload, classifySubmissionOutcome } = require('./zatca-invoice-validation');
 const { validateComplianceRequest, extractCsidCredentials, validateProductionRequest } = require('./zatca-onboarding');
 const { generateInvoice } = require('./lib/zatca/invoice');
