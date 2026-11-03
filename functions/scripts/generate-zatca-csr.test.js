@@ -17,7 +17,6 @@ test('validates Saudi VAT, TSCZ functionality map and required CSR identity fiel
   assert.equal(p.template, 'TSTZATCA-Code-Signing');
   assert.equal(p.invoiceType, '1100');
   assert.match(p.serialNumber, /^1-MusafirCafe\|2-POS\|3-/);
-  assert.equal(validateOptions({ ...base, vat: '123' }).vat, undefined);
   assert.throws(() => validateOptions({ ...base, vat: '123' }), /15 digits/);
   assert.throws(() => validateOptions({ ...base, 'invoice-type': '0000' }), /functionality map/);
   assert.throws(() => validateOptions({ ...base, organization: 'bad\nvalue' }), /single line/);
