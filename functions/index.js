@@ -605,28 +605,24 @@ exports.zatcaSubmitGeneratedInvoice = onCall({
 
   const reservation = await db.runTransaction(async (tx) => {
     const existing = await tx.get(submissionRef);
-    if (!existing.exists || String(existing.data().status || '').toLowerCase() !== 'validated' || !existing.data().sdkValidation || existing.data().sdkValidation.status !== 'PASS' || existing.data().sdkValidation.invoiceHash !== invoice.invoiceHash) {
+    if (!existing.exists) throw new HttpsError('failed-precondition', 'Invoice submission state is missing.');
+    const current = existing.data();
+    const state = String(current.status || '').toLowerCase();
+    if (state === 'reported' || state === 'cleared') return { duplicate: true, status: state };
+    if (state === 'processing') throw new HttpsError('aborted', 'This invoice is already being submitted.');
+    if (state === 'submission_unknown' || state === 'submitted') {
+      throw new HttpsError('failed-precondition', 'A previous request may have reached FATOORA. Reconcile its outcome before retrying this invoice.');
+    }
+    if (state !== 'validated' || !current.sdkValidation || current.sdkValidation.status !== 'PASS' || current.sdkValidation.invoiceHash !== invoice.invoiceHash) {
       throw new HttpsError('failed-precondition', 'Record an official SDK PASS for this exact invoice hash before sandbox submission.');
     }
-    if (existing.exists) {
-      const state = String(existing.data().status || '').toLowerCase();
-      if (state === 'reported' || state === 'cleared') return { duplicate: true, status: state };
-      if (state === 'processing') throw new HttpsError('aborted', 'This invoice is already being submitted.');
-      if (state === 'submission_unknown' || state === 'submitted') {
-        throw new HttpsError('failed-precondition', 'A previous request may have reached FATOORA. Reconcile its outcome before retrying this invoice.');
-      }
-      tx.set(submissionRef, {
-        status: 'processing',
-        attempts: Number(existing.data().attempts || 0) + 1,
-        updatedAt: FieldValue.serverTimestamp()
-      }, { merge: true });
-      return { duplicate: false };
-    }
-    tx.create(submissionRef, {
-      saleId, uuid: invoice.uuid, invoiceHash: invoice.invoiceHash,
-      status: 'processing', attempts: 1,
-      createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
-    });
+    tx.set(submissionRef, {
+      status: 'processing',
+      attempts: Number(current.attempts || 0) + 1,
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+    return { duplicate: false };
+  });
     return { duplicate: false };
   });
   if (reservation.duplicate) return { duplicate: true, status: reservation.status, saleId, uuid: invoice.uuid };
