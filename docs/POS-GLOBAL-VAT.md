@@ -32,3 +32,5 @@ Sales store the VAT-exclusive subtotal and discount, the VAT amount, the custome
 
 This change does not claim that the full EGS signing pipeline or production ZATCA certification is complete. Production remains gated until the official UBL, hash/PIH, signing, QR, SDK and sandbox verification work is completed.
 \n\nThe POS product editor does not expose individual VAT category/rate fields. Each new sale line snapshots category `S` and the global VAT rate from Settings. Editing an existing product removes legacy per-product VAT override metadata so it cannot silently override the global rate. Any product with a legally different VAT treatment must be reviewed before being sold through this standard-rated-only workflow.\n
+
+The POS product editor does not expose individual VAT category/rate fields. Each new sale line snapshots category `S` and the global VAT rate from Settings. Editing an existing product removes legacy per-product VAT override metadata so it cannot silently override the global rate. Any product with a legally different VAT treatment must be reviewed before being sold through this standard-rated-only workflow.
