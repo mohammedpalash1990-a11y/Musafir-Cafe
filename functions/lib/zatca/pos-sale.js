@@ -17,11 +17,12 @@ function preparePosSaleForInvoice({ sale, saleId, settings }) {
   const subtype = String(sale.zatca && sale.zatca.documentType || '').toLowerCase();
   if (!['standard', 'simplified'].includes(subtype)) throw new Error('Choose Standard or Simplified invoice type on the POS sale first.');
   const lines = (sale.items || []).map((item, index) => {
-    const category = String(item.zatcaVatCategory || '').toUpperCase();
-    const rate = Number(item.zatcaVatRate);
+    const category = String(item.zatcaVatCategory || 'S').toUpperCase();
+    const rawRate = item.zatcaVatRate;
+    const rate = rawRate === null || rawRate === undefined || rawRate === '' ? Number(sale.vatRate || 15) : Number(rawRate);
     const grossUnitPrice = Number(item.price);
     if (category !== 'S' || rate !== 15 || !Number.isFinite(grossUnitPrice) || grossUnitPrice < 0) throw new Error(`Sale line ${index + 1} must use the automatic Standard-rated 15% VAT classification.`);
-    return { name: String(item.name || '').trim(), qty: Number(item.qty), unitPriceExclVat: Number((grossUnitPrice * 100 / 115).toFixed(2)) };
+    return { name: String(item.name || '').trim(), qty: Number(item.qty), unitPriceExclVat: Number((grossUnitPrice * 100 / 115).toFixed(6)) };
   });
   const saleTime = Number(sale.t);
   const issuedAt = Number.isFinite(saleTime) ? new Date(saleTime).toISOString() : new Date().toISOString();
