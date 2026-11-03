@@ -1,0 +1,134 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // POS data (products, sales, expenses, staff, settings, due ledgers,
+    // ZATCA invoice records) is private to the authenticated account.
+    match /users/{userId}/{document=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Published menu is intentionally public-read; only its owner can publish.
+    match /shops/{shopId} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isOwner(shopId);
+      allow delete: if isOwner(shopId);
+
+      match /img/{imageId} {
+        allow get: if true;
+        allow list: if false;
+        allow create, update, delete: if isOwner(shopId);
+      }
+    }
+
+    function validCustomerOrder() {
+      let d = request.resource.data;
+      return d.keys().hasAll([
+          'uid', 'shop', 'status', 't', 'name', 'note',
+          'items', 'type', 'table', 'fee', 'total'
+        ])
+        && d.keys().hasOnly([
+          'uid', 'shop', 'lg', 'cuid', 'cn', 'cname',
+          'status', 't', 'name', 'note', 'items', 'type',
+          'table', 'fee', 'total', 'phone', 'addr', 'loc'
+        ])
+        && d.uid is string
+        && d.uid.size() > 0
+        && d.uid.size() <= 128
+        && exists(/databases/$(database)/documents/shops/$(d.uid))
+        && d.shop is string
+        && d.shop.size() <= 120
+        && d.status == 'new'
+        && d.t is int
+        && d.name is string
+        && d.name.size() <= 60
+        && d.note is string
+        && d.note.size() <= 150
+        && d.items is list
+        && d.items.size() > 0
+        && d.items.size() <= 40
+        && d.type in ['dine', 'pickup', 'delivery']
+        && d.table is string
+        && d.table.size() <= 10
+        && d.fee is number
+        && d.fee >= 0
+        && d.total is number
+        && d.total >= 0
+        && (!('phone' in d) || (d.phone is string && d.phone.size() <= 16))
+        && (!('addr' in d) || (d.addr is string && d.addr.size() <= 200))
+        && (!('lg' in d) || d.lg == 1)
+        && (!('cuid' in d) || (d.cuid is string && d.cuid.size() <= 128))
+        && (!('cn' in d) || (d.cn is string && d.cn.size() <= 254))
+        && (!('cname' in d) || (d.cname is string && d.cname.size() <= 80));
+    }
+
+    // Customers create a new order without needing an account. The opaque
+    // random document ID is used by the customer tracking page. Only the
+    // owning shop account can read its order list or change its workflow.
+    match /orders/{orderId} {
+      allow create: if validCustomerOrder();
+      allow get: if true;
+      allow list: if signedIn() && resource.data.uid == request.auth.uid;
+      allow update: if signedIn()
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'eta'])
+        && (!('status' in request.resource.data)
+          || request.resource.data.status in [
+            'new', 'accepted', 'ready', 'served', 'billed', 'cancelled'
+          ])
+        && (!('eta' in request.resource.data)
+          || request.resource.data.eta is int);
+      allow delete: if false;
+    }
+
+    // A rating must refer to an existing order belonging to the same shop.
+    // Only the shop owner can read rating records.
+    match /ratings/{ratingId} {
+      allow create: if request.resource.data.keys().hasAll([
+          'uid', 'oid', 'table', 'name', 'stars', 'comment', 't'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'uid', 'oid', 'table', 'name', 'stars', 'comment', 't'
+        ])
+        && request.resource.data.oid == ratingId
+        && request.resource.data.uid is string
+        && exists(/databases/$(database)/documents/orders/$(ratingId))
+        && get(/databases/$(database)/documents/orders/$(ratingId)).data.uid
+          == request.resource.data.uid
+        && get(/databases/$(database)/documents/orders/$(ratingId)).data.status
+          in ['accepted', 'ready', 'served', 'billed']
+        && request.resource.data.stars is int
+        && request.resource.data.stars >= 1
+        && request.resource.data.stars <= 5
+        && request.resource.data.comment is string
+        && request.resource.data.comment.size() <= 300
+        && request.resource.data.table is string
+        && request.resource.data.table.size() <= 10
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 60
+        && request.resource.data.t is int;
+      allow get, list: if signedIn() && resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Receipt / due-share links are intentionally readable by anyone holding
+    // the random receipt code. Only the account that created one may mutate it.
+    match /receipts/{receiptId} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if signedIn()
+        && request.resource.data.uid == request.auth.uid;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Everything not explicitly listed above is denied.
+  }
+}
