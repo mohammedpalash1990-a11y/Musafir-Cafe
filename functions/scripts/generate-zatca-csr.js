@@ -27,7 +27,7 @@ function parseArgs(argv) {
 
 function clean(value, label, max = 160) {
   const text = String(value || '').trim();
-  if (!text || text.length > max || /[\\r\\n\\u0000-\\u001f\\u007f]/.test(text)) {
+  if (!text || text.length > max || /[\r\n\u0000-\u001f\u007f]/.test(text)) {
     throw new Error(label + ' is required and must be a single line of at most ' + max + ' characters.');
   }
   return text;
@@ -39,7 +39,7 @@ function validateOptions(input) {
     throw new Error('environment must be sandbox, simulation, or production.');
   }
   const vat = clean(input.vat, 'VAT number', 15);
-  if (!/^3\\d{13}3$/.test(vat)) throw new Error('VAT number must be 15 digits, starting and ending with 3.');
+  if (!/^3\d{13}3$/.test(vat)) throw new Error('VAT number must be 15 digits, starting and ending with 3.');
   const invoiceType = String(input['invoice-type'] || '1100');
   if (!/^[01]{4}$/.test(invoiceType) || invoiceType === '0000') {
     throw new Error('invoice-type must be a non-zero four-digit TSCZ functionality map (for example 1100).');
@@ -101,7 +101,7 @@ function buildOpenSslConfig(p) {
     'registeredAddress = ' + configValue(p.address),
     'businessCategory = ' + configValue(p.industry),
     ''
-  ].join('\\n');
+  ].join('\n');
 }
 
 function generate(argv = process.argv.slice(2)) {
@@ -130,14 +130,14 @@ function generate(argv = process.argv.slice(2)) {
     'OpenSSL config: ' + configPath,
     'Next: keep the private key in your protected local backup, then provision it to Firebase Secret Manager as ZATCA_EGS_PRIVATE_KEY using your secured terminal.',
     'The CSR request has NOT been sent to ZATCA; no OTP or CSID has been used.'
-  ].join('\\n') + '\\n');
+  ].join('\n') + '\n');
   return { outputDir, keyPath, csrPath, configPath, base64Path, environment: p.environment };
 }
 
 if (require.main === module) {
   try { generate(); }
   catch (error) {
-    process.stderr.write('CSR generation failed: ' + (error.message || String(error)) + '\\n');
+    process.stderr.write('CSR generation failed: ' + (error.message || String(error)) + '\n');
     process.exitCode = 1;
   }
 }
