@@ -332,6 +332,70 @@ exports.zatcaQueueSale = onDocumentCreated({
  * Generate and sign one immutable invoice from an existing POS sale.
  * This is generation only; it never submits automatically to FATOORA.
  */
+/**
+ * Automatic draft generation for eligible queued POS sales.
+ * Seller-profile enablement is the opt-in; this never submits to FATOORA.
+ */
+exports.zatcaAutoGenerateSandboxDraft = onDocumentCreated({
+  document: 'users/{uid}/zatcaInvoices/{jobId}',
+  region: REGION,
+  retry: true,
+  secrets: [ZATCA_EGS_PRIVATE_KEY, ZATCA_ONBOARDING_ENCRYPTION_KEY]
+}, async (event) => {
+  const { uid, jobId } = event.params;
+  if (!String(jobId).startsWith('sale-')) return;
+  const job = event.data && event.data.data();
+  if (!job || job.source !== 'pos_sale') return;
+  if (['generated_pending_sdk', 'validated', 'reported', 'cleared', 'submitted', 'submission_unknown'].includes(String(job.status || '').toLowerCase())) return;
+  if (String(job.status || '') !== 'awaiting_egs') return;
+
+  const [saleSnap, settingsSnap] = await Promise.all([
+    db.doc(`users/${uid}/sales/${job.saleId}`).get(),
+    db.doc(`users/${uid}/pos/settings`).get()
+  ]);
+  if (!saleSnap.exists || !settingsSnap.exists) return;
+  const sale = saleSnap.data();
+  const settings = settingsSnap.data();
+  const z = settings.zatca || {};
+  if (z.enabled !== true) return;
+
+  const jobRef = db.doc(`users/${uid}/zatcaInvoices/${jobId}`);
+  if (getEnvironment() !== 'sandbox') {
+    await jobRef.set({ status: 'auto_generation_blocked', reasons: ['Automatic draft generation is sandbox-only; production remains disabled.'], updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+    return;
+  }
+  try {
+    const requestId = String(z.onboardingRequestId || '').trim();
+    if (!requestId) throw new Error('Complete sandbox OTP/CSID onboarding and save its request ID before automatic draft generation.');
+    onboardingEncryptionKey();
+    const onboardingSnap = await db.doc(`users/${uid}/zatcaOnboarding/${requestId}`).get();
+    if (!onboardingSnap.exists || onboardingSnap.data().status !== 'sandbox_production_csid_issued') throw new Error('A sandbox Production CSID must be issued before automatic draft generation.');
+    const credentials = decryptOnboardingValue(onboardingSnap.data().sandboxProductionCredentialsEncrypted);
+    const privateKeyPem = String(ZATCA_EGS_PRIVATE_KEY.value() || '');
+    if (!privateKeyPem) throw new Error('Configure ZATCA_EGS_PRIVATE_KEY in Firebase Secret Manager.');
+    const prepared = preparePosSaleForInvoice({ sale, saleId: job.saleId, settings });
+    const generated = await generateInvoice({
+      db, uid, stateKey: 'default', sale: prepared.invoiceSale,
+      seller: prepared.seller, subtype: prepared.subtype,
+      privateKeyPem, certToken: credentials.token, numberPrefix: 'MUS-'
+    });
+    await jobRef.set({
+      status: 'generated_pending_sdk', reasons: [],
+      invoiceNumber: generated.number, uuid: generated.uuid,
+      invoiceHash: generated.invoiceHash, icv: generated.icv,
+      totalWithVat: generated.totalWithVat, vatTotal: generated.vatTotal,
+      generatedAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp(),
+      generationMode: 'automatic_sandbox_draft'
+    }, { merge: true });
+  } catch (error) {
+    await jobRef.set({
+      status: 'auto_generation_blocked',
+      reasons: Array.isArray(error.details && error.details.reasons) ? error.details.reasons : [String(error && error.message || 'Automatic invoice draft generation failed.')],
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+  }
+});
+
 exports.zatcaGenerateInvoice = onCall({
   region: REGION,
   timeoutSeconds: 60,
