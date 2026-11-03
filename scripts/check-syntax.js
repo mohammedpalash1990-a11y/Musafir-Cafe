@@ -36,6 +36,34 @@ function checkAllJs(dir) {
   return count;
 }
 
+
+function checkFirestoreRules() {
+  const root = path.join(__dirname, '..');
+  const config = JSON.parse(fs.readFileSync(path.join(root, 'firebase.json'), 'utf8'));
+  const rulesPath = config.firestore && config.firestore.rules;
+  if (rulesPath !== 'firestore.rules') {
+    throw new Error('firebase.json must point Firestore deployment at firestore.rules');
+  }
+  const rulesFile = path.join(root, rulesPath);
+  if (!fs.existsSync(rulesFile)) throw new Error('Configured Firestore rules file is missing');
+  const rules = fs.readFileSync(rulesFile, 'utf8');
+  for (const required of [
+    "rules_version = '2';",
+    'match /users/{userId}/{document=**}',
+    'match /shops/{shopId}',
+    'match /orders/{orderId}',
+    'match /ratings/{ratingId}',
+    'match /receipts/{receiptId}',
+    'allow read, write: if isOwner(userId);',
+    'allow delete: if false;'
+  ]) {
+    if (!rules.includes(required)) throw new Error('Firestore rules baseline is missing: ' + required);
+  }
+  process.stdout.write('Firestore rules wiring and baseline checks OK\\n');
+}
+
+checkFirestoreRules();
+
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'musafir-check-'));
 try {
   const indexScripts = checkHtmlScripts('index.html', dir, 'index-inline');
