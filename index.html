@@ -318,7 +318,7 @@ function rpSet(k,v){S.rp=S.rp||{};S.rp[k]=v;save();render();rqFlush()}
 function rpTest(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}rqAdd({k:'test',t:Date.now(),shop:S.shop});toast(L('টেস্ট পাঠানো হয়েছে, ইমেইল দেখুন','Test sent, check your email'))}
 function rpNow(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var d=tdy();H.filter(function(h){return day(h.t)==d}).forEach(function(h){rqAdd(rqSale(h))});rqAdd({k:'report',day:d,shop:S.shop});toast(L('আজকের রিপোর্ট পাঠানো হচ্ছে','Sending today\'s report'))}
 function rpHist(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}H.forEach(function(h){rqAdd(rqSale(h))});toast(L('সব পুরনো বিক্রি পাঠানো হচ্ছে','Sending all past sales'))}
-var APP_V='v10 · 2026-11-03';
+var APP_V='v11 · 2026-11-10';
 function updApp(){if(!navigator.onLine){toast(L('আপডেটের জন্য নেট লাগবে','Internet needed to update'));return}toast(L('আপডেট হচ্ছে…','Updating…'));var p=[];try{if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}))}catch(e){}Promise.all(p).catch(function(){}).then(function(){location.reload()})}
 function verBox(){return '<div class="box"><div class="hd">'+I('set')+'<b>'+L('অ্যাপ ভার্সন','App version')+'</b></div><div class="dl"><span>'+APP_V+'</span><button class="pri" onclick="updApp()">'+L('এখনই আপডেট করুন','Update now')+'</button></div><div class="mute" style="font-size:12px">'+L('আপনার বিক্রি ও ডেটা মুছবে না। নতুন ফাইল GitHub-এ দেওয়ার পর এটা চাপলে নতুন ভার্সন চলে আসবে।','Your sales and data are kept. Press this after uploading new files to GitHub.')+'</div></div>'}
 function rpBox(){var r=S.rp||{};return '<div class="box"><div class="hd">'+I('cash')+'<b>'+L('দৈনিক রিপোর্ট (ইমেইল ও ড্রাইভ)','Daily report (email & Drive)')+'</b></div>'
@@ -354,6 +354,8 @@ function vatConfig(){return Object.assign({enabled:true,rate:15,pricesIncludeVat
 function calc(){var s=rnd2(sub()),d=rnd2(Math.min(Math.max(+disc||0,0),s)),v=vatConfig(),rate=Math.max(0,Math.min(100,+v.rate||0)),inclusive=v.pricesIncludeVat!==false,enabled=v.enabled!==false,base=rnd2(s-d),tx=enabled?(inclusive?rnd2(base*rate/(100+rate)):rnd2(base*rate/100)):0,netS=enabled&&inclusive?rnd2(s*100/(100+rate)):s,netD=enabled&&inclusive?rnd2(d*100/(100+rate)):d;return{s:s,d:d,tx:tx,t:rnd2(base+(enabled&&!inclusive?tx:0)),netS:netS,netD:netD,vatRate:rate,vatInclusive:inclusive,vatEnabled:enabled}}
 function cnt(){var n=0;for(var id in cart)n+=cart[id];return n}
 function hue(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h}
+var CPAL=['#1f9d55','#3b78e7','#d6455a','#e8941a','#8a4fd6','#12a3a3','#c2418a','#6f8f1f','#e0603a','#5b6ad0','#a0522d','#2c8fb8'];
+function ccol(c){if(!c)return null;var l=[];P.forEach(function(p){if(p.cat&&l.indexOf(p.cat)<0)l.push(p.cat)});var i=l.indexOf(c);return i<0?'hsl('+hue(c)+',55%,40%)':CPAL[i%CPAL.length]}
 function isWide(){return !!(window.matchMedia&&window.matchMedia('(min-width:860px)').matches)}
 
 function setLang(l){S.lang=l;save();render();if($('#cs').classList.contains('show'))openCart()}
@@ -446,7 +448,7 @@ function sesStrip(){var z=SES(),n=sesCur(),r=sums(n.l);return '<div class="box" 
 function dailyCard(){var ym=(typeof dm!='undefined'&&dm)||tdy().slice(0,7),rows=dayRows(ym),tot=0;return '<div class="box" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:center"><b>'+L('দিন অনুযায়ী বিক্রি','Daily sales')+' · '+ym.slice(5)+'/'+ym.slice(0,4)+'</b><button style="padding:4px 12px" onclick="csvDaily(\''+ym+'\')">CSV</button></div>'+(rows.length?rows.map(function(x){tot+=x.r.t;return '<div class="row" onclick="showDayRpt(\''+x.d+'\')" style="cursor:pointer"><div><b>'+x.i+' · '+dmy(x.d)+'</b><div class="mute" style="font-size:12px">'+x.n+L(' ইনভয়েস',' invoices')+'</div></div><b>'+$$(x.r.t)+'</b></div>'}).join('')+'<div class="row"><b>'+L('মোট','Total')+'</b><b>'+$$(tot)+'</b></div>':'<div class="empty">'+L('এই মাসে কোনো বিক্রি নেই','No sales this month')+'</div>')+'<div class="mute" style="font-size:12px;margin-top:6px">'+L('দিনে চাপ দিলে রিপোর্ট ও প্রিন্ট','Tap a day for its report and print')+'</div></div>'}
 function vDash(){return sesStrip()+vDash0()+dailyCard()}
 function showRecent(){var l=H.slice().sort(function(a,b){return b.t-a.t}).slice(0,80);$('#rb').innerHTML='<div class="box"><b>'+L('সাম্প্রতিক বিক্রি','Recent Sales')+'</b></div>'+(l.length?l.map(function(s){var d=new Date(s.t);return '<div class="row" onclick="showRc('+s.no+')" style="cursor:pointer"><div><b>#'+s.sn+(s.refund?' ↩':'')+'</b><div class="mute" style="font-size:12px">'+dmy(day(s.t))+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+(s.src=='qr'?' · QR':'')+' · '+esc(t(s.pays&&s.pays.length>1?'Split':(s.pay||'')))+'</div></div><b>'+$$(s.total)+'</b></div>'}).join(''):'<div class="empty">'+L('এখনো কোনো ইনভয়েস নেই','No invoice yet')+'</div>')+'<button style="width:100%;margin-top:10px" onclick="$(\'#rc\').classList.remove(\'show\')">'+L('বন্ধ','Close')+'</button>';$('#rc').classList.add('show')}
-function cbg(c){var p=P.filter(function(x){return x.cat==c&&IMG[x.id]})[0];return p?"linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.6)),url('"+IMG[p.id]+"') center/cover":'hsl('+hue(c)+',55%,40%)'}
+function cbg(c){var p=P.filter(function(x){return x.cat==c&&IMG[x.id]})[0],k=ccol(c)||'#14454b';return p?"linear-gradient("+k+"88,"+k+"e6),url('"+IMG[p.id]+"') center/cover":'linear-gradient(135deg,'+k+','+k+'cc)'}
 function typing(){var a=document.activeElement;return !!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&(a.closest('#m')||a.closest('#side')||a.closest('#cs')||a.closest('#rb')))}
 function bgRender(){if(typing()){window.__pend=1;return}render()}
 document.addEventListener('focusout',function(){if(window.__pend)setTimeout(function(){if(!typing()){window.__pend=0;render()}},400)});
@@ -465,7 +467,7 @@ function vSell0(){
   }
   return top+'<div class="cats"><button onclick="pickCat(\'All\')">'+'← '+L('সব ক্যাটাগরি','All categories')+'</button>'+(cat!='All'?'<b style="align-self:center">'+esc(tc(cat))+'</b>':'')+'</div>'+grid
  }
- return top+'<div class="cats">'+cats.map(function(c){return '<button class="'+(c==cat?'on':'')+'" data-c="'+esc(c)+'" onclick="pickCat(this.dataset.c)">'+esc(c=='All'?t('all'):tc(c))+'</button>'}).join('')+'</div>'+grid
+ return top+'<div class="cats">'+cats.map(function(c){var k=c=='All'?null:ccol(c);return '<button class="'+(c==cat?'on':'')+'" data-c="'+esc(c)+'"'+(k?' style="border-color:'+k+';'+(c==cat?'background:'+k+';color:#fff':'')+'"':'')+' onclick="pickCat(this.dataset.c)">'+esc(c=='All'?t('all'):tc(c))+'</button>'}).join('')+'</div>'+grid
 }
 function cbQS(){try{return(JSON.parse(localStorage.getItem('qr_set')||'{}').cb)||[]}catch(e){return[]}}
 function cbOK(c){return c&&c.on!==false&&c.ids&&c.ids.length>1&&+c.p>0&&c.ids.every(function(i){return gp(i)})}
@@ -475,7 +477,7 @@ return '<button class="p" '+(out?'disabled':'')+' onclick="addCombo(\''+esc(Stri
 function addCombo(cid){var c=cbQS().filter(function(x){return String(x.id)==String(cid)})[0];if(!cbOK(c))return;var id='cb_'+c.id,n=(cart[id]||0)+1;if(!fits(id,n)){toast(t('out'));return}cart[id]=n;render()}
 
 function gridHtml(l){return comboCards()+l.map(function(p){var out=p.stock!==''&&p.stock<=0,low=p.stock!==''&&p.stock<=5,n=cart[p.id]||0,u=IMG[p.id];
- return '<button class="p" '+(out?'disabled':'')+' onclick="add('+p.id+')">'+(n?'<div class="qty">'+n+'</div>':'')+(u?'<img class="pimg" alt="" src="'+u+'">':'<div class="dot" style="background:hsl('+hue(p.name)+',45%,40%)">'+esc((nm(p)||'?').charAt(0).toUpperCase())+'</div>')+'<b>'+esc(nm(p))+'</b><span>'+$$(p.price)+'</span>'+(p.stock!==''?'<small style="'+(low?'color:var(--warn)':'')+'">'+(out?t('out'):p.stock+t('left'))+'</small>':'')+'</button>'}).join('')}
+ var cc=ccol(p.cat);return '<button class="p" '+(out?'disabled':'')+(cc?' style="border-top:5px solid '+cc+'"':'')+' onclick="add('+p.id+')">'+(n?'<div class="qty">'+n+'</div>':'')+(u?'<img class="pimg" alt="" src="'+u+'">':'<div class="dot" style="background:'+(cc||'hsl('+hue(p.name)+',45%,40%)')+'">'+esc((nm(p)||'?').charAt(0).toUpperCase())+'</div>')+'<b>'+esc(nm(p))+'</b><span>'+$$(p.price)+'</span>'+(p.stock!==''?'<small style="'+(low?'color:var(--warn)':'')+'">'+(out?t('out'):p.stock+t('left'))+'</small>':'')+'</button>'}).join('')}
 function keep(){var g=$('#gr');if(X().cat&&cat=='All'&&!tAll&&(!g||!q)){var v=q;render();var e=$('#sq');if(e){e.focus();try{e.setSelectionRange(v.length,v.length)}catch(x){}}return}if(g)g.innerHTML=gridHtml(flt())}
 function add(id){var p=gp(id),n=(cart[id]||0)+1;if(!p||!fits(id,n))return;cart[id]=n;render()}
 function chg(id,d){var p=gp(id),n=(cart[id]||0)+d;if(!p||n<=0)delete cart[id];else if(fits(id,n))cart[id]=n;render();openCart()}
@@ -590,7 +592,7 @@ function rcHtml(s){  var r=Object.assign(RD(),{qr:true}),id=invCode(s),qrT='INV:
  var h='<div class="rcpt"><div class="rl">'+LOGO_MONO+'</div><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+L('ইনভয়েস','Invoice')+' #'+s.sn+'</span><span>'+day(s.t)+' · '+tm+'</span></div>'+(s.src?'<div class="rm"><span>'+(s.src=='qr'?'📲 '+L('QR অর্ডার','QR order')+(s.qr&&s.qr.length?' · '+esc(s.qr.join(' + ')):''):'🏪 '+L('POS থেকে','From POS'))+'</span></div>':'')+'<table>'+rows+'</table>';
  if(s.disc||s.tax)h+='<div class="rt" style="margin-top:4px"><span>'+t('sub')+'</span><span>'+$$(s.sub)+'</span></div>';
  if(s.disc)h+='<div class="rt"><span>'+t('disc')+'</span><span>−'+$$(s.disc)+'</span></div>';
- if(s.tax)h+='<div class="rt"><span>'+L(s.vatInclusive?'VAT অন্তর্ভুক্ত':'VAT','VAT included')+' '+(s.vatRate||15)+'%</span><span>'+$(s.tax)+'</span></div>';
+ if(s.tax)h+='<div class="rt"><span>'+L(s.vatInclusive?'VAT অন্তর্ভুক্ত':'VAT','VAT included')+' '+(s.vatRate||15)+'%</span><span>'+$$(s.tax)+'</span></div>';
  h+='<div class="rt g"><span>'+t('total')+'</span><span>'+$$(s.total)+'</span></div>';
  pl.forEach(function(x){h+='<div class="rt py"><span>'+t(x.m)+(x.debtor?' · '+esc(x.debtor):'')+'</span><span>'+$$(x.a)+'</span></div>'});
  if(s.recv!=null&&(s.chg||0)>0)h+='<div class="rt py"><span>'+t('received')+'</span><span>'+$$(s.recv)+'</span></div><div class="rt py"><span>'+t('chg')+'</span><span>'+$$(s.chg)+'</span></div>';
@@ -628,7 +630,7 @@ function rcText(s){
  var o=[S.shop,L('ইনভয়েস #','Invoice #')+s.sn+'  ·  '+day(s.t),new Date(s.t).toLocaleTimeString(),'--------------------------------'];
  s.items.forEach(function(i){o.push(nm(i)+'\n   '+i.qty+' × '+i.price.toFixed(2)+'  =  '+(i.qty*i.price).toFixed(2))});
  o.push('--------------------------------',t('sub')+': '+$$(s.sub));
- if(s.disc)o.push(t('disc')+': −'+$(s.disc));if(s.tax)o.push(L(s.vatInclusive?'VAT অন্তর্ভুক্ত':'VAT','VAT included')+' '+(s.vatRate||15)+'%: '+$(s.tax));
+ if(s.disc)o.push(t('disc')+': −'+$$(s.disc));if(s.tax)o.push(L(s.vatInclusive?'VAT অন্তর্ভুক্ত':'VAT','VAT included')+' '+(s.vatRate||15)+'%: '+$$(s.tax));
  o.push(t('total')+': '+$$(s.total),'--------------------------------');
  (s.pays&&s.pays.length?s.pays:[{m:s.pay,a:s.total}]).forEach(function(x){o.push(t(x.m)+': '+$$(x.a))});
  if(s.recv!=null)o.push(t('received')+': '+$$(s.recv),t('chg')+': '+$$(s.chg!=null?s.chg:s.recv-s.total));
@@ -1222,7 +1224,7 @@ function navHtml(){var tabs=[['sell',L('বিক্রি','Sell'),'sell'],['du
 function info0(){var e=$('#ib');if(!e)return;var l=H.length?H.reduce(function(a,x){return x.t>a.t?x:a}):null,d=new Date();
  e.innerHTML='<button class="lb" '+(l?'onclick="showRc('+l.no+')"':'disabled')+'>'+I('print')+' '+L('শেষ ইনভয়েস','Last invoice')+(l?' #'+l.sn+' · '+$$(l.total):'')+'</button>'+(innerWidth<600?navHtml():'')+'<div style="display:flex;align-items:center;gap:10px"><button class="thm" aria-label="Theme" onclick="togTheme()">'+I(curTheme()=='dark'?'sun':'moon')+'</button><div class="clk"><b>'+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</b><span>'+d.toLocaleDateString(AL()?'ar-SA-u-ca-gregory':S.lang!='en'?'bn-BD':'en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+'</span></div></div>'}
 
-function lastInv(){var s=H.slice().sort(function(a,b){return b.t-a.t})[0];if(s)showRc(s.no);else toast(L('এখনো কোনো ইনভয়েস নেই','No invoice yet'))}
+function lastInv(){var s=H.slice().sort(function(a,b){return b.t-a.t})[0];if(s){showRc(s.no);setTimeout(function(){try{window.print()}catch(e){}},350)}else toast(L('এখনো কোনো ইনভয়েস নেই','No invoice yet'))}
 
 function ask(msg,fn,yes){var e=$('#cf');if(!e){e=document.createElement('div');e.id='cf';e.className='ov';e.style.alignItems='center';e.style.zIndex=40;document.body.appendChild(e)}
  window.__cf=fn;e.innerHTML='<div class="sheet" style="border-radius:20px;max-width:340px;margin:16px;text-align:center"><div style="font-size:17px;font-weight:700">'+esc(msg)+'</div><div class="mute" style="margin-top:4px">'+L('এটা আর ফেরানো যাবে না','This cannot be undone')+'</div><div style="display:flex;gap:10px;margin-top:16px"><button style="flex:1" onclick="$(\'#cf\').classList.remove(\'show\')">'+L('না','No')+'</button><button class="bad2" style="flex:1" onclick="$(\'#cf\').classList.remove(\'show\');window.__cf()">'+(yes||L('হ্যাঁ, মুছুন','Yes, delete'))+'</button></div></div>';e.classList.add('show')}
