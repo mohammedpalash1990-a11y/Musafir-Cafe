@@ -1,4 +1,4 @@
-var V='musafir-pos-v37';
+var V='musafir-pos-v38';
 var CORE=['./','./index.html','./order.html','./manifest.json','./menu-manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png'];
 var VID=[];
 var FB='https://www.gstatic.com/firebasejs/10.12.2/';
@@ -50,3 +50,5 @@ self.addEventListener('fetch',function(e){
   return hit||net}))});
 
 self.addEventListener('notificationclick',function(e){e.notification.close();e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(function(l){for(var i=0;i<l.length;i++){if('focus' in l[i])return l[i].focus()}return clients.openWindow('./')}))});
+
+self.addEventListener('notificationclick',function(e){e.notification.close();e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(function(l){for(var i=0;i<l.length;i++){if('focus' in l[i])return l[i].focus()}return self.clients.openWindow('./order.html')}))});

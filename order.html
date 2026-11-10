@@ -2,9 +2,11 @@
 <script>try{var _t=localStorage.getItem("qo_theme");if(_t)document.documentElement.setAttribute("data-theme",_t)}catch(e){}</script><title>মেনু</title><meta name="theme-color" content="#0b2a2e"><link rel="icon" href="logo-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
 <style>
+@font-face{font-family:"SAR";src:url(data:font/ttf;base64,AAEAAAAKAIAAAwAgT1MvMmY4ZPMAAAEoAAAAYGNtYXAADCEUAAABkAAAADRnbHlmutjl3gAAAcwAAACoaGVhZDAZiTAAAACsAAAANmhoZWEGCgItAAAA5AAAACRobXR4BMgAAAAAAYgAAAAIbG9jYQBUAAAAAAHEAAAABm1heHAABQA/AAABCAAAACBuYW1lfxy54QAAAnQAAABmcG9zdGJ4A3MAAALcAAAAKgABAAAAAQAAKasxdV8PPPUAAQPoAAAAAOcYosAAAAAA5xiiwAAoAAACrALQAAAAAwACAAAAAAAAAAEAAAOE/wYAAALUAAAAUAKEAAEAAAAAAAAAAAAAAAAAAAACAAEAAAACAD0AAgAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAwJkAZAABQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAPz8/PwAAIMEgwQOE/wYAAAOEAPoAAAAAAAAAAAAAAAAAAAAgAAAB9AAAAtQAAAAAAAIAAAADAAAAFAADAAEAAAAUAAQAIAAAAAQABAABAAAgwf//AAAgwf//30AAAQAAAAAAAAAAAFQAAAACACgAAAKsAtAACQA8AAAlDwM/BAM3DwQVNw8ENQcVDwg/BDUHPwQRPwQTNzU/AwKqBQcI8wMEBwjzvb0DBAcIp70DBQUJ80wCBCgFCQkGC9kDBQYIzb8DBQYIqQwMCxUUAUsNFBcUdBcWEzQVFBUUNAEOKBcSFhMkTSgWFRMUNJsQWAsHPQYIBgMELhQWFhIsYikZExQSJAEuDQwKEAz+oxDoDhQRDAAAAAQANgABAAAAAAABAAkAAAABAAAAAAACAAcACQADAAEECQABABIAEAADAAEECQACAA4AIlNBUlN5bWJvbFJlZ3VsYXIAUwBBAFIAUwB5AG0AYgBvAGwAUgBlAGcAdQBsAGEAcgAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAQIDc2FyAAA=) format("truetype");unicode-range:U+20C1}
+
 :root{--bg:#0d1a1d;--card:#142529;--ink:#e6f0f1;--mu:#8fa5a8;--ln:#244047;--ac:#5cb82e;--acink:#05200a;--hd:#0b2a2e;--z:1;--cw:150px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:500 calc(15px*var(--z))/1.45 "Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:140px;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 calc(15px*var(--z))/1.45 "SAR","Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;padding-bottom:140px;overflow-x:hidden}
 header{background:var(--hd);padding:calc(8px + env(safe-area-inset-top)) 10px 8px;display:flex;align-items:center;gap:6px;position:sticky;top:0;z-index:5}
 header img{width:36px;height:36px;border-radius:10px;flex:none}header b{font-size:17px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip{background:var(--card);border:1px solid var(--ln);border-radius:99px;padding:3px 10px;font-size:12px;white-space:nowrap;flex:none}
@@ -177,6 +179,24 @@ body{background:var(--bg)}
 .g{grid-template-columns:repeat(2,minmax(0,1fr))}@media(min-width:700px){.g{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}.ch.ct{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
 .p{min-height:0;padding:10px;gap:4px}.p .av{aspect-ratio:20/9!important;height:auto;font-size:calc(30px*var(--z))!important}.p b{font-size:15px;line-height:1.25}
 .tg.pmx button{padding:13px 6px;border:2px solid transparent}.tg.pmx .on{border-color:var(--ac)}
+
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+header{background:linear-gradient(135deg,var(--hd),color-mix(in srgb,var(--hd) 72%,#000))!important;box-shadow:0 4px 18px rgba(0,0,0,.25)!important}
+header>img{width:50px!important;height:50px!important;border-radius:15px!important;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.hn b{font-size:21px;letter-spacing:.2px;display:block}.hs{display:block;color:#fff!important;opacity:.85;font-size:12.5px;font-weight:500;margin-top:1px}
+.bf{margin:26px 0 8px;padding:22px 16px;border-radius:22px;text-align:center;color:#fff;background:linear-gradient(135deg,var(--hd),color-mix(in srgb,var(--hd) 65%,#000));box-shadow:0 6px 20px rgba(0,0,0,.22)}
+.bf img{width:54px;height:54px;border-radius:16px;display:block;margin:0 auto 8px;box-shadow:0 4px 14px rgba(0,0,0,.35)}.bf b{display:block;font-size:19px}.bf span{display:block;opacity:.85;font-size:13px;margin-top:2px}.bf small{display:block;opacity:.7;margin-top:10px;font-size:12px}
+#sp{background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--hd) 60%,#fff),var(--hd) 70%)!important}
+button,.p,.ctt,.ch span,.tg button,.big{transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .22s,background .22s,opacity .2s,border-color .2s}
+.p,.p.sel{animation:none!important}.g.in .p{animation:up .45s cubic-bezier(.2,.8,.2,1) both!important}
+.g.in .p:nth-child(2){animation-delay:.05s!important}.g.in .p:nth-child(3){animation-delay:.1s!important}.g.in .p:nth-child(4){animation-delay:.15s!important}.g.in .p:nth-child(5){animation-delay:.2s!important}.g.in .p:nth-child(6){animation-delay:.25s!important}
+.ch.ct .ctt{animation:up .45s cubic-bezier(.2,.8,.2,1) both}.ch.ct .ctt:nth-child(2){animation-delay:.05s}.ch.ct .ctt:nth-child(3){animation-delay:.1s}.ch.ct .ctt:nth-child(4){animation-delay:.15s}
+.ctt:active,.p:active,.big:active,.tg button:active{transform:scale(.97)}
+@media(hover:hover){.p:hover,.ctt:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.28)}}
+.sh{animation:sheetUp .36s cubic-bezier(.2,.9,.25,1) both!important}@keyframes sheetUp{from{transform:translateY(70px);opacity:.3}}
+.ov{animation:ovIn .22s both}@keyframes ovIn{from{opacity:0}}
+.bar{transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style><link rel="apple-touch-icon" href="logo-192.png"></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
 <script type="module">
 let FS=null,db=null;
@@ -239,7 +259,7 @@ const saveF=()=>{};
 const cartKey=()=>'qo_cart_'+uid;
 const saveCart=()=>{Object.keys(cart).length?ls(cartKey(),JSON.stringify({t:Date.now(),c:cart})):ls(cartKey(),null)};
 function restoreCart(){try{const d=JSON.parse(ls(cartKey())||'null');if(!d||Date.now()-d.t>6*3600*1000)return;Object.keys(d.c||{}).forEach(id=>{const it=allItems().find(x=>x.id==id);if(!it||(it.s!==''&&it.s!=null&&it.s<=0))return;let n=+d.c[id].q||0;if(it.s!==''&&it.s!=null&&n>it.s)n=it.s;if(n>0)cart[id]={id:it.id,n:it.n,e:it.e,p:it.p,q:n,...(it.cb?{cb:it.cb,o:it.o}:{})}})}catch(e){}}
-const m=n=>(C.cur||'৳')+Math.round(n*100)/100,sub=()=>Object.values(cart).reduce((a,x)=>a+x.p*x.q,0),cnt=()=>Object.values(cart).reduce((a,x)=>a+x.q,0);
+const m=n=>(C.sa?'\u20C1 ':(C.cur||'৳'))+(C.sa?(Math.round(n*100)/100).toFixed(2):Math.round(n*100)/100),sub=()=>Object.values(cart).reduce((a,x)=>a+x.p*x.q,0),cnt=()=>Object.values(cart).reduce((a,x)=>a+x.q,0);
 const hue=id=>{let h=0;String(id).split('').forEach(c=>h=(h*31+c.charCodeAt(0))%360);return h};
 const greet=()=>{const h=new Date().getHours(),g=t('g');return h<5?g[0]:h<12?g[1]:h<16?g[2]:h<19?g[3]:g[4]};
 function applySz(){const r=document.documentElement.style;r.setProperty('--z',SZ[si].z);r.setProperty('--cw',SZ[si].cw+'px');ls('qo_sz',si)}
@@ -251,7 +271,8 @@ async function init(){
  try{sd=JSON.parse(ls(SK)||'null')}catch(e){sd=null}
  /* পুরনো সেভ করা অর্ডার (৩ দিনের বেশি) পরিষ্কার */
  try{Object.keys(localStorage).filter(k=>k.indexOf('qo_o_')===0).forEach(k=>{try{const v=JSON.parse(localStorage.getItem(k));if(!v||!v.d||Date.now()-(v.d.t||0)>3*864e5)localStorage.removeItem(k)}catch(e){localStorage.removeItem(k)}})}catch(e){}
- const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(ls('qo_lang')===null&&s.lang){bi=false;lang=s.lang==='en'?'en':'bn'}if(s.sa){lang='en';bi=true}if(C.color)document.documentElement.style.setProperty('--hd',C.color);document.documentElement.style.setProperty('--is',({s:'66px',m:'96px',l:'124px',x:'999px'})[Q.is||'m']||'96px')};
+ const brand=c=>{if(!c||!/^#[0-9a-f]{6}$/i.test(c))return;C.color=c;const r=document.documentElement.style,n=parseInt(c.slice(1),16),R=n>>16,G=n>>8&255,B=n&255,mx=v=>Math.round(v+(255-v)*.42),h=v=>v.toString(16).padStart(2,'0'),ac='#'+h(mx(R))+h(mx(G))+h(mx(B)),L=(.299*mx(R)+.587*mx(G)+.114*mx(B))/255;r.setProperty('--ac',ac);r.setProperty('--blue',ac);r.setProperty('--acink',L>.6?'#10201f':'#ffffff');r.setProperty('--qi',L>.6?'#10201f':'#ffffff')};
+const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(ls('qo_lang')===null&&s.lang){bi=false;lang=s.lang==='en'?'en':'bn'}if(s.sa){lang='en';bi=true}brand(Q.bc);if(C.color)document.documentElement.style.setProperty('--hd',C.color);document.documentElement.style.setProperty('--is',({s:'66px',m:'96px',l:'124px',x:'999px'})[Q.is||'m']||'96px')};
  const fetchShop=async()=>{if(navigator.onLine===false)return null;try{const s=await Promise.race([shopGet(),new Promise((_,j)=>setTimeout(()=>j('to'),10000))]);if(s){ls(SK,JSON.stringify(s));return s}ls(SK,null);return 'none'}catch(e){return null}};
  /* অর্ডার ট্র্যাকিং পাতা: মেনুর জন্য অপেক্ষা না করে সাথে সাথে দেখানো হয় */
  if(oid){apply(sd||{});if(HM)mkManifest();hdr();trackStart();
@@ -268,7 +289,7 @@ async function init(){
  if(!s){$('#app').innerHTML='<div class="w" style="text-align:center;padding-top:30px"><p>'+t('off')+'</p><button class="big" onclick="location.reload()">'+t('retry')+'</button></div>';return}
  apply(s);show()}
 const wt=()=>HM?{b:Q.hw||Q.welcome,e:Q.hwe,tb:Q.ht||Q.tag,te:Q.hte}:{b:Q.welcome,e:Q.we,tb:Q.tag,te:Q.te};
-function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(lang==='en'?(wt().e||t('welcome')):(wt().b||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(lang==='en'?(wt().te||t('tag')):(wt().tb||t('tag')))}</p>`;document.body.appendChild(d);
+function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(C.sa?([Q.welcome,Q.we].filter(Boolean).join(' / ')||t('welcome')):lang==='en'?(wt().e||t('welcome')):(wt().b||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(C.sa?([Q.tag,Q.te].filter(Boolean).join(' / ')||t('tag')):lang==='en'?(wt().te||t('tag')):(wt().tb||t('tag')))}</p>`;document.body.appendChild(d);
  const x=()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)};d.onclick=x;setTimeout(x,2200)}
 const SUN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 const p2=n=>String(n).padStart(2,'0');
@@ -330,7 +351,7 @@ function accOpen(){if(!ACC){lgOpen();return}if($('#lgsb'))return;const L=LG(),cu
  fbWait(8000).then(async fb=>{if(!fb)return;for(const x of h.slice(0,8)){try{const s=await fb.getDoc(fb.doc(db,'orders',x.id));if(s.exists()){const e=b.querySelector('.lgo[data-id="'+x.id+'"] .st');if(e){const c=stCls(s.data().status,false);e.className='st '+c[0];e.textContent=c[1]}}}catch(e){}}})}
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('#acc');if(a){e.preventDefault();e.stopPropagation();ACC?accOpen():lgOpen()}},true);
 function instToast(){try{if(oid||$('#lgx')||sessionStorage.getItem('qo_it')||matchMedia('(display-mode:standalone)').matches||navigator.standalone||!(C&&C.name))return;sessionStorage.setItem('qo_it','1');const en=lang==='en',d=document.createElement('div');d.className='it-t';d.innerHTML=`<b>📲 ${en?'Add to Home Screen':'হোম স্ক্রিনে যোগ করুন'}</b><span>${esc(C.name)} ${en?'will open like an app: menu, orders and live order status':'অ্যাপের মতো খুলবে: মেনু, অর্ডার ও অর্ডারের অবস্থা'}</span><small>${en?'Browser ⋮ menu → Add to Home screen':'ব্রাউজারের ⋮ মেনু → Add to Home screen'}</small>`;document.body.appendChild(d);setTimeout(()=>d.classList.add('x'),2600);setTimeout(()=>d.remove(),3300)}catch(e){}}
-function hdr(){const cur=bi?'bi':lang;$('#app').innerHTML=`${authStrip()}<header><img src="logo-192.png" alt=""><div class="hn"><b>${esc(C.name||T2('মেনু','Menu'))}</b>${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}</div>
+function hdr(){const cur=bi?'bi':lang;$('#app').innerHTML=`${authStrip()}<header><img src="logo-192.png" alt=""><div class="hn"><b>${esc(C.name||T2('মেনু','Menu'))}</b>${(()=>{const g=C.sa?[Q.tag,Q.te].filter(Boolean).join(' / '):(lang==='en'?(Q.te||Q.tag):(Q.tag||Q.te));return g?`<small class="hs">${esc(g)}</small>`:''})()}${tbl?`<span class="chip">${t('table')}${esc(tbl)}</span>`:''}</div>
  <div class="hb">${C.sa?'':[['bn','বাং'],['en','EN']].map(x=>`<button data-lang="${x[0]}" class="${cur===x[0]?'on':''}">${x[1]}</button>`).join('')}</div>${acctBtn()}</header>
  <div id="ib"><div class="zp"><button data-sz="-1" aria-label="${t('sizeS')}" ${si<=0?'disabled':''}>A−</button><button data-sz="1" aria-label="${t('sizeL')}" ${si>=SZ.length-1?'disabled':''}>A+</button></div><button class="sun" id="th" aria-label="theme">${SUN}</button><div class="clk"><b id="ck"></b><span id="cdt"></span></div></div><div class="w" id="bd"></div>`;clk();try{lgCheck()}catch(e){}setTimeout(instToast,1600)}
 const qrBanner=()=>`<div class="qrb"><span>📲 ${T2('QR অর্ডার','QR Orders')}</span><span class="qs">${tbl?esc(t('table')+tbl):HM?T2('পিকআপ / ডেলিভারি','Pickup / Delivery'):Q.open===false?T2('বন্ধ','Closed'):T2('অর্ডার দিন','Order here')}</span></div>`;
@@ -345,8 +366,8 @@ function catUI(cs,cL){
 function list(){
  const cs=[...new Set(items.map(i=>i.c).filter(Boolean))],CB={Drinks:'পানীয়',Food:'খাবার'},cL=c=>lang==='en'?c:(CB[c]||c);
  let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
- bestHTML()+homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}">${catUI(cs,cL)}<div class="g" id="gr"></div>`;
- $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();bar();showInst()}
+ bestHTML()+homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}">${catUI(cs,cL)}<div class="g" id="gr"></div><div class="bf"><img src="logo-192.png" alt=""><b>${esc(C.name||'')}</b><span>${esc(C.sa?[Q.tag,Q.te].filter(Boolean).join(' / '):(lang==='en'?(Q.te||Q.tag):(Q.tag||Q.te))||'')}</span><small>${C.sa?'شكراً لزيارتكم · Thank you for visiting':T2('আবার আসবেন','Come again')} ☕</small></div>`;
+ $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();{const g=$('#gr');if(g){g.classList.add('in');setTimeout(()=>g.classList.remove('in'),900)}}bar();showInst()}
 const stand=matchMedia('(display-mode: standalone)').matches||navigator.standalone,isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();DI=e;showInst()});
 function showInst(){const w=$('#instw');if(!w||stand||!(DI||isIos))return;w.innerHTML=`<button class="big" id="inst" style="margin:0 0 10px">${t('inst')}</button>`}
@@ -425,7 +446,7 @@ async function send(){
  try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<8000){alert(t('wait'));return}}catch(e){}
  const sb=$('#sd');sb.disabled=true;
  const id=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
- const data=JSON.parse(JSON.stringify({uid,shop:C.name||'',...acctData(),pm:pmCur(),status:'new',t:Date.now(),name:$('#nm').value.trim(),note:$('#nt').value.trim(),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q,...(x.cb?{cb:x.cb.map(String),o:x.o}:{})})),...o}));
+ const data=JSON.parse(JSON.stringify({uid,shop:C.name||'',...acctData(),status:'new',t:Date.now(),name:$('#nm').value.trim(),note:((pmCur()?'[PM:'+pmCur()+'] ':'')+$('#nt').value.trim()).slice(0,150),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q,...(x.cb?{cb:x.cb.map(String),o:x.o}:{})})),...o}));
  /* আগে ফোনে সেভ: নেট/ফায়ারবেস যা-ই হোক অর্ডার হারাবে না, ট্র্যাকিং পাতা নিজে পাঠিয়ে দেবে */
  ls('qo_o_'+id,JSON.stringify({d:data,ack:false}));histAdd(id,data);
  let ok=false,perr=null;sb.textContent=T2('পাঠানো হচ্ছে…','Sending…');
@@ -461,7 +482,7 @@ function paint0(){const o=lastO;if(!o)return;if(document.activeElement&&document
  const v=$('#vv');if(v){v.muted=true;const p=v.play();if(p&&p.catch)p.catch(()=>{})}
  if(!can&&vs<2)lock();else unlock();
  const ck='cf'+oid+(home?'_'+vs:'');if(!sessionStorage.getItem(ck)&&!can){sessionStorage.setItem(ck,1);pop();if(vs==1)readyAlert()}}
-function readyAlert(){try{navigator.vibrate&&navigator.vibrate([500,150,500,150,900])}catch(e){}try{const c=new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(d=>{const o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start(c.currentTime+d);o.stop(c.currentTime+d+.25)})}catch(e){}try{document.title='✅ '+(lang==='en'?'Order ready!':'অর্ডার প্রস্তুত!')}catch(e){}try{if('Notification' in window&&Notification.permission==='granted')new Notification((C.name||'')+' ✅',{body:(lang==='en'?'Your order is ready':'আপনার অর্ডার প্রস্তুত'),icon:'logo-192.png'})}catch(e){}}
+function readyAlert(){try{navigator.vibrate&&navigator.vibrate([500,150,500,150,900])}catch(e){}try{const c=new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(d=>{const o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start(c.currentTime+d);o.stop(c.currentTime+d+.25)})}catch(e){}try{document.title='✅ '+(lang==='en'?'Order ready!':'অর্ডার প্রস্তুত!')}catch(e){}try{if('Notification' in window&&Notification.permission==='granted'){const ttl=(C.name||'')+' ✅',o={body:C.sa?'طلبك جاهز / Your order is ready':(lang==='en'?'Your order is ready':'আপনার অর্ডার প্রস্তুত'),icon:'logo-192.png',badge:'logo-192.png',vibrate:[500,150,500,150,900],tag:'ord-'+oid,renotify:true,requireInteraction:true};if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(r=>r.showNotification(ttl,o)).catch(()=>{try{new Notification(ttl,o)}catch(e){}});else new Notification(ttl,o)}}catch(e){}}
 const notifBtn=(can,vs)=>(!can&&vs==0&&'Notification' in window&&Notification.permission==='default')?`<button class="big" id="nfy" style="background:var(--ln);color:var(--ink)">🔔 ${T2('প্রস্তুত হলে জানান','Notify me when ready')}</button>`:'';
 let wl=null;async function lock(){try{if(!wl&&navigator.wakeLock){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null})}}catch(e){wl=null}}
 function unlock(){try{if(wl)wl.release()}catch(e){}wl=null}
