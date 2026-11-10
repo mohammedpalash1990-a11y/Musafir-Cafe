@@ -184,8 +184,8 @@ html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
 header{background:linear-gradient(135deg,var(--hd),color-mix(in srgb,var(--hd) 72%,#000))!important;box-shadow:0 4px 18px rgba(0,0,0,.25)!important}
 header>img{width:50px!important;height:50px!important;border-radius:15px!important;box-shadow:0 3px 10px rgba(0,0,0,.35)}
 .hn b{font-size:21px;letter-spacing:.2px;display:block}.hs{display:block;color:#fff!important;opacity:.85;font-size:12.5px;font-weight:500;margin-top:1px}
-.bf{margin:26px 0 8px;padding:22px 16px;border-radius:22px;text-align:center;color:#fff;background:linear-gradient(135deg,var(--hd),color-mix(in srgb,var(--hd) 65%,#000));box-shadow:0 6px 20px rgba(0,0,0,.22)}
-.bf img{width:54px;height:54px;border-radius:16px;display:block;margin:0 auto 8px;box-shadow:0 4px 14px rgba(0,0,0,.35)}.bf b{display:block;font-size:19px}.bf span{display:block;opacity:.85;font-size:13px;margin-top:2px}.bf small{display:block;opacity:.7;margin-top:10px;font-size:12px}
+.bf{margin:18px 0 4px;padding:8px 12px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;color:#fff;font-size:11.5px;opacity:.85;background:linear-gradient(135deg,var(--hd),color-mix(in srgb,var(--hd) 65%,#000));box-shadow:0 6px 20px rgba(0,0,0,.22)}
+.bf img{width:22px;height:22px;border-radius:7px}.bf span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #sp{background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--hd) 60%,#fff),var(--hd) 70%)!important}
 button,.p,.ctt,.ch span,.tg button,.big{transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .22s,background .22s,opacity .2s,border-color .2s}
 .p,.p.sel{animation:none!important}.g.in .p{animation:up .45s cubic-bezier(.2,.8,.2,1) both!important}
@@ -197,6 +197,13 @@ button,.p,.ctt,.ch span,.tg button,.big{transition:transform .18s cubic-bezier(.
 .ov{animation:ovIn .22s both}@keyframes ovIn{from{opacity:0}}
 .bar{transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+input,select,textarea{font-size:16px!important}
+html,body{overscroll-behavior-y:none}
+.sh{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))!important;max-height:92dvh;overflow:auto;-webkit-overflow-scrolling:touch}
+button{min-height:44px;touch-action:manipulation}
+.tg button{min-height:48px}
+#sp h1,#sp p{color:#fff!important}
 </style><link rel="apple-touch-icon" href="logo-192.png"></head><body><div id="app"></div><canvas id="cfx"></canvas><div id="bar"></div><div id="ovl"></div>
 <script type="module">
 let FS=null,db=null;
@@ -246,10 +253,10 @@ const nmOf=i=>bi?(i.n+((i.e&&i.e!==i.n)?'\n'+i.e:'')):lang==='en'?(i.e||i.n):i.n
 const T2=(b,e)=>lang==='en'?((C&&C.sa&&AR2[e])?AR2[e]+' / '+e:e):b;
 let tAll=false,C={},Q={},items=[],cart={},cat='',q='',lastO=null,F={tn:'',nm:'',nt:'',pm:''},R={s:0,c:''},dirty=false;
 /* বাড়ি থেকে অর্ডার (পিকআপ/ডেলিভারি): লিংকে &h=1 থাকলে চালু */
-const HM=P.get('h')==='1'&&!tbl;let H={ty:'',ph:'',ad:'',loc:null},DI=null;
+let HM=P.get('h')==='1'&&!tbl;let H={ty:'',ph:'',ad:'',loc:null},DI=null;
 try{const x=JSON.parse(ls('qo_h')||'{}');H.ty=x.ty||'';H.ph=x.ph||'';H.ad=x.ad||''}catch(e){}
 const saveH=()=>ls('qo_h',JSON.stringify({ty:H.ty,ph:H.ph,ad:H.ad}));
-const opts=()=>[Q.pk!==false?'pickup':null,Q.dl?'delivery':null].filter(Boolean);
+const opts=()=>[(C.sa&&Q.tb)?'dine':null,Q.pk!==false?'pickup':null,Q.dl?'delivery':null].filter(Boolean);
 const hasLoc=()=>Q.lat!==''&&Q.lat!=null&&Q.lng!==''&&Q.lng!=null&&isFinite(+Q.lat)&&isFinite(+Q.lng);
 const dist=(a,b,c,d)=>{const r=x=>x*Math.PI/180,u=r(c-a),v=r(d-b),x=Math.sin(u/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(v/2)**2;return 12742*Math.asin(Math.sqrt(x))};
 function zoneInfo(){const r=+Q.rad||0;if(!(r>0&&hasLoc()))return{need:false,out:false,msg:''};if(!H.loc)return{need:true,out:false,msg:t('needlc')};const d=dist(+Q.lat,+Q.lng,H.loc.lat,H.loc.lng);H.loc.d=Math.round(d*10)/10;return d<=r?{need:true,out:false,msg:t('inz')}:{need:true,out:true,msg:t('outz')+' ('+r+t('km')+')'}}
@@ -272,7 +279,7 @@ async function init(){
  /* পুরনো সেভ করা অর্ডার (৩ দিনের বেশি) পরিষ্কার */
  try{Object.keys(localStorage).filter(k=>k.indexOf('qo_o_')===0).forEach(k=>{try{const v=JSON.parse(localStorage.getItem(k));if(!v||!v.d||Date.now()-(v.d.t||0)>3*864e5)localStorage.removeItem(k)}catch(e){localStorage.removeItem(k)}})}catch(e){}
  const brand=c=>{if(!c||!/^#[0-9a-f]{6}$/i.test(c))return;C.color=c;const r=document.documentElement.style,n=parseInt(c.slice(1),16),R=n>>16,G=n>>8&255,B=n&255,mx=v=>Math.round(v+(255-v)*.42),h=v=>v.toString(16).padStart(2,'0'),ac='#'+h(mx(R))+h(mx(G))+h(mx(B)),L=(.299*mx(R)+.587*mx(G)+.114*mx(B))/255;r.setProperty('--ac',ac);r.setProperty('--blue',ac);r.setProperty('--acink',L>.6?'#10201f':'#ffffff');r.setProperty('--qi',L>.6?'#10201f':'#ffffff')};
-const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(ls('qo_lang')===null&&s.lang){bi=false;lang=s.lang==='en'?'en':'bn'}if(s.sa){lang='en';bi=true}brand(Q.bc);if(C.color)document.documentElement.style.setProperty('--hd',C.color);document.documentElement.style.setProperty('--is',({s:'66px',m:'96px',l:'124px',x:'999px'})[Q.is||'m']||'96px')};
+const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মেনু';if(ls('qo_lang')===null&&s.lang){bi=false;lang=s.lang==='en'?'en':'bn'}if(s.sa){lang='en';bi=true;if(!tbl)HM=true}brand(Q.bc);if(C.color)document.documentElement.style.setProperty('--hd',C.color);document.documentElement.style.setProperty('--is',({s:'66px',m:'96px',l:'124px',x:'999px'})[Q.is||'m']||'96px')};
  const fetchShop=async()=>{if(navigator.onLine===false)return null;try{const s=await Promise.race([shopGet(),new Promise((_,j)=>setTimeout(()=>j('to'),10000))]);if(s){ls(SK,JSON.stringify(s));return s}ls(SK,null);return 'none'}catch(e){return null}};
  /* অর্ডার ট্র্যাকিং পাতা: মেনুর জন্য অপেক্ষা না করে সাথে সাথে দেখানো হয় */
  if(oid){apply(sd||{});if(HM)mkManifest();hdr();trackStart();
@@ -289,7 +296,7 @@ const apply=s=>{C=s;Q=C.qs||{};items=C.items||[];document.title=C.name||'মে�
  if(!s){$('#app').innerHTML='<div class="w" style="text-align:center;padding-top:30px"><p>'+t('off')+'</p><button class="big" onclick="location.reload()">'+t('retry')+'</button></div>';return}
  apply(s);show()}
 const wt=()=>HM?{b:Q.hw||Q.welcome,e:Q.hwe,tb:Q.ht||Q.tag,te:Q.hte}:{b:Q.welcome,e:Q.we,tb:Q.tag,te:Q.te};
-function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(C.sa?([Q.welcome,Q.we].filter(Boolean).join(' / ')||t('welcome')):lang==='en'?(wt().e||t('welcome')):(wt().b||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:6px">${esc(C.sa?([Q.tag,Q.te].filter(Boolean).join(' / ')||t('tag')):lang==='en'?(wt().te||t('tag')):(wt().tb||t('tag')))}</p>`;document.body.appendChild(d);
+function splash(){sessionStorage.setItem('sp',1);const d=document.createElement('div');d.id='sp';d.innerHTML=`<img src="logo-192.png"><h1>${greet()}!</h1><p>${esc(C.sa?([Q.welcome,Q.we].filter(Boolean).join(' / ')||t('welcome')):lang==='en'?(wt().e||t('welcome')):(wt().b||t('welcome')))} · ${esc(C.name||'')}</p><p style="margin-top:14px;font-size:.95em;opacity:.9">${C.sa?'شكراً لزيارتكم · Thank you for visiting':T2('আমাদের এখানে আসার জন্য ধন্যবাদ','Thank you for visiting')} ☕</p><p style="margin-top:6px">${esc(C.sa?([Q.tag,Q.te].filter(Boolean).join(' / ')||t('tag')):lang==='en'?(wt().te||t('tag')):(wt().tb||t('tag')))}</p>`;document.body.appendChild(d);
  const x=()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)};d.onclick=x;setTimeout(x,2200)}
 const SUN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 const p2=n=>String(n).padStart(2,'0');
@@ -366,7 +373,7 @@ function catUI(cs,cL){
 function list(){
  const cs=[...new Set(items.map(i=>i.c).filter(Boolean))],CB={Drinks:'পানীয়',Food:'খাবার'},cL=c=>lang==='en'?c:(CB[c]||c);
  let h=((navigator.onLine===false)?`<div class="cd" style="margin-bottom:10px">${t('offb')}</div>`:'')+(Q.open===false?`<div class="cd" style="background:#5a2a22;margin-bottom:10px">${t('closed')}</div>`:'')+(Q.note?`<div class="cd" style="margin-bottom:10px">📢 ${esc(Q.note)}</div>`:'')+
- bestHTML()+homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}">${catUI(cs,cL)}<div class="g" id="gr"></div><div class="bf"><img src="logo-192.png" alt=""><b>${esc(C.name||'')}</b><span>${esc(C.sa?[Q.tag,Q.te].filter(Boolean).join(' / '):(lang==='en'?(Q.te||Q.tag):(Q.tag||Q.te))||'')}</span><small>${C.sa?'شكراً لزيارتكم · Thank you for visiting':T2('আবার আসবেন','Come again')} ☕</small></div>`;
+ bestHTML()+homeBar()+`<input id="sq" placeholder="${t('search')}" value="${esc(q)}">${catUI(cs,cL)}<div class="g" id="gr"></div><div class="bf"><img src="logo-192.png" alt=""><span>${esc(C.name||'')}${(()=>{const g=C.sa?[Q.tag,Q.te].filter(Boolean).join(' / '):(lang==='en'?(Q.te||Q.tag):(Q.tag||Q.te));return g?' · '+esc(g):''})()}</span></div>`;
  $('#bd').innerHTML=h;$('#sq').oninput=e=>{q=e.target.value;grid()};grid();{const g=$('#gr');if(g){g.classList.add('in');setTimeout(()=>g.classList.remove('in'),900)}}bar();showInst()}
 const stand=matchMedia('(display-mode: standalone)').matches||navigator.standalone,isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();DI=e;showInst()});
@@ -417,7 +424,9 @@ function getLoc(){const b=$('#lc');if(!navigator.geolocation){alert(t('nogeo'));
  navigator.geolocation.getCurrentPosition(p=>{H.loc={lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),acc:Math.round(p.coords.accuracy)};zoneInfo();sheet()},()=>{alert(t('locfail'));sheet()},{enableHighAccuracy:true,timeout:15000,maximumAge:0})}
 function collect(){const tn=tbl||($('#tn')?$('#tn').value.trim():''),o={type:'dine',table:tn||'-',fee:0};
  if(HM){if(!opts().length){alert(t('nohome'));return null}o.type=H.ty;o.table='-';
-  if(!/^\+?[0-9][0-9\s-]{6,15}$/.test((H.ph||'').trim())){alert(t('needPh'));return null}o.phone=H.ph.trim();
+  if(H.ty==='dine'){o.table=($('#tn')?$('#tn').value.trim():'')||'-';if((H.ph||'').trim()&&/^\+?[0-9][0-9\s-]{6,15}$/.test(H.ph.trim()))o.phone=H.ph.trim()}
+  else if(C.sa&&H.ty==='pickup'&&!(H.ph||'').trim()){}
+  else{if(!/^\+?[0-9][0-9\s-]{6,15}$/.test((H.ph||'').trim())){alert(t('needPh'));return null}o.phone=H.ph.trim()}
   if(H.ty==='delivery'){if(!(H.ad||'').trim()){alert(t('needAd'));return null}const z=zoneInfo();if(z.need&&!H.loc){alert(t('needlc'));return null}if(z.out){alert(z.msg);return null}
    if(+Q.min>0&&sub()<+Q.min){alert(t('minmsg')(m(+Q.min)));return null}o.addr=H.ad.trim();if(H.loc)o.loc=H.loc;o.fee=feeNow()}}
  else if(Q.needTable!==false&&!tn&&!C.sa){alert(t('needT'));return null}
@@ -433,12 +442,12 @@ const pmHTML=()=>{const l=pmList();if(!l.length)return '';const cur=pmCur();retu
 function sheet(){if(!cnt()){closeSh();return}const sv=savN();const need=!HM&&Q.needTable!==false&&!tbl&&!C.sa,closed=Q.open===false||(HM&&!opts().length);
  if(HM&&opts().length&&opts().indexOf(H.ty)<0)H.ty=opts()[0];
  const dlv=HM&&H.ty==='delivery',fe=feeNow(),z=dlv?zoneInfo():null;
- const homeHTML=HM?`<div class="tg">${opts().map(o=>`<button data-ty="${o}" class="${H.ty===o?'on':''}">${t(o==='pickup'?'pk':'dl')}</button>`).join('')}</div><label class="mu">${t('ph')}</label><input id="ph" type="tel" inputmode="tel" maxlength="16" placeholder="01XXXXXXXXX" value="${esc(H.ph)}">
+ const homeHTML=HM?`<div class="tg">${opts().map(o=>`<button data-ty="${o}" class="${H.ty===o?'on':''}">${o==='dine'?T2('🍽 ডাইন-ইন','🍽 Dine-in'):t(o==='pickup'?'pk':'dl')}</button>`).join('')}</div>${H.ty==='dine'?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="${t('tph')}" value="${esc(F.tn)}">`:`<label class="mu">${t('ph')}${C.sa&&H.ty==='pickup'?' · '+T2('ঐচ্ছিক','optional'):''}</label><input id="ph" type="tel" inputmode="tel" maxlength="16" placeholder="05XXXXXXXX" value="${esc(H.ph)}">`}
   ${dlv?`<label class="mu">${t('ad')}</label><input id="ad" maxlength="200" value="${esc(H.ad)}"><button class="big" id="lc" style="background:var(--ln);color:var(--ink)">${t('mylc')}</button><div class="mu" style="margin:6px 0">${H.loc?t('lcok')+(H.loc.d!=null?' · '+H.loc.d+t('km'):'')+'<br>':''}${z.msg?esc(z.msg):''}</div>${+Q.min>0&&sub()<+Q.min?`<div style="color:#ffb4a8;margin:4px 0">${t('minmsg')(m(+Q.min))}</div>`:''}`:(Q.addr?`<div class="mu" style="margin:8px 0">${t('shopat')}: ${esc(Q.addr)}</div>`:'')}`:'';
  $('#ovl').innerHTML=`<div class="ov" id="sh"><div class="sh"><b style="font-size:18px">${t('yours')}</b>${Object.values(cart).map(x=>`<div class="row"><span>${esc(nmOf(x))}<br>${x.cb&&x.o>x.p?`<s class="mu">${m(x.o)}</s> <b class="of">${m(x.p)}</b> <span class="sv">${T2('সাশ্রয়','Save')} ${m(x.o-x.p)}</span>`:`<span class="mu">${m(x.p)}</span>`}</span><button class="qb" data-a="-1" data-i="${x.id}">−</button><b>${x.q}</b><button class="qb" data-a="1" data-i="${x.id}">+</button></div>`).join('')}
  ${sv>0?`<div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span>${T2('আসল দাম','Original price')}</span><s class="mu">${m(sub()+sv)}</s></div><div class="row"><span class="of2"><b>🎉 ${T2('অফার ছাড়','Offer discount')}</b></span><b class="of2">−${m(sv)}</b></div>`:''}<div class="row" style="border-top:1px solid var(--ln);margin-top:6px"><span><b>${t('total')}</b></span><b style="font-size:19px">${m(sub())}</b></div>
  ${dlv?`<div class="row"><span>${t('fee')}</span><b>${fe?m(fe):t('free')}</b></div><div class="row"><span><b>${t('gtot')}</b></span><b style="font-size:19px">${m(sub()+fe)}</b></div>`:''}
- ${homeHTML}${need?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="${t('tph')}" value="${esc(F.tn)}">`:''}${pmHTML()}<label class="mu">${t('yname')}</label><input id="nm" maxlength="60" autocomplete="off" name="qo-nick" value="${esc(F.nm)}"><label class="mu">${t('note')}</label><input id="nt" maxlength="150" autocomplete="off" value="${esc(F.nt)}">
+ ${homeHTML}${(need&&!HM)?`<label class="mu">${t('tno')}</label><input id="tn" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="${t('tph')}" value="${esc(F.tn)}">`:''}${C.sa?'':pmHTML()}<label class="mu">${t('yname')}</label><input id="nm" maxlength="60" autocomplete="off" name="qo-nick" value="${esc(F.nm)}"><label class="mu">${t('note')}</label><input id="nt" maxlength="150" autocomplete="off" value="${esc(F.nt)}">
  <button class="big" id="sd" ${closed?'disabled style="opacity:.5"':''}>${closed?t('closedBtn'):t('confirm')}</button>${Q.wa?`<button class="big" id="wab" style="background:#25d366;color:#05301a">${t('wa')}</button>`:''}<button class="big" id="cl" style="background:var(--ln);color:var(--ink)">${t('back')}</button></div></div>`;
  $('#cl').onclick=closeSh;$('#sd').onclick=send;$('#sh').onclick=e=>{if(e.target.id=='sh')closeSh()};bar()}
 async function send(){
@@ -446,7 +455,7 @@ async function send(){
  try{if(Date.now()-(+localStorage.getItem('qo_t')||0)<8000){alert(t('wait'));return}}catch(e){}
  const sb=$('#sd');sb.disabled=true;
  const id=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
- const data=JSON.parse(JSON.stringify({uid,shop:C.name||'',...acctData(),status:'new',t:Date.now(),name:$('#nm').value.trim(),note:((pmCur()?'[PM:'+pmCur()+'] ':'')+$('#nt').value.trim()).slice(0,150),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q,...(x.cb?{cb:x.cb.map(String),o:x.o}:{})})),...o}));
+ const data=JSON.parse(JSON.stringify({uid,shop:C.name||'',...acctData(),status:'new',t:Date.now(),name:$('#nm').value.trim(),note:((!C.sa&&pmCur()?'[PM:'+pmCur()+'] ':'')+$('#nt').value.trim()).slice(0,150),items:Object.values(cart).map(x=>({id:x.id,n:x.n,p:x.p,q:x.q,...(x.cb?{cb:x.cb.map(String),o:x.o}:{})})),...o}));
  /* আগে ফোনে সেভ: নেট/ফায়ারবেস যা-ই হোক অর্ডার হারাবে না, ট্র্যাকিং পাতা নিজে পাঠিয়ে দেবে */
  ls('qo_o_'+id,JSON.stringify({d:data,ack:false}));histAdd(id,data);
  let ok=false,perr=null;sb.textContent=T2('পাঠানো হচ্ছে…','Sending…');

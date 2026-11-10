@@ -1,4 +1,4 @@
-var V='musafir-pos-v38';
+var V='musafir-pos-v39';
 var CORE=['./','./index.html','./order.html','./manifest.json','./menu-manifest.json','./logo-192.png','./logo-512.png','./favicon-32.png'];
 var VID=[];
 var FB='https://www.gstatic.com/firebasejs/10.12.2/';
