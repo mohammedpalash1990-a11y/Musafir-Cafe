@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate"><meta name="robots" content="noindex,nofollow">
+<title>Musafir POS · Admin</title><link rel="icon" href="favicon-32.png">
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#16202a;--mute:#6b7785;--line:#e3e8ee;--ac:#14454b;--ok:#157f3b;--warn:#b54708;--bad:#b42318}
+@media(prefers-color-scheme:dark){:root{--bg:#10161b;--card:#18212a;--ink:#e8eef3;--mute:#93a1ae;--line:#26323d;--ac:#6bc4cf}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,"Segoe UI",sans-serif}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header b{font-size:17px}header .sp{flex:1}.w{max-width:980px;margin:0 auto;padding:14px 16px 60px}
+button,input,select,textarea{font:inherit;color:inherit}button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600}
+button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}button.bad{color:var(--bad)}input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:6px 0 14px}.st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}.st b{display:block;font-size:24px}.st span{color:var(--mute);font-size:12px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tools input{flex:2;min-width:160px}.tools select{flex:1;min-width:130px;width:auto}
+.row{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}.top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.top b{font-size:16px}
+.badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;background:#e6f4ea;color:var(--ok)}.badge.w{background:#fff4e5;color:var(--warn)}.badge.b{background:#fde8e8;color:var(--bad)}.badge.g{background:#eef1f4;color:var(--mute)}
+.mu{color:var(--mute);font-size:13px;word-break:break-all}.act{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.act button{padding:6px 10px;font-size:13px}
+.pay{margin-top:8px;font-size:12.5px;color:var(--mute)}.hide{display:none}.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center;margin-top:30px}
+</style></head><body>
+<header><b>Musafir POS · Admin</b><span class="sp"></span><span class="mu" id="who"></span><button id="bt" class="pri">Sign in with Google</button></header>
+<div class="w" id="main"><div class="box" id="msg">Sign in with the admin Google account.</div></div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,getDocs,doc,setDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const ADMIN='mohammedpalash1990@gmail.com';
+const app=initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",storageBucket:"index-9d688.firebasestorage.app",messagingSenderId:"385223961831",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});
+const auth=getAuth(app),db=getFirestore(app),$=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let rows=[],user=null;
+const DAY=864e5,fmt=t=>t?new Date(t).toISOString().slice(0,10):'-';
+const addM=(t,m)=>{const d=new Date(Math.max(+t||0,Date.now()));d.setMonth(d.getMonth()+m);return d.getTime()};
+function stOf(r){if(!r.sub)return{k:'legacy',l:'No subscription set (legacy)',c:'g'};const s=r.sub;if(s.st=='suspended')return{k:'suspended',l:'Suspended',c:'b'};const d=Math.ceil((+s.exp-Date.now())/DAY);
+ if(d<0)return{k:'expired',l:'Expired '+(-d)+'d ago',c:'b'};if(d<=30)return{k:'expiring',l:(s.st=='trial'?'Trial ':'')+d+' days left',c:'w'};return{k:s.st=='trial'?'trial':'active',l:(s.st=='trial'?'Trial · ':'Active · ')+d+' days',c:s.st=='trial'?'w':''}}
+async function load(){$('#main').innerHTML='<div class="box">Loading…</div>';
+ try{const [a,b]=await Promise.all([getDocs(collection(db,'subs')),getDocs(collection(db,'shops'))]);const m={};
+  b.docs.forEach(d=>{const x=d.data();m[d.id]={id:d.id,name:x.name||'',cur:x.cur||''}});
+  a.docs.forEach(d=>{m[d.id]=Object.assign(m[d.id]||{id:d.id,name:''},{sub:d.data()})});
+  rows=Object.values(m);draw()}catch(e){$('#main').innerHTML='<div class="box">Could not load: '+esc(e.code||e.message)+'<br><span class="mu">Check that the admin Firestore rules are added.</span></div>'}}
+function draw(){const q=($('#q')?$('#q').value:'').toLowerCase(),f=$('#f')?$('#f').value:'all';
+ const all=rows.map(r=>({r,s:stOf(r)})),cnt=k=>all.filter(x=>x.s.k==k).length;
+ let h='<div class="stats"><div class="st"><b>'+all.length+'</b><span>Accounts</span></div><div class="st"><b>'+(cnt('active')+cnt('trial'))+'</b><span>Active / trial</span></div><div class="st"><b>'+cnt('expiring')+'</b><span>Ending ≤30 days</span></div><div class="st"><b>'+(cnt('expired')+cnt('suspended'))+'</b><span>Expired / suspended</span></div><div class="st"><b>'+cnt('legacy')+'</b><span>No subscription set</span></div></div>'
+ +'<div class="tools"><input id="q" placeholder="Search name, email, id" value="'+esc(q)+'" oninput="window.dr()"><select id="f" onchange="window.dr()">'+[['all','All'],['active','Active'],['trial','Trial'],['expiring','Ending soon'],['expired','Expired'],['suspended','Suspended'],['legacy','No subscription']].map(o=>'<option value="'+o[0]+'"'+(f==o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select><button onclick="window.reload()">Refresh</button>'+(cnt('legacy')?'<button class="pri" onclick="window.legacyYear()">Give 1 year to all "No subscription"</button>':'')+'</div><div id="list">';
+ const L=all.filter(x=>(f=='all'||x.s.k==f)&&(!q||(x.r.name+' '+(x.r.sub&&x.r.sub.email||'')+' '+x.r.id).toLowerCase().includes(q)));
+ L.sort((a,b)=>(a.r.sub?+a.r.sub.exp:1e15)-(b.r.sub?+b.r.sub.exp:1e15));
+ h+=L.map(({r,s})=>{const sb=r.sub||{},pay=(sb.pay||[]).slice(-3).reverse().map(p=>fmt(p.t)+' · '+esc(p.a)+' '+esc(p.m||'')).join(' | ');
+  return '<div class="row"><div class="top"><b>'+esc(r.name||sb.nm||'(no name)')+'</b><span class="badge '+s.c+'">'+s.l+'</span></div><div class="mu">'+esc(sb.email||'')+' · '+esc(r.id)+'</div><div class="mu">Valid until: <b>'+fmt(sb.exp)+'</b>'+(sb.note?' · Note: '+esc(sb.note):'')+'</div>'+(pay?'<div class="pay">Payments: '+pay+'</div>':'')
+  +'<div class="act"><button onclick="window.ext(\''+r.id+'\',1)">+1 month</button><button onclick="window.ext(\''+r.id+'\',6)">+6 months</button><button class="pri" onclick="window.ext(\''+r.id+'\',12)">+1 year</button><button onclick="window.trial(\''+r.id+'\')">Trial 14d</button><button onclick="window.pay(\''+r.id+'\')">Record payment</button><button onclick="window.note(\''+r.id+'\')">Note</button>'
+  +(sb.st=='suspended'?'<button onclick="window.sus(\''+r.id+'\',0)">Activate</button>':'<button class="bad" onclick="window.sus(\''+r.id+'\',1)">Suspend</button>')+'</div></div>'}).join('')||'<div class="box">Nothing here.</div>';
+ $('#main').innerHTML=h+'</div>';if(q){const e=$('#q');e.focus();e.setSelectionRange(q.length,q.length)}}
+async function put(id,patch){const r=rows.find(x=>x.id==id);const cur=r.sub||{};const nx=Object.assign({email:'',nm:r.name||'',t0:Date.now(),st:'active'},cur,patch);await setDoc(doc(db,'subs',id),nx);r.sub=nx}
+window.dr=draw;window.reload=load;
+window.ext=async(id,m)=>{try{const r=rows.find(x=>x.id==id),b=r.sub&&r.sub.st!='suspended'?+r.sub.exp:0;await put(id,{exp:addM(b,m),st:'active'});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
+window.trial=async id=>{if(!confirm('Set a 14-day trial from today?'))return;try{await put(id,{exp:Date.now()+14*DAY,st:'trial'});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
+window.sus=async(id,v)=>{if(v&&!confirm('Suspend this account? They will be locked out.'))return;try{await put(id,{st:v?'suspended':'active'});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
+window.note=async id=>{const r=rows.find(x=>x.id==id),n=prompt('Note',r.sub&&r.sub.note||'');if(n===null)return;try{await put(id,{note:n});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
+window.pay=async id=>{const a=prompt('Amount received (e.g. 600 SAR)');if(!a)return;const m=prompt('Method (cash / bank / STC Pay / bKash)','')||'';const r=rows.find(x=>x.id==id),pay=((r.sub&&r.sub.pay)||[]).concat([{t:Date.now(),a,m}]);try{await put(id,{pay});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
+window.legacyYear=async()=>{const t=rows.filter(r=>!r.sub);if(!confirm('Give 1 year (from today) to '+t.length+' accounts?'))return;try{for(const r of t)await put(r.id,{exp:addM(0,12),st:'active'});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
+$('#bt').onclick=()=>user?signOut(auth):signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>alert(e.code||e.message));
+onAuthStateChanged(auth,u=>{user=u;$('#bt').textContent=u?'Sign out':'Sign in with Google';$('#who').textContent=u?u.email:'';
+ if(!u){$('#main').innerHTML='<div class="box">Sign in with the admin Google account.</div>';return}
+ if(u.email!==ADMIN||!u.emailVerified){$('#main').innerHTML='<div class="box">This account ('+esc(u.email)+') is not authorised.</div>';return}load()});
+</script></body></html>
