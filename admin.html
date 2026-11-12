@@ -20,7 +20,7 @@ button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}button.bad{col
 <div class="w" id="main"><div class="box" id="msg">Sign in with the admin Google account.</div></div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signOut,sendEmailVerification} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,collection,getDocs,doc,setDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const ADMIN='mohammedpalash1990@gmail.com';
 const app=initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",storageBucket:"index-9d688.firebasestorage.app",messagingSenderId:"385223961831",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});
@@ -58,5 +58,9 @@ window.legacyYear=async()=>{const t=rows.filter(r=>!r.sub);if(!confirm('Give 1 y
 $('#bt').onclick=()=>user?signOut(auth):signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>alert(e.code||e.message));
 onAuthStateChanged(auth,u=>{user=u;$('#bt').textContent=u?'Sign out':'Sign in with Google';$('#who').textContent=u?u.email:'';
  if(!u){$('#main').innerHTML='<div class="box">Sign in with the admin Google account.</div>';return}
- if(u.email!==ADMIN||!u.emailVerified){$('#main').innerHTML='<div class="box">This account ('+esc(u.email)+') is not authorised.</div>';return}load()});
+ if((u.email||'').toLowerCase()!==ADMIN){$('#main').innerHTML='<div class="box">This account ('+esc(u.email)+') is not authorised.<br><br><span class="mu">Sign out and use the admin account.</span></div>';return}
+ if(!u.emailVerified){$('#main').innerHTML='<div class="box"><b>Email not verified yet</b><p class="mu">For safety the admin panel needs a verified email. 1) Press "Send verification email". 2) Open the email in Gmail and click the link. 3) Come back and press "I have verified".</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="pri" onclick="window.sendV()">Send verification email</button><button onclick="window.chkV()">I have verified</button></div></div>';return}
+ load()});
+window.sendV=async()=>{try{await sendEmailVerification(user);alert('Verification email sent to '+user.email+'. Check inbox and spam.')}catch(e){alert('Failed: '+(e.code||e.message))}};
+window.chkV=async()=>{try{await user.reload();await user.getIdToken(true);if(auth.currentUser.emailVerified)location.reload();else alert('Not verified yet. Click the link in the email first.')}catch(e){alert('Failed: '+(e.code||e.message))}};
 </script></body></html>
