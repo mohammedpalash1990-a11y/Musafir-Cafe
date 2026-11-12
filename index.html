@@ -168,6 +168,8 @@ button.pay:disabled{opacity:.5}
 .pvt{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:17px}
 .pvt.g{font-size:30px;font-weight:800;padding:14px 0 8px}
 .pvm{text-align:center;color:var(--mute);margin:14px 0 0;font-size:16px}
+.rcpt .rl{display:flex;justify-content:center}.rcpt .rl img{height:54px;max-width:70%;width:auto;object-fit:contain}.rcpt .rhd{text-align:center;font-size:12px;line-height:1.3;margin:2px 0 4px}.rcpt .rhd b{font-size:13px}
+.ipr{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:4px 0}.ipr input{width:100%;min-width:0}.irow{border-top:1px solid var(--line);padding:8px 0}.irow.off{opacity:.45}.ist{font-size:11px;font-weight:800;padding:2px 7px;border-radius:99px;background:var(--soft);color:var(--ac)}.ist.d{background:#fde8e8;color:#b42318}
 @media print{
  @page{margin:0}
  html,body{background:#fff!important;padding:0!important;margin:0!important;height:auto!important;min-height:0!important}
@@ -176,7 +178,7 @@ button.pay:disabled{opacity:.5}
  #rc .sheet{background:#fff!important;padding:0!important;margin:0!important;max-width:none!important;width:auto!important;max-height:none!important;overflow:visible!important;border-radius:0!important}
  .rcpt{width:100%!important;max-width:none!important;margin:0!important;padding:0 2mm 1.5mm!important;box-shadow:none!important;border-radius:0!important;color:#000!important;font-size:12px!important;font-weight:800!important;line-height:1.22!important}
  .rcpt *{color:#000!important;opacity:1!important}
- .rcpt .rl{margin:0 0 .8mm!important}.rcpt .rl svg{height:9mm!important;width:auto!important}
+ .rcpt .rl{margin:0 0 .8mm!important}.rcpt .rl svg{height:9mm!important;width:auto!important}.rcpt .rl img{height:13mm!important;max-width:70%!important;width:auto!important}.rcpt .rhd{font-size:10.5px!important;line-height:1.25!important;margin:.2mm 0 .6mm!important}
  .rcpt .rs{font-size:15px!important;line-height:1.15!important;margin:0 0 .5mm!important}
  .rcpt .rm{font-size:11px!important;margin:1.2mm 0!important;padding:.5mm 0!important}
  .rcpt td,.rcpt th,.rcpt .rt,.rcpt .rt.py,.rcpt td.q{font-size:12px!important;padding:.25mm 0!important}
@@ -227,7 +229,7 @@ header #nav{position:static;display:flex;gap:6px;background:none;border:0;paddin
 .rcpt pre.rp{background:#fff!important;color:#000!important;border:1px dashed #000!important}
 </style>
 </head><body>
-<header><div class="brand"><svg width="40" height="40" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#14454b"/><path d="M19 29h26v6a13 13 0 0 1-13 13 13 13 0 0 1-13-13z" fill="#fff"/><path d="M45 32h2.5a5 5 0 0 1 0 10H43" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><path d="M15 52h34" stroke="#f5b52e" stroke-width="3.4" stroke-linecap="round"/><path d="M22 24l4.5-8 5.5 8 5.5-8 4.5 8" fill="none" stroke="#f5b52e" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><h1 id="shop">Musafir Cafe</h1></div><div class="hr"><div id="hnav"></div><button class="hic" id="lastBtn" onclick="lastInv()" aria-label="Last invoice"></button><button class="chip" id="today" onclick="showRecent()" style="border:0;cursor:pointer"></button><button class="av" id="av" aria-label="Account" onclick="admOpen()"></button></div></header>
+<header><div class="brand"><span id="blg" style="display:flex"><svg width="40" height="40" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#14454b"/><path d="M19 29h26v6a13 13 0 0 1-13 13 13 13 0 0 1-13-13z" fill="#fff"/><path d="M45 32h2.5a5 5 0 0 1 0 10H43" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><path d="M15 52h34" stroke="#f5b52e" stroke-width="3.4" stroke-linecap="round"/><path d="M22 24l4.5-8 5.5 8 5.5-8 4.5 8" fill="none" stroke="#f5b52e" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h1 id="shop">Musafir Cafe</h1></div><div class="hr"><div id="hnav"></div><button class="hic" id="lastBtn" onclick="lastInv()" aria-label="Last invoice"></button><button class="chip" id="today" onclick="showRecent()" style="border:0;cursor:pointer"></button><button class="av" id="av" aria-label="Account" onclick="admOpen()"></button></div></header>
 <div id="ib"></div>
 <div id="sync" class="mute" style="text-align:center;font-size:12px;padding:0 16px 6px"></div>
 <main id="m"></main>
@@ -292,6 +294,8 @@ var IC={
 };
 function I(n){return '<svg class="i" viewBox="0 0 24 24">'+(IC[n]||'')+'</svg>'}
 var LOGO = document.querySelector('.brand svg').outerHTML;
+var LOGO_FAST='<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#000"/><path d="M16 29a16 13 0 0 1 32 0z" fill="#fff"/><rect x="14" y="32" width="36" height="5" rx="2.5" fill="#fff"/><path d="M15 41h34v1a7 7 0 0 1-7 7H22a7 7 0 0 1-7-7z" fill="#fff"/></svg>';
+var LOGO_MART='<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#000"/><path d="M13 18h6l5 22h22l4-16H21" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="27" cy="48" r="3.4" fill="#fff"/><circle cx="43" cy="48" r="3.4" fill="#fff"/></svg>';
 var LOGO_MONO='<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#000"/><path d="M19 29h26v6a13 13 0 0 1-13 13 13 13 0 0 1-13-13z" fill="#fff"/><path d="M45 32h2.5a5 5 0 0 1 0 10H43" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><path d="M15 52h34" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><path d="M22 24l4.5-8 5.5 8 5.5-8 4.5 8" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 function hasBn(s){return /[\u0980-\u09FF]/.test(s||'')}
@@ -308,7 +312,7 @@ function SYM(){return(S.country=='SA'&&(S.x||{}).sar!==false)?'\u20C1':S.cur}
 function $$(n){return ((S.country=='SA'&&(S.x||{}).sar!==false)?'\u20C1':S.cur)+' '+(+n).toFixed(2)}
 function toast(m){var e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(function(){e.style.display='none'},2200)}
 
-function RD(){return Object.assign({foot:true,mode:'shop',custom:'',wifi:false,wn:'',wp:'',offer:false,offerTxt:'',info:false,hours:'',phone:'',qr:true,qm:'view',l_maps:'',l_wa:'',l_fb:'',qs:60,dayReset:true,dayStart:0,welcome:true},S.rc||{})}
+function RD(){return Object.assign({foot:true,mode:'shop',custom:'',wifi:false,wn:'',wp:'',offer:false,offerTxt:'',info:false,hours:'',phone:'',qr:true,qm:'view',l_maps:'',l_wa:'',l_fb:'',qs:60,hdr:true,pw:'auto',pt:1,dayReset:true,dayStart:0,welcome:true},S.rc||{})}
 function rset(k,v){S.rc=RD();S.rc[k]=v;save();render()}
 
 function lsave(){try{localStorage.setItem('pos_s',JSON.stringify(S));localStorage.setItem('pos_p',JSON.stringify(P));localStorage.setItem('pos_h',JSON.stringify(H));localStorage.setItem('pos_img',JSON.stringify(IMG));localStorage.setItem('pos_du',JSON.stringify(DU))}catch(e){}try{localStorage.setItem('pos_kh',JSON.stringify(KH))}catch(e){}}
@@ -329,7 +333,7 @@ function rpSet(k,v){S.rp=S.rp||{};S.rp[k]=v;save();render();rqFlush()}
 function rpTest(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}rqAdd({k:'test',t:Date.now(),shop:S.shop});toast(L('টেস্ট পাঠানো হয়েছে, ইমেইল দেখুন','Test sent, check your email'))}
 function rpNow(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var d=tdy();H.filter(function(h){return day(h.t)==d}).forEach(function(h){rqAdd(rqSale(h))});rqAdd({k:'report',day:d,shop:S.shop});toast(L('আজকের রিপোর্ট পাঠানো হচ্ছে','Sending today\'s report'))}
 function rpHist(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}H.forEach(function(h){rqAdd(rqSale(h))});toast(L('সব পুরনো বিক্রি পাঠানো হচ্ছে','Sending all past sales'))}
-var APP_V='v17 · 2026-11-11';
+var APP_V='v18 · 2026-11-12';
 function updApp(){if(!navigator.onLine){toast(L('আপডেটের জন্য নেট লাগবে','Internet needed to update'));return}toast(L('আপডেট হচ্ছে…','Updating…'));var p=[];try{if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}))}catch(e){}Promise.all(p).catch(function(){}).then(function(){location.reload()})}
 function verBox(){return '<div class="box"><div class="hd">'+I('set')+'<b>'+L('অ্যাপ ভার্সন','App version')+'</b></div><div class="dl"><span>'+APP_V+'</span><button class="pri" onclick="updApp()">'+L('এখনই আপডেট করুন','Update now')+'</button></div><div class="mute" style="font-size:12px">'+L('আপনার বিক্রি ও ডেটা মুছবে না। নতুন ফাইল GitHub-এ দেওয়ার পর এটা চাপলে নতুন ভার্সন চলে আসবে।','Your sales and data are kept. Press this after uploading new files to GitHub.')+'</div></div>'}
 function rpBox(){var r=S.rp||{};return '<div class="box"><div class="hd">'+I('cash')+'<b>'+L('দৈনিক রিপোর্ট (ইমেইল ও ড্রাইভ)','Daily report (email & Drive)')+'</b></div>'
@@ -389,6 +393,7 @@ function togTheme(){setTheme(curTheme()=='dark'?'light':'dark')}
 try{window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',function(){applyPal()})}catch(e){}
 
 function render(){
+ try{pgStyle();var bl=document.getElementById('blg');if(bl){if(BLG0===null)BLG0=bl.innerHTML;bl.innerHTML=S.logo?'<img src="'+S.logo+'" alt="" style="height:40px;max-width:96px;object-fit:contain">':(S.shopType=='fast'||S.shopType=='mart'?(S.shopType=='fast'?LOGO_FAST:LOGO_MART).replace('#000','#14454b').replace('<svg','<svg width="40" height="40"'):BLG0)}}catch(e){}
  if(view=='kh')view='set';if(view=='due'&&!X().due)view='sell';fixSn();document.documentElement.lang=S.lang;document.documentElement.dir='ltr';$('#shop').textContent=S.shop;document.title=S.shop;sy();
  $('#av').textContent=String((typeof CE!='undefined'&&CE)||S.shop||'M').trim().charAt(0).toUpperCase()||'M';
  var td=H.filter(function(h){return day(h.t)==tdy()}).reduce(function(a,h){return a+h.total},0);
@@ -599,11 +604,20 @@ function footMsg(s){var r=RD();if(!r.foot)return '';var sa=S.country=='SA',bn=S.
  return '<div class="th">'+m+'</div><div class="th2">— '+esc(S.shop)+'</div>'
 }
 
+var BLG0=null;
+function rcLogo(){return S.logoM?'<img src="'+S.logoM+'" alt="">':(S.shopType=='fast'?LOGO_FAST:S.shopType=='mart'?LOGO_MART:LOGO_MONO)}
+function rcHead(){var r=RD();if(r.hdr===false)return '';var z=S.zatca||{},SA=S.country=='SA',h='';
+ if(SA&&z.vatNumber)h+='<div class="rhd"><b>فاتورة ضريبية مبسطة<br>Simplified Tax Invoice</b></div>';
+ if(z.sellerName&&z.sellerName!=S.shop)h+='<div class="rhd">'+esc(z.sellerName)+'</div>';
+ if(z.vatNumber)h+='<div class="rhd">'+(SA?'الرقم الضريبي / VAT No: ':'VAT No: ')+esc(z.vatNumber)+'</div>';
+ var ad=[z.building,z.street,z.district,z.city].filter(Boolean).join(' - ');if(ad)h+='<div class="rhd">'+esc(ad)+'</div>';
+ return h}
+function pgStyle(){var r=RD(),w=r.pw,css='@media print{@page{'+(w&&w!='auto'?'size:'+w+'mm auto;':'')+'margin:0}.rcpt{padding-top:'+(+r.pt||0)+'mm!important}}',e=document.getElementById('pgcss');if(!e){e=document.createElement('style');e.id='pgcss';document.head.appendChild(e)}e.textContent=css;return css}
 function rcHtml(s){  var r=Object.assign(RD(),{qr:true}),id=invCode(s),qrT='INV:'+id+';D:'+day(s.t)+';T:'+s.total.toFixed(2)+';P:'+s.pay,tm=new Date(s.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
  var base=location.href.split('#')[0].split('?')[0].replace(/index\.html$/,'');var lk=(r.qm=='view')?(s.pc?base+'?r='+s.pc:''):(r.qm!='inv'?r['l_'+r.qm]:'');if(lk)qrT=lk;var qz=lk?Math.max(+r.qs,84):+r.qs;
  var rows=s.items.map(function(i){var n=nm(i),img=i.id&&IMG[i.id]?'<img src="'+IMG[i.id]+'" style="width:20px;height:20px;border-radius:5px;object-fit:cover;vertical-align:-5px;margin-right:5px">':'';return '<tr><td>'+img+esc(n)+'</td><td class="q">'+i.qty+' × '+i.price.toFixed(2)+'</td><td class="a">'+(i.qty*i.price).toFixed(2)+'</td></tr>'}).join('');
  var pl=(s.pays&&s.pays.length?s.pays:[{m:s.pay,a:s.total}]);
- var h='<div class="rcpt"><div class="rl">'+LOGO_MONO+'</div><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+L('ইনভয়েস','Invoice')+' #'+s.sn+'</span><span>'+day(s.t)+' · '+tm+'</span></div>'+(s.src?'<div class="rm"><span>'+(s.src=='qr'?'📲 '+L('QR অর্ডার','QR order')+(s.qr&&s.qr.length?' · '+esc(s.qr.join(' + ')):''):'🏪 '+L('POS থেকে','From POS'))+'</span></div>':'')+'<table>'+rows+'</table>';
+ var h='<div class="rcpt"><div class="rl">'+rcLogo()+'</div><span class="rs">'+esc(S.shop)+'</span>'+rcHead()+'<div class="rm"><span>'+L('ইনভয়েস','Invoice')+' #'+s.sn+'</span><span>'+day(s.t)+' · '+tm+'</span></div>'+(s.src?'<div class="rm"><span>'+(s.src=='qr'?'📲 '+L('QR অর্ডার','QR order')+(s.qr&&s.qr.length?' · '+esc(s.qr.join(' + ')):''):'🏪 '+L('POS থেকে','From POS'))+'</span></div>':'')+'<table>'+rows+'</table>';
  if(s.disc||s.tax)h+='<div class="rt" style="margin-top:4px"><span>'+t('sub')+'</span><span>'+$$(s.sub)+'</span></div>';
  if(s.disc)h+='<div class="rt"><span>'+t('disc')+'</span><span>−'+$$(s.disc)+'</span></div>';
  if(s.tax)h+='<div class="rt"><span>'+L(s.vatInclusive?'VAT অন্তর্ভুক্ত':'VAT','VAT included')+' '+(s.vatRate||15)+'%</span><span>'+$$(s.tax)+'</span></div>';
@@ -620,7 +634,7 @@ function rcHtml(s){  var r=Object.assign(RD(),{qr:true}),id=invCode(s),qrT='INV:
 function openInvoice(no,autoPrint){
  var s=H.find(function(h){return h.no==no});if(!s)return;
  var w=window.open('','_blank');if(!w){toast(L('Invoice window blocked','Invoice window was blocked'));return}
- w.document.open();w.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(S.shop)+' · Invoice #'+esc(s.sn)+'</title><style>'+sarCss()+'body{margin:0;padding:20px;background:#f3f4f6;font:15px "SAR",Arial,sans-serif;color:#111}.page{max-width:520px;margin:0 auto}.rcpt{background:#fff;color:#000;font:700 15px/1.4 "SAR",Arial,sans-serif;padding:18px;border:1px solid #ddd}.rs{display:block;text-align:center;font-size:25px}.rm,.rt,.ft{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px dashed #777}.rcpt table{width:100%;border-collapse:collapse}.rcpt td{padding:5px 2px}.rcpt td.q{text-align:center}.rcpt td.a{text-align:right}.rt.g{font-size:22px;font-weight:bold;border-top:2px solid #111}.ft{display:block;text-align:center}.qrw svg{width:110px;height:110px}.cid{font:12px "SAR",monospace;text-align:center;margin-top:8px}.xl{text-align:center;margin-top:8px}.actions{display:flex;gap:10px;margin:14px 0}.actions button{flex:1;padding:12px;border:0;border-radius:8px;font-weight:bold;cursor:pointer}.print{background:#187b36;color:#fff}.rl{display:flex;justify-content:center;margin-bottom:6px}.rl svg{height:48px;width:auto}@media print{@page{margin:0}body{padding:0;background:#fff}.actions{display:none}.page{max-width:none}.rcpt{border:0;padding:0 2mm 1.5mm;font-size:12px;line-height:1.22;font-weight:800}.rl svg{height:9mm}.rs{font-size:15px;margin:0}.rm{font-size:11px;padding:.5mm 0}.rcpt td,.rt,.rcpt th{font-size:12px;padding:.25mm 0}.rt.g{font-size:15px}.ft svg,.qrw svg{width:22mm;height:22mm}.xl,.cid{font-size:10.5px;margin-top:1mm}}</style></head><body><main class="page">'+rcHtml(s)+'<div class="actions"><button class="print" onclick="window.print()">'+t('print')+'</button><button onclick="window.close()">'+t('done')+'</button></div></main></body></html>');w.document.close();if(autoPrint)setTimeout(function(){try{w.focus();w.print()}catch(e){}},500)
+ w.document.open();w.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(S.shop)+' · Invoice #'+esc(s.sn)+'</title><style>'+sarCss()+pgStyle()+'body{margin:0;padding:20px;background:#f3f4f6;font:15px "SAR",Arial,sans-serif;color:#111}.page{max-width:520px;margin:0 auto}.rcpt{background:#fff;color:#000;font:700 15px/1.4 "SAR",Arial,sans-serif;padding:18px;border:1px solid #ddd}.rs{display:block;text-align:center;font-size:25px}.rm,.rt,.ft{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px dashed #777}.rcpt table{width:100%;border-collapse:collapse}.rcpt td{padding:5px 2px}.rcpt td.q{text-align:center}.rcpt td.a{text-align:right}.rt.g{font-size:22px;font-weight:bold;border-top:2px solid #111}.ft{display:block;text-align:center}.qrw svg{width:110px;height:110px}.cid{font:12px "SAR",monospace;text-align:center;margin-top:8px}.xl{text-align:center;margin-top:8px}.actions{display:flex;gap:10px;margin:14px 0}.actions button{flex:1;padding:12px;border:0;border-radius:8px;font-weight:bold;cursor:pointer}.print{background:#187b36;color:#fff}.rl{display:flex;justify-content:center;margin-bottom:6px}.rl svg{height:48px;width:auto}.rl img{height:56px;max-width:70%;width:auto}.rhd{text-align:center;font-size:13px;line-height:1.3}@media print{@page{margin:0}body{padding:0;background:#fff}.actions{display:none}.page{max-width:none}.rcpt{border:0;padding:0 2mm 1.5mm;font-size:12px;line-height:1.22;font-weight:800}.rl svg{height:9mm}.rs{font-size:15px;margin:0}.rm{font-size:11px;padding:.5mm 0}.rcpt td,.rt,.rcpt th{font-size:12px;padding:.25mm 0}.rt.g{font-size:15px}.ft svg,.qrw svg{width:22mm;height:22mm}.xl,.cid{font-size:10.5px;margin-top:1mm}}</style></head><body><main class="page">'+rcHtml(s)+'<div class="actions"><button class="print" onclick="window.print()">'+t('print')+'</button><button onclick="window.close()">'+t('done')+'</button></div></main></body></html>');w.document.close();if(autoPrint)setTimeout(function(){try{w.focus();w.print()}catch(e){}},500)
 }
 function printSale(no){openInvoice(no,true)}
 function showRc(no){
@@ -731,12 +745,92 @@ function vSell(){var g=vSell0();return isWide()?'<div class="split"><aside class
 
 function vProd(){
  var e=edit?gp(edit):null;
- var h='<div class="box"><b>'+(e?t('edit'):t('add'))+'</b><label>'+t('nm')+'</label><input id="pn" value="'+esc(e?e.name:'')+'"><label>'+t('nb')+'</label><input id="pb" value="'+esc(e?e.bn||'':'')+'"><label>'+t('pr')+'</label><input id="pp" type="number" inputmode="decimal" value="'+(e?e.price:'')+'"><label>'+t('cat')+'</label><input id="pc" value="'+esc(e?e.cat:'')+'" placeholder="Drinks"><label>'+t('stock')+'</label><input id="ps" type="number" inputmode="numeric" value="'+(e?e.stock:'')+'">'
+ var h=(e?'':impBox())+'<div class="box"><b>'+(e?t('edit'):t('add'))+'</b><label>'+t('nm')+'</label><input id="pn" value="'+esc(e?e.name:'')+'"><label>'+t('nb')+'</label><input id="pb" value="'+esc(e?e.bn||'':'')+'"><label>'+t('pr')+'</label><input id="pp" type="number" inputmode="decimal" value="'+(e?e.price:'')+'"><label>'+t('cat')+'</label><input id="pc" value="'+esc(e?e.cat:'')+'" placeholder="Drinks"><label>'+t('stock')+'</label><input id="ps" type="number" inputmode="numeric" value="'+(e?e.stock:'')+'">'
  +'<label>'+L('ছবি (ঐচ্ছিক)','Photo (optional)')+'</label><div style="display:flex;align-items:center;gap:10px"><div id="pph">'+pphHtml(e)+'</div><label class="btn">'+I('camera')+' '+L('ছবি দিন / বদলান','Add / change photo')+'<input type="file" accept="image/*" hidden onchange="pickPhoto(this)"></label><button class="x" aria-label="'+t('rm')+'" onclick="rmPhoto()">'+I('trash')+'</button></div>'
  +'<div style="display:flex;gap:10px;margin-top:14px"><button class="pri" style="flex:1" onclick="saveP()">'+t('save')+'</button>'+(e?'<button class="bad" onclick="delP()">'+t('del')+'</button><button onclick="edit=null;pPhoto=undefined;render()">'+t('back')+'</button>':'')+'</div></div><div class="box">';
  h+=P.map(function(p){return '<div class="row" onclick="edit='+p.id+';pPhoto=undefined;render();scrollTo(0,0)"><div style="display:flex;align-items:center;gap:10px">'+pphHtml(p,38,true)+'<div><b>'+esc(nm(p))+'</b><div class="mute">'+esc(p.cat?tc(p.cat):t('noc'))+(p.stock!==''?' · '+p.stock:'')+'</div></div></div><b>'+$$(p.price)+'</b></div>'}).join('');
  return h+'</div>';
 }
+/* ===== Shop type & logo ===== */
+function logoBox(){var tp=S.shopType||'cafe',pv=S.logo?'<img src="'+S.logo+'" alt="" style="height:56px;max-width:140px;object-fit:contain">':'<div style="width:56px;height:56px">'+(tp=='fast'?LOGO_FAST:tp=='mart'?LOGO_MART:LOGO_MONO)+'</div>';
+ return '<div class="box"><div class="hd"><b>'+L('দোকানের ধরন ও লোগো','Shop type & logo')+'</b></div>'
+ +'<select onchange="setShopType(this.value)">'+[['cafe',L('ক্যাফে / কফি শপ','Cafe / coffee shop')],['fast',L('ফাস্ট ফুড / রেস্টুরেন্ট','Fast food / restaurant')],['mart',L('বাকালা / সুপারমার্কেট','Grocery / supermarket')]].map(function(o){return '<option value="'+o[0]+'"'+(tp==o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select>'
+ +'<div style="display:flex;align-items:center;gap:12px;margin:10px 0">'+pv+'<div style="flex:1"><label class="btn" style="display:block;text-align:center">'+L('লোগো আপলোড','Upload logo')+'<input type="file" accept="image/*" style="display:none" onchange="logoPick(this)"></label>'+(S.logo?'<button class="bad" style="width:100%;margin-top:6px" onclick="logoDel()">'+L('লোগো সরান','Remove logo')+'</button>':'')+'</div></div>'
+ +'<div class="mute" style="font-size:12px">'+L('সাদা বা স্বচ্ছ ব্যাকগ্রাউন্ডে কালো লোগো দিলে প্রিন্টে সবচেয়ে পরিষ্কার আসে। লোগো রসিদ, POS ও QR মেনুতে একসাথে বসবে।','A black logo on a white or transparent background prints best. The logo is used on receipts, the POS and the QR menu.')+'</div></div>'}
+function setShopType(v){S.shopType=v;save();render();try{window.qrPub&&window.qrPub(1)}catch(e){}}
+function logoDel(){delete S.logo;delete S.logoM;save();render();try{window.qrPub&&window.qrPub(1)}catch(e){}}
+function logoPick(inp){var f=inp.files&&inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){
+ function mk(mx,mono){var k=Math.min(1,mx/im.width,mx/im.height),w=Math.max(1,Math.round(im.width*k)),h=Math.max(1,Math.round(im.height*k)),c=document.createElement('canvas');c.width=w;c.height=h;var x=c.getContext('2d');
+  if(mono){x.fillStyle='#fff';x.fillRect(0,0,w,h)}x.drawImage(im,0,0,w,h);
+  if(mono){var d=x.getImageData(0,0,w,h),p=d.data;for(var i=0;i<p.length;i+=4){var g=.299*p[i]+.587*p[i+1]+.114*p[i+2],v=g<165?0:255;p[i]=p[i+1]=p[i+2]=v;p[i+3]=255}x.putImageData(d,0,0)}
+  return c.toDataURL('image/png')}
+ S.logo=mk(256,false);S.logoM=mk(420,true);save();render();toast(L('লোগো সেভ হয়েছে','Logo saved'));try{window.qrPub&&window.qrPub(1)}catch(e){}};
+ im.onerror=function(){toast(L('ছবি পড়া যায়নি','Could not read image'))};im.src=r.result};r.readAsDataURL(f);inp.value=''}
+
+/* ===== PDF menu import ===== */
+var IMP=null;
+function impBox(){return '<div class="box"><div class="hd"><b>'+L('PDF থেকে মেনু আপলোড','Import menu from PDF')+'</b></div><p class="mute" style="margin:0 0 8px;font-size:13px">'+L('এক বা একাধিক PDF বেছে নিন। আইটেম দেখে ঠিক করে নিয়ে তবেই সেভ হবে, শুধু এই দোকানের account-এ। ইন্টারনেট লাগবে।','Pick one or more PDFs. You review and edit the items first, then they are saved to this shop only. Internet is required.')+'</p><label class="btn" style="display:block;text-align:center">'+L('PDF বেছে নিন','Choose PDF files')+'<input type="file" accept="application/pdf" multiple style="display:none" onchange="impPick(this)"></label></div>'}
+function impLoad(){return new Promise(function(res,rej){if(window.pdfjsLib&&window.pdfjsWorker){res();return}
+ function ld(u){return new Promise(function(a,b){var e=document.createElement('script');e.src=u;e.onload=a;e.onerror=function(){b(new Error('load'))};document.head.appendChild(e)})}
+ var b='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';ld(b+'pdf.min.js').then(function(){return ld(b+'pdf.worker.min.js')}).then(function(){pdfjsLib.GlobalWorkerOptions.workerSrc=b+'pdf.worker.min.js';res()},rej)})}
+var AR_RE=/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/;
+function impRev(s){return Array.from(s).reverse().join('')}
+function impSplit(tk){var a=-1,z=-1;tk.forEach(function(s,i){if(AR_RE.test(s)){if(a<0)a=i;z=i}});var cl=function(x){return x.replace(/\s+/g,' ').trim()};
+ if(a<0)return{en:cl(tk.join('')),ar:''};
+ return{en:cl(tk.slice(0,a).join('')+' '+tk.slice(z+1).join('')),ar:cl(tk.slice(a,z+1).reverse().join('').normalize('NFKC'))}}
+async function impParse(buf,fname){var doc=await pdfjsLib.getDocument({data:new Uint8Array(buf),disableWorker:true}).promise,out=[];
+ for(var p=1;p<=doc.numPages;p++){var pg=await doc.getPage(p),tc=await pg.getTextContent();
+  var its=tc.items.filter(function(i){return i.str!==''}).map(function(i){return{x:i.transform[4],y:i.transform[5],s:i.str}}),an=[];
+  its.forEach(function(a,i){if(/^\d{1,4}$/.test(a.s.trim())){var nx=its.filter(function(b){return b.s.trim()==='#'&&Math.abs(b.y-a.y)<2&&b.x>a.x&&b.x-a.x<25})[0];if(nx)an.push(a)}else if(/^\d{1,4}#/.test(a.s.trim()))an.push(a)});
+  an.forEach(function(a){
+   var near=function(i){return Math.abs(i.y-a.y)<=14&&an.every(function(o){return o===a||Math.abs(i.y-a.y)<=Math.abs(i.y-o.y)})};
+   var nm=its.filter(function(i){return i.x>=a.x-1&&near(i)}).sort(function(m,n){return Math.abs(m.y-n.y)>3?n.y-m.y:m.x-n.x}),
+       pr=its.filter(function(i){return i.x<a.x-100&&near(i)&&/^\d+(\.\d+)?$/.test(i.s.trim())}).sort(function(m,n){return n.y-m.y});
+   var idn=/^\d{1,4}$/.test(a.s.trim())?+a.s.trim():+(/^(\d{1,4})#/.exec(a.s.trim())||[0,NaN])[1],hs=false,tk=nm.filter(function(i){if(i===a)return false;if(!hs&&i.s.trim()==='#'){hs=true;return false}return true});
+   if(tk.length&&/^\s*\d{1,4}#\s*/.test(tk[0].s)){tk[0]={x:tk[0].x,y:tk[0].y,s:tk[0].s.replace(/^\s*\d{1,4}#\s*/,'')}}
+   var sp=impSplit(tk.map(function(i){return i.s}));out.push({id:idn,en:sp.en,ar:sp.ar,p1:pr[0]?parseFloat(pr[0].s):NaN,p2:pr[1]?parseFloat(pr[1].s):NaN,f:fname})})}
+ return out}
+function impNorm(x){return String(x||'').toLowerCase().replace(/[^a-z0-9؀-ۿ]/g,'')}
+function impGuess(en,ar){var t=(en+' '+ar).toLowerCase(),c=null;
+ if(/burger|برجر/.test(t))c='Burger';else if(/sauce|صوص/.test(t))c='Extra Sauces';else if(/\bbox\b|بوكس/.test(t))c='Box';else if(/juice|sahlab|tea|coffee|pepsi|cola|vimto|water|عصير|سحلب|شاي|قهوة|ماء/.test(t))c='Drinks';else if(/plate|صحن/.test(t))c='Plate';else if(/basbousa|cake|arika|porridge|كيكة|بسبوسة/.test(t))c='sweets';
+ if(!c)return '';var ex=P.map(function(p){return p.cat}).filter(Boolean).filter(function(x,i,a){return a.indexOf(x)==i}).filter(function(x){return x.toLowerCase()==c.toLowerCase()})[0];return ex||c}
+async function impPick(inp){var fs=Array.prototype.slice.call(inp.files||[]);inp.value='';if(!fs.length)return;
+ toast(L('PDF পড়া হচ্ছে…','Reading PDFs…'));
+ try{await impLoad()}catch(e){toast(L('PDF রিডার লোড হয়নি, ইন্টারনেট দেখুন','Could not load the PDF reader, check internet'));return}
+ var all=[],bad=0,byId={},seen={};
+ for(var i=0;i<fs.length;i++){try{var rows=await impParse(await fs[i].arrayBuffer(),fs[i].name);rows.forEach(function(r){if(byId[r.id]){byId[r.id].same=true;return}byId[r.id]=r;all.push(r)})}catch(e){bad++}}
+ if(!all.length){toast(L('এই PDF থেকে আইটেম পাওয়া যায়নি','No items found in these PDFs'));return}
+ all.sort(function(a,b){return a.id-b.id});
+ var ex={};P.forEach(function(p){[p.name,p.bn].forEach(function(n){if(n)ex[impNorm(n)]=1})});
+ all.forEach(function(r){r.on=true;r.cat=impGuess(r.en,r.ar);r.dup='';var k=[impNorm(r.en),impNorm(r.ar)].filter(Boolean);
+  if(k.some(function(x){return ex[x]}))r.dup='exists';else if(k.some(function(x){return seen[x]}))r.dup='batch';k.forEach(function(x){seen[x]=1});if(r.dup)r.on=false});
+ IMP={rows:all,src:1,dupOk:false,badFiles:bad,nFiles:fs.length};impUi()}
+function impUi(){var e=$('#imp');if(!e){e=document.createElement('div');e.id='imp';e.className='ov show';e.style.zIndex=35;e.innerHTML='<div class="sheet" id="impb" style="max-height:92vh;overflow:auto"></div>';document.body.appendChild(e)}
+ e.classList.add('show');var R=IMP.rows,cats=P.map(function(p){return p.cat}).concat(R.map(function(r){return r.cat})).filter(function(x,i,a){return x&&a.indexOf(x)==i});
+ var h='<datalist id="impcats">'+cats.map(function(c){return '<option value="'+esc(c)+'">'}).join('')+'</datalist><b style="font-size:18px">'+L('PDF থেকে আইটেম','Items from PDF')+' ('+R.length+')</b>'
+ +'<div class="mute" style="font-size:12px;margin:4px 0 8px">'+L('PDF-এ বারকোড, ক্যাটাগরি ও কেনা দাম থাকে না, তাই ক্যাটাগরি নিচে ঠিক করুন। ডুপ্লিকেট বন্ধ করা আছে।','PDFs have no barcode, category or purchase price, so set categories below. Duplicates are switched off.')+'</div>'
+ +'<div class="dl"><div style="flex:1"><label>'+L('বিক্রির দাম কোনটা','Selling price')+'</label><select onchange="IMP.src=+this.value;impUi()"><option value="1"'+(IMP.src==1?' selected':'')+'>'+L('🛒 প্রথম দাম','🛒 First price')+'</option><option value="2"'+(IMP.src==2?' selected':'')+'>'+L('🚚 দ্বিতীয় দাম','🚚 Second price')+'</option></select></div></div>'
+ +'<div style="display:flex;gap:6px;margin:6px 0"><input id="impbc" list="impcats" placeholder="'+L('নির্বাচিতদের ক্যাটাগরি','Category for selected')+'" style="flex:1"><button onclick="impBulk()">'+L('বসান','Apply')+'</button></div>'
+ +'<div style="display:flex;gap:6px;margin:6px 0"><button onclick="impAll(1)" style="flex:1">'+L('সব বেছে নিন','Select all')+'</button><button onclick="impAll(0)" style="flex:1">'+L('কিছু না','None')+'</button></div>'
+ +'<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" style="width:20px;height:20px;flex:none;margin:0" '+(IMP.dupOk?'checked':'')+' onchange="IMP.dupOk=this.checked">'+L('ডুপ্লিকেটও ইম্পোর্ট করুন','Import duplicates too')+'</label>';
+ R.forEach(function(r,i){var pv=IMP.src==2?r.p2:r.p1;h+='<div class="irow'+(r.on?'':' off')+'"><div style="display:flex;align-items:center;gap:8px"><input type="checkbox" style="width:20px;height:20px;flex:none;margin:0" '+(r.on?'checked':'')+' onchange="IMP.rows['+i+'].on=this.checked;this.closest(\'.irow\').classList.toggle(\'off\',!this.checked)"><b>#'+r.id+'</b>'+(r.dup?'<span class="ist d">'+(r.dup=='exists'?L('আগে আছে','Already exists'):L('ডুপ্লিকেট','Duplicate'))+'</span>':'')+'<span class="mute" style="margin-left:auto;font-size:12px">🛒 '+(isNaN(r.p1)?'–':r.p1)+' · 🚚 '+(isNaN(r.p2)?'–':r.p2)+'</span></div>'
+  +'<div class="ipr"><input value="'+esc(r.en)+'" placeholder="English" oninput="IMP.rows['+i+'].en=this.value"><input dir="rtl" value="'+esc(r.ar)+'" placeholder="العربية" oninput="IMP.rows['+i+'].ar=this.value"></div>'
+  +'<div class="ipr"><input type="number" step="0.01" value="'+(isNaN(pv)?'':pv)+'" placeholder="'+L('দাম','Price')+'" oninput="IMP.rows['+i+'].pv=this.value;IMP.rows['+i+'].pe=1"><input list="impcats" value="'+esc(r.cat)+'" placeholder="'+L('ক্যাটাগরি','Category')+'" oninput="IMP.rows['+i+'].cat=this.value"></div></div>'});
+ h+='<div style="display:flex;gap:10px;margin-top:12px;position:sticky;bottom:0;background:var(--card,#fff);padding:8px 0"><button class="pri" style="flex:2" onclick="impGo()">'+L('ইম্পোর্ট করুন','Import')+'</button><button style="flex:1" onclick="impClose()">'+L('বাতিল','Cancel')+'</button></div>';
+ var sc=$('#impb');sc.innerHTML=h}
+function impAll(v){IMP.rows.forEach(function(r){r.on=!!v});impUi()}
+function impBulk(){var c=$('#impbc').value.trim();IMP.rows.forEach(function(r){if(r.on)r.cat=c});impUi()}
+function impClose(){var e=$('#imp');if(e)e.remove();IMP=null}
+function impGo(){var R=IMP.rows,tot=0,ok=0,dup=0,fail=0,k=0;
+ R.forEach(function(r){if(!r.on)return;tot++;if(r.dup&&!IMP.dupOk){dup++;return}
+  var pv=r.pe?parseFloat(r.pv):(IMP.src==2?r.p2:r.p1),nm0=(r.en||'').trim(),ar0=(r.ar||'').trim();
+  if(!(nm0||ar0)||isNaN(pv)||pv<0){fail++;return}
+  P.push({id:Date.now()+(k++),name:nm0||ar0,bn:ar0,price:pv,cat:(r.cat||'').trim(),stock:''});ok++});
+ if(ok){save();lsave();render();try{window.qrPub&&window.qrPub(0)}catch(e){}}
+ var rep=function(a,b,c){return '<div class="pvt"><span>'+a+'</span><b'+(c?' style="color:'+c+'"':'')+'>'+b+'</b></div>'};
+ $('#impb').innerHTML='<b style="font-size:18px">'+L('ইম্পোর্ট রিপোর্ট','Import report')+'</b>'+rep(L('মোট বাছাই','Total selected'),tot)+rep(L('সফল','Successful'),ok,'var(--ac)')+rep(L('ডুপ্লিকেট (বাদ)','Duplicate (skipped)'),dup)+rep(L('ব্যর্থ (নাম/দাম নেই)','Failed (name/price missing)'),fail,fail?'#b42318':'')
+ +'<p class="mute" style="font-size:12px">'+L('আইটেমগুলো এখন এই দোকানের account-এ স্থায়ীভাবে সেভ। PDF মুছলেও থাকবে।','Items are now saved permanently in this shop. They stay even if the PDF is deleted.')+'</p><button class="pri" style="width:100%" onclick="impClose()">'+L('ঠিক আছে','Done')+'</button>'}
+
 function pphHtml(e,z,raw){z=z||56;var u=raw?(e&&IMG[e.id]):(pPhoto===null?null:(pPhoto||(e&&IMG[e.id])));return u?'<img class="pimg" style="width:'+z+'px;height:'+z+'px" alt="" src="'+u+'">':'<div class="dot" style="width:'+z+'px;height:'+z+'px;background:hsl('+hue(e?e.name:'x')+',45%,40%)">'+esc(((e&&nm(e))||'?').charAt(0).toUpperCase())+'</div>'}
 function pickPhoto(inp){var f=inp.files&&inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas'),s=360;c.width=c.height=s;var m=Math.min(im.width,im.height),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,s,s);pPhoto=c.toDataURL('image/jpeg',0.88);var b=$('#pph');if(b)b.innerHTML=pphHtml(edit?gp(edit):null)};im.src=r.result};r.readAsDataURL(f);inp.value=''}
 function rmPhoto(){pPhoto=null;var b=$('#pph');if(b)b.innerHTML=pphHtml(edit?gp(edit):null)}
@@ -782,6 +876,9 @@ function rcBox(){var r=RD();
  +sw('info',L('খোলার সময় ও ফোন','Opening hours & phone'),inp('hours',L('যেমন: সকাল ৬টা – রাত ১২টা','e.g. 6 AM – 12 AM'))+inp('phone',L('ফোন নম্বর','Phone number')))
  +sw('qr',L('রসিদে QR','QR on receipt'),sel('qm',[['view',L('রসিদ পাতা (পণ্যের ছবিসহ)','Receipt page with product pictures')],['inv',L('ইনভয়েস নম্বর','Invoice number')],['maps',L('Google Maps রিভিউ লিংক','Google Maps review link')],['wa',L('WhatsApp লিংক','WhatsApp link')],['fb',L('ফেসবুক পেজ লিংক','Facebook page link')]])+(r.qm!='inv'&&r.qm!='view'?inp('l_'+r.qm,L('লিংক বসান (https://…)','Paste link (https://…)')):'')+sel('qs',[[48,L('ছোট (৪৮px)','Small (48px)')],[60,L('মাঝারি (৬০px)','Medium (60px)')],[76,L('বড় (৭৬px)','Large (76px)')]])+'<div class="mute" style="font-size:12px">'+L('লিংকের QR বড় লাগে, তাই ৬০px এর নিচে নামবে না','Link QR codes need more room, so they will not go below 60px')+'</div>')
  +sw('welcome',L('অ্যাপ খোলার স্বাগতম পর্দা','Welcome screen on open'),inp('wgr',L('শুভেচ্ছা লেখা (খালি = সময় অনুযায়ী নিজে)','Greeting line (empty = automatic by time)'))+inp('wmsg',L('মূল লেখা (খালি = স্বাগতম)','Main text (empty = Welcome)'))+inp('wsub',L('নিচের লেখা (খালি = দোকানের নাম)','Bottom text (empty = shop name)')))
+ +sw('hdr',L('রসিদের উপরে ট্যাক্স নম্বর ও ঠিকানা','Tax number & address on top'),'<div class="mute" style="font-size:12px;margin-bottom:6px">'+L('ZATCA সেটআপে দেওয়া তথ্য রসিদের মাথায় আসবে।','Uses the details from the ZATCA setup.')+'</div>')
+ +'<div class="mute" style="font-size:13px;margin-top:10px">'+L('কাগজের মাপ','Paper width')+'</div>'+sel('pw',[['auto',L('অটো (প্রিন্টারের মাপ)','Auto (printer default)')],['58','58 mm'],['72','72 mm'],['80','80 mm']])
+ +'<div class="mute" style="font-size:13px;margin-top:6px">'+L('উপরের ফাঁকা (মিমি)','Top margin (mm)')+'</div>'+sel('pt',[[0,'0 mm'],[1,'1 mm'],[2,'2 mm'],[3,'3 mm'],[4,'4 mm'],[6,'6 mm']])
  +'<button style="width:100%;margin-top:12px" onclick="previewRc()">'+I('print')+' '+L('রসিদের নমুনা দেখুন','Preview receipt')+'</button></div>'}
 
 function accBox(){var o=[];for(var i=0;i<=6;i++)o.push([i,('0'+i).slice(-2)+':00']);
@@ -917,7 +1014,7 @@ function fontBox(){var m='md';try{m=localStorage.getItem('pos_fsz')||'md'}catch(
  return '<div class="box"><div class="hd">'+I('sun')+'<b>'+L('ফন্ট সাইজ','Font size')+'</b></div><div style="display:flex;gap:8px">'+[['sm',L('ছোট','Small')],['md',L('মাঝারি','Medium')],['lg',L('বড়','Large')],['xl',L('অনেক বড়','XL')]].map(function(x){return '<button style="flex:1" class="'+(m==x[0]?'pri':'')+'" onclick="setFsz(\''+x[0]+'\')">'+x[1]+'</button>'}).join('')+'</div></div>'}
 function setFsz(v){if(v=='md')document.documentElement.removeAttribute('data-fsz');else document.documentElement.setAttribute('data-fsz',v);try{localStorage.setItem('pos_fsz',v)}catch(e){}render()}
 function sec(ttl,html,open,key){return '<details'+((open||(key&&SO[key]))?' open':'')+(key?' ontoggle="SO[\''+key+'\']=this.open"':'')+' style="margin:14px 0"><summary style="cursor:pointer;font-weight:800;font-size:16px;padding:10px 2px;color:var(--ink)">'+ttl+'</summary><div style="margin-top:4px">'+html+'</div></details>'}
-function vSet(){return sec(L('থীম ও ফন্ট','Theme & font'),themeBox()+thmBox()+fontBox(),true)+sec(L('ভাষা ও ফিচার','Language & features'),langBox()+featBox(),0,'feat')+sec(L('কর্মী, মালিক ও খরচ','Staff, owner & expenses'),vKh(),0,'kh')+sec('ZATCA',zatcaBox(),0,'zat')+sec(L('রসিদ, স্বাগতম ও দিনের হিসাব','Receipt, welcome & daily accounts'),rcBox()+accBox(),0,'rc')+sec(L('দোকান, ব্যাকআপ ও লগইন','Shop, backup & login'),verBox()+(S.country=='SA'?'':otpBox())+vSet0()+rpBox()+bkBox(),0,'shop')}
+function vSet(){return sec(L('থীম ও ফন্ট','Theme & font'),themeBox()+thmBox()+fontBox(),true)+sec(L('ভাষা ও ফিচার','Language & features'),langBox()+featBox(),0,'feat')+sec(L('কর্মী, মালিক ও খরচ','Staff, owner & expenses'),vKh(),0,'kh')+sec('ZATCA',zatcaBox(),0,'zat')+sec(L('রসিদ, স্বাগতম ও দিনের হিসাব','Receipt, welcome & daily accounts'),logoBox()+rcBox()+accBox(),0,'rc')+sec(L('দোকান, ব্যাকআপ ও লগইন','Shop, backup & login'),verBox()+(S.country=='SA'?'':otpBox())+vSet0()+rpBox()+bkBox(),0,'shop')}
 
 function findDU(nid,name,phone){
  if(nid)for(var i=0;i<DU.length;i++)if(DU[i].nid&&DU[i].nid==nid)return DU[i];
@@ -979,7 +1076,7 @@ function addDuPay(id){var d=DU.find(function(x){return x.id==id});if(!d)return;v
 function printDU(id){var d=DU.find(function(x){return x.id==id});if(!d)return;
  var base=location.href.split('#')[0].split('?')[0];var qr=(CU&&d.pc)?base+'?r='+d.pc:'DUE:'+d.id+';N:'+d.name+';T:'+duTotal(d).toFixed(2);
  var rows=(d.entries||[]).map(function(e){return '<tr><td>'+new Date(e.t).toLocaleDateString()+' · '+esc(e.items||'')+'</td><td class="a">'+e.a.toFixed(2)+'</td></tr>'}).join('');
- var h='<div class="rcpt"><div class="rl">'+LOGO_MONO+'</div><span class="rs">'+esc(S.shop)+'</span><div class="rm"><span>'+t('statement')+'</span><span>'+tdy()+'</span></div><div style="display:flex;align-items:center;gap:8px;margin:4px 0">'+(d.photo?'<img src="'+d.photo+'" style="width:34px;height:34px;border-radius:8px;object-fit:cover">':'')+'<div style="font-weight:800">'+esc(d.name)+(d.nid?' · NID '+esc(d.nid):'')+(d.phone?' · '+esc(d.phone):'')+'</div></div><table>'+rows+'</table><div class="rt g"><span>'+t('totalDue')+'</span><span>'+$$(duTotal(d))+'</span></div><div class="ft"><div class="qrw">'+qrSvg(qr)+'</div><div class="th2">'+esc(d.name)+' · '+esc(d.nid||d.phone||'')+'</div></div></div>';
+ var h='<div class="rcpt"><div class="rl">'+rcLogo()+'</div><span class="rs">'+esc(S.shop)+'</span>'+rcHead()+'<div class="rm"><span>'+t('statement')+'</span><span>'+tdy()+'</span></div><div style="display:flex;align-items:center;gap:8px;margin:4px 0">'+(d.photo?'<img src="'+d.photo+'" style="width:34px;height:34px;border-radius:8px;object-fit:cover">':'')+'<div style="font-weight:800">'+esc(d.name)+(d.nid?' · NID '+esc(d.nid):'')+(d.phone?' · '+esc(d.phone):'')+'</div></div><table>'+rows+'</table><div class="rt g"><span>'+t('totalDue')+'</span><span>'+$$(duTotal(d))+'</span></div><div class="ft"><div class="qrw">'+qrSvg(qr)+'</div><div class="th2">'+esc(d.name)+' · '+esc(d.nid||d.phone||'')+'</div></div></div>';
  $('#rb').innerHTML=h+'<div class="ract"><button onclick="window.print()">'+I('print')+' '+t('print')+'</button><button class="pri" onclick="$(\'#rc\').classList.remove(\'show\')">'+t('done')+'</button></div>';
  $('#rc').classList.add('show')
 }
@@ -1866,8 +1963,8 @@ function bill(id){const o=ords.find(x=>x.id==id);if(!o)return;
   window.QRSRC=window.QRSRC||{l:[]};window.QRSRC.l.push(lbl(o)+(o.name?' · '+o.name:''));
   updateDoc(doc(db,'orders',id),{status:'billed'}).catch(()=>{});op=false;draw();window.go('sell');openCart();if(window.ppOpen&&isWide())setTimeout(function(){ppOpen(o.pm)},80);if(miss)toast(miss+'টি পণ্য POS-এ নেই, বাদ গেছে');else if(o.fee)toast('ডেলিভারি চার্জ '+o.fee+' আলাদা যোগ করুন')};
  Object.keys(cart).length?ask('এখন একটা অর্ডার চলছে। QR অর্ডার ('+lbl(o)+') আলাদা পেমেন্ট হবে; আপনার চলমান অর্ডার সেভ থাকবে, পেমেন্টের পর ফিরে আসবে। চালাবেন?',go,'হ্যাঁ, আলাদা করুন'):go()}
-window.qrPub=async f=>{if(!uid||!CU)return;const it=P.map(x=>({id:x.id,n:x.bn||x.name,e:x.name||x.bn||'',p:x.price,c:x.cat||'',s:x.stock===''?'':x.stock,h:IMG[x.id]?1:0})),best=(function(){try{if(QS.bm=='off')return [];let ids;if(QS.bm=='manual')ids=QS.bi||[];else{const k=tdy(),c={};(H||[]).forEach(h=>{if(!h.refund&&day(h.t)==k)(h.items||[]).forEach(i=>{if(i.id!=null)c[i.id]=(c[i.id]||0)+(+i.qty||0)})});ids=Object.keys(c).filter(x=>c[x]>0).sort((a,b)=>c[b]-c[a]).slice(0,+QS.bc||5)}return ids.map(v=>{const p=P.find(x=>x.id==v);return p?p.id:null}).filter(x=>x!==null)}catch(e){return []}})(),cbs=(QS.cb||[]).filter(c=>c.on!==false&&(c.ids||[]).length>=2&&+c.p>0).map(c=>{const ps=(c.ids||[]).map(id=>P.find(x=>x.id==id)).filter(Boolean);if(ps.length<2)return null;const o=ps.reduce((a,x)=>a+(+x.price||0),0),st=ps.reduce((m,x)=>x.stock===''?m:Math.min(m,x.stock),Infinity);return{id:c.id,n:c.n||ps.map(x=>x.bn||x.name).join(' + '),e:c.n||ps.map(x=>x.name||x.bn).join(' + '),ids:ps.map(x=>String(x.id)),p:+c.p,o:o,s:st===Infinity?'':st}}).filter(Boolean),sig=JSON.stringify([it,S.shop,S.cur,QS,best,S.lang,cbs,S.country]);
- if(!f&&sig==lastSig)return;try{await setDoc(doc(db,'shops',uid),{name:S.shop||'',cur:S.cur||'৳',lang:S.lang||'bn',sa:S.country=='SA',pms:(S.country=='SA'?['Cash','Mada']:['Cash','bKash','Nagad','Rocket','BanglaQR']),color:(QS.bc&&/^#[0-9a-f]{6}$/i.test(QS.bc)?QS.bc:(getComputedStyle(document.documentElement).getPropertyValue('--head').trim()||'#0b2a2e')),items:it,best,combos:cbs,qs:Object.assign({},QS,{dl:DLE()}),updated:Date.now()});lastSig=sig;
+window.qrPub=async f=>{if(!uid||!CU)return;const it=P.map(x=>({id:x.id,n:x.bn||x.name,e:x.name||x.bn||'',p:x.price,c:x.cat||'',s:x.stock===''?'':x.stock,h:IMG[x.id]?1:0})),best=(function(){try{if(QS.bm=='off')return [];let ids;if(QS.bm=='manual')ids=QS.bi||[];else{const k=tdy(),c={};(H||[]).forEach(h=>{if(!h.refund&&day(h.t)==k)(h.items||[]).forEach(i=>{if(i.id!=null)c[i.id]=(c[i.id]||0)+(+i.qty||0)})});ids=Object.keys(c).filter(x=>c[x]>0).sort((a,b)=>c[b]-c[a]).slice(0,+QS.bc||5)}return ids.map(v=>{const p=P.find(x=>x.id==v);return p?p.id:null}).filter(x=>x!==null)}catch(e){return []}})(),cbs=(QS.cb||[]).filter(c=>c.on!==false&&(c.ids||[]).length>=2&&+c.p>0).map(c=>{const ps=(c.ids||[]).map(id=>P.find(x=>x.id==id)).filter(Boolean);if(ps.length<2)return null;const o=ps.reduce((a,x)=>a+(+x.price||0),0),st=ps.reduce((m,x)=>x.stock===''?m:Math.min(m,x.stock),Infinity);return{id:c.id,n:c.n||ps.map(x=>x.bn||x.name).join(' + '),e:c.n||ps.map(x=>x.name||x.bn).join(' + '),ids:ps.map(x=>String(x.id)),p:+c.p,o:o,s:st===Infinity?'':st}}).filter(Boolean),sig=JSON.stringify([it,S.shop,S.cur,QS,best,S.lang,cbs,S.country,S.logo||'']);
+ if(!f&&sig==lastSig)return;try{await setDoc(doc(db,'shops',uid),{name:S.shop||'',cur:S.cur||'৳',lang:S.lang||'bn',sa:S.country=='SA',lg:S.logo||'',pms:(S.country=='SA'?['Cash','Mada']:['Cash','bKash','Nagad','Rocket','BanglaQR']),color:(QS.bc&&/^#[0-9a-f]{6}$/i.test(QS.bc)?QS.bc:(getComputedStyle(document.documentElement).getPropertyValue('--head').trim()||'#0b2a2e')),items:it,best,combos:cbs,qs:Object.assign({},QS,{dl:DLE()}),updated:Date.now()});lastSig=sig;
   for(const k in IMG){const key=k+':'+IMG[k].length;if(pi[k]!==key){await setDoc(doc(db,'shops',uid,'img',String(k)),{d:IMG[k]});pi[k]=key;try{localStorage.setItem('qr_img',JSON.stringify(pi))}catch(e){}}}
   if(f)toast('মেনু ও সেটিংস প্রকাশ হয়েছে ('+it.length+'টি পণ্য)')}catch(e){if(f)toast('প্রকাশ হয়নি: নেট/Rules দেখুন')}};
 setInterval(()=>{try{qrPub(0)}catch(e){}},120000);
