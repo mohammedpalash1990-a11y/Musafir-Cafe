@@ -1,66 +1,129 @@
 <!doctype html>
 <html lang="en" translate="no" class="notranslate"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate"><meta name="robots" content="noindex,nofollow">
-<title>Musafir POS · Admin</title><link rel="icon" href="favicon-32.png">
+<title>Musafir POS · Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f4f6f8;--card:#fff;--ink:#16202a;--mute:#6b7785;--line:#e3e8ee;--ac:#14454b;--ok:#157f3b;--warn:#b54708;--bad:#b42318}
-@media(prefers-color-scheme:dark){:root{--bg:#10161b;--card:#18212a;--ink:#e8eef3;--mute:#93a1ae;--line:#26323d;--ac:#6bc4cf}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,"Segoe UI",sans-serif}
-header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-header b{font-size:17px}header .sp{flex:1}.w{max-width:980px;margin:0 auto;padding:14px 16px 60px}
-button,input,select,textarea{font:inherit;color:inherit}button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600}
-button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}button.bad{color:var(--bad)}input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:6px 0 14px}.st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}.st b{display:block;font-size:24px}.st span{color:var(--mute);font-size:12px}
-.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tools input{flex:2;min-width:160px}.tools select{flex:1;min-width:130px;width:auto}
-.row{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}.top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.top b{font-size:16px}
-.badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;background:#e6f4ea;color:var(--ok)}.badge.w{background:#fff4e5;color:var(--warn)}.badge.b{background:#fde8e8;color:var(--bad)}.badge.g{background:#eef1f4;color:var(--mute)}
-.mu{color:var(--mute);font-size:13px;word-break:break-all}.act{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.act button{padding:6px 10px;font-size:13px}
-.pay{margin-top:8px;font-size:12.5px;color:var(--mute)}.hide{display:none}.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center;margin-top:30px}
+:root{--bg:#0b0d12;--bg2:#10131a;--card:#141821;--card2:#191e29;--ink:#f2ede3;--mute:#8d93a1;--line:#252b38;--gold:#c9a86a;--gold2:#e8d4a2;--gdeep:#8a6d3b;--ok:#6fcf97;--warn:#e9b44c;--bad:#ef7a72;--r:18px}
+@media(prefers-color-scheme:light){:root[data-t="auto"]{--bg:#f6f2ea;--bg2:#fbf8f2;--card:#fff;--card2:#faf6ee;--ink:#1c1a16;--mute:#7c766a;--line:#e6dfd0;--gold:#a27e3a;--gold2:#7a5c24;--gdeep:#c9a86a;--ok:#1f8a4c;--warn:#b7791f;--bad:#c0392b}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#1b1f2c 0%,transparent 60%),var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,"Segoe UI",sans-serif;min-height:100vh}
+:root[data-t="auto"] body{background:radial-gradient(1200px 600px at 80% -10%,#efe6d3 0%,transparent 60%),var(--bg)}
+.serif{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;letter-spacing:.2px}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:14px max(16px,calc((100vw - 1040px)/2));background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.mono{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,var(--gold2),var(--gdeep));color:#17120a;font-weight:700;font-size:22px;box-shadow:0 6px 20px #c9a86a33}
+.brand b{display:block;font-size:22px;line-height:1.05}.brand small{color:var(--gold);letter-spacing:.22em;text-transform:uppercase;font-size:10px;font-weight:600}
+.sp{flex:1}.who{font-size:12.5px;color:var(--mute);padding:6px 12px;border:1px solid var(--line);border-radius:99px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--card2);border-radius:12px;padding:9px 14px;font-weight:500;transition:.18s}
+button:hover{border-color:var(--gold);color:var(--gold2)}
+button.gold{background:linear-gradient(145deg,var(--gold2),var(--gdeep));color:#17120a;border-color:transparent;font-weight:600;box-shadow:0 6px 18px #c9a86a2e}
+button.gold:hover{filter:brightness(1.06);color:#17120a}
+button.ghost{background:transparent}button.bad{color:var(--bad)}button.bad:hover{border-color:var(--bad);color:var(--bad)}
+input,select,textarea{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg2);outline:none;transition:.18s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px #c9a86a22}
+label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:14px 0 6px}
+.tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:99px;background:var(--bg2);margin:2px 0 20px}
+.tabs button{border:0;background:transparent;border-radius:99px;padding:8px 20px;color:var(--mute)}
+.tabs button.on{background:linear-gradient(145deg,var(--gold2),var(--gdeep));color:#17120a;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.st{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden}
+.st::after{content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,#c9a86a22,transparent 70%)}
+.st b{display:block;font-family:"Cormorant Garamond",Georgia,serif;font-size:38px;line-height:1;font-weight:600}.st span{color:var(--mute);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}.tools input{flex:1;min-width:180px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}.chip{padding:6px 14px;border-radius:99px;font-size:13px;background:transparent;color:var(--mute)}.chip.on{border-color:var(--gold);color:var(--gold2);background:#c9a86a14}
+.acc{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:12px;transition:.2s}
+.acc:hover{border-color:#c9a86a55;box-shadow:0 10px 30px #0004}
+.ah{display:flex;gap:14px;align-items:center}.av{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:"Cormorant Garamond",Georgia,serif;font-size:24px;font-weight:700;color:#17120a;background:linear-gradient(145deg,var(--gold2),var(--gdeep))}
+.ai{flex:1;min-width:0}.ai b{display:block;font-family:"Cormorant Garamond",Georgia,serif;font-size:21px;line-height:1.15;font-weight:600}.ai small{color:var(--mute);word-break:break-all}
+.pill{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 11px;border-radius:99px;border:1px solid;white-space:nowrap}
+.pill.ok{color:var(--ok);border-color:#6fcf9744;background:#6fcf9712}.pill.w{color:var(--warn);border-color:#e9b44c44;background:#e9b44c12}.pill.b{color:var(--bad);border-color:#ef7a7244;background:#ef7a7212}.pill.g{color:var(--mute);border-color:var(--line)}.pill.gd{color:var(--gold2);border-color:#c9a86a55;background:#c9a86a14}
+.meta{display:flex;gap:18px;flex-wrap:wrap;margin:14px 0 8px;font-size:13px;color:var(--mute)}.meta b{color:var(--ink);font-weight:500}
+.bar{height:4px;border-radius:9px;background:var(--line);overflow:hidden;margin:6px 0 12px}.bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--gdeep),var(--gold2))}
+.act{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.act button{padding:7px 13px;font-size:13px}
+details.more{position:relative}details.more summary{list-style:none;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:7px 13px;font-size:13px;background:var(--card2)}details.more summary::-webkit-details-marker{display:none}
+details.more[open] summary{border-color:var(--gold);color:var(--gold2)}.menu{position:absolute;z-index:5;top:110%;left:0;min-width:190px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 18px 40px #0007;display:flex;flex-direction:column}
+.menu button{border:0;background:transparent;text-align:left;padding:9px 12px;border-radius:9px}.menu button:hover{background:#c9a86a14}
+.note{margin-top:10px;font-size:12.5px;color:var(--mute);border-top:1px dashed var(--line);padding-top:8px}
+.panel{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:var(--r);padding:22px;margin-bottom:16px}
+.panel h3{margin:0 0 4px;font-size:24px;font-weight:600}.panel p.s{margin:0 0 6px;color:var(--mute);font-size:13px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}@media(max-width:620px){.g2{grid-template-columns:1fr}.who{display:none}}
+.mrow{display:flex;align-items:center;gap:12px;margin:8px 0;font-size:13px}.mrow span{width:70px;color:var(--mute)}.mrow .bb{flex:1;height:10px;border-radius:9px;background:var(--line);overflow:hidden}.mrow .bb i{display:block;height:100%;background:linear-gradient(90deg,var(--gdeep),var(--gold2))}.mrow b{width:90px;text-align:right;font-weight:500}
+.empty{text-align:center;color:var(--mute);padding:50px 20px;border:1px dashed var(--line);border-radius:var(--r)}
+.hero{text-align:center;padding:70px 20px}.hero h1{font-size:44px;margin:14px 0 6px;font-weight:600}.hero p{color:var(--mute);max-width:420px;margin:0 auto 22px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--card);border:1px solid var(--gold);color:var(--gold2);padding:10px 18px;border-radius:99px;z-index:99;box-shadow:0 12px 30px #0007;opacity:0;pointer-events:none;transition:.25s}.toast.on{opacity:1}
 </style></head><body>
-<header><b>Musafir POS · Admin</b><span class="sp"></span><span class="mu" id="who"></span><button id="bt" class="pri">Sign in with Google</button></header>
-<div class="w" id="main"><div class="box" id="msg">Sign in with the admin Google account.</div></div>
+<header><div class="mono serif">M</div><div class="brand"><b class="serif">Musafir POS</b><small>Admin Console</small></div><span class="sp"></span><span class="who" id="who"></span><button id="bt" class="gold">Sign in with Google</button></header>
+<div class="wrap" id="main"><div class="hero"><div class="mono serif" style="margin:0 auto;width:64px;height:64px;font-size:34px">M</div><h1 class="serif">Welcome back</h1><p>Sign in with the administrator account to manage shops and subscriptions.</p></div></div>
+<div class="toast" id="tt"></div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signOut,sendEmailVerification} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,getDocs,doc,setDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,collection,getDocs,getDoc,doc,setDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const ADMIN='mohammedpalash1990@gmail.com';
+document.documentElement.dataset.t='auto';
 const app=initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDomain:"index-9d688.firebaseapp.com",projectId:"index-9d688",storageBucket:"index-9d688.firebasestorage.app",messagingSenderId:"385223961831",appId:"1:385223961831:web:48738d8e14c8b6c2a7c642"});
 const auth=getAuth(app),db=getFirestore(app),$=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let rows=[],user=null;
-const DAY=864e5,fmt=t=>t?new Date(t).toISOString().slice(0,10):'-';
+let rows=[],user=null,tab='acc',flt='all',cfg={},q='';
+const DAY=864e5,LIFE=4102444800000,fmt=t=>t?(+t>=LIFE?'Lifetime':new Date(t).toISOString().slice(0,10)):'-';
 const addM=(t,m)=>{const d=new Date(Math.max(+t||0,Date.now()));d.setMonth(d.getMonth()+m);return d.getTime()};
-function stOf(r){if(!r.sub)return{k:'legacy',l:'No subscription set (legacy)',c:'g'};const s=r.sub;if(s.st=='suspended')return{k:'suspended',l:'Suspended',c:'b'};const d=Math.ceil((+s.exp-Date.now())/DAY);
- if(d<0)return{k:'expired',l:'Expired '+(-d)+'d ago',c:'b'};if(d<=30)return{k:'expiring',l:(s.st=='trial'?'Trial ':'')+d+' days left',c:'w'};return{k:s.st=='trial'?'trial':'active',l:(s.st=='trial'?'Trial · ':'Active · ')+d+' days',c:s.st=='trial'?'w':''}}
-async function load(){$('#main').innerHTML='<div class="box">Loading…</div>';
- try{const [a,b]=await Promise.all([getDocs(collection(db,'subs')),getDocs(collection(db,'shops'))]);const m={};
-  b.docs.forEach(d=>{const x=d.data();m[d.id]={id:d.id,name:x.name||'',cur:x.cur||''}});
+const toast=m=>{const e=$('#tt');e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)};
+function stOf(r){if(!r.sub)return{k:'legacy',l:'No plan',c:'g',d:null};const s=r.sub;if(s.st=='suspended')return{k:'suspended',l:'Suspended',c:'b',d:null};if(+s.exp>=LIFE)return{k:'life',l:'Lifetime',c:'gd',d:99999};const d=Math.ceil((+s.exp-Date.now())/DAY);
+ if(d<0)return{k:'expired',l:'Expired '+(-d)+'d',c:'b',d};if(d<=30)return{k:'expiring',l:(s.st=='trial'?'Trial · ':'')+d+' days left',c:'w',d};return{k:s.st=='trial'?'trial':'active',l:(s.st=='trial'?'Trial · ':'Active · ')+d+' days',c:s.st=='trial'?'w':'ok',d}}
+async function load(){$('#main').innerHTML='<div class="empty">Loading…</div>';
+ try{const [a,b,c]=await Promise.all([getDocs(collection(db,'subs')),getDocs(collection(db,'shops')),getDoc(doc(db,'appcfg','main'))]);const m={};
+  b.docs.forEach(d=>{const x=d.data();m[d.id]={id:d.id,name:x.name||''}});
   a.docs.forEach(d=>{m[d.id]=Object.assign(m[d.id]||{id:d.id,name:''},{sub:d.data()})});
-  rows=Object.values(m);draw()}catch(e){$('#main').innerHTML='<div class="box">Could not load: '+esc(e.code||e.message)+'<br><span class="mu">Check that the admin Firestore rules are added.</span></div>'}}
-function draw(){const q=($('#q')?$('#q').value:'').toLowerCase(),f=$('#f')?$('#f').value:'all';
- const all=rows.map(r=>({r,s:stOf(r)})),cnt=k=>all.filter(x=>x.s.k==k).length;
- let h='<div class="stats"><div class="st"><b>'+all.length+'</b><span>Accounts</span></div><div class="st"><b>'+(cnt('active')+cnt('trial'))+'</b><span>Active / trial</span></div><div class="st"><b>'+cnt('expiring')+'</b><span>Ending ≤30 days</span></div><div class="st"><b>'+(cnt('expired')+cnt('suspended'))+'</b><span>Expired / suspended</span></div><div class="st"><b>'+cnt('legacy')+'</b><span>No subscription set</span></div></div>'
- +'<div class="tools"><input id="q" placeholder="Search name, email, id" value="'+esc(q)+'" oninput="window.dr()"><select id="f" onchange="window.dr()">'+[['all','All'],['active','Active'],['trial','Trial'],['expiring','Ending soon'],['expired','Expired'],['suspended','Suspended'],['legacy','No subscription']].map(o=>'<option value="'+o[0]+'"'+(f==o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select><button onclick="window.reload()">Refresh</button>'+(cnt('legacy')?'<button class="pri" onclick="window.legacyYear()">Give 1 year to all "No subscription"</button>':'')+'</div><div id="list">';
- const L=all.filter(x=>(f=='all'||x.s.k==f)&&(!q||(x.r.name+' '+(x.r.sub&&x.r.sub.email||'')+' '+x.r.id).toLowerCase().includes(q)));
+  cfg=c.exists()?c.data():{};rows=Object.values(m);draw()}catch(e){$('#main').innerHTML='<div class="empty">Could not load: '+esc(e.code||e.message)+'<br><small>Make sure the latest Firestore rules are published.</small></div>'}}
+function tabsH(){return '<div class="tabs">'+[['acc','Accounts'],['ins','Insights'],['set','Settings']].map(t=>'<button class="'+(tab==t[0]?'on':'')+'" onclick="window.tb(\''+t[0]+'\')">'+t[1]+'</button>').join('')+'</div>'}
+function draw(){const h=tabsH();$('#main').innerHTML=h+(tab=='acc'?accH():tab=='ins'?insH():setH())}
+function accH(){const all=rows.map(r=>({r,s:stOf(r)})),cnt=k=>all.filter(x=>x.s.k==k).length;
+ let h='<div class="stats"><div class="st"><b>'+all.length+'</b><span>Shops</span></div><div class="st"><b>'+(cnt('active')+cnt('trial')+cnt('life')+cnt('expiring'))+'</b><span>Live</span></div><div class="st"><b>'+cnt('expiring')+'</b><span>Ending ≤30d</span></div><div class="st"><b>'+(cnt('expired')+cnt('suspended'))+'</b><span>Locked / expired</span></div>'+(cnt('legacy')?'<div class="st"><b>'+cnt('legacy')+'</b><span>No plan set</span></div>':'')+'</div>'
+ +'<div class="tools"><input id="q" placeholder="Search shop, email or id" value="'+esc(q)+'" oninput="window.sq(this.value)"><button onclick="window.reload()">Refresh</button>'+(cnt('legacy')?'<button class="gold" onclick="window.legacyYear()">Give 1 year to '+cnt('legacy')+' shops</button>':'')+'</div>'
+ +'<div class="chips">'+[['all','All'],['active','Active'],['trial','Trial'],['expiring','Ending soon'],['expired','Expired'],['suspended','Suspended'],['life','Lifetime'],['legacy','No plan']].map(o=>'<button class="chip '+(flt==o[0]?'on':'')+'" onclick="window.fl(\''+o[0]+'\')">'+o[1]+'</button>').join('')+'</div><div id="list">'+listH(all)+'</div>';return h}
+function listH(all){const ql=q.toLowerCase(),L=all.filter(x=>(flt=='all'||x.s.k==flt)&&(!ql||(x.r.name+' '+(x.r.sub&&x.r.sub.email||'')+' '+x.r.id).toLowerCase().includes(ql)));
  L.sort((a,b)=>(a.r.sub?+a.r.sub.exp:1e15)-(b.r.sub?+b.r.sub.exp:1e15));
- h+=L.map(({r,s})=>{const sb=r.sub||{},pay=(sb.pay||[]).slice(-3).reverse().map(p=>fmt(p.t)+' · '+esc(p.a)+' '+esc(p.m||'')).join(' | ');
-  return '<div class="row"><div class="top"><b>'+esc(r.name||sb.nm||'(no name)')+'</b><span class="badge '+s.c+'">'+s.l+'</span></div><div class="mu">'+esc(sb.email||'')+' · '+esc(r.id)+'</div><div class="mu">Valid until: <b>'+fmt(sb.exp)+'</b>'+(sb.note?' · Note: '+esc(sb.note):'')+'</div>'+(pay?'<div class="pay">Payments: '+pay+'</div>':'')
-  +'<div class="act"><button onclick="window.ext(\''+r.id+'\',1)">+1 month</button><button onclick="window.ext(\''+r.id+'\',6)">+6 months</button><button class="pri" onclick="window.ext(\''+r.id+'\',12)">+1 year</button><button onclick="window.trial(\''+r.id+'\')">Trial 14d</button><button onclick="window.pay(\''+r.id+'\')">Record payment</button><button onclick="window.note(\''+r.id+'\')">Note</button>'
-  +(sb.st=='suspended'?'<button onclick="window.sus(\''+r.id+'\',0)">Activate</button>':'<button class="bad" onclick="window.sus(\''+r.id+'\',1)">Suspend</button>')+'</div></div>'}).join('')||'<div class="box">Nothing here.</div>';
- $('#main').innerHTML=h+'</div>';if(q){const e=$('#q');e.focus();e.setSelectionRange(q.length,q.length)}}
+ return L.map(({r,s})=>{const sb=r.sub||{},nm=r.name||sb.nm||'Unnamed shop',pay=(sb.pay||[]).slice(-2).reverse().map(p=>fmt(p.t)+' · '+esc(p.a)+(p.m?' · '+esc(p.m):'')).join('  |  '),pc=s.d==null?0:Math.max(3,Math.min(100,s.d/365*100));
+  return '<div class="acc"><div class="ah"><div class="av">'+esc(nm.trim().charAt(0).toUpperCase()||'?')+'</div><div class="ai"><b>'+esc(nm)+'</b><small>'+esc(sb.email||r.id)+'</small></div><span class="pill '+s.c+'">'+s.l+'</span></div>'
+  +'<div class="meta"><span>Valid until <b>'+fmt(sb.exp)+'</b></span>'+(sb.email?'<span>ID <b>'+esc(r.id.slice(0,8))+'…</b></span>':'')+'</div><div class="bar"><i style="width:'+pc+'%"></i></div>'
+  +'<div class="act"><button class="gold" onclick="window.ext(\''+r.id+'\',12)">+ 1 Year</button><button onclick="window.ext(\''+r.id+'\',1)">+ 1 Month</button><details class="more"><summary>More ▾</summary><div class="menu"><button onclick="window.ext(\''+r.id+'\',6)">+ 6 Months</button><button onclick="window.life(\''+r.id+'\')">Make Lifetime</button><button onclick="window.trial(\''+r.id+'\')">Start 14-day trial</button><button onclick="window.pay(\''+r.id+'\')">Record payment</button><button onclick="window.note(\''+r.id+'\')">Edit note</button>'
+  +(sb.st=='suspended'?'<button onclick="window.sus(\''+r.id+'\',0)">Activate</button>':'<button class="bad" onclick="window.sus(\''+r.id+'\',1)">Suspend</button>')+'</div></details></div>'
+  +(sb.note?'<div class="note">Note · '+esc(sb.note)+'</div>':'')+(pay?'<div class="note">Payments · '+pay+'</div>':'')+'</div>'}).join('')||'<div class="empty">No shops match.</div>'}
+function num(a){const m=String(a||'').replace(/[,\s]/g,'').match(/[\d.]+/);return m?parseFloat(m[0]):0}
+function insH(){const pays=[];rows.forEach(r=>(r.sub&&r.sub.pay||[]).forEach(p=>pays.push(Object.assign({shop:r.name||r.sub.nm||r.id},p))));
+ const tot=pays.reduce((a,p)=>a+num(p.a),0),by={};pays.forEach(p=>{const k=new Date(p.t).toISOString().slice(0,7);by[k]=(by[k]||0)+num(p.a)});const ks=Object.keys(by).sort().slice(-8),mx=Math.max(1,...ks.map(k=>by[k]));
+ const due=rows.map(r=>({r,s:stOf(r)})).filter(x=>x.s.d!=null&&x.s.d<=90&&x.s.d>=0&&x.s.k!='life').sort((a,b)=>a.s.d-b.s.d);
+ return '<div class="stats"><div class="st"><b>'+tot.toLocaleString()+'</b><span>Recorded payments</span></div><div class="st"><b>'+pays.length+'</b><span>Payments</span></div><div class="st"><b>'+due.length+'</b><span>Renewals ≤ 90d</span></div></div>'
+ +'<div class="panel"><h3 class="serif">Monthly receipts</h3><p class="s">From payments you recorded (numbers only are summed).</p>'+(ks.length?ks.map(k=>'<div class="mrow"><span>'+k+'</span><div class="bb"><i style="width:'+by[k]/mx*100+'%"></i></div><b>'+by[k].toLocaleString()+'</b></div>').join(''):'<div class="empty" style="padding:24px">No payments recorded yet.</div>')+'</div>'
+ +'<div class="panel"><h3 class="serif">Upcoming renewals</h3><p class="s">Shops whose plan ends within 90 days.</p>'+(due.map(x=>'<div class="mrow"><span style="width:auto;flex:1;color:var(--ink)">'+esc(x.r.name||x.r.sub.nm||x.r.id)+'</span><span style="width:auto">'+fmt(x.r.sub.exp)+'</span><b class="pill '+x.s.c+'" style="width:auto">'+x.s.d+'d</b></div>').join('')||'<div class="empty" style="padding:24px">Nothing due soon.</div>')+'</div>'}
+function setH(){return '<div class="panel"><h3 class="serif">Customer-facing settings</h3><p class="s">Shown on the lock screen and used for new trials. Saved to the cloud, applied the next time a shop opens the app.</p>'
+ +'<div class="g2"><div><label>Contact (WhatsApp number or text)</label><input id="c1" placeholder="+966 5x xxx xxxx" value="'+esc(cfg.contact||'')+'"></div><div><label>Yearly price shown</label><input id="c2" placeholder="600 SAR / year" value="'+esc(cfg.price||'')+'"></div>'
+ +'<div><label>Free trial (days, 1–15)</label><input id="c3" type="number" min="1" max="15" value="'+esc(cfg.trial||14)+'"></div><div><label>Software name</label><input id="c4" placeholder="Musafir POS" value="'+esc(cfg.brand||'')+'"></div></div>'
+ +'<label>Message on lock screen (optional)</label><textarea id="c5" rows="3" placeholder="Your subscription has ended. Please renew to continue.">'+esc(cfg.msg||'')+'</textarea>'
+ +'<div class="act" style="margin-top:16px"><button class="gold" onclick="window.saveCfg()">Save settings</button></div></div>'
+ +'<div class="panel"><h3 class="serif">Data</h3><p class="s">Download every shop with plan, validity and notes.</p><div class="act"><button onclick="window.csv()">Export CSV</button></div></div>'
+ +'<div class="panel"><h3 class="serif">Security</h3><p class="s">Admin access is limited to <b style="color:var(--ink)">'+esc(ADMIN)+'</b> with a verified email, enforced by Firestore rules.</p></div>'}
 async function put(id,patch){const r=rows.find(x=>x.id==id);const cur=r.sub||{};const nx=Object.assign({email:'',nm:r.name||'',t0:Date.now(),st:'active'},cur,patch);await setDoc(doc(db,'subs',id),nx);r.sub=nx}
-window.dr=draw;window.reload=load;
-window.ext=async(id,m)=>{try{const r=rows.find(x=>x.id==id),b=r.sub&&r.sub.st!='suspended'?+r.sub.exp:0;await put(id,{exp:addM(b,m),st:'active'});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
-window.trial=async id=>{if(!confirm('Set a 14-day trial from today?'))return;try{await put(id,{exp:Date.now()+14*DAY,st:'trial'});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
-window.sus=async(id,v)=>{if(v&&!confirm('Suspend this account? They will be locked out.'))return;try{await put(id,{st:v?'suspended':'active'});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
-window.note=async id=>{const r=rows.find(x=>x.id==id),n=prompt('Note',r.sub&&r.sub.note||'');if(n===null)return;try{await put(id,{note:n});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
-window.pay=async id=>{const a=prompt('Amount received (e.g. 600 SAR)');if(!a)return;const m=prompt('Method (cash / bank / STC Pay / bKash)','')||'';const r=rows.find(x=>x.id==id),pay=((r.sub&&r.sub.pay)||[]).concat([{t:Date.now(),a,m}]);try{await put(id,{pay});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
-window.legacyYear=async()=>{const t=rows.filter(r=>!r.sub);if(!confirm('Give 1 year (from today) to '+t.length+' accounts?'))return;try{for(const r of t)await put(r.id,{exp:addM(0,12),st:'active'});draw()}catch(e){alert('Failed: '+(e.code||e.message))}};
-$('#bt').onclick=()=>user?signOut(auth):signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>alert(e.code||e.message));
-onAuthStateChanged(auth,u=>{user=u;$('#bt').textContent=u?'Sign out':'Sign in with Google';$('#who').textContent=u?u.email:'';
- if(!u){$('#main').innerHTML='<div class="box">Sign in with the admin Google account.</div>';return}
- if((u.email||'').toLowerCase()!==ADMIN){$('#main').innerHTML='<div class="box">This account ('+esc(u.email)+') is not authorised.<br><br><span class="mu">Sign out and use the admin account.</span></div>';return}
- if(!u.emailVerified){$('#main').innerHTML='<div class="box"><b>Email not verified yet</b><p class="mu">For safety the admin panel needs a verified email. 1) Press "Send verification email". 2) Open the email in Gmail and click the link. 3) Come back and press "I have verified".</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="pri" onclick="window.sendV()">Send verification email</button><button onclick="window.chkV()">I have verified</button></div></div>';return}
+const run=async f=>{try{await f();draw();toast('Saved')}catch(e){toast('Failed: '+(e.code||e.message))}};
+window.tb=t=>{tab=t;draw()};window.fl=f=>{flt=f;draw()};window.sq=v=>{q=v;const all=rows.map(r=>({r,s:stOf(r)}));$('#list').innerHTML=listH(all)};window.reload=load;
+window.ext=(id,m)=>run(async()=>{const r=rows.find(x=>x.id==id),b=r.sub&&r.sub.st!='suspended'&&+r.sub.exp<LIFE?+r.sub.exp:0;await put(id,{exp:addM(b,m),st:'active'})});
+window.life=id=>{if(confirm('Make this shop lifetime (never expires)?'))run(()=>put(id,{exp:LIFE,st:'active'}))};
+window.trial=id=>{if(confirm('Set a 14-day trial from today?'))run(()=>put(id,{exp:Date.now()+14*DAY,st:'trial'}))};
+window.sus=(id,v)=>{if(v&&!confirm('Suspend this account? They will be locked out.'))return;run(()=>put(id,{st:v?'suspended':'active'}))};
+window.note=id=>{const r=rows.find(x=>x.id==id),n=prompt('Note',r.sub&&r.sub.note||'');if(n===null)return;run(()=>put(id,{note:n}))};
+window.pay=id=>{const a=prompt('Amount received (e.g. 600 SAR)');if(!a)return;const m=prompt('Method (cash / bank / STC Pay / bKash)','')||'';const r=rows.find(x=>x.id==id);run(()=>put(id,{pay:((r.sub&&r.sub.pay)||[]).concat([{t:Date.now(),a,m}])}))};
+window.legacyYear=()=>{const t=rows.filter(r=>!r.sub);if(confirm('Give 1 year (from today) to '+t.length+' shops?'))run(async()=>{for(const r of t)await put(r.id,{exp:addM(0,12),st:'active'})})};
+window.saveCfg=()=>run(async()=>{const tr=Math.max(1,Math.min(15,parseInt($('#c3').value)||14));cfg={contact:$('#c1').value.trim(),price:$('#c2').value.trim(),trial:tr,brand:$('#c4').value.trim(),msg:$('#c5').value.trim()};await setDoc(doc(db,'appcfg','main'),cfg)});
+window.csv=()=>{const l=[['shop','email','id','status','valid_until','note']].concat(rows.map(r=>{const s=stOf(r),b=r.sub||{};return [r.name||b.nm||'',b.email||'',r.id,s.l,fmt(b.exp),b.note||'']}));const t=l.map(a=>a.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n'),u=URL.createObjectURL(new Blob(['﻿'+t],{type:'text/csv'})),a=document.createElement('a');a.href=u;a.download='musafir-pos-shops.csv';a.click()};
+window.sendV=async()=>{try{await sendEmailVerification(user);toast('Verification email sent')}catch(e){toast('Failed: '+(e.code||e.message))}};
+window.chkV=async()=>{try{await user.reload();await user.getIdToken(true);if(auth.currentUser.emailVerified)location.reload();else toast('Not verified yet')}catch(e){toast('Failed: '+(e.code||e.message))}};
+$('#bt').onclick=()=>user?signOut(auth):signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>toast(e.code||e.message));
+const hero=(t,p,b)=>'<div class="hero"><div class="mono serif" style="margin:0 auto;width:64px;height:64px;font-size:34px">M</div><h1 class="serif">'+t+'</h1><p>'+p+'</p>'+(b||'')+'</div>';
+onAuthStateChanged(auth,u=>{user=u;$('#bt').textContent=u?'Sign out':'Sign in with Google';$('#bt').className=u?'':'gold';$('#who').textContent=u?u.email:'';
+ if(!u){$('#main').innerHTML=hero('Welcome back','Sign in with the administrator account to manage shops and subscriptions.');return}
+ if((u.email||'').toLowerCase()!==ADMIN){$('#main').innerHTML=hero('Not authorised','This account ('+esc(u.email)+') cannot open the console. Sign out and use the admin account.');return}
+ if(!u.emailVerified){$('#main').innerHTML=hero('Verify your email','For safety the console needs a verified email. Send the link, open it in Gmail, then come back and press “I have verified”.','<div class="act" style="justify-content:center"><button class="gold" onclick="window.sendV()">Send verification email</button><button onclick="window.chkV()">I have verified</button></div>');return}
  load()});
-window.sendV=async()=>{try{await sendEmailVerification(user);alert('Verification email sent to '+user.email+'. Check inbox and spam.')}catch(e){alert('Failed: '+(e.code||e.message))}};
-window.chkV=async()=>{try{await user.reload();await user.getIdToken(true);if(auth.currentUser.emailVerified)location.reload();else alert('Not verified yet. Click the link in the email first.')}catch(e){alert('Failed: '+(e.code||e.message))}};
 </script></body></html>
