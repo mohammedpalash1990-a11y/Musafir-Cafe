@@ -47,6 +47,15 @@ h2.pt{margin:0 0 14px;font-size:22px}
 details.more{position:relative}details.more summary{list-style:none;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:8px 13px;font-size:13px;font-weight:600;background:var(--card)}
 .menu{position:absolute;z-index:5;top:110%;left:0;min-width:190px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 10px 30px #0003}
 .menu button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:9px 12px;border-radius:9px}.menu button:hover{background:var(--bg)}
+.mo{position:fixed;inset:0;background:#0008;z-index:50;display:flex;align-items:center;justify-content:center;padding:14px}
+.mb{background:var(--card);color:var(--ink);border-radius:20px;max-width:500px;width:100%;max-height:94vh;overflow:auto;padding:20px;box-shadow:0 20px 60px #0006}
+.mb h3{margin:0 0 2px;font-size:20px}.mb .sub2{color:var(--mute);font-size:13px;margin:0 0 12px;overflow-wrap:anywhere}
+.mb h5{margin:14px 0 6px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}.seg button{padding:9px 13px;font-size:13.5px;border-radius:12px}.seg button.on{background:var(--head);border-color:var(--head);color:#fff}.seg button:disabled{opacity:.4}
+.prev{background:var(--bg);border-radius:14px;padding:12px 14px;font-size:14px;margin:14px 0 8px;line-height:1.7}.prev b{font-weight:800}.prev.bad{background:var(--reds);color:var(--warn)}.prev .ar{opacity:.6;margin:0 4px}
+.mb .hint{font-size:12.5px;color:var(--mute);margin:6px 0 0}
+.mb .foot{display:flex;gap:10px;margin-top:14px}.mb .foot button{flex:1;padding:12px}
+.lastc{margin-top:10px;font-size:12.5px;color:var(--mute);border-top:1px dashed var(--line);padding-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.lastc button{padding:4px 11px;font-size:12px;border-radius:9px}
 .note{margin-top:10px;font-size:12.5px;color:var(--mute);border-top:1px dashed var(--line);padding-top:8px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px}
 .panel h3{margin:0 0 4px;font-size:18px}.panel p.s{margin:0 0 6px;color:var(--mute);font-size:13px}
@@ -75,8 +84,9 @@ const app=initializeApp({apiKey:"AIzaSyDzeJEmyQi8vbRr4jnFoaygyU6Afd351Y4",authDo
 const auth=getAuth(app),db=getFirestore(app),$=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let rows=[],user=null,pg='acc',flt='all',cfg={},q='',hf='all';
-const DAY=864e5,LIFE=4102444800000,isLife=t=>+t>=LIFE,fmt=t=>t?(isLife(t)?'Lifetime':new Date(t).toISOString().slice(0,10)):'-';
-const addM=(t,m)=>{const d=new Date(Math.max(+t||0,Date.now()));d.setMonth(d.getMonth()+m);return d.getTime()};
+const DAY=864e5,LIFE=4102444800000,isLife=t=>+t>=LIFE,pad2=n=>('0'+n).slice(-2),fmt=t=>{if(!t)return '-';if(isLife(t))return 'Lifetime';const d=new Date(+t);return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())};
+const addMon=(t,m)=>{const d=new Date(+t),day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+m);const dim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,dim));return d.getTime()};
+const addM=(t,m)=>addMon(Math.max(+t||0,Date.now()),m);
 const toast=m=>{const e=$('#tt');e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)};
 const PLANS=[['trial','Free trial','🎁'],['m1','1 Month','📅'],['m6','6 Months','🗓️'],['y1','1 Year','⭐'],['life','Lifetime','♾️']];
 function planOf(r){const s=r.sub;if(!s)return '';if(isLife(s.exp))return 'life';if(s.st=='trial')return 'trial';return s.plan||''}
@@ -103,9 +113,9 @@ function listH(all){const ql=q.toLowerCase(),L=all.filter(x=>(flt=='all'||x.s.k=
  return L.map(({r,s})=>{const sb=r.sub||{},nm=r.name||sb.nm||'Unnamed shop',pay=(sb.pay||[]).slice(-2).reverse().map(p=>fmt(p.t)+' · '+esc(p.a)+(p.m?' · '+esc(p.m):'')).join('  |  '),life=s.k=='life',pc=s.d==null||life?0:Math.max(3,Math.min(100,s.d/365*100));
   return '<div class="acc"><div class="ah"><div class="av">'+esc((em(r)||nm).trim().charAt(0).toUpperCase()||'?')+'</div><div class="ai"><b>'+(em(r)?esc(em(r)):'<span style="opacity:.6">Email unknown · shows after the shop logs in once</span>')+'</b><small>'+(r.own&&(r.own.shop||r.own.mart)?(r.own.shop?'☕ '+esc(r.own.shop):'')+(r.own.shop&&r.own.mart?'  ·  ':'')+(r.own.mart?'🛒 '+esc(r.own.mart):''):esc(nm))+'</small></div><span class="pill '+s.c+'">'+s.l+'</span></div>'
   +'<div class="meta">'+(r.sub?(life?'<span>Plan <b>Lifetime</b></span>':'<span>Valid until <b>'+fmt(sb.exp)+'</b></span>'):'<span>No plan yet</span>')+'<span>ID <b>'+esc(r.id.slice(0,8))+'…</b></span></div>'+(life||!r.sub?'':'<div class="bar"><i style="width:'+pc+'%"></i></div>')
-  +'<div class="act"><button class="pri" onclick="window.ext(\''+r.id+'\',12)">+ 1 Year</button><button onclick="window.ext(\''+r.id+'\',1)">+ 1 Month</button><details class="more"><summary>More ▾</summary><div class="menu"><button onclick="window.ext(\''+r.id+'\',6)">+ 6 Months</button><button onclick="window.life(\''+r.id+'\')">Make Lifetime</button><button onclick="window.trial(\''+r.id+'\')">Start 14-day trial</button><button onclick="window.pay(\''+r.id+'\')">Record payment</button><button onclick="window.note(\''+r.id+'\')">Edit note</button>'
+  +'<div class="act"><button class="pri" onclick="window.pm(\''+r.id+'\')">Change plan</button>'+(life?'':'<button title="Adds to the current end date (from today if already expired)" onclick="window.ext(\''+r.id+'\',12)">Extend +1 Year</button><button title="Adds to the current end date (from today if already expired)" onclick="window.ext(\''+r.id+'\',1)">Extend +1 Month</button>')+'<details class="more"><summary>More ▾</summary><div class="menu">'+(life?'':'<button onclick="window.ext(\''+r.id+'\',6)">Extend +6 Months</button>')+'<button onclick="window.life(\''+r.id+'\')">Make Lifetime</button><button onclick="window.trial(\''+r.id+'\')">Start 14-day trial</button><button onclick="window.pay(\''+r.id+'\')">Record payment</button><button onclick="window.note(\''+r.id+'\')">Edit note</button>'
   +(sb.st=='suspended'?'<button onclick="window.sus(\''+r.id+'\',0)">Activate</button>':'<button class="bad" onclick="window.sus(\''+r.id+'\',1)">Suspend</button>')+'</div></details></div>'
-  +(sb.note?'<div class="note">Note · '+esc(sb.note)+'</div>':'')+(pay?'<div class="note">Payments · '+pay+'</div>':'')+'</div>'}).join('')||'<div class="empty">No shops match.</div>'}
+  +lastH(r)+(sb.note?'<div class="note">Note · '+esc(sb.note)+'</div>':'')+(pay?'<div class="note">Payments · '+pay+'</div>':'')+'</div>'}).join('')||'<div class="empty">No shops match.</div>'}
 /* ---- health ---- */
 const ago=t=>{if(!t)return null;const d=Math.floor((Date.now()-t)/DAY);return d<=0?'today':d+'d ago'};
 function health(r){const s=stOf(r),o=r.own,K=[];
@@ -147,13 +157,45 @@ const run=async f=>{try{await f();draw();toast('Saved')}catch(e){toast('Failed: 
 const saveCfg=async p=>{cfg=Object.assign({},cfg,p);await setDoc(doc(db,'appcfg','main'),cfg)};
 window.go=p=>{pg=p;draw();scrollTo(0,0)};window.sb=()=>{$('#side').classList.toggle('open');$('#scrim').classList.toggle('on')};
 window.fl=f=>{flt=f;draw()};window.hfl=f=>{hf=f;draw()};window.pf=k=>{flt='plan_'+k;pg='acc';draw()};window.sq=v=>{q=v;const all=rows.map(r=>({r,s:stOf(r)}));$('#list').innerHTML=listH(all)};window.reload=load;
-window.ext=(id,m)=>run(async()=>{const r=rows.find(x=>x.id==id),b=r.sub&&r.sub.st!='suspended'&&!isLife(r.sub.exp)?+r.sub.exp:0;await put(id,{exp:addM(b,m),st:'active',plan:m==1?'m1':m==6?'m6':'y1'})});
-window.life=id=>{if(confirm('Make this shop lifetime (never expires)?'))run(()=>put(id,{exp:LIFE,st:'active',plan:'life'}))};
-window.trial=id=>{if(confirm('Set a 14-day trial from today?'))run(()=>put(id,{exp:Date.now()+14*DAY,st:'trial',plan:'trial'}))};
-window.sus=(id,v)=>{if(v&&!confirm('Suspend this account? They will be locked out.'))return;run(()=>put(id,{st:v?'suspended':'active'}))};
+async function chg(id,patch,what){const r=rows.find(x=>x.id==id),s=r.sub,h=((s&&s.hist)||[]).slice(-9),
+  f=s&&s.exp?{exp:+s.exp,st:s.st||'active',plan:s.plan||''}:null,to={exp:'exp' in patch?patch.exp:(f?f.exp:0),st:'st' in patch?patch.st:(f?f.st:'active'),plan:'plan' in patch?patch.plan:(f?f.plan:'')};
+ h.push({t:Date.now(),w:what,f,to});await put(id,Object.assign({},patch,{hist:h}))}
+window.ext=(id,m)=>run(async()=>{const r=rows.find(x=>x.id==id),b=r.sub&&r.sub.st!='suspended'&&!isLife(r.sub.exp)?+r.sub.exp:0;await chg(id,{exp:addM(b,m),st:'active',plan:m==1?'m1':m==6?'m6':'y1'},'Extend +'+(m==12?'1 Year':m+(m==1?' Month':' Months')))});
+window.life=id=>{if(confirm('Make this shop lifetime (never expires)?'))run(()=>chg(id,{exp:LIFE,st:'active',plan:'life'},'Lifetime'))};
+window.trial=id=>{if(confirm('Set a '+(cfg.trial||14)+'-day trial from today?'))run(()=>chg(id,{exp:Date.now()+(+cfg.trial||14)*DAY,st:'trial',plan:'trial'},'Trial from today'))};
+window.sus=(id,v)=>{if(v&&!confirm('Suspend this account? They will be locked out.'))return;run(()=>chg(id,{st:v?'suspended':'active'},v?'Suspend':'Activate'))};
+/* ---- change plan dialog ---- */
+const PN={trial:'Free trial',m1:'1 Month',m6:'6 Months',y1:'1 Year',life:'Lifetime'},MN={set:'From today',add:'Add to current',sub:'Subtract',date:'Exact date'};
+let PM=null;
+const stS=x=>x.st=='suspended'?'Suspended':isLife(x.exp)?'Lifetime':fmt(x.exp);
+function lastH(r){const h=r.sub&&r.sub.hist,e=h&&h[h.length-1];if(!e)return '';const d=new Date(e.t);
+ return '<div class="lastc"><span>Last change · '+d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())+' · <b style="color:var(--ink)">'+esc(e.w||'')+'</b> · '+(e.f?stS(e.f):'No plan')+' → '+stS(e.to)+'</span>'+(e.f?'<button onclick="window.undo(\''+r.id+'\')">Undo</button>':'')+'</div>'}
+function pmCalc(){const r=rows.find(x=>x.id==PM.id),s=r.sub,cur=s&&s.exp&&!isLife(s.exp)?+s.exp:null,pl=PM.plan,now=Date.now();
+ if(pl=='life')return{exp:LIFE,st:'active',plan:'life'};
+ if(PM.mode=='date'){if(!PM.date)return{err:'Pick a date'};const p=PM.date.split('-').map(Number),t=new Date(p[0],p[1]-1,p[2],23,59,59).getTime();if(!(t>0)||p[0]>2100)return{err:'Invalid date'};return{exp:t,st:pl=='trial'?'trial':'active',plan:pl}}
+ if(PM.mode!='set'&&cur==null)return{err:'This shop has no end date to '+(PM.mode=='add'?'add to':'subtract from')+'. Use "From today" or "Exact date".'};
+ const base=PM.mode=='set'?now:cur,sg=PM.mode=='sub'?-1:1,mm={m1:1,m6:6,y1:12}[pl],exp=pl=='trial'?base+sg*(+cfg.trial||14)*DAY:addMon(base,sg*mm);
+ return{exp,st:pl=='trial'?'trial':'active',plan:pl}}
+function pmV(){const r=rows.find(x=>x.id==PM.id),s=r.sub,c=pmCalc(),now=Date.now(),cur=s&&s.exp?stS({exp:s.exp,st:s.st}):'No plan',curL=s?stOf(r).l:'';
+ let pv;if(c.err)pv='<div class="prev bad">'+esc(c.err)+'</div>';else{const d=Math.ceil((c.exp-now)/DAY),past=c.plan!='life'&&c.exp<now;
+  pv='<div class="prev'+(past?' bad':'')+'"><div>Now: <b>'+esc(cur)+'</b>'+(curL&&!isLife(s&&s.exp)?' <span style="opacity:.7">('+esc(curL)+')</span>':'')+'</div><div>New: <b>'+(c.plan=='life'?'Lifetime':fmt(c.exp))+'</b> · '+PN[c.plan]+(c.plan=='life'?'':' <span style="opacity:.7">('+(past?'already expired — shop will be locked':d+' days from today')+')</span>')+'</div>'+(s&&s.st=='suspended'?'<div style="font-size:12.5px">This account is suspended — it will be activated.</div>':'')+'</div>'}
+ return pv+'<div class="foot"><button onclick="window.pmX()">Cancel</button><button class="pri" '+(c.err?'disabled':'')+' onclick="window.pmOk()">Apply</button></div>'}
+function pmDraw(){const r=rows.find(x=>x.id==PM.id),s=r.sub,noCur=!(s&&s.exp&&!isLife(s.exp));
+ $('#pmb').innerHTML='<h3>Change plan</h3><p class="sub2">'+esc(em(r)||r.name||r.id)+'</p><h5>1 · Plan</h5><div class="seg">'+Object.keys(PN).map(k=>'<button class="'+(PM.plan==k?'on':'')+'" onclick="window.pmS(\'plan\',\''+k+'\')">'+PN[k]+'</button>').join('')+'</div>'
+ +(PM.plan=='life'?'':'<h5>2 · How</h5><div class="seg">'+['set','add','sub','date'].map(k=>'<button '+((k=='add'||k=='sub')&&noCur?'disabled ':'')+'class="'+(PM.mode==k?'on':'')+'" onclick="window.pmS(\'mode\',\''+k+'\')">'+MN[k]+'</button>').join('')+'</div><div class="hint">'+({set:'Old date is replaced. The new period starts today.',add:'New period is added after the current end date.',sub:'Removes the period from the current end date (use to correct a mistake).',date:'Choose the exact last day of the subscription.'}[PM.mode])+'</div>'
+ +(PM.mode=='date'?'<input type="date" id="pmd" value="'+esc(PM.date||'')+'" oninput="window.pmS(\'date\',this.value)" style="margin-top:8px">':''))
+ +'<div id="pmv">'+pmV()+'</div>'}
+window.pm=id=>{const r=rows.find(x=>x.id==id),s=r.sub;PM={id,plan:(s&&planOf(r)&&planOf(r)!='life'?planOf(r):'y1'),mode:s&&s.exp&&!isLife(s.exp)?'add':'set',date:s&&s.exp&&!isLife(s.exp)?fmt(s.exp):''};
+ let o=$('#pmo');if(!o){o=document.createElement('div');o.id='pmo';o.className='mo';o.innerHTML='<div class="mb" id="pmb"></div>';o.addEventListener('mousedown',e=>{if(e.target===o)window.pmX()});document.body.appendChild(o)}o.style.display='flex';pmDraw()};
+window.pmS=(k,v)=>{PM[k]=v;if(k=='date'){$('#pmv').innerHTML=pmV();return}pmDraw()};
+window.pmX=()=>{const o=$('#pmo');if(o)o.style.display='none';PM=null};
+window.pmOk=()=>{const c=pmCalc();if(c.err)return;if(c.plan!='life'&&c.exp<Date.now()&&!confirm('The new date is in the past. The shop will be locked immediately. Continue?'))return;
+ const id=PM.id,w=PN[c.plan]+(c.plan=='life'?'':' · '+MN[PM.mode]);window.pmX();run(()=>chg(id,{exp:c.exp,st:c.st,plan:c.plan},w))};
+window.undo=id=>{const r=rows.find(x=>x.id==id),h=(r.sub&&r.sub.hist)||[],e=h[h.length-1];if(!e||!e.f)return;
+ if(!confirm('Undo "'+e.w+'"?\n'+stS(e.to)+'  →  '+stS(e.f)))return;run(()=>put(id,{exp:e.f.exp,st:e.f.st,plan:e.f.plan,hist:h.slice(0,-1)}))};
 window.note=id=>{const r=rows.find(x=>x.id==id),n=prompt('Note',r.sub&&r.sub.note||'');if(n===null)return;run(()=>put(id,{note:n}))};
 window.pay=id=>{const a=prompt('Amount received (e.g. 600 SAR)');if(!a)return;const m=prompt('Method (cash / bank / STC Pay / bKash)','')||'';const r=rows.find(x=>x.id==id);run(()=>put(id,{pay:((r.sub&&r.sub.pay)||[]).concat([{t:Date.now(),a,m}])}))};
-window.legacyYear=()=>{const t=rows.filter(r=>!r.sub);if(confirm('Give 1 year (from today) to '+t.length+' shops?'))run(async()=>{for(const r of t)await put(r.id,{exp:addM(0,12),st:'active',plan:'y1'})})};
+window.legacyYear=()=>{const t=rows.filter(r=>!r.sub);if(confirm('Give 1 year (from today) to '+t.length+' shops?'))run(async()=>{for(const r of t)await chg(r.id,{exp:addM(0,12),st:'active',plan:'y1'},'1 Year · From today')})};
 window.saveContact=()=>run(()=>saveCfg({contact:$('#c1').value.trim()}));
 window.savePriceTrial=()=>run(()=>saveCfg({price:$('#c2').value.trim(),trial:Math.max(1,Math.min(15,parseInt($('#c3').value)||14))}));
 window.saveBrand=()=>run(()=>saveCfg({brand:$('#c4').value.trim(),msg:$('#c5').value.trim()}));
