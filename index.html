@@ -341,7 +341,7 @@ function rpSet(k,v){S.rp=S.rp||{};S.rp[k]=v;save();render();rqFlush()}
 function rpTest(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}rqAdd({k:'test',t:Date.now(),shop:S.shop});toast(L('টেস্ট পাঠানো হয়েছে, ইমেইল দেখুন','Test sent, check your email'))}
 function rpNow(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var d=tdy();H.filter(function(h){return day(h.t)==d}).forEach(function(h){rqAdd(rqSale(h))});rqAdd({k:'report',day:d,shop:S.shop});toast(L('আজকের রিপোর্ট পাঠানো হচ্ছে','Sending today\'s report'))}
 function rpHist(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}H.forEach(function(h){rqAdd(rqSale(h))});toast(L('সব পুরনো বিক্রি পাঠানো হচ্ছে','Sending all past sales'))}
-var APP_V='v23 · 2026-11-13';
+var APP_V='v24 · 2026-11-13';
 function updApp(){if(!navigator.onLine){toast(L('আপডেটের জন্য নেট লাগবে','Internet needed to update'));return}toast(L('আপডেট হচ্ছে…','Updating…'));var p=[];try{if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}))}catch(e){}Promise.all(p).catch(function(){}).then(function(){location.reload()})}
 function verBox(){return '<div class="box"><div class="hd">'+I('set')+'<b>'+L('অ্যাপ ভার্সন','App version')+'</b></div><div class="dl"><span>'+APP_V+'</span><button class="pri" onclick="updApp()">'+L('এখনই আপডেট করুন','Update now')+'</button></div><div class="mute" style="font-size:12px">'+L('আপনার বিক্রি ও ডেটা মুছবে না। নতুন ফাইল GitHub-এ দেওয়ার পর এটা চাপলে নতুন ভার্সন চলে আসবে।','Your sales and data are kept. Press this after uploading new files to GitHub.')+'</div></div>'}
 function rpBox(){var r=S.rp||{};return '<div class="box"><div class="hd">'+I('cash')+'<b>'+L('দৈনিক রিপোর্ট (ইমেইল ও ড্রাইভ)','Daily report (email & Drive)')+'</b></div>'
@@ -487,8 +487,10 @@ function catList(){var l=[];P.forEach(function(p){if(p.cat&&l.indexOf(p.cat)<0)l
 function catName(c){return c==CATSEL?L('অন্যান্য','Other'):tc(c)}
 function catCount(c){return P.filter(function(p){return c==CATSEL?!p.cat:p.cat==c}).length}
 function curCat(){var l=catList();if(l.indexOf(cat)<0)cat=l[0]||'All';return cat}
-function pickCat(c){cat=c;tAll=0;q='';render()}
-function catStep(d){var l=catList();if(!l.length)return;var i=l.indexOf(curCat());pickCat(l[(i+d+l.length)%l.length])}
+var catHome=true;
+function pickCat(c){cat=c;tAll=0;q='';catHome=false;render()}
+function catBack(){catHome=true;q='';render()}
+
 function catClose(){var o=document.getElementById('catov');if(o)o.remove()}
 function catOpen(){catClose();var cl=catList(),o=document.createElement('div');o.id='catov';o.onclick=function(e){if(e.target===o)catClose()};
  o.innerHTML='<div class="catbox"><div class="cath"><b>'+L('ক্যাটাগরি বাছুন','Choose category')+'</b><button onclick="catClose()" aria-label="Close">✕</button></div><div class="catg">'+cl.map(function(c){return '<button class="ctile'+(c==cat?' on':'')+'" style="background:'+(c==CATSEL?'linear-gradient(135deg,#6b7280,#4b5563)':cbg(c))+'" data-c="'+esc(c)+'" onclick="catClose();pickCat(this.dataset.c)"><b>'+esc(catName(c))+'</b><small>'+catCount(c)+L(' আইটেম',' items')+'</small></button>'}).join('')+'</div><button class="catm" onclick="catClose();go(\'set\');setGo(\'cats\')">⚙ '+L('ক্যাটাগরি ম্যানেজ','Manage categories')+'</button></div>';document.body.appendChild(o)}
@@ -513,7 +515,8 @@ function vSell0(){
  if(MART)return vMartSell();
  var cl=catList(),cc=curCat(),top='<input id="sq" placeholder="'+t('search')+'" value="'+esc(q)+'" oninput="q=this.value;keep()">';
  var grid=P.length?'<div class="grid" id="gr">'+gridHtml(flt())+'</div>':'<div class="empty">'+t('noItems')+'</div>';
- var k=cc==CATSEL?null:ccol(cc),bar=cl.length?'<div class="cbar"><button class="cgrid" onclick="catOpen()">⊞ '+L('ক্যাটাগরি','Categories')+'</button><button class="cnav" onclick="catStep(-1)" aria-label="Prev">‹</button><span class="ccur"'+(k?' style="background:'+k+'"':'')+'>'+esc(catName(cc))+' <small>'+catCount(cc)+'</small></span><button class="cnav" onclick="catStep(1)" aria-label="Next">›</button></div>':'';
+ if(catHome&&!q&&cl.length)return '<div class="shead">'+top+'</div><div class="sgrid"><div class="ctiles" style="margin-top:2px">'+cl.map(function(c){return '<button class="ctile" style="background:'+(c==CATSEL?'linear-gradient(135deg,#6b7280,#4b5563)':cbg(c))+'" data-c="'+esc(c)+'" onclick="pickCat(this.dataset.c)"><b>'+esc(catName(c))+'</b><small>'+catCount(c)+L(' আইটেম',' items')+'</small></button>'}).join('')+'</div><button class="catm" style="margin:12px auto 4px;display:block" onclick="go(\'set\');setGo(\'cats\')">⚙ '+L('ক্যাটাগরি ম্যানেজ','Manage categories')+'</button></div>';
+ var k=cc==CATSEL?null:ccol(cc),bar=cl.length?'<div class="cbar"><button class="cgrid" onclick="catBack()">⊞ '+L('ক্যাটাগরি','Categories')+'</button>'+(q?'<span class="ccur" style="background:var(--blue)">'+L('সব ক্যাটাগরিতে খোঁজা হচ্ছে','Searching all categories')+'</span>':'<span class="ccur"'+(k?' style="background:'+k+'"':'')+'>'+esc(catName(cc))+' <small>'+catCount(cc)+'</small></span>')+'</div>':'';
  return '<div class="shead">'+top+bar+'</div><div class="sgrid">'+grid+'</div>'
 }
 function cbQS(){try{return(JSON.parse(localStorage.getItem('qr_set')||'{}').cb)||[]}catch(e){return[]}}
@@ -525,7 +528,7 @@ function addCombo(cid){var c=cbQS().filter(function(x){return String(x.id)==Stri
 
 function gridHtml(l){return comboCards()+l.map(function(p){var out=p.stock!==''&&p.stock<=0,low=p.stock!==''&&p.stock<=5,n=cart[p.id]||0,u=IMG[p.id];
  var cc=ccol(p.cat);return '<button class="p" '+(out?'disabled':'')+(cc?' style="border-top:5px solid '+cc+'"':'')+' onclick="add('+p.id+')">'+(n?'<div class="qty">'+n+'</div>':'')+(u?'<img class="pimg" alt="" src="'+u+'">':'')+'<b>'+esc(nm(p))+'</b><span>'+$$(p.price)+'</span>'+(p.stock!==''?'<small style="'+(low?'color:var(--warn)':'')+'">'+(out?t('out'):p.stock+t('left'))+'</small>':'')+'</button>'}).join('')}
-function keep(){var g=$('#gr');if(g)g.innerHTML=gridHtml(flt())}
+function keep(){var g=$('#gr');if(!g||(catHome&&!q)){var v=q;render();var e=$('#sq');if(e){e.focus();try{e.setSelectionRange(v.length,v.length)}catch(x){}}return}g.innerHTML=gridHtml(flt())}
 function add(id){var p=gp(id),n=(cart[id]||0)+1;if(!p||!fits(id,n))return;cart[id]=n;render()}
 function chg(id,d){var p=gp(id),n=(cart[id]||0)+d;if(!p||n<=0)delete cart[id];else if(fits(id,n))cart[id]=n;render();openCart()}
 function rm(id){delete cart[id];render();openCart()}
