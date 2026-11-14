@@ -376,7 +376,7 @@ function rpSet(k,v){S.rp=S.rp||{};S.rp[k]=v;save();render();rqFlush()}
 function rpTest(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}rqAdd({k:'test',t:Date.now(),shop:S.shop});toast(L('টেস্ট পাঠানো হয়েছে, ইমেইল দেখুন','Test sent, check your email'))}
 function rpNow(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}var d=tdy();H.filter(function(h){return day(h.t)==d}).forEach(function(h){rqAdd(rqSale(h))});rqAdd({k:'report',day:d,shop:S.shop});toast(L('আজকের রিপোর্ট পাঠানো হচ্ছে','Sending today\'s report'))}
 function rpHist(){if(!rpOn()){toast(L('আগে চালু করুন ও URL দিন','Turn on and add the URL first'));return}H.forEach(function(h){rqAdd(rqSale(h))});toast(L('সব পুরনো বিক্রি পাঠানো হচ্ছে','Sending all past sales'))}
-var APP_V='v29 · 2026-11-14 · hold';
+var APP_V='v30 · 2026-11-14';
 function updApp(){if(!navigator.onLine){toast(L('আপডেটের জন্য নেট লাগবে','Internet needed to update'));return}toast(L('আপডেট হচ্ছে…','Updating…'));var p=[];try{if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}))}catch(e){}Promise.all(p).catch(function(){}).then(function(){location.reload()})}
 function verBox(){return '<div class="box"><div class="hd">'+I('set')+'<b>'+L('অ্যাপ ভার্সন','App version')+'</b></div><div class="dl"><span>'+APP_V+'</span><button class="pri" onclick="updApp()">'+L('এখনই আপডেট করুন','Update now')+'</button></div><div class="mute" style="font-size:12px">'+L('আপনার বিক্রি ও ডেটা মুছবে না। নতুন ফাইল GitHub-এ দেওয়ার পর এটা চাপলে নতুন ভার্সন চলে আসবে।','Your sales and data are kept. Press this after uploading new files to GitHub.')+'</div></div>'}
 function rpBox(){var r=S.rp||{};return '<div class="box"><div class="hd">'+I('cash')+'<b>'+L('দৈনিক রিপোর্ট (ইমেইল ও ড্রাইভ)','Daily report (email & Drive)')+'</b></div>'
@@ -968,13 +968,13 @@ function impSplit(tk){var a=-1,z=-1;tk.forEach(function(s,i){if(AR_RE.test(s)){i
 async function impParse(buf,fname){var doc=await pdfjsLib.getDocument({data:new Uint8Array(buf),disableWorker:true}).promise,out=[];
  for(var p=1;p<=doc.numPages;p++){var pg=await doc.getPage(p),tc=await pg.getTextContent();
   var its=tc.items.filter(function(i){return i.str!==''}).map(function(i){return{x:i.transform[4],y:i.transform[5],s:i.str}}),an=[];
-  its.forEach(function(a,i){if(/^\d{1,4}$/.test(a.s.trim())){var nx=its.filter(function(b){return b.s.trim()==='#'&&Math.abs(b.y-a.y)<2&&b.x>a.x&&b.x-a.x<25})[0];if(nx)an.push(a)}else if(/^\d{1,4}#/.test(a.s.trim()))an.push(a)});
+  its.forEach(function(a,i){if(/^\d{1,6}$/.test(a.s.trim())){var nx=its.filter(function(b){return b.s.trim()==='#'&&Math.abs(b.y-a.y)<2&&b.x>a.x&&b.x-a.x<25})[0];if(nx)an.push(a)}else if(/^\d{1,6}#/.test(a.s.trim()))an.push(a)});
   an.forEach(function(a){
    var near=function(i){return Math.abs(i.y-a.y)<=14&&an.every(function(o){return o===a||Math.abs(i.y-a.y)<=Math.abs(i.y-o.y)})};
    var nm=its.filter(function(i){return i.x>=a.x-1&&near(i)}).sort(function(m,n){return Math.abs(m.y-n.y)>3?n.y-m.y:m.x-n.x}),
        pr=its.filter(function(i){return i.x<a.x-100&&near(i)&&/^\d+(\.\d+)?$/.test(i.s.trim())}).sort(function(m,n){return n.y-m.y});
-   var idn=/^\d{1,4}$/.test(a.s.trim())?+a.s.trim():+(/^(\d{1,4})#/.exec(a.s.trim())||[0,NaN])[1],hs=false,tk=nm.filter(function(i){if(i===a)return false;if(!hs&&i.s.trim()==='#'){hs=true;return false}return true});
-   if(tk.length&&/^\s*\d{1,4}#\s*/.test(tk[0].s)){tk[0]={x:tk[0].x,y:tk[0].y,s:tk[0].s.replace(/^\s*\d{1,4}#\s*/,'')}}
+   var idn=/^\d{1,6}$/.test(a.s.trim())?+a.s.trim():+(/^(\d{1,6})#/.exec(a.s.trim())||[0,NaN])[1],hs=false,tk=nm.filter(function(i){if(i===a)return false;if(!hs&&i.s.trim()==='#'){hs=true;return false}return true});
+   if(tk.length&&/^\s*\d{1,6}#\s*/.test(tk[0].s)){tk[0]={x:tk[0].x,y:tk[0].y,s:tk[0].s.replace(/^\s*\d{1,6}#\s*/,'')}}
    var sp=impSplit(tk.map(function(i){return i.s}));out.push({id:idn,en:sp.en,ar:sp.ar,p1:pr[0]?parseFloat(pr[0].s):NaN,p2:pr[1]?parseFloat(pr[1].s):NaN,f:fname})})}
  return out}
 function impNorm(x){return String(x||'').toLowerCase().replace(/[^a-z0-9؀-ۿ]/g,'')}
@@ -995,6 +995,14 @@ function impGuess(en,ar){var t=(en+' '+ar).toLowerCase(),c=null,syn=[],k;
  for(k=0;k<IMPCAT.length;k++){if(IMPCAT[k][1].test(t)){c=IMPCAT[k][0];syn=IMPCAT[k][2];break}}
  if(!c)return '';var ex=P.map(function(p){return p.cat}).filter(Boolean).filter(function(x,i,a){return a.indexOf(x)==i});
  var m=ex.filter(function(x){return x.toLowerCase()==c.toLowerCase()})[0]||ex.filter(function(x){var y=x.toLowerCase();return syn.some(function(z){return y==z||y==z+'s'})})[0];return m||c}
+function impFold(x){return impNorm(String(x||'').replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي'))}
+function impHasEn(x){return /[A-Za-z]/.test(String(x||''))}
+function impHasAr(x){return AR_RE.test(String(x||''))}
+function impNeed(p){var e=!impHasEn(p.name),a=!impHasAr(p.bn);return e&&a?'both':e?'en':a?'ar':''}
+function impMatch(rows){var map={};P.forEach(function(p){[p.bn,p.name].forEach(function(n){var k=impFold(n);if(k&&impHasAr(n)&&!map[k])map[k]=p})});
+ var em={};P.forEach(function(p){var k=impNorm(p.name);if(k&&impHasEn(p.name)&&!em[k])em[k]=p});var used={};rows.forEach(function(r){r.mt=null;var k=impFold(r.ar),p=k&&map[k];if(p&&!used[p.id]){r.mt=p.id;used[p.id]=1}});rows.forEach(function(r){if(r.mt)return;var k=impNorm(r.en),p=k&&em[k];if(p&&!used[p.id]){r.mt=p.id;used[p.id]=1}})}
+function impMode(){var R=IMP.rows;
+ R.forEach(function(r){if(IMP.mode=='upd'){var p=r.mt?P.find(function(x){return x.id==r.mt}):null;r.on=!!p&&(!IMP.onlyMis||!!impNeed(p))}else r.on=!r.dup})}
 async function impPick(inp){var fs=Array.prototype.slice.call(inp.files||[]);inp.value='';if(!fs.length)return;
  toast(L('PDF পড়া হচ্ছে…','Reading PDFs…'));
  try{await impLoad()}catch(e){toast(L('PDF রিডার লোড হয়নি, ইন্টারনেট দেখুন','Could not load the PDF reader, check internet'));return}
@@ -1005,31 +1013,38 @@ async function impPick(inp){var fs=Array.prototype.slice.call(inp.files||[]);inp
  var ex={};P.forEach(function(p){[p.name,p.bn].forEach(function(n){if(n)ex[impNorm(n)]=1})});
  all.forEach(function(r){r.on=true;r.cat=impGuess(r.en,r.ar);r.dup='';var k=[impNorm(r.en),impNorm(r.ar)].filter(Boolean);
   if(k.some(function(x){return ex[x]}))r.dup='exists';else if(k.some(function(x){return seen[x]}))r.dup='batch';k.forEach(function(x){seen[x]=1});if(r.dup)r.on=false});
- IMP={rows:all,src:1,dupOk:false,badFiles:bad,nFiles:fs.length};impUi()}
+ impMatch(all);IMP={rows:all,src:1,dupOk:false,badFiles:bad,nFiles:fs.length,mode:'add',onlyMis:true,pr:false,addNew:false};impUi()}
 function impUi(){var e=$('#imp');if(!e){e=document.createElement('div');e.id='imp';e.className='ov show';e.style.zIndex=35;e.innerHTML='<div class="sheet" id="impb" style="max-height:92vh;overflow:auto"></div>';document.body.appendChild(e)}
  e.classList.add('show');var R=IMP.rows,cats=P.map(function(p){return p.cat}).concat(R.map(function(r){return r.cat})).filter(function(x,i,a){return x&&a.indexOf(x)==i});
  var h='<datalist id="impcats">'+cats.map(function(c){return '<option value="'+esc(c)+'">'}).join('')+'</datalist><b style="font-size:18px">'+L('PDF থেকে আইটেম','Items from PDF')+' ('+R.length+')</b>'
  +'<div class="mute" style="font-size:12px;margin:4px 0 8px">'+L('PDF-এ বারকোড, ক্যাটাগরি ও কেনা দাম থাকে না, তাই ক্যাটাগরি নিচে ঠিক করুন। ডুপ্লিকেট বন্ধ করা আছে।','PDFs have no barcode, category or purchase price, so set categories below. Duplicates are switched off.')+'</div>'
+ +'<div class="dl"><div style="flex:1"><label>'+L('কী করবেন','What to do')+'</label><select onchange="IMP.mode=this.value;impMode();impUi()"><option value="add"'+(IMP.mode=='add'?' selected':'')+'>'+L('➕ নতুন আইটেম যোগ','➕ Add new items')+'</option><option value="upd"'+(IMP.mode=='upd'?' selected':'')+'>'+L('🔁 আগের আইটেমের নাম আপডেট (বাইলিঙ্গুয়াল)','🔁 Update existing item names (bilingual)')+'</option></select></div></div>'
+ +(IMP.mode=='upd'?'<div class="mute" style="font-size:12px;margin:4px 0">'+L('আরবি নাম মিলিয়ে আগের আইটেম খোঁজা হয়। আইটেম, দাম, স্টক, ছবি, ক্যাটাগরি মুছে না, শুধু নাম বদলায়।','Existing items are found by their Arabic name. Items, prices, stock, photos and categories are kept; only names change.')+'</div><label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" style="width:20px;height:20px;flex:none;margin:0" '+(IMP.onlyMis?'checked':'')+' onchange="IMP.onlyMis=this.checked;impMode();impUi()">'+L('শুধু যে আইটেমে ইংরেজি/আরবি নেই (ল্যাঙ্গুয়েজ মিসম্যাচ)','Only items missing English or Arabic (language mismatch)')+'</label><label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" style="width:20px;height:20px;flex:none;margin:0" '+(IMP.pr?'checked':'')+' onchange="IMP.pr=this.checked">'+L('দামও আপডেট করুন','Also update prices')+'</label><label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" style="width:20px;height:20px;flex:none;margin:0" '+(IMP.addNew?'checked':'')+' onchange="IMP.addNew=this.checked">'+L('যেগুলো মেলেনি সেগুলো নতুন আইটেম হিসেবে যোগ করুন','Add unmatched rows as new items')+'</label>':'')
  +'<div class="dl"><div style="flex:1"><label>'+L('বিক্রির দাম কোনটা','Selling price')+'</label><select onchange="IMP.src=+this.value;impUi()"><option value="1"'+(IMP.src==1?' selected':'')+'>'+L('🛒 প্রথম দাম','🛒 First price')+'</option><option value="2"'+(IMP.src==2?' selected':'')+'>'+L('🚚 দ্বিতীয় দাম','🚚 Second price')+'</option></select></div></div>'
  +'<div style="display:flex;gap:6px;margin:6px 0"><input id="impbc" list="impcats" placeholder="'+L('নির্বাচিতদের ক্যাটাগরি','Category for selected')+'" style="flex:1"><button onclick="impBulk()">'+L('বসান','Apply')+'</button></div>'
  +'<div style="display:flex;gap:6px;margin:6px 0"><button onclick="impAll(1)" style="flex:1">'+L('সব বেছে নিন','Select all')+'</button><button onclick="impAll(0)" style="flex:1">'+L('কিছু না','None')+'</button></div>'
  +'<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" style="width:20px;height:20px;flex:none;margin:0" '+(IMP.dupOk?'checked':'')+' onchange="IMP.dupOk=this.checked">'+L('ডুপ্লিকেটও ইম্পোর্ট করুন','Import duplicates too')+'</label>';
- R.forEach(function(r,i){var pv=IMP.src==2?r.p2:r.p1;h+='<div class="irow'+(r.on?'':' off')+'"><div style="display:flex;align-items:center;gap:8px"><input type="checkbox" style="width:20px;height:20px;flex:none;margin:0" '+(r.on?'checked':'')+' onchange="IMP.rows['+i+'].on=this.checked;this.closest(\'.irow\').classList.toggle(\'off\',!this.checked)"><b>#'+r.id+'</b>'+(r.dup?'<span class="ist d">'+(r.dup=='exists'?L('আগে আছে','Already exists'):L('ডুপ্লিকেট','Duplicate'))+'</span>':'')+'<span class="mute" style="margin-left:auto;font-size:12px">🛒 '+(isNaN(r.p1)?'–':r.p1)+' · 🚚 '+(isNaN(r.p2)?'–':r.p2)+'</span></div>'
+ R.forEach(function(r,i){var pv=IMP.src==2?r.p2:r.p1;h+='<div class="irow'+(r.on?'':' off')+'"><div style="display:flex;align-items:center;gap:8px"><input type="checkbox" style="width:20px;height:20px;flex:none;margin:0" '+(r.on?'checked':'')+' onchange="IMP.rows['+i+'].on=this.checked;this.closest(\'.irow\').classList.toggle(\'off\',!this.checked)"><b>#'+r.id+'</b>'+(IMP.mode=='upd'?impChip(r):(r.dup?'<span class="ist d">'+(r.dup=='exists'?L('আগে আছে','Already exists'):L('ডুপ্লিকেট','Duplicate'))+'</span>':''))+'<span class="mute" style="margin-left:auto;font-size:12px">🛒 '+(isNaN(r.p1)?'–':r.p1)+' · 🚚 '+(isNaN(r.p2)?'–':r.p2)+'</span></div>'
   +'<div class="ipr"><input value="'+esc(r.en)+'" placeholder="English" oninput="IMP.rows['+i+'].en=this.value"><input dir="rtl" value="'+esc(r.ar)+'" placeholder="العربية" oninput="IMP.rows['+i+'].ar=this.value"></div>'
   +'<div class="ipr"><input type="number" step="0.01" value="'+(isNaN(pv)?'':pv)+'" placeholder="'+L('দাম','Price')+'" oninput="IMP.rows['+i+'].pv=this.value;IMP.rows['+i+'].pe=1"><input list="impcats" value="'+esc(r.cat)+'" placeholder="'+L('ক্যাটাগরি','Category')+'" oninput="IMP.rows['+i+'].cat=this.value"></div></div>'});
  h+='<div style="display:flex;gap:10px;margin-top:12px;position:sticky;bottom:0;background:var(--card,#fff);padding:8px 0"><button class="pri" style="flex:2" onclick="impGo()">'+L('ইম্পোর্ট করুন','Import')+'</button><button style="flex:1" onclick="impClose()">'+L('বাতিল','Cancel')+'</button></div>';
  var sc=$('#impb');sc.innerHTML=h}
+function impChip(r){var p=r.mt?P.find(function(x){return x.id==r.mt}):null;if(!p)return '<span class="ist d">'+L('মেলেনি','No match')+'</span>';var n=impNeed(p),t=n=='both'?L('ইংরেজি+আরবি নেই','Needs EN+AR'):n=='en'?L('ইংরেজি নেই','Needs English'):n=='ar'?L('আরবি নেই','Needs Arabic'):L('সম্পূর্ণ আছে','Complete');return '<span class="ist'+(n?'':' d')+'">'+t+'</span><span class="mute" style="font-size:11px;direction:ltr">'+esc(p.name)+(p.bn&&p.bn!=p.name?' / '+esc(p.bn):'')+'</span>'}
 function impAll(v){IMP.rows.forEach(function(r){r.on=!!v});impUi()}
 function impBulk(){var c=$('#impbc').value.trim();IMP.rows.forEach(function(r){if(r.on)r.cat=c});impUi()}
 function impClose(){var e=$('#imp');if(e)e.remove();IMP=null}
-function impGo(){var R=IMP.rows,tot=0,ok=0,dup=0,fail=0,k=0;
- R.forEach(function(r){if(!r.on)return;tot++;if(r.dup&&!IMP.dupOk){dup++;return}
+function impGo(){var R=IMP.rows,tot=0,ok=0,dup=0,fail=0,k=0,upd=0,nom=0;
+ R.forEach(function(r){if(!r.on)return;tot++;
+  if(IMP.mode=='upd'){var p=r.mt?P.find(function(x){return x.id==r.mt}):null;
+   if(p){var en0=(r.en||'').trim(),ar0=(r.ar||'').trim(),ch=false;if(en0&&p.name!==en0){p.name=en0;ch=true}if(ar0&&p.bn!==ar0){p.bn=ar0;ch=true}if(IMP.pr){var pv0=r.pe?parseFloat(r.pv):(IMP.src==2?r.p2:r.p1);if(!isNaN(pv0)&&pv0>=0&&pv0!==p.price){p.price=pv0;ch=true}}if(ch)upd++;else nom++;ok++;return}
+   if(!IMP.addNew){nom++;return}}
+  if(r.dup&&!IMP.dupOk&&IMP.mode!='upd'){dup++;return}
   var pv=r.pe?parseFloat(r.pv):(IMP.src==2?r.p2:r.p1),nm0=(r.en||'').trim(),ar0=(r.ar||'').trim();
   if(!(nm0||ar0)||isNaN(pv)||pv<0){fail++;return}
   P.push({id:Date.now()+(k++),name:nm0||ar0,bn:ar0,price:pv,cat:(r.cat||'').trim(),stock:''});ok++});
  if(ok){save();lsave();render();try{window.qrPub&&window.qrPub(0)}catch(e){}}
  var rep=function(a,b,c){return '<div class="pvt"><span>'+a+'</span><b'+(c?' style="color:'+c+'"':'')+'>'+b+'</b></div>'};
- $('#impb').innerHTML='<b style="font-size:18px">'+L('ইম্পোর্ট রিপোর্ট','Import report')+'</b>'+rep(L('মোট বাছাই','Total selected'),tot)+rep(L('সফল','Successful'),ok,'var(--ac)')+rep(L('ডুপ্লিকেট (বাদ)','Duplicate (skipped)'),dup)+rep(L('ব্যর্থ (নাম/দাম নেই)','Failed (name/price missing)'),fail,fail?'#b42318':'')
+ $('#impb').innerHTML='<b style="font-size:18px">'+L('ইম্পোর্ট রিপোর্ট','Import report')+'</b>'+rep(L('মোট বাছাই','Total selected'),tot)+rep(L('সফল','Successful'),ok,'var(--ac)')+(IMP.mode=='upd'?rep(L('নাম আপডেট হয়েছে','Names updated'),upd,'var(--ac)')+rep(L('বদলানোর কিছু নেই / মেলেনি','Unchanged / no match'),nom):'')+rep(L('ডুপ্লিকেট (বাদ)','Duplicate (skipped)'),dup)+rep(L('ব্যর্থ (নাম/দাম নেই)','Failed (name/price missing)'),fail,fail?'#b42318':'')
  +'<p class="mute" style="font-size:12px">'+L('আইটেমগুলো এখন এই দোকানের account-এ স্থায়ীভাবে সেভ। PDF মুছলেও থাকবে।','Items are now saved permanently in this shop. They stay even if the PDF is deleted.')+'</p><button class="pri" style="width:100%" onclick="impClose()">'+L('ঠিক আছে','Done')+'</button>'}
 
 function pphHtml(e,z,raw){z=z||56;var u=raw?(e&&IMG[e.id]):(pPhoto===null?null:(pPhoto||(e&&IMG[e.id])));return u?'<img class="pimg" style="width:'+z+'px;height:'+z+'px" alt="" src="'+u+'">':'<div class="dot" style="width:'+z+'px;height:'+z+'px;background:hsl('+hue(e?e.name:'x')+',45%,40%)">'+esc(((e&&nm(e))||'?').charAt(0).toUpperCase())+'</div>'}
